@@ -630,6 +630,9 @@ a.tc-row__title:hover{text-decoration:underline}
 .tc-runbar .tc-meter{width:64px;height:3px;border-radius:2px;background:var(--tc-edge);overflow:hidden;flex:none}
 .tc-runbar .tc-meter__bar{display:block;height:100%;background:var(--tc-accent)}
 /* Отступ у баннера с обеих сторон. */
+/* Полоса сообщений — зона живого слоя без своего вида: отступы у сообщений (Notices, задача Carrel 226). */
+.tc-notices{display:contents}
+.tc-notices[hidden]{display:none}
 .tc-msg{display:block;padding:9px 12px;margin:12px var(--tc-page-gutter);font-size:12.5px;line-height:1.5;
   background:var(--tc-card);border-left:2px solid var(--tc-edge);border-radius:0 3px 3px 0}
 .tc-msg.is-row{display:flex;gap:9px;align-items:flex-start}
@@ -738,6 +741,8 @@ label.tc-tree__row{cursor:pointer}
 /* Затемнение — слой над всей страницей, открытые меню (6) и поднятые кнопки ящика (1) тоже под ним. */
 /* Лист открывается и по адресу (#id) — без сценариев: ссылка на него, крестик — ссылка «#». */
 .tc-scrim[hidden]{display:none}
+/* Место листа над всей оболочкой (Shell.Sheet, задача Carrel 226): затемнение ложится на полосу, рейл и страницу. */
+.tc-shell:has(> .tc-scrim){position:relative}
 .tc-scrim[hidden]:target{display:flex}
 .tc-scrim{position:absolute;inset:0;z-index:7;background:rgba(23,33,28,.22);display:flex;align-items:flex-start;justify-content:center;padding-top:44px}
 [data-tc-theme="dark"] .tc-scrim{background:rgba(0,0,0,.42)}
@@ -2240,9 +2245,10 @@ label.tc-field__swatch{position:relative;cursor:pointer}
         <div class="tc-zone"><div class="tc-rubric">Details</div><div class="tc-mono tc-mono--t11-top4">400 px · closes by ✕</div></div>
       </div>
     </div>
+    <div class="tc-scrim" hidden></div>
   </div>
 </div>
-<figcaption><b>Поиск стоит по центру полосы</b> — см. <a href="#conventions">§1</a>: сквозной, не принадлежит ни рейлу, ни разделу. <b>Крестик панели подробностей</b> — в правом верхнем углу, вынут из потока.<br><br><b>Верхняя панель</b> — 52&nbsp;px: знак, поиск по всем источникам, <b>New note</b> (одно нажатие с любого экрана, стрелка — всё остальное, что можно создать), <b>кнопка обновления</b> с временем последнего опроса, меню пользователя. Кнопка перезапускает веерный опрос <b>отмеченных коллекций текущего раздела</b> — ровно тот, что показывает полоса опроса: нажимают её, глядя на список, и ждут, что обновится он, а не все пять разделов сразу. «2 min ago» — <b>когда закончился последний опрос</b>, а не когда открыли страницу: подпись отвечает на «насколько свежее то, что я вижу». Пока опрос идёт, это сказано подписью, и второго опроса кнопка не запускает. Счётчики в рейле обновляются этим же опросом (<a href="#components">§6</a>). <b>Rail</b> — разделы и источники в одном столбце: выбор «где искать» и «что смотреть» — одно движение. Поиска среди разделов нет: он живёт в шапке (7.6.1). Первая строка списка источников — «Combined calendar» / «Combined address book»: единый вид принадлежит разделу, отдельной страницы «всё сразу» нет. <b>Content</b> — единственная резиновая зона. <b>Details</b> — карточка выбранной записи; список при этом остаётся на месте.<br><br><b>Подвал рейла — последняя строка окна, и последняя строка в нём — версия.</b> Над ней стоят кнопки раздела (завести коллекцию, подключить сервер, подписаться), под ними — <span class="tc-mono">Carrel 0.0.1 · 786949a</span> ссылкой на «о программе» (<a href="#rest">7.21</a>). Это не украшение и не отладочная подпись: <b>C-13 (AGPL) требует видимой ссылки на исходники именно запущенной версии</b>, а видимой она бывает только там, где человек находится, — то есть в оболочке, а не на странице, куда попадают до входа. Хеш сборки стоит рядом с номером по той же причине, по какой он стоит на самой странице: <b>в отчётах об ошибках спрашивают именно его</b> — между двумя сборками одной версии номер не различает ничего, а копировать его человек будет оттуда, где он попался на глаза. Заодно это отвечает на вопрос «какая у меня версия» без похода в настройки. Подвал прижат к низу столбца и в узком рейле (56&nbsp;px) не показывается — там его место занимает сам рейл.</figcaption>
+<figcaption><b>Поиск стоит по центру полосы</b> — см. <a href="#conventions">§1</a>: сквозной, не принадлежит ни рейлу, ни разделу. <b>Крестик панели подробностей</b> — в правом верхнем углу, вынут из потока.<br><br><b>Верхняя панель</b> — 52&nbsp;px: знак, поиск по всем источникам, <b>New note</b> (одно нажатие с любого экрана, стрелка — всё остальное, что можно создать), <b>кнопка обновления</b> с временем последнего опроса, меню пользователя. Кнопка перезапускает веерный опрос <b>отмеченных коллекций текущего раздела</b> — ровно тот, что показывает полоса опроса: нажимают её, глядя на список, и ждут, что обновится он, а не все пять разделов сразу. «2 min ago» — <b>когда закончился последний опрос</b>, а не когда открыли страницу: подпись отвечает на «насколько свежее то, что я вижу». Пока опрос идёт, это сказано подписью, и второго опроса кнопка не запускает. Счётчики в рейле обновляются этим же опросом (<a href="#components">§6</a>). <b>Rail</b> — разделы и источники в одном столбце: выбор «где искать» и «что смотреть» — одно движение. Поиска среди разделов нет: он живёт в шапке (7.6.1). Первая строка списка источников — «Combined calendar» / «Combined address book»: единый вид принадлежит разделу, отдельной страницы «всё сразу» нет. <b>Content</b> — единственная резиновая зона. <b>Details</b> — карточка выбранной записи; список при этом остаётся на месте.<br><br><b>Подвал рейла — последняя строка окна, и последняя строка в нём — версия.</b> Над ней стоят кнопки раздела (завести коллекцию, подключить сервер, подписаться), под ними — <span class="tc-mono">Carrel 0.0.1 · 786949a</span> ссылкой на «о программе» (<a href="#rest">7.21</a>). Это не украшение и не отладочная подпись: <b>C-13 (AGPL) требует видимой ссылки на исходники именно запущенной версии</b>, а видимой она бывает только там, где человек находится, — то есть в оболочке, а не на странице, куда попадают до входа. Хеш сборки стоит рядом с номером по той же причине, по какой он стоит на самой странице: <b>в отчётах об ошибках спрашивают именно его</b> — между двумя сборками одной версии номер не различает ничего, а копировать его человек будет оттуда, где он попался на глаза. Заодно это отвечает на вопрос «какая у меня версия» без похода в настройки. Подвал прижат к низу столбца и в узком рейле (56&nbsp;px) не показывается — там его место занимает сам рейл. Пятая зона — место листа над всей оболочкой: затемнение стоит последним в оболочке, закрытое, и живой слой кладёт в него лист, открытый ссылкой.</figcaption>
 </figure>
 
 <table class="doc">
@@ -5787,6 +5793,8 @@ Read  2 min ago · changed on server 3 days ago</div>
           <details class="tc-drop"><summary class="tc-btn tc-bar__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><span class="tc-menu is-pop is-right"><form class="tc-range tc-range--wrap" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form><span class="tc-menu__sep"></span><form class="tc-checkform" action="/app/calendar" method="get"><label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="compact" value="1"><span class="tc-tickrow__tick is-off"></span>Compact rows</label><span class="tc-checkform__apply"><button class="tc-btn is-sm" type="submit">Apply</button></span></form></span></details>
           <span class="tc-bar__right is-2nd"><form class="tc-checkform" action="/app/calendar" method="get"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="compact" value="1"><span class="tc-tickrow__tick is-off"></span>Compact rows</label><span class="tc-checkform__apply"><button class="tc-btn is-sm" type="submit">Apply</button></span></form></span>
         </div>
+        <div class="tc-notices" hidden></div>
+        <div class="tc-runbar" hidden></div>
 
         <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">1</span></div>
         <div class="tc-list">
@@ -11759,8 +11767,10 @@ Read  just now · written by the merge</div>
           <div class="tc-head__titles"><div class="tc-head__title">Duplicates</div><div class="tc-head__sub">0 records compared</div></div>
           <div class="tc-acts"><form class="tc-field tc-field--inline" action="/app/duplicates/decide" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="do" value="threshold"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" name="value" aria-label="Match threshold"><button class="tc-btn is-sm" type="button">Weights</button></form></div>
         </div>
-        <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
-        <div class="tc-msg"><b>Nothing is loaded yet.</b> Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.</div>
+        <div class="tc-notices">
+          <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
+          <div class="tc-msg"><b>Nothing is loaded yet.</b> Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.</div>
+        </div>
         <div class="tc-stack tc-stack--gap-10 tc-main__results">
           <div class="tc-rubric">Decided earlier <span class="tc-mono tc-mono--ls0">3</span></div>
           <form class="tc-card" action="/app/duplicates/decide" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="group" value="g3">

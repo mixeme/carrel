@@ -239,3 +239,23 @@ func TestThemeComesFromTheLook(t *testing.T) {
 		t.Error("a nil page has a look")
 	}
 }
+
+// A page of the shell has one place a sheet is answered into (Typecase's
+// note 124): over a page with none open, the closed scrim at the shell's end;
+// under a sheet drawn with the page, that sheet's scrim.
+func TestEveryShellPageHasOneSheetPlace(t *testing.T) {
+	for _, scr := range screens.All {
+		root := document.Zoned(scr.Draw(scr.Model()))
+		shell, ok := root.(w.Shell)
+		if !ok {
+			continue
+		}
+		html := shell.Render()
+		if n := strings.Count(html, `data-tc-zone="sheet"`); n != 1 {
+			t.Errorf("%T: %d places of a sheet", scr.Model(), n)
+		}
+		if _, plain := shell.Body.(w.ShellBody); plain && (shell.Sheet == nil || !shell.Sheet.Closed) {
+			t.Errorf("%T: the sheet's place over the shell = %+v, want it closed", scr.Model(), shell.Sheet)
+		}
+	}
+}

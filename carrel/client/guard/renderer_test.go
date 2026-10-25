@@ -84,11 +84,15 @@ func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
 	return unzoned(root), ok && root != ""
 }
 
-// unzoned is a root as its frame draws it: without the empty zone of a
-// panel not open (document.Zoned), which the frames, drawn without the
-// live layer, do not have.
+// unzoned is a root as its frame draws it: without the empty zones of a
+// panel not open and of the sheet's place over the shell (document.Zoned),
+// which the frames, drawn without the live layer, do not have — shell-1
+// alone draws the place.
 func unzoned(root string) string {
-	return strings.ReplaceAll(root, document.EmptyDetails.Render(), "")
+	for _, empty := range []string{document.EmptyDetails.Render(), document.EmptySheet.Render()} {
+		root = strings.ReplaceAll(root, empty, "")
+	}
+	return root
 }
 
 // served holds what the renderer served for a fixture against the fixture's
