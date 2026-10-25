@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"panel-one","whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
+states = {"folder-cut","book-empty","panel-one","whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
@@ -651,6 +651,8 @@ STATE_FRAME = {
     "p-token/folder-empty": "s-publish-36",
     "p-token/unanswered": "s-publish-37",
     "p-token/gone": "s-publish-38",
+    "p-token/folder-cut": "s-publish-31",
+    "p-token/book-empty": "s-publish-35",
     "app-record-delete/single": "s-tasks-18",
     "app-settings-connections/edit": "s-profile-16",
     # Нс30: диалог Connect account (s-profile-2), занятая подпись

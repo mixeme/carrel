@@ -346,7 +346,7 @@ var All = []Screen{
 		Model: func() any { return new(view.PublishedPage) },
 		Frames: []string{"s-publish-6", "s-publish-7", "s-publish-8", "s-publish-23", "s-publish-9", "s-publish-10", "s-publish-11", "s-publish-12",
 			"s-publish-16", "s-publish-24", "s-publish-25", "s-publish-26", "s-publish-27", "s-publish-28", "s-publish-29", "s-publish-30",
-			"s-publish-33", "s-publish-34", "s-publish-36", "s-publish-37", "s-publish-38", "s-publish-39"},
+			"s-publish-31", "s-publish-33", "s-publish-34", "s-publish-35", "s-publish-36", "s-publish-37", "s-publish-38", "s-publish-39"},
 		Draw:  func(model any) Root { return guest.Screen(model.(*view.PublishedPage)) },
 		Title: func(model any) string { return string(model.(*view.PublishedPage).Title) },
 	},

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"carrel.dev/carrel/server/view"
+	"github.com/emersion/go-webdav/carddav"
 )
 
 // C-14.2: the public pages a link opens (U-6.15, Пс1), one state for each
@@ -107,5 +108,29 @@ func TestFixturePublicPages(t *testing.T) {
 		app.servers["nextcloud"].Refuse("REPORT", 503, "")
 		defer app.servers["nextcloud"].Accept("REPORT")
 		app.compare(t, "p-token/unanswered.json", app.h.do(get("/p/"+whole, nil)))
+	})
+	// A folder larger than one page shows (s-publish-31): files only, as the
+	// frame's, the listing cut and what it shows of how many said; the cap
+	// lowered for this one page.
+	t.Run("folder-cut", func(t *testing.T) {
+		july := file("july", "carrel/attachments/2026-07", true)
+		was := app.h.cfg.FilesMaxEntries
+		app.h.cfg.FilesMaxEntries = 3
+		defer func() { app.h.cfg.FilesMaxEntries = was }()
+		app.compare(t, "p-token/folder-cut.json", app.h.do(get("/p/"+july, nil)))
+	})
+	// A book with nothing in it (s-publish-35): «Рассылки», found on
+	// nextcloud by Update collection list, as a person adds one.
+	t.Run("book-empty", func(t *testing.T) {
+		nc := app.servers["nextcloud"]
+		path := strings.Replace(app.realPath(t, "kontakty"), "kontakty", "rassylki", 1)
+		nc.AddAddressBook(carddav.AddressBook{Path: path, Name: "Рассылки"})
+		app.byPath[url.PathEscape(path)] = "rassylki"
+		if rec := app.h.do(postForm("/app/settings/connections?"+url.Values{
+			"op": {"rediscover"}, "account": {app.realAccount(t, "kontakty")}}.Encode(), app.sess, url.Values{})); rec.Code >= 400 {
+			t.Fatalf("Update collection list: %d", rec.Code)
+		}
+		book := record("rassylki", "contacts", "rassylki", "", "lives", "30", "name", "on")
+		app.compare(t, "p-token/book-empty.json", app.h.do(get("/p/"+book, nil)))
 	})
 }
