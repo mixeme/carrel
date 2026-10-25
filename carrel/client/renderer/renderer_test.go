@@ -99,3 +99,25 @@ func TestAnEventIsThePollsAnswer(t *testing.T) {
 		t.Errorf("an event the screens do not draw = %q, want %q", mine.String(), theirs.String())
 	}
 }
+
+// An upload's answer is the queue as the folder draws it, the zone queue —
+// waiting for the next upload, its rows moving in place —, and the folder
+// out of band, its main: the file sent stands in its list at once.
+func TestTheQueueIsItsZone(t *testing.T) {
+	rd := renderer.New("")
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	rec := httptest.NewRecorder()
+	q := view.TransferQueue{Title: "Uploading 1 file"}
+	if err := rd.Fragment(rec, req, http.StatusOK, render.TargetQueue, q, []render.OOB{{Target: render.TargetMain, Body: view.FilesPage{}}}); err != nil {
+		t.Fatal(err)
+	}
+	got := rec.Body.String()
+	if ct := rec.Header().Get("Content-Type"); !strings.HasPrefix(ct, "text/html") {
+		t.Fatalf("the queue's answer is %q: %s", ct, got)
+	}
+	for _, want := range []string{`data-tc-zone="queue"`, `data-tc-progress="`, `<template data-tc-zone="main"><div class="tc-main" data-tc-zone="main"`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the queue's answer has no %s: %.400s", want, got)
+		}
+	}
+}

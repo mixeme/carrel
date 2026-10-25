@@ -4,6 +4,7 @@ import (
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/client/screens/agenda"
 	"carrel.dev/carrel/client/screens/contacts"
+	"carrel.dev/carrel/client/screens/folder"
 	"carrel.dev/carrel/client/screens/notes"
 	"carrel.dev/carrel/client/screens/search"
 	"carrel.dev/carrel/client/screens/tasks"
@@ -56,4 +57,11 @@ func RailOf(r view.Rail) ([]widget.RailPart, *widget.PostForm) {
 		}
 	}
 	return search.Rail(r)
+}
+
+// QueueOf is a queue of transfers drawn alone, as the folder draws it, and
+// the forms its answers about a name taken submit: an upload's answer
+// (C-7.3).
+func QueueOf(q view.TransferQueue) (widget.Queue, []widget.PostForm) {
+	return folder.Queue(q)
 }

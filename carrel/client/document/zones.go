@@ -13,11 +13,11 @@ import (
 
 // The zones a link or a form may ask for: the ones whose answer the live
 // layer puts in place — the page, the rail, the panel, the sheet and the
-// poll's bar, whose answers carry the forms their buttons submit after the
-// zone's widget (Typecase's note 124: the layer puts each in place of the
-// page's form of that ID). The queue goes the plain way.
+// poll's bar and the queue of transfers, whose answers carry the forms
+// their buttons submit after the zone's widget (Typecase's note 124: the
+// layer puts each in place of the page's form of that ID).
 func init() {
-	bind.Zones = []string{render.TargetMain, render.TargetRail, render.TargetDetails, render.TargetSheet, render.TargetPoll}
+	bind.Zones = []string{render.TargetMain, render.TargetRail, render.TargetDetails, render.TargetSheet, render.TargetPoll, render.TargetQueue}
 }
 
 // Zoned is a screen's root with the zones of C-7.2 named, as the library's
@@ -96,9 +96,53 @@ func PollZone(bar widget.Runbar, p *view.PollBar) widget.Runbar {
 var EmptyPoll = PollZone(widget.Runbar{Closed: true}, nil)
 
 // Root is a screen's root as a page prints it: the zones of C-7.2 named
-// (Zoned), the poll's bar the zone poll (withPoll).
+// (Zoned), the poll's bar the zone poll (withPoll), the queue of transfers
+// the zone queue (withQueue).
 func Root(scr screens.Screen, model any) screens.Root {
-	return withPoll(Zoned(scr.Draw(model)), model)
+	return withQueue(withPoll(Zoned(scr.Draw(model)), model))
+}
+
+// withQueue is a page's root with its queue of transfers the zone queue:
+// the queue the screen draws on the page, waiting hidden while an upload
+// may come (Queue.Progress), or showing what goes — under a sheet too, as
+// the page's bar (withPoll).
+func withQueue(root screens.Root) screens.Root {
+	shell, ok := root.(widget.Shell)
+	if !ok {
+		return root
+	}
+	switch body := shell.Body.(type) {
+	case widget.ShellBody:
+		if items, ok := namedQueue(body.Main.Items); ok {
+			body.Main.Items = items
+			shell.Body = body
+		}
+	case widget.Overlay:
+		if items, ok := namedQueue(body.Body.Main.Items); ok {
+			body.Body.Main.Items = items
+			shell.Body = body
+		}
+	}
+	return shell
+}
+
+// namedQueue are a page's parts, a copy, with its queue named the zone
+// queue, and whether the page has one.
+func namedQueue(parts []widget.MainPart) ([]widget.MainPart, bool) {
+	items := append([]widget.MainPart(nil), parts...)
+	for i, it := range items {
+		if q, ok := it.(widget.Queue); ok {
+			items[i] = QueueZone(q)
+			return items, true
+		}
+	}
+	return items, false
+}
+
+// QueueZone is a queue of transfers as the zone queue.
+func QueueZone(q widget.Queue) widget.Queue {
+	q.Zone = render.TargetQueue
+	return q
 }
 
 // withPoll is a page's root with its poll's bar the zone poll (PollZone):

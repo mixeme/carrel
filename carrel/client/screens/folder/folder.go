@@ -6,6 +6,8 @@
 package folder
 
 import (
+	"slices"
+
 	"strconv"
 
 	"carrel.dev/carrel/client/bind"
@@ -137,6 +139,7 @@ var selectionActs = []string{"file.download", "file.rename", "file.move", "file.
 //     the cross, its preview, Download, Open, Rename, Move, its fields, the
 //     links' rubric, Delete.
 func Screen(p *view.FilesPage) w.Shell {
+	p = queued(p)
 	main := []w.MainPart{head(p)}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	// The bar of the selected stands whenever the folder has its form:
@@ -201,6 +204,7 @@ func Screen(p *view.FilesPage) w.Shell {
 // the rows' menus and the panel's, the queue's answers, the buttons of the
 // notices, the items of the menus that post (Sign out).
 func Forms(p *view.FilesPage) []w.PostForm {
+	p = queued(p)
 	out := bind.TopForms(p.Top)
 	if p.Select != nil {
 		// The selection's form (s-files-5): the rows' picks are its fields,
@@ -254,6 +258,37 @@ func uploadField(f w.FileField, a view.Action) *w.FileField {
 // progress is a queue the library's live layer fills while the upload's form
 // goes (Queue.Progress, Typecase's note 108): a row for each file from Row,
 // and the question of a name taken from Taken with its answers.
+// queued is the folder with its upload answering into the queue only where
+// the folder draws one — while an upload may go, or what goes; the tiles and
+// a folder not read have none, and their upload goes the plain way, the
+// folder answered whole.
+func queued(p *view.FilesPage) *view.FilesPage {
+	up, live := action(p.Bar.Actions, uploadID)
+	live = live && up.Enabled && up.Method == "POST" && p.View != view.FileTiles && !p.Unread
+	if p.Queue != nil || live {
+		return p
+	}
+	out := *p
+	out.Bar.Actions = plainUpload(p.Bar.Actions)
+	if p.Empty != nil {
+		empty := *p.Empty
+		empty.Actions = plainUpload(p.Empty.Actions)
+		out.Empty = &empty
+	}
+	return &out
+}
+
+// plainUpload are actions with the upload's zone taken off.
+func plainUpload(actions []view.Action) []view.Action {
+	out := slices.Clone(actions)
+	for i := range out {
+		if out[i].ID == uploadID {
+			out[i].Target = ""
+		}
+	}
+	return out
+}
+
 func progress(q w.Queue) w.Queue {
 	q.Progress = uploadID
 	q.Row = &w.QueueItem{Name: rowName, Meta: rowMeta, Meter: &w.Meter{Percent: 0, Track: 100}}
@@ -694,4 +729,11 @@ func side(d view.Details) *w.Side {
 		items = append(items, w.Danger{Button: *danger})
 	}
 	return &w.Side{Items: items}
+}
+
+// Queue is the queue of transfers alone, as the folder draws it while an
+// upload may go (progress): an upload's answer brings it (C-7.3), and the
+// next upload moves its rows in place.
+func Queue(q view.TransferQueue) (w.Queue, []w.PostForm) {
+	return progress(bind.Queue(q, queue)), bind.QueueForms(q)
 }

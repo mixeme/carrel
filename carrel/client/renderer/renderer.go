@@ -22,10 +22,12 @@
 //     poll (document.PollZone; closed while none stands), each with the
 //     page's forms; text/html. A poll's bar answered alone (the run's
 //     retries, Stop, its fallback) is the zone poll too, with the forms of
-//     its retries. Out of band (C-7.3) go a rail — drawn by the screen of
-//     the page it is of (screens.RailOf) — and a poll's bar, each in its
-//     template (page.Fragment). The rest — queue and topbar, which no
-//     screen built draws alone — is JSON.
+//     its retries; a queue of transfers answered alone (an upload's
+//     answer) the zone queue as the folder draws it. Out of band (C-7.3)
+//     go a rail — drawn by the screen of the page it is of
+//     (screens.RailOf) — and a page's main, each in its template
+//     (page.Fragment). The rest — topbar, which no screen built draws
+//     alone — is JSON.
 //   - Event: the events of C-7.4 as a poll's bar answered alone, the rail
 //     out of band, their lines the data lines; JSON is JSON.
 package renderer
@@ -143,7 +145,13 @@ func (r *Renderer) Page(w http.ResponseWriter, req *http.Request, status int, bo
 // otherwise (the package's doc).
 func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int, target string, body any, extra []render.OOB) error {
 	if p, ok := pollOf(body); ok && target == render.TargetPoll {
-		if out, ok := pollAnswer(p, extra); ok {
+		if out, ok := r.pollAnswer(p, extra); ok {
+			return writeHTML(w, status, out)
+		}
+		return r.json.Fragment(w, req, status, target, body, extra)
+	}
+	if q, ok := queueOf(body); ok && target == render.TargetQueue {
+		if out, ok := r.queueAnswer(q, extra); ok {
 			return writeHTML(w, status, out)
 		}
 		return r.json.Fragment(w, req, status, target, body, extra)
@@ -283,7 +291,7 @@ func (r *Renderer) JSON(w http.ResponseWriter, status int, body any) error {
 // for what the screens do not draw alone.
 func (r *Renderer) Event(w io.Writer, event, target string, body any, extra []render.OOB) error {
 	if p, ok := pollOf(body); ok && target == render.TargetPoll {
-		if out, ok := pollAnswer(p, extra); ok {
+		if out, ok := r.pollAnswer(p, extra); ok {
 			return writeEvent(w, event, out)
 		}
 	}
@@ -303,35 +311,82 @@ func pollOf(body any) (*view.PollBar, bool) {
 
 // pollAnswer is a poll's bar answered alone: the zone poll as its page
 // draws it (screens.PollBar), the forms of its retries after it, and out of
-// band the rail of its page and any other bar, each in its template; false
-// when something out of band is not one the screens draw alone.
-func pollAnswer(p *view.PollBar, extra []render.OOB) (string, bool) {
+// band what changed with it (outOfBand); false when something out of band
+// is not one the screens draw alone.
+func (r *Renderer) pollAnswer(p *view.PollBar, extra []render.OOB) (string, bool) {
 	f := page.Fragment{Body: []page.Part{document.PollZone(screens.PollBar(p), p)}, Forms: bind.PollForms(p)}
+	more, ok := r.outOfBand(extra)
+	f.Extra = more
+	return f.Render(), ok
+}
+
+// queueAnswer is a queue of transfers answered alone (an upload's answer,
+// C-7.3): the zone queue as the folder draws it (screens.QueueOf), the forms
+// of its answers about a name taken after it, and out of band the folder
+// the file went to (outOfBand).
+func (r *Renderer) queueAnswer(q view.TransferQueue, extra []render.OOB) (string, bool) {
+	queue, forms := screens.QueueOf(q)
+	f := page.Fragment{Body: []page.Part{document.QueueZone(queue)}, Forms: forms}
+	more, ok := r.outOfBand(extra)
+	f.Extra = more
+	return f.Render(), ok
+}
+
+// outOfBand are the zones that change with an answer (C-7.3), each in its
+// template: a rail, drawn by the screen of the page it is of
+// (screens.RailOf); a page, the main of its screen (ShellZone). False when
+// one is not what the screens draw alone.
+func (r *Renderer) outOfBand(extra []render.OOB) ([]page.ZonePart, bool) {
+	var out []page.ZonePart
 	for _, x := range extra {
+		z := page.ZonePart{Zone: x.Target}
 		switch x.Target {
 		case render.TargetRail:
 			rail, ok := x.Body.(view.Rail)
 			if !ok {
-				return "", false
+				return nil, false
 			}
 			parts, form := screens.RailOf(rail)
-			z := page.ZonePart{Zone: render.TargetRail}
 			for _, part := range parts {
 				p, ok := part.(page.Part)
 				if !ok {
-					return "", false
+					return nil, false
 				}
 				z.Body = append(z.Body, p)
 			}
 			if form != nil {
 				z.Forms = []w.PostForm{*form}
 			}
-			f.Extra = append(f.Extra, z)
+		case render.TargetMain:
+			scr, model, ok := r.screenOf(x.Body)
+			if !ok || zone.KindOf(model) != zone.ShellPage {
+				return nil, false
+			}
+			main, ok := ShellZone(scr, model, render.TargetMain)
+			if !ok {
+				return nil, false
+			}
+			z.Body = []page.Part{page.Printed(main)}
 		default:
-			return "", false
+			return nil, false
 		}
+		out = append(out, z)
 	}
-	return f.Render(), true
+	return out, true
+}
+
+// queueOf is body as a queue of transfers, by value or by pointer.
+func queueOf(body any) (view.TransferQueue, bool) {
+	switch q := body.(type) {
+	case *view.TransferQueue:
+		if q == nil {
+			return view.TransferQueue{}, false
+		}
+		return *q, true
+	case view.TransferQueue:
+		return q, true
+	}
+	return view.TransferQueue{}, false
 }
 
 // writeEvent writes one server-sent event: its name, and each line of what

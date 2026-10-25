@@ -548,22 +548,9 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 		return
 	}
 	entries, err := s.readFolder(r.Context(), c, folder, onlyCuts(q))
-	switch {
-	case file.NotFound(err):
+	if file.NotFound(err) {
 		s.notFound(w, r)
 		return
-	case err != nil:
-		retry := c.href("", segs, true)
-		notices = append(notices, view.Notice{
-			Role:  view.NoticeAlert,
-			Title: text(collectionLabel(c.col) + " is unavailable"),
-			Body:  text("The server did not answer as expected, so nothing on this screen comes from it."),
-			Details: &view.Diagnostic{
-				Summary: text("PROPFIND " + folder),
-				Lines:   []view.Text{text(connLabel(c.conn)), text(err.Error())},
-			},
-			Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: s.route(retry), Method: "GET", Enabled: true}},
-		})
 	}
 	if pick != "" {
 		i := slices.IndexFunc(entries, func(e file.Entry) bool { return e.Name == pick })
@@ -578,14 +565,7 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 		q = cloneValues(q)
 		q.Add("select", pick)
 	}
-	page := s.folderPage(r, c, segs, entries, q, notices)
-	if err != nil {
-		// Nothing was read (states-33): the head and the message alone, and
-		// the storage's row of the rail says it did not answer, its reason
-		// the row's hint (as a collection's, states-11).
-		page.Unread, page.Count, page.Empty, page.Queue = true, "", nil, nil
-		markUnavailable(page.Rail.Sections, s.route(fileHref(c.conn.ID, c.col.Path, "", nil, true)), err)
-	}
+	page := s.folderRead(r, c, segs, folder, entries, err, q, notices)
 	if edit != nil {
 		edit(&page)
 	}
@@ -594,6 +574,48 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 		return
 	}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// folderRead is the page of a folder as it was read: its listing, or, when
+// the server did not answer (err), the head and the message alone, the
+// storage's row of the rail saying so (states-33).
+func (s *Server) folderRead(r *http.Request, c *fileCtx, segs []string, folder string, entries []file.Entry, err error, q url.Values, notices []view.Notice) view.FilesPage {
+	if err != nil {
+		retry := c.href("", segs, true)
+		notices = append(notices, view.Notice{
+			Role:  view.NoticeAlert,
+			Title: text(collectionLabel(c.col) + " is unavailable"),
+			Body:  text("The server did not answer as expected, so nothing on this screen comes from it."),
+			Details: &view.Diagnostic{
+				Summary: text("PROPFIND " + folder),
+				Lines:   []view.Text{text(connLabel(c.conn)), text(err.Error())},
+			},
+			Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: s.route(retry), Method: "GET", Enabled: true}},
+		})
+	}
+	page := s.folderPage(r, c, segs, entries, q, notices)
+	if err != nil {
+		// Nothing was read (states-33): the head and the message alone, and
+		// the storage's row of the rail says it did not answer, its reason
+		// the row's hint (as a collection's, states-11).
+		page.Unread, page.Count, page.Empty, page.Queue = true, "", nil, nil
+		markUnavailable(page.Rail.Sections, s.route(fileHref(c.conn.ID, c.col.Path, "", nil, true)), err)
+	}
+	return page
+}
+
+// folderAfresh is the page of a folder read afresh, for what goes with an
+// answer out of band (answerUpload); false when it is not there.
+func (s *Server) folderAfresh(r *http.Request, c *fileCtx, segs []string) (view.FilesPage, bool) {
+	folder, err := c.path(segs, true)
+	if err != nil {
+		return view.FilesPage{}, false
+	}
+	entries, err := s.readFolder(r.Context(), c, folder, false)
+	if file.NotFound(err) {
+		return view.FilesPage{}, false
+	}
+	return s.folderRead(r, c, segs, folder, entries, err, url.Values{}, nil), true
 }
 
 // markUnavailable marks the rail's row of the address as a source that did

@@ -622,7 +622,10 @@ func uploadType(part *multipart.Part, name string) string {
 
 // answerUpload is the queue as a fragment (C-7.3), or the folder again for a
 // plain form: its address after a success, the page with what went wrong
-// otherwise.
+// otherwise. An upload from the folder's own bar brings the folder out of
+// band (main): the file sent stands in its list at once, as the plain way's
+// new page shows it; one from the sheet of the New menu (?menu=1) stands
+// over another page, and the queue alone goes.
 func (s *Server) answerUpload(w http.ResponseWriter, r *http.Request, c *fileCtx, notices ...view.Notice) {
 	if render.WantsFragment(r) {
 		q := s.transferQueue(c.sess)
@@ -632,7 +635,14 @@ func (s *Server) answerUpload(w http.ResponseWriter, r *http.Request, c *fileCtx
 		for _, n := range notices {
 			q.Note = text(strings.TrimPrefix(string(q.Note)+" · "+string(n.Title)+". "+string(n.Body), " · "))
 		}
-		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetQueue, q, nil)
+		var extra []render.OOB
+		if r.URL.Query().Get("menu") == "" {
+			if page, ok := s.folderAfresh(r, c, c.segs); ok {
+				page.Notices = append(page.Notices, notices...)
+				extra = []render.OOB{{Target: render.TargetMain, Body: page}}
+			}
+		}
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetQueue, q, extra)
 		return
 	}
 	if len(notices) == 0 {
