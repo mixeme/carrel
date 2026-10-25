@@ -1,0 +1,59 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "This folder is empty.",
+  "fields": [],
+  "file": null,
+  "filter": null,
+  "folder": {
+    "crumbs": [
+      {
+        "href": "",
+        "label": "черновики"
+      }
+    ],
+    "rows": [],
+    "total": "0 items"
+  },
+  "foot": [
+    {
+      "text": "This link works until 24 August 2026."
+    }
+  ],
+  "kind": "file",
+  "lede": [],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": {
+    "address": "http://example.com/p/link-drafts-token/dav/",
+    "label": "Mount as a drive",
+    "mount": [
+      {
+        "text": "File Explorer › This PC › Map network drive, then paste the address.",
+        "title": "Windows"
+      },
+      {
+        "text": "Finder › Go › Connect to Server, then paste the address.",
+        "title": "macOS"
+      },
+      {
+        "text": "Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.",
+        "title": "Linux"
+      }
+    ],
+    "note": "read-only WebDAV, no password",
+    "open": ""
+  },
+  "tasks": [],
+  "title": "черновики",
+  "width": []
+}

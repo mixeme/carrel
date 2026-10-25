@@ -133,9 +133,7 @@ func TestTheAppWorksWithoutScripts(t *testing.T) {
 var notYetPages = []struct {
 	path *regexp.Regexp
 	why  string
-}{
-	{regexp.MustCompile(`^/p/`), "public pages: task 196"},
-}
+}{}
 
 // notYet holds what an address answered: a page; JSON only where
 // notYetPages expects it; one expected that is a page now is said.

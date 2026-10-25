@@ -419,7 +419,7 @@ func TestLetterLinksGiveWhatThePublishSheetGives(t *testing.T) {
 	if len(links) != 1 {
 		t.Fatalf("links = %+v", links)
 	}
-	if got := links[0].Target; strings.Join(got.Shows, ",") != "time,title" || got.NoDownload {
-		t.Errorf("the calendar's link = %+v, want the time and the title, the .ics allowed", got)
+	if got := links[0].Target; strings.Join(got.Shows, ",") != "time,title" || !got.NoDownload {
+		t.Errorf("the calendar's link = %+v, want the time and the title, no .ics — as the sheet stands", got)
 	}
 }

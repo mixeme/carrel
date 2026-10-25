@@ -564,10 +564,11 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 }
 
 // sheetDefaults puts into a link of a kind what the sheet of publishing it
-// chooses before anyone touches it (s-publish-2, -3; Б39): a calendar's,
-// an event's, a task's — the time and the title, the .ics allowed; a
-// contact's and a book's — the name and the organisation, no phone, address,
-// photo or note, and no .vcf. A link made without that sheet — by a letter
+// chooses before anyone touches it (s-publish-2, -3, -4, -19; Б39): a
+// calendar's, an event's, a task's — the time and the title; a contact's and
+// a book's — the name and the organisation, no phone, address, photo or
+// note; and the file of none of them, as no sheet ticks it (the owner's
+// decision of 23.10.2026). A link made without that sheet — by a letter
 // that sends a record as a link (Пб38; the owner's decision Б38) — gives the
 // guest no more than the sheet would have.
 func sheetDefaults(kind view.Kind, target *user.PublishTarget) {
@@ -579,8 +580,11 @@ func sheetDefaults(kind view.Kind, target *user.PublishTarget) {
 				target.Shows = append(target.Shows, f.name)
 			}
 		}
+		target.NoDownload = true
 	case kind == view.KindContact:
 		target.Shows, target.HideOrganisation, target.NoDownload = nil, false, true
+	case kind == view.KindNote:
+		target.NoDownload = true
 	}
 }
 

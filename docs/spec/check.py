@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"normal","task","nowhere","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
+states = {"whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
@@ -629,6 +629,24 @@ STATE_FRAME = {
     "p-token/text": "s-publish-10",
     "p-token/download": "s-publish-11",
     "p-token/folder": "s-publish-12",
+    # Гостевые виды записки 122: весь календарь, пустая неделя, фильтр;
+    # одна запись — событие, контакт, задача; список задач, тетрадь; PDF,
+    # текст сверх потолка, вложенная и пустая папка; источник не ответил,
+    # опубликованного больше нет.
+    "p-token/whole": "s-publish-24",
+    "p-token/whole-empty": "s-publish-25",
+    "p-token/filtered": "s-publish-39",
+    "p-token/event": "s-publish-16",
+    "p-token/contact": "s-publish-26",
+    "p-token/task": "s-publish-27",
+    "p-token/tasks": "s-publish-28",
+    "p-token/notebook": "s-publish-29",
+    "p-token/pdf": "s-publish-33",
+    "p-token/text-large": "s-publish-34",
+    "p-token/subfolder": "s-publish-30",
+    "p-token/folder-empty": "s-publish-36",
+    "p-token/unanswered": "s-publish-37",
+    "p-token/gone": "s-publish-38",
     "app-record-delete/single": "s-tasks-18",
     "app-settings-connections/edit": "s-profile-16",
     # Нс30: диалог Connect account (s-profile-2), занятая подпись

@@ -1,0 +1,56 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-server-log-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download 14.3 MB",
+      "method": "GET",
+      "primary": true
+    }
+  ],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [],
+  "file": {
+    "blocks": [],
+    "body": "",
+    "changed": "2026-08-11",
+    "href": "/p/link-server-log-token/download",
+    "name": "server-log-august.txt",
+    "note": "Too large to show on the page.",
+    "preview": "none",
+    "size": "14.3 MB",
+    "type": "text/plain"
+  },
+  "filter": null,
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
+  "kind": "file",
+  "lede": [
+    {
+      "mark": "mono",
+      "text": "text/plain · 14.3 MB · changed 2026-08-11"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "server-log-august.txt",
+  "width": []
+}

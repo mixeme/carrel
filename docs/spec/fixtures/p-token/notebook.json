@@ -1,0 +1,100 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [],
+  "file": null,
+  "filter": {
+    "action": "/p/link-zapisi-token",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Filter by word",
+            "name": "q",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
+  "kind": "note",
+  "lede": [
+    {
+      "text": "2 notes"
+    }
+  ],
+  "note": null,
+  "notes": [
+    {
+      "count": 2,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "",
+          "colour": "",
+          "date": "10 Aug",
+          "excerpt": "Договорились заморозить ветку в среду.",
+          "href": "/p/link-zapisi-token?uid=5c81-77aa-0d64",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "tags": [],
+          "title": "Заметка со встречи 10.08",
+          "uid": "5c81-77aa-0d64"
+        },
+        {
+          "badges": [],
+          "changed": "",
+          "colour": "",
+          "date": "8 Aug",
+          "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
+          "href": "/p/link-zapisi-token?uid=6d92-13ef-b408",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "tags": [],
+          "title": "Что почитать про CRDT",
+          "uid": "6d92-13ef-b408"
+        }
+      ],
+      "rubric": "August 2026"
+    }
+  ],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "Записи",
+  "width": []
+}

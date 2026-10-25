@@ -1,0 +1,39 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [],
+  "file": null,
+  "filter": null,
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link does not expire."
+    }
+  ],
+  "kind": "event",
+  "lede": [],
+  "note": null,
+  "notes": [],
+  "notices": [
+    {
+      "actions": [],
+      "body": "Try again later.",
+      "details": null,
+      "role": "alert",
+      "title": "The source did not answer."
+    }
+  ],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "Личный",
+  "width": []
+}

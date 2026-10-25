@@ -362,6 +362,9 @@ var contract = map[string]rule{
 	// with a Span.
 	"DocRef":    func(control) string { return "" },
 	"DocAttach": func(control) string { return "" },
+	// A file given with a published note (s-publish-8): the link of its
+	// own the guest fetches it by.
+	"DocFile": needs("Href"),
 	// A category (Typecase's task 63): with Href it goes to the list filtered
 	// by it, without it is words — whether it goes is the model's (C-6.2
 	// Tag.Href), as with a Span; in a row that is a link itself the library

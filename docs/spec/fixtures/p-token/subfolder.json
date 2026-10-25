@@ -1,0 +1,196 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-attachments-token/download?in=2026-07",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download folder",
+      "method": "GET"
+    }
+  ],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [],
+  "file": null,
+  "filter": {
+    "action": "/p/link-attachments-token",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Filter this folder",
+            "name": "q",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "in",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2026-07"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "folder": {
+    "crumbs": [
+      {
+        "href": "/p/link-attachments-token",
+        "label": "attachments"
+      },
+      {
+        "href": "",
+        "label": "2026-07"
+      }
+    ],
+    "rows": [
+      {
+        "href": "/p/link-attachments-token/file/2026-07/whiteboard-2.jpg",
+        "icon": "i-img",
+        "isDir": false,
+        "menu": [],
+        "modified": "2026-07-14 16:22",
+        "name": "whiteboard-2.jpg",
+        "open": "/p/link-attachments-token?file=2026-07%2Fwhiteboard-2.jpg",
+        "selected": false,
+        "size": "3 B",
+        "thumb": "",
+        "type": "image/jpeg",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/2026-07/whiteboard.jpg",
+        "icon": "i-img",
+        "isDir": false,
+        "menu": [],
+        "modified": "2026-07-14 16:20",
+        "name": "whiteboard.jpg",
+        "open": "/p/link-attachments-token?file=2026-07%2Fwhiteboard.jpg",
+        "selected": false,
+        "size": "2.8 MB",
+        "thumb": "",
+        "type": "image/jpeg",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/2026-07/%D0%BF%D0%B0%D0%BD%D0%BE%D1%80%D0%B0%D0%BC%D0%B0.tif",
+        "icon": "i-img",
+        "isDir": false,
+        "menu": [],
+        "modified": "2026-07-20 13:10",
+        "name": "панорама.tif",
+        "open": "/p/link-attachments-token?file=2026-07%2F%D0%BF%D0%B0%D0%BD%D0%BE%D1%80%D0%B0%D0%BC%D0%B0.tif",
+        "selected": false,
+        "size": "84 MB",
+        "thumb": "",
+        "type": "image/tiff",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/2026-07/%D1%81%D0%BC%D0%B5%D1%82%D0%B0.pdf",
+        "icon": "i-doc",
+        "isDir": false,
+        "menu": [],
+        "modified": "2026-07-09 15:45",
+        "name": "смета.pdf",
+        "open": "/p/link-attachments-token?file=2026-07%2F%D1%81%D0%BC%D0%B5%D1%82%D0%B0.pdf",
+        "selected": false,
+        "size": "1.2 MB",
+        "thumb": "",
+        "type": "application/pdf",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/2026-07/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-1.png",
+        "icon": "i-img",
+        "isDir": false,
+        "menu": [],
+        "modified": "2026-07-01 12:00",
+        "name": "схема-1.png",
+        "open": "/p/link-attachments-token?file=2026-07%2F%D1%81%D1%85%D0%B5%D0%BC%D0%B0-1.png",
+        "selected": false,
+        "size": "640 KB",
+        "thumb": "",
+        "type": "image/png",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/2026-07/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-2.png",
+        "icon": "i-img",
+        "isDir": false,
+        "menu": [],
+        "modified": "2026-07-02 10:30",
+        "name": "схема-2.png",
+        "open": "/p/link-attachments-token?file=2026-07%2F%D1%81%D1%85%D0%B5%D0%BC%D0%B0-2.png",
+        "selected": false,
+        "size": "712 KB",
+        "thumb": "",
+        "type": "image/png",
+        "upload": null
+      }
+    ],
+    "total": "6 items · 89.4 MB"
+  },
+  "foot": [
+    {
+      "text": "This link works until 24 August 2026."
+    }
+  ],
+  "kind": "file",
+  "lede": [],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": {
+    "address": "http://example.com/p/link-attachments-token/dav/",
+    "label": "Mount as a drive",
+    "mount": [
+      {
+        "text": "File Explorer › This PC › Map network drive, then paste the address.",
+        "title": "Windows"
+      },
+      {
+        "text": "Finder › Go › Connect to Server, then paste the address.",
+        "title": "macOS"
+      },
+      {
+        "text": "Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.",
+        "title": "Linux"
+      }
+    ],
+    "note": "read-only WebDAV, no password",
+    "open": ""
+  },
+  "tasks": [],
+  "title": "attachments",
+  "width": []
+}

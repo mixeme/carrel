@@ -22,6 +22,7 @@ import (
 	"carrel.dev/carrel/client/screens/files"
 	"carrel.dev/carrel/client/screens/folder"
 	"carrel.dev/carrel/client/screens/forgot"
+	"carrel.dev/carrel/client/screens/guest"
 	"carrel.dev/carrel/client/screens/history"
 	"carrel.dev/carrel/client/screens/importer"
 	"carrel.dev/carrel/client/screens/invite"
@@ -340,6 +341,14 @@ var All = []Screen{
 		Frames: []string{"s-auth-15"},
 		Draw:   func(model any) Root { return history.Screen(model.(*view.PasswordHistoryPage)) },
 		Title:  func(model any) string { return string(model.(*view.PasswordHistoryPage).Title) },
+	},
+	{
+		Model:  func() any { return new(view.PublishedPage) },
+		Frames: []string{"s-publish-6", "s-publish-7", "s-publish-8", "s-publish-23", "s-publish-9", "s-publish-10", "s-publish-11", "s-publish-12",
+			"s-publish-16", "s-publish-24", "s-publish-25", "s-publish-26", "s-publish-27", "s-publish-28", "s-publish-29", "s-publish-30",
+			"s-publish-33", "s-publish-34", "s-publish-36", "s-publish-37", "s-publish-38", "s-publish-39"},
+		Draw:   func(model any) Root { return guest.Screen(model.(*view.PublishedPage)) },
+		Title:  func(model any) string { return string(model.(*view.PublishedPage).Title) },
 	},
 	{
 		Model:  func() any { return new(view.DeadLinkPage) },

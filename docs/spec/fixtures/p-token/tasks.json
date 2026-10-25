@@ -1,0 +1,168 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [],
+  "file": null,
+  "filter": {
+    "action": "/p/link-dela-token",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Filter by word",
+            "name": "q",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
+  "kind": "task",
+  "lede": [
+    {
+      "text": "4 tasks"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [
+    {
+      "count": 3,
+      "overdue": false,
+      "rows": [
+        {
+          "attendees": "",
+          "badges": [],
+          "changed": "",
+          "colour": "",
+          "done": false,
+          "due": "7 Aug",
+          "href": "/p/link-dela-token?uid=aa10-77bc-0e31",
+          "menu": [],
+          "on": false,
+          "overdue": true,
+          "percent": null,
+          "priority": "",
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "status": "",
+          "summary": "Отправить документы в МФЦ",
+          "tags": [],
+          "tick": null,
+          "uid": "aa10-77bc-0e31",
+          "where": ""
+        },
+        {
+          "attendees": "",
+          "badges": [],
+          "changed": "",
+          "colour": "",
+          "done": false,
+          "due": "12 Aug 18:00",
+          "href": "/p/link-dela-token?uid=aa11-2d09-5f84",
+          "menu": [],
+          "on": false,
+          "overdue": false,
+          "percent": null,
+          "priority": "",
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "status": "",
+          "summary": "Собрать чемодан",
+          "tags": [],
+          "tick": null,
+          "uid": "aa11-2d09-5f84",
+          "where": ""
+        },
+        {
+          "attendees": "",
+          "badges": [],
+          "changed": "",
+          "colour": "",
+          "done": false,
+          "due": "",
+          "href": "/p/link-dela-token?uid=aa12-9e44-c703",
+          "menu": [],
+          "on": false,
+          "overdue": false,
+          "percent": 100,
+          "priority": "",
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "status": "",
+          "summary": "Продлить страховку",
+          "tags": [],
+          "tick": null,
+          "uid": "aa12-9e44-c703",
+          "where": ""
+        }
+      ],
+      "rubric": "Open"
+    },
+    {
+      "count": 1,
+      "overdue": false,
+      "rows": [
+        {
+          "attendees": "",
+          "badges": [],
+          "changed": "",
+          "colour": "",
+          "done": true,
+          "due": "",
+          "href": "/p/link-dela-token?uid=aa13-5b2e-71c0",
+          "menu": [],
+          "on": false,
+          "overdue": false,
+          "percent": 100,
+          "priority": "",
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "status": "",
+          "summary": "Прочитать договор аренды",
+          "tags": [],
+          "tick": null,
+          "uid": "aa13-5b2e-71c0",
+          "where": ""
+        }
+      ],
+      "rubric": "Done"
+    }
+  ],
+  "title": "Дела",
+  "width": []
+}

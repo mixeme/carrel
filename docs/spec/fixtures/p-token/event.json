@@ -1,0 +1,92 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-sync-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download .ics",
+      "method": "GET"
+    }
+  ],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [
+    {
+      "colour": "",
+      "email": "mix@example.org",
+      "href": "",
+      "name": "Михаил Енученко",
+      "status": "organiser"
+    },
+    {
+      "colour": "",
+      "email": "a.kovaleva@example.org",
+      "href": "",
+      "name": "Анна Ковалёва",
+      "status": "accepted"
+    },
+    {
+      "colour": "",
+      "email": "a.belov@example.org",
+      "href": "",
+      "name": "Артём Белов",
+      "status": "tentative"
+    },
+    {
+      "colour": "",
+      "email": "v@example.org",
+      "href": "",
+      "name": "Виктор Гончаров",
+      "status": "no reply"
+    }
+  ],
+  "avatar": null,
+  "body": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [
+    {
+      "badge": {
+        "label": "until 2026-12-28",
+        "role": "neutral"
+      },
+      "from": null,
+      "href": "",
+      "label": "Repeats",
+      "mono": false,
+      "value": "Weekly on Mon"
+    },
+    {
+      "from": null,
+      "href": "",
+      "label": "Status",
+      "mono": false,
+      "value": "Confirmed"
+    }
+  ],
+  "file": null,
+  "filter": null,
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
+  "kind": "event",
+  "lede": [
+    {
+      "text": "Monday, 10 August 2026, 10:00 – 11:00 · Переговорная 2"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "Синк-ап по релизу",
+  "width": []
+}

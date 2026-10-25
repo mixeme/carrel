@@ -9,23 +9,13 @@ import (
 )
 
 // C-14.2: the public pages a link opens (U-6.15, Пс1), one state for each
-// kind of page the frames draw — s-publish-6 to -12. The links are given
-// out through the sheet, as a person does; the page is asked without a
-// session.
+// kind of page the frames draw — s-publish-6 to -39, each link with what
+// the frame's label says was ticked. The links are given out through the
+// sheet, as a person does; the page is asked without a session.
 func TestFixturePublicPages(t *testing.T) {
 	app := newMockupApp(t)
 	app.h.srv.SetClock(mockupNow(t))
 	app.h.users.SetClock(mockupNow(t))
-	// «Личный» for 10–31 August is a link of the set already (s-publish-1).
-	calendar := ""
-	for issued, name := range app.byAccount {
-		if name == "link-lichnyj-token" {
-			calendar = issued
-		}
-	}
-	if calendar == "" {
-		t.Fatal("the set has no link to «Личный»")
-	}
 	give := func(name string, q url.Values) string {
 		rec := app.h.do(postForm("/app/publish", app.sess, q))
 		if rec.Code != 200 {
@@ -58,18 +48,64 @@ func TestFixturePublicPages(t *testing.T) {
 		}
 		return give(name, q)
 	}
+	// A file of the set's storage made for one frame: a text larger than
+	// the page shows (s-publish-34), a folder with nothing in it (-36), a
+	// file deleted after its link was made (-38).
+	docs := app.realPath(t, "Documents")
+	sftp := app.servers["sftpgo · vps"]
+	sftp.SeedFile(docs+"carrel/server-log-august.txt", "2026-08-11 00:00:01 started\n")
+	sftp.Grow(docs+"carrel/server-log-august.txt", 14600<<10)
+	sftp.SetModified(docs+"carrel/server-log-august.txt", mockupDayAt(t, "2026-08-11 09:00"))
+	sftp.SeedFolder(docs + "carrel/черновики/")
+	// The folder in the folder holds six, as s-publish-30 draws it.
+	sftp.SeedFile(docs+"carrel/attachments/2026-07/whiteboard-2.jpg", "\xff\xd8\xff")
+	sftp.SetModified(docs+"carrel/attachments/2026-07/whiteboard-2.jpg", mockupDayAt(t, "2026-07-14 16:22"))
+	sftp.SeedFile(docs+"carrel/отчёт-июль.pdf", "%PDF-1.4\n")
+	gone := file("report", "carrel/отчёт-июль.pdf", false)
+	sftp.RemoveFile(docs + "carrel/отчёт-июль.pdf")
+	// The whole of «Личный», as the sheet stands (s-publish-24): the title
+	// and the time, no .ics, no end.
+	whole := record("lichnyj-whole", "calendar", "lichnyj", "", "how", "whole", "lives", "never", "title", "on")
+	folder := file("attachments", "carrel/attachments", true)
 	for _, one := range []struct{ state, token string }{
-		{"normal", calendar}, // s-publish-6
-		{"addressbook", record("komanda", "contacts", "komanda", "")},                                                          // s-publish-7
+		// «Личный» for 10–31 August with Location and Attendees ticked and
+		// its .ics (s-publish-6).
+		{"normal", record("lichnyj-shown", "calendar", "lichnyj", "", "how", "range", "from", "2026-08-10", "to", "2026-08-31",
+			"lives", "30", "title", "on", "location", "on", "attendees", "on", "download", "on")},
+		// «Команда» with the phones and the addresses ticked and its .vcf
+		// (s-publish-7).
+		{"addressbook", record("komanda", "contacts", "komanda", "", "lives", "30", "name", "on", "phones", "on", "emails", "on", "download", "on")},
+		{"whole", whole}, // s-publish-24
+		{"whole-empty", whole + "?from=2027-01-04"},           // s-publish-25: a week with nothing in it
+		{"filtered", whole + "?q=" + url.QueryEscape("синк")}, // s-publish-39
+		// One event with all but the files and the tags, its .ics
+		// (s-publish-16); one contact with the phones, the addresses and the
+		// note, no .vcf (-26); one task with Location and Description (-27).
+		{"event", record("sync", "calendar", "lichnyj", "8f1c-4a02-b7d3", "lives", "30", "title", "on", "location", "on", "description", "on", "attendees", "on", "download", "on")},
+		{"contact", record("anna", "contacts", "kontakty", "4f2b-9c31-a0e7", "lives", "30", "name", "on", "phones", "on", "emails", "on", "note", "on")},
+		{"task", record("mfc", "tasks", "dela", "aa10-77bc-0e31", "lives", "30", "title", "on", "location", "on", "description", "on")},
+		{"tasks", record("dela", "tasks", "dela", "", "lives", "30", "title", "on")}, // s-publish-28
+		{"notebook", record("zapisi", "notes", "zapisi", "", "lives", "30")},         // s-publish-29: no .md
+		{"pdf", file("smeta-page", "carrel/attachments/смета-подрядчик.pdf", false)}, // s-publish-33
+		{"text-large", file("server-log", "carrel/server-log-august.txt", false)},    // s-publish-34
+		{"subfolder", folder + "?in=2026-07"},                      // s-publish-30
+		{"folder-empty", file("drafts", "carrel/черновики", true)}, // s-publish-36
+		{"gone", gone}, // s-publish-38
 		{"note", record("zametka", "notes", "zapisi", "5c81-77aa-0d64", "lives", "30", "download", "on", "attachments", "on")}, // s-publish-8: its files too
 		{"note-files-kept", record("zametka-kept", "notes", "zapisi", "5c81-77aa-0d64")},                                       // s-publish-23: how many, not which
 		{"image", file("sync-board", "carrel/attachments/2026-08-10-sync-board.png", false)},                                   // s-publish-9
 		{"text", file("checklist", "carrel/attachments/release-checklist.md", false)},                                          // s-publish-10
 		{"download", file("panorama", "carrel/attachments/2026-07/панорама.tif", false)},                                       // s-publish-11
-		{"folder", file("attachments", "carrel/attachments", true)},                                                            // s-publish-12
+		{"folder", folder}, // s-publish-12
 	} {
 		t.Run(one.state, func(t *testing.T) {
 			app.compare(t, "p-token/"+one.state+".json", app.h.do(get("/p/"+one.token, nil)))
 		})
 	}
+	// The server of «Личный» does not answer (s-publish-37).
+	t.Run("unanswered", func(t *testing.T) {
+		app.servers["nextcloud"].Refuse("REPORT", 503, "")
+		defer app.servers["nextcloud"].Accept("REPORT")
+		app.compare(t, "p-token/unanswered.json", app.h.do(get("/p/"+whole, nil)))
+	})
 }

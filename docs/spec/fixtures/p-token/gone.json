@@ -1,0 +1,35 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [],
+  "file": null,
+  "filter": null,
+  "folder": null,
+  "foot": [],
+  "kind": "file",
+  "lede": [],
+  "note": null,
+  "notes": [],
+  "notices": [
+    {
+      "actions": [],
+      "body": "It was deleted or moved.",
+      "details": null,
+      "role": "info",
+      "title": "No longer there."
+    }
+  ],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "отчёт-июль.pdf",
+  "width": []
+}

@@ -1,0 +1,142 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
+          "changed": "7 Aug 15:15",
+          "colour": "#4a6b52",
+          "href": "/p/link-lichnyj-whole-token?uid=8f1c-4a02-b7d3",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Синк-ап по релизу",
+          "tags": [],
+          "time": "10:00",
+          "uid": "8f1c-4a02-b7d3"
+        }
+      ],
+      "rubric": "Monday · 10 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "9 Aug 20:30",
+          "colour": "#4a6b52",
+          "href": "/p/link-lichnyj-whole-token?uid=1d55-90fe-3c27",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Забрать документы",
+          "tags": [],
+          "time": "18:00",
+          "uid": "1d55-90fe-3c27"
+        }
+      ],
+      "rubric": "Tuesday · 11 August"
+    }
+  ],
+  "empty": "",
+  "fields": [],
+  "file": null,
+  "filter": {
+    "action": "/p/link-lichnyj-whole-token",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Filter by word",
+            "name": "q",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link does not expire."
+    }
+  ],
+  "kind": "event",
+  "lede": [
+    {
+      "text": "10 – 16 August 2026"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": {
+    "form": null,
+    "from": "10 August 2026",
+    "presets": [
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token?from=2026-08-03",
+        "icon": "i-back",
+        "id": "range.previous",
+        "label": "Previous week",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token",
+        "id": "range.current",
+        "label": "Today",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token?from=2026-08-17",
+        "icon": "i-next",
+        "id": "range.next",
+        "label": "Next week",
+        "method": "GET"
+      }
+    ],
+    "to": "16 August 2026"
+  },
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "Личный",
+  "width": []
+}

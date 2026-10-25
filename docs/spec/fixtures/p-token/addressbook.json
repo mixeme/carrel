@@ -1,5 +1,14 @@
 {
-  "actions": [],
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-komanda-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download .vcf",
+      "method": "GET"
+    }
+  ],
   "attachNote": "",
   "attachments": [],
   "attendees": [],
@@ -19,13 +28,13 @@
           "birthday": "",
           "changed": "",
           "colour": "#6b4e7a",
-          "email": "",
+          "email": "a.kovaleva@example.org",
           "href": "/p/link-komanda-token?uid=4f2b-9c31-a0e7",
           "menu": [],
           "name": "Анна Ковалёва",
           "on": false,
           "org": "Издательство «Слово»",
-          "phone": "",
+          "phone": "+7 912 445-10-88",
           "sources": [],
           "stamp": "",
           "state": "ok",
@@ -42,13 +51,13 @@
           "birthday": "",
           "changed": "",
           "colour": "#6b4e7a",
-          "email": "",
+          "email": "a.belov@example.org",
           "href": "/p/link-komanda-token?uid=d41a-6f30-92be",
           "menu": [],
           "name": "Артём Белов",
           "on": false,
           "org": "Тензор",
-          "phone": "",
+          "phone": "+7 903 118-22-04",
           "sources": [],
           "stamp": "",
           "state": "ok",
@@ -93,7 +102,7 @@
   "folder": null,
   "foot": [
     {
-      "text": "This link works until 17 August 2026."
+      "text": "This link works until 9 September 2026."
     }
   ],
   "kind": "contact",
@@ -107,7 +116,13 @@
   "notices": [],
   "range": null,
   "readOnly": true,
-  "strip": null,
+  "strip": {
+    "address": "http://example.com/p/link-komanda-token/komanda.vcf",
+    "label": "Address of this book",
+    "mount": [],
+    "note": "another Carrel can subscribe to it; other clients import it",
+    "open": ""
+  },
   "tasks": [],
   "title": "Команда",
   "width": []

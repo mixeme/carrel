@@ -1,0 +1,75 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": {
+    "colour": "#8c6239",
+    "href": "",
+    "initials": "АК"
+  },
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [
+    {
+      "from": null,
+      "href": "tel:+79124451088",
+      "label": "Phone · mobile",
+      "mono": true,
+      "value": "+7 912 445-10-88"
+    },
+    {
+      "from": null,
+      "href": "tel:+74951204500",
+      "label": "Phone · work",
+      "mono": true,
+      "value": "+7 495 120-45-00"
+    },
+    {
+      "from": null,
+      "href": "mailto:a.kovaleva@example.org",
+      "label": "Email · work",
+      "mono": false,
+      "value": "a.kovaleva@example.org"
+    },
+    {
+      "from": null,
+      "href": "mailto:anna.kovaleva@slovo.example",
+      "label": "Email · second",
+      "mono": false,
+      "value": "anna.kovaleva@slovo.example"
+    },
+    {
+      "from": null,
+      "href": "",
+      "label": "Note",
+      "mono": false,
+      "value": "Пишет по вторникам, отвечает в тот же день."
+    }
+  ],
+  "file": null,
+  "filter": null,
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
+  "kind": "contact",
+  "lede": [
+    {
+      "text": "Издательство «Слово» · Выпускающий редактор"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "Анна Ковалёва",
+  "width": []
+}

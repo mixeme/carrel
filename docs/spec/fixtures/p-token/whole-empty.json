@@ -1,0 +1,64 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "empty": "No events this week.",
+  "fields": [],
+  "file": null,
+  "filter": null,
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link does not expire."
+    }
+  ],
+  "kind": "event",
+  "lede": [
+    {
+      "text": "4 – 10 January 2027"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": {
+    "form": null,
+    "from": "4 January 2027",
+    "presets": [
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token?from=2026-12-28",
+        "icon": "i-back",
+        "id": "range.previous",
+        "label": "Previous week",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token",
+        "id": "range.current",
+        "label": "Today",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token?from=2027-01-11",
+        "icon": "i-next",
+        "id": "range.next",
+        "label": "Next week",
+        "method": "GET"
+      }
+    ],
+    "to": "10 January 2027"
+  },
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "Личный",
+  "width": []
+}

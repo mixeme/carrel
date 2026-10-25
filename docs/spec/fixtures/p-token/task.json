@@ -1,0 +1,48 @@
+{
+  "actions": [],
+  "attachNote": "",
+  "attachments": [],
+  "attendees": [],
+  "avatar": null,
+  "body": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4.",
+  "contacts": [],
+  "days": [],
+  "empty": "",
+  "fields": [
+    {
+      "from": null,
+      "href": "",
+      "label": "Status",
+      "mono": false,
+      "runs": [
+        {
+          "text": "Needs action"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "file": null,
+  "filter": null,
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
+  "kind": "task",
+  "lede": [
+    {
+      "text": "Due Friday, 7 August 2026"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "strip": null,
+  "tasks": [],
+  "title": "Отправить документы в МФЦ",
+  "width": []
+}
