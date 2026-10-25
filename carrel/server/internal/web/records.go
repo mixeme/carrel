@@ -1334,7 +1334,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	// «Filter by word» first in the bar (s-agenda-17): with a word the
 	// calendar is read whole and what is found stands by day, the week and
 	// ← Today → gone (s-agenda-31).
-	sift := strings.TrimSpace(r.URL.Query().Get("q"))
+	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
 	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.calendarFilter(c.listPath(), sift)
 	window := [2]*time.Time{&from, &to}
 	if sift != "" {
@@ -1380,10 +1380,9 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 }
 
 // calendarFilter is «Filter by word» of a calendar without scripts
-// (s-agenda-1, -17): a GET to the calendar, the word under q.
+// (s-agenda-1, -17): a GET to the calendar, the word under filter (note 129).
 func (s *Server) calendarFilter(base, q string) *view.Form {
-	f := s.plainForm(base, "GET", view.FormRow{Name: "q", Label: "Filter by word", Kind: view.InputText, Value: text(q)})
-	return &f
+	return s.filterForm(base, q, view.FormRow{Name: "filter", Label: "Filter by word", Kind: view.InputText, Value: text(q)})
 }
 
 // foundSubtitle is the line under a calendar sifted by a word: where, and
@@ -1739,7 +1738,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
 	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(c.listPath(), r.URL.Query(), sift)
 	shown := filterByWord(linkedElsewhere(s.catalogOf(c.sess), view.KindTask, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items))), sift)
-	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, shown, c.spec.segment, false, filter, c.tf.now, by)
+	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.sess, c.tf, show, shown, c.spec.segment, false, filter, c.tf.now, by)
 	page.Subtitle = text(bookSubtitle(c, len(objs), true))
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, taskRowsOn(page.Groups))
 	page.Bar.Segments = append(s.taskSegments(c.listPath(), filter.tag, show, open, done),
@@ -1757,10 +1756,15 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 }
 
 // taskGroups shows open, done or all tasks: open first, then by due date,
-// undated last. A row's categories link to the list filtered to each.
-func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment string, mark bool, filter tagFilter, now time.Time, by string) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
+// undated last. A row's categories link to the list filtered to each. A task
+// open in what the session read and marked done since (Р-42; the owner's
+// word of 09.10.2026) stays where it stood, counted as it was read, crossed
+// with its tick full — the tick takes the mark off again — until its
+// collection is read anew.
+func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, items []listed, segment string, mark bool, filter tagFilter, now time.Time, by string) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
 	type item struct {
 		row      view.TaskRow
+		done     bool // as read: a task ticked since stands where it stood
 		due      time.Time
 		priority int
 		changed  time.Time
@@ -1771,6 +1775,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		o := it.obj
 		uid := cal.UID(o)
 		isDone := taskDone(o)
+		ticked := !isDone && sess != nil && sess.TickedSinceRead(it.from.conn.ID, it.from.col.Path, uid)
 		if isDone {
 			done++
 		} else {
@@ -1789,7 +1794,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			continue
 		}
 		row := view.TaskRow{
-			Href: s.route(it.from.recordPath(segment, uid)), Target: render.TargetDetails, UID: uid, Done: isDone,
+			Href: s.route(it.from.recordPath(segment, uid)), Target: render.TargetDetails, UID: uid, Done: isDone || ticked,
 			Summary: text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), "Untitled task")),
 			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: linkedState(it),
 			Badges: linkedBadge(it), Sources: linkedSources(it),
@@ -1810,8 +1815,8 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			if mark {
 				from = "all"
 			}
-			tick := s.doneAction(it.from.recordPath(segment, uid)+"/edit", o.ETag, isDone, from)
-			if len(it.also) > 0 && !isDone {
+			tick := s.doneAction(it.from.recordPath(segment, uid)+"/edit", o.ETag, isDone || ticked, from)
+			if len(it.also) > 0 && !isDone && !ticked {
 				// One row for every copy: its tick asks which copy is done
 				// (s-tasks-16).
 				tick = s.linkedTick(it.from, segment, uid)
@@ -1838,12 +1843,12 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		}
 		row.Where = text(strings.TrimSpace(firstValue(o, "LOCATION")))
 		row.Attendees = peopleCount(o)
-		rows = append(rows, item{row: row, due: due.Start, priority: priorityOf(o), changed: changed, order: it.from.listPath(segment)})
+		rows = append(rows, item{row: row, done: isDone, due: due.Start, priority: priorityOf(o), changed: changed, order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
 		a, b := rows[i], rows[j]
-		if a.row.Done != b.row.Done {
-			return !a.row.Done
+		if a.done != b.done {
+			return !a.done
 		}
 		switch by {
 		case "priority":
@@ -1875,7 +1880,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 	for _, it := range rows {
 		rubric := ""
 		if by == "due" {
-			rubric = dueRubric(it.due, it.row.Done, now)
+			rubric = dueRubric(it.due, it.done, now)
 		}
 		if n := len(groups); n == 0 || string(groups[n-1].Rubric) != rubric {
 			groups = append(groups, view.TaskGroup{Rubric: text(rubric)})

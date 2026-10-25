@@ -272,7 +272,7 @@
               "hint": "",
               "kind": "text",
               "label": "Filter by word",
-              "name": "q",
+              "name": "filter",
               "options": [],
               "readOnly": false,
               "required": false,
@@ -671,7 +671,7 @@
         "method": "GET"
       },
       {
-        "count": 8,
+        "count": 9,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -726,7 +726,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 8,
+            "count": 9,
             "detail": "",
             "feed": false,
             "href": "/app/calendar",
@@ -788,7 +788,7 @@
         "rows": [
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-rad-vps/proekty",

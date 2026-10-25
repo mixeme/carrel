@@ -319,7 +319,7 @@
               "hint": "",
               "kind": "text",
               "label": "Filter by word",
-              "name": "q",
+              "name": "filter",
               "options": [],
               "readOnly": false,
               "required": false,
@@ -615,7 +615,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/delete?etag=e4",
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/delete?etag=e5",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete event",
@@ -1080,7 +1080,7 @@
         "method": "GET"
       },
       {
-        "count": 8,
+        "count": 9,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",

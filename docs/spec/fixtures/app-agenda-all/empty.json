@@ -314,7 +314,7 @@
               "hint": "",
               "kind": "text",
               "label": "Filter by word",
-              "name": "q",
+              "name": "filter",
               "options": [],
               "readOnly": false,
               "required": false,

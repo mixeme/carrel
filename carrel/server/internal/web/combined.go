@@ -108,8 +108,8 @@ func (s *Server) combinedQuery(r *http.Request, tf timeFmt, spec kindSpec) (fano
 	}
 	// A word asks every calendar whole: what is found is found in all of
 	// it, not in the week (s-agenda-31).
-	if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
-		return fanout.Query{}, page + "?" + url.Values{"q": {q}}.Encode()
+	if q := strings.TrimSpace(r.URL.Query().Get("filter")); q != "" {
+		return fanout.Query{}, page + "?" + url.Values{"filter": {q}}.Encode()
 	}
 	kind, from, to := agendaWindow(tf, r.URL.Query())
 	// The window of the screen is the window asked of the servers: a month
@@ -416,7 +416,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			events := eventsIn(page.Days)
 			page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, nil), from, to, &events)
 		}
-		sift := strings.TrimSpace(r.URL.Query().Get("q"))
+		sift := strings.TrimSpace(r.URL.Query().Get("filter"))
 		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.calendarFilter(base, sift)
 		if sift != "" {
 			// With a word: all that is found, by day; no week, no ← Today →
@@ -472,7 +472,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		// 69 of Typecase, task 167).
 		sift := strings.TrimSpace(r.URL.Query().Get("filter"))
 		kept := filterByWord(shown, sift)
-		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, kept, spec.segment, true, filter, tf.now, by)
+		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(sess, tf, show, kept, spec.segment, true, filter, tf.now, by)
 		page.Details = s.openRow(r, sess, base, spec, kept, taskRowsOn(page.Groups))
 		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(base, query, sift)
 		page.Bar.Segments = append(s.taskSegments(base, filter.tag, show, open, done),

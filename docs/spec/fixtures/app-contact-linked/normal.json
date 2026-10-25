@@ -298,9 +298,29 @@
       "title": "Синк-ап по релизу",
       "when": "10 Aug",
       "why": "attendee · accepted"
+    },
+    {
+      "colour": "#3f6e8c",
+      "from": null,
+      "href": "/app/tasks/a-nc-home/rabota/bb22-6e1a-0c44",
+      "kind": "task",
+      "stamp": "nextcloud · Работа",
+      "title": "Согласовать обложку",
+      "when": "4 Aug",
+      "why": "organiser"
+    },
+    {
+      "colour": "#6b4e7a",
+      "from": null,
+      "href": "/app/calendar/a-rad-vps/proekty/9c28-4a71-b305",
+      "kind": "event",
+      "stamp": "radicale · vps · Проекты",
+      "title": "Ревью вёрстки сборника",
+      "when": "29 Jul",
+      "why": "attendee"
     }
   ],
-  "timelineCount": 1,
+  "timelineCount": 3,
   "title": "Анна Ковалёва",
   "top": {
     "lock": null,

@@ -390,6 +390,7 @@
     ],
     "foreign": [],
     "foreignShow": null,
+    "late": "",
     "linkedRecord": true,
     "menu": [
       {
@@ -600,7 +601,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e26",
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e27",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -700,7 +701,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e22",
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e23",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -790,7 +791,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e25",
+              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e26",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -935,7 +936,7 @@
         "method": "GET"
       },
       {
-        "count": 8,
+        "count": 9,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",

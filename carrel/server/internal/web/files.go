@@ -785,8 +785,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 			keep = append(keep, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
 		}
 	}
-	filterForm := s.plainForm(here, "GET", append(keep, view.FormRow{Name: "filter", Label: "Filter this folder", Kind: view.InputText, Value: text(filter)})...)
-	page.Bar.FilterForm = &filterForm
+	page.Bar.FilterForm = s.filterForm(here, filter, append(keep, view.FormRow{Name: "filter", Label: "Filter this folder", Kind: view.InputText, Value: text(filter)})...)
 	option := func(id, label, key, value, current string) view.Action {
 		v := cloneValues(q)
 		v.Set(key, value)

@@ -403,6 +403,22 @@ func progress(p *int) string {
 	return strconv.Itoa(*p) + percent
 }
 
+// late puts how late the task is after where it lies, a badge in the
+// alert's tone, as its card says it (s-tasks-20: «▍nextcloud · Дела ·
+// overdue by 3 days»).
+func late(sub w.HeadSub, by view.Text) w.HeadSub {
+	if by == "" {
+		return sub
+	}
+	if n := len(sub.Parts); n > 0 {
+		if t, ok := sub.Parts[n-1].(w.Text); ok {
+			sub.Parts[n-1] = t + " " + w.Text(lead)
+		}
+	}
+	sub.Parts = append(sub.Parts, w.Badge{Label: string(by), Tone: w.BadgeAlert})
+	return sub
+}
+
 // side is the panel of the task opened (Details).
 func side(d view.Details) *w.Side {
 	var acts []w.ActsPart
@@ -431,7 +447,7 @@ func side(d view.Details) *w.Side {
 	acts = append(acts, w.Close{Label: "Close the panel", Href: d.Close})
 	items := []w.SidePart{w.Head{
 		Title: &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
-		Subs:  []w.HeadSub{bind.SourceSub(d.Source.Colour, d.Subtitle)},
+		Subs:  []w.HeadSub{late(bind.SourceSub(d.Source.Colour, d.Subtitle), d.Late)},
 		Acts:  &w.Acts{Items: acts},
 	}}
 	if d.LinkedRecord {
@@ -461,9 +477,6 @@ func side(d view.Details) *w.Side {
 		if len(d.Attach) > 0 {
 			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: 6})
 		}
-		if d.AttachHint != "" {
-			sec = append(sec, w.SecHint{Text: string(d.AttachHint), Apart: true})
-		}
 		items = append(items, w.Sec{Items: sec})
 	}
 	if len(d.Related) > 0 {
@@ -472,10 +485,10 @@ func side(d view.Details) *w.Side {
 			lines = append(lines, bind.WithFrom([]w.SecItemPart{
 				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
 				w.Text(" "),
-				w.Dim{Parts: []w.Inline{w.Text(lead + string(r.Kind))}},
+				w.Dim{Parts: []w.Inline{w.Text(about(r))}},
 			}, r.From))
 		}
-		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: 6}}})
 	}
 	if d.LinkedRecord {
 		items = append(items, bind.KeptSec("Where this task is kept", d.Books, lead))
@@ -536,3 +549,13 @@ const upload = "Upload"
 // Rail is the page's rail alone and the form its ticks send: the end of a
 // poll brings it out of band (C-7.4; Typecase's note 124).
 func Rail(r view.Rail) ([]w.RailPart, *w.PostForm) { return railParts(r), bind.RailForm(r, formRail) }
+
+// about is what a related record is, and its day where it has one: «· event
+// · 11 Aug» (s-tasks-20; Typecase's note 130 p. 3), as a note's panel says
+// it.
+func about(r view.TimelineRow) string {
+	if r.When == "" {
+		return lead + string(r.Kind)
+	}
+	return lead + string(r.Kind) + " " + lead + string(r.When)
+}

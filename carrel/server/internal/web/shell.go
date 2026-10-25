@@ -155,6 +155,26 @@ func (s *Server) plainForm(action, method string, rows ...view.FormRow) view.For
 	}
 }
 
+// filterForm is a filter without scripts, a GET of the page (plainForm),
+// with its cross while it holds a word: the same address without the word,
+// with what the form keeps hidden (Form.Clear; Typecase's note 129 p. 2).
+func (s *Server) filterForm(action, word string, rows ...view.FormRow) *view.Form {
+	f := s.plainForm(action, "GET", rows...)
+	if word != "" {
+		q := url.Values{}
+		for _, r := range rows {
+			if r.Kind == view.InputHidden {
+				q.Add(r.Name, string(r.Value))
+			}
+		}
+		f.Clear = f.Action
+		if len(q) > 0 {
+			f.Clear += "?" + q.Encode()
+		}
+	}
+	return &f
+}
+
 // discard is Discard beside the Save of a settings page that is one form
 // (the owner's decision of 12.10.2026, Typecase's Р-57; appearance-1,
 // attachments-1): a link to the page itself, which drops what was typed and

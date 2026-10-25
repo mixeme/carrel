@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"testing"
@@ -79,5 +80,47 @@ func TestMarkDoneFromTheCardAndTheRow(t *testing.T) {
 	u, _ := url.Parse(stale.Href)
 	if resp := f.h.do(postForm(strings.Replace(u.EscapedPath(), "/tasks/", "/calendar/", 1), f.sess, u.Query())); resp.Code != 404 {
 		t.Errorf("done on an event: %d, want 404", resp.Code)
+	}
+}
+
+// Р-42 (the owner's word of 09.10.2026): a task marked done from the
+// combined list stays where it stood in the list answered from the poll —
+// crossed, its tick full, counted as it was read —, and the tick takes the
+// mark off again; a list read anew from the server has it among the done.
+func TestATaskJustMarkedDoneStaysWhereItStood(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nEND:VTODO"),
+		"t2.ics", ics("BEGIN:VTODO\nUID:t2\nDTSTAMP:20260101T000000Z\nSUMMARY:Notes\nEND:VTODO"))
+	tickAll(t, f.h, f.sess)
+	page := combined(t, f.h, f.sess, "/app/tasks", tasksPoll)
+	row := func(p view.TasksPage, summary string) (view.TaskRow, string, bool) {
+		for _, g := range p.Groups {
+			for _, r := range g.Rows {
+				if string(r.Summary) == summary {
+					return r, string(g.Rubric), true
+				}
+			}
+		}
+		return view.TaskRow{}, "", false
+	}
+	before, group, ok := row(page, "Slides")
+	if !ok || before.Done || before.Tick == nil {
+		t.Fatalf("Slides before = %+v", before)
+	}
+	if resp := f.h.do(postHref(f, before.Tick.Href)); resp.Code != 303 {
+		t.Fatalf("Mark done: %d %s", resp.Code, resp.Body.String())
+	}
+	again := decode[view.TasksPage](t, f.h.do(get("/app/tasks?task="+page.Poll.TaskID, f.sess)))
+	after, where, ok := row(again, "Slides")
+	if !ok || !after.Done || where != group || after.Tick == nil || after.Tick.Label != "Mark not done" {
+		t.Errorf("Slides after the tick = %+v in %q, want it done where it stood (%q), its tick taking it back", after, where, group)
+	}
+	if fmt.Sprint(again.Bar.Segments) != fmt.Sprint(page.Bar.Segments) {
+		t.Errorf("the counts moved with the tick: %+v, were %+v", again.Bar.Segments, page.Bar.Segments)
+	}
+	// Read anew: among the done, not the open.
+	fresh := decode[view.TasksPage](t, f.h.do(get(f.path("tasks"), f.sess)))
+	if _, _, ok := row(fresh, "Slides"); ok {
+		t.Errorf("a list read anew still shows Slides among the open: %+v", fresh.Groups)
 	}
 }

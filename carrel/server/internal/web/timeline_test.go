@@ -194,9 +194,12 @@ func TestContactTimeline(t *testing.T) {
 	if len(sheet.Target.Options) == 0 {
 		t.Fatalf("event sheet = %+v", sheet)
 	}
-	quick, _ := url.Parse(sheet.Target.Options[0].ID)
-	sheet = decode[view.NewSheet](t, f.h.do(get(strings.TrimSuffix(quick.EscapedPath(), "/new")+"/new/quick?"+quick.RawQuery, f.sess)))
+	// Nothing chosen yet (s-notes-34): the sheet's fields at once, the
+	// relation carried in them; «where» is the first calendar.
 	form := formFields(sheet.Form)
+	if sheet.Target.Chosen == "" {
+		form.Set("into", sheet.Target.Options[0].Value)
+	}
 	if form.Get("related") != "ann" || form.Get("attendee") != "" {
 		t.Fatalf("event quick form = %v, want the person as its relation and no attendee", form)
 	}

@@ -296,7 +296,7 @@
         "id": "tasks.done",
         "label": "Done",
         "method": "GET",
-        "tally": "1"
+        "tally": "2"
       },
       {
         "enabled": true,
@@ -304,7 +304,7 @@
         "id": "tasks.all",
         "label": "All",
         "method": "GET",
-        "tally": "6"
+        "tally": "7"
       },
       {
         "enabled": true,
@@ -385,7 +385,6 @@
       }
     ],
     "attach": [],
-    "attachHint": "The same block events and notes have: up to 2 MB the file is written into the task itself, above that it goes to the attachments folder and the task keeps a link. Pasting and dropping work the same way.",
     "attendees": [],
     "avatar": null,
     "body": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4.",
@@ -452,6 +451,7 @@
     ],
     "foreign": [],
     "foreignShow": null,
+    "late": "overdue by 3 days",
     "menu": [
       {
         "enabled": true,
@@ -956,7 +956,7 @@
           "badges": [],
           "changed": "10 Aug 09:00",
           "colour": "#4a6b52",
-          "done": false,
+          "done": true,
           "due": "",
           "href": "/app/tasks?open=%2Fapp%2Ftasks%2Fa-nc-home%2Fdela%2Faa12-9e44-c703\u0026task=t-task",
           "menu": [
@@ -1038,9 +1038,9 @@
           "tick": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=on\u0026etag=e14\u0026from=all\u0026op=done",
+            "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=off\u0026etag=e14\u0026from=all\u0026op=done",
             "id": "task.done",
-            "label": "Mark done",
+            "label": "Mark not done",
             "method": "POST"
           },
           "uid": "aa12-9e44-c703",
@@ -1098,7 +1098,7 @@
       },
       {
         "colour": "#3f6e8c",
-        "count": 3,
+        "count": 4,
         "fromCache": false,
         "message": "",
         "retry": null,
@@ -1109,7 +1109,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 2 of 2 sources · 6 tasks"
+        "text": "Polled 2 of 2 sources · 7 tasks"
       }
     ],
     "taskID": "t-task"
@@ -1167,7 +1167,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -1222,7 +1222,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 7,
+            "count": 8,
             "detail": "",
             "feed": false,
             "href": "/app/tasks",
@@ -1253,7 +1253,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 3,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",
@@ -1352,7 +1352,7 @@
       "target": "rail"
     }
   },
-  "subtitle": "2 of 3 lists · nextcloud · 6 tasks",
+  "subtitle": "2 of 3 lists · nextcloud · 7 tasks",
   "title": "Combined list",
   "top": {
     "lock": null,

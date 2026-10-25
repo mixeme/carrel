@@ -237,6 +237,13 @@
             "value": "aa10-77bc-0e31"
           },
           {
+            "colour": "#3f6e8c",
+            "label": "Согласовать обложку",
+            "meta": "task · 4 Aug",
+            "selected": false,
+            "value": "bb22-6e1a-0c44"
+          },
+          {
             "colour": "#6b4e7a",
             "label": "Про дорогу до дачи",
             "meta": "note · 3 Aug",

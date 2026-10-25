@@ -95,12 +95,14 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		// Priority, Tags — the card's order, monospaced where the frame
 		// sets them; and where the task lies, as its card says it.
 		d.Fields, _ = taskFields(c.tf, obj, true, s.recordTags(c, obj))
+		// How late, under the title, as the card says it (s-tasks-20;
+		// Typecase's note 130 p. 2).
+		if due, err := cal.DueOf(obj, c.tf.tz); err == nil {
+			d.Late = text(overdueBy(c.tf, due, taskDone(obj)))
+		}
 		d.Body, d.Attendees, d.Attach, d.Related = page.Body, page.Attendees, page.Attach, page.Related
 		d.Source.Path, d.Source.Compared = page.Source.Path, page.Source.Compared
 		d.Actions = shown(ops.edit, attach, ops.del)
-		if attach != nil {
-			d.AttachHint = taskAttachHint(c)
-		}
 	default:
 		page := s.notePage(c, uid, obj, nil)
 		// Where the note lies and when it was written, in one line under

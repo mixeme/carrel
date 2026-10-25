@@ -1093,14 +1093,14 @@ func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.Pu
 // publicCollection fills the page with the collection read now: a book, a
 // calendar — its days, or a week of the whole of it —, a task list, a
 // notebook (note 122). Each row opens its record in the same link (?uid=);
-// «Filter by word» (?q=) sifts it as the owner's list does, and goes away
+// «Filter by word» (?filter=) sifts it as the owner's list does, and goes away
 // with nothing to sift.
 func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.OpenLink, token string, page *view.PublishedPage) error {
 	ctx := r.Context()
 	tf := c.tf
 	here := "/p/" + token
 	open := func(uid string) string { return s.postQuery(here, url.Values{"uid": {uid}}) }
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	q := strings.TrimSpace(r.URL.Query().Get("filter"))
 	has := func(q string, hay ...string) bool {
 		return q == "" || strings.Contains(strings.ToLower(strings.Join(hay, "\n")), strings.ToLower(q))
 	}
@@ -1257,15 +1257,14 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 }
 
 // publicFilter is «Filter by word» of a public list, «Filter this folder» of
-// a folder: a GET to the page, the word under q, the folder open in a
+// a folder: a GET to the page, the word under filter, the folder open in a
 // nested one under in (s-publish-7, -12, -30).
 func (s *Server) publicFilter(here, label, q, in string) *view.Form {
-	rows := []view.FormRow{{Name: "q", Label: text(label), Kind: view.InputText, Value: text(q)}}
+	rows := []view.FormRow{{Name: "filter", Label: text(label), Kind: view.InputText, Value: text(q)}}
 	if in != "" {
 		rows = append(rows, view.FormRow{Name: "in", Kind: view.InputHidden, Value: text(in)})
 	}
-	f := s.plainForm(here, "GET", rows...)
-	return &f
+	return s.filterForm(here, q, rows...)
 }
 
 // guestDays makes the rows of a published calendar the guest's: each opens

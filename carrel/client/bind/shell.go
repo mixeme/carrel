@@ -769,14 +769,24 @@ func Notice(n view.Notice, space w.MsgSpace) w.Msg {
 }
 
 // Notices are the notices of the shell on the page (the zone notices, C-7.2):
-// each its message (Notice) and under it its technical block, where it has
-// one (NoticeDiag).
+// their band (Band), where there are any — the frames draw no empty one;
+// the document puts it where none stands (Typecase's note 127).
 func Notices(ns []view.Notice, space w.MsgSpace) []w.MainPart {
-	var out []w.MainPart
+	if len(ns) == 0 {
+		return nil
+	}
+	return []w.MainPart{Band(ns, space)}
+}
+
+// Band is the band of the notices: each its message (Notice) and under it
+// its technical block, where it has one (NoticeDiag) — one band
+// (states-11).
+func Band(ns []view.Notice, space w.MsgSpace) w.Notices {
+	var out w.Notices
 	for _, n := range ns {
-		out = append(out, Notice(n, space))
+		out.Items = append(out.Items, Notice(n, space))
 		if d := NoticeDiag(n); d != nil {
-			out = append(out, *d)
+			out.Items = append(out.Items, *d)
 		}
 	}
 	return out

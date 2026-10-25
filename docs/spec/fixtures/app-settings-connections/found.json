@@ -1100,7 +1100,7 @@
               "target": "sheet"
             }
           ],
-          "objects": 1,
+          "objects": 2,
           "path": "/alice/calendars/proekty/",
           "pick": "a-rad-vps|/alice/calendars/proekty/",
           "readOnly": false,

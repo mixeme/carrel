@@ -32,7 +32,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e26",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e27",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -42,7 +42,7 @@
   ],
   "avatar": {
     "colour": "#8c6239",
-    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e26",
+    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e27",
     "initials": "АК"
   },
   "books": [
@@ -239,7 +239,7 @@
   },
   "name": "Анна Ковалёва",
   "notices": [],
-  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e26",
+  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e27",
   "photoNote": "",
   "print": {
     "range": "nextcloud · Контакты",
@@ -330,9 +330,29 @@
       "title": "Синк-ап по релизу",
       "when": "10 Aug",
       "why": "attendee · accepted"
+    },
+    {
+      "colour": "#3f6e8c",
+      "from": null,
+      "href": "/app/tasks/a-nc-home/rabota/bb22-6e1a-0c44",
+      "kind": "task",
+      "stamp": "nextcloud · Работа",
+      "title": "Согласовать обложку",
+      "when": "4 Aug",
+      "why": "organiser"
+    },
+    {
+      "colour": "#6b4e7a",
+      "from": null,
+      "href": "/app/calendar/a-rad-vps/proekty/9c28-4a71-b305",
+      "kind": "event",
+      "stamp": "radicale · vps · Проекты",
+      "title": "Ревью вёрстки сборника",
+      "when": "29 Jul",
+      "why": "attendee"
     }
   ],
-  "timelineCount": 1,
+  "timelineCount": 3,
   "title": "Анна Ковалёва",
   "top": {
     "lock": null,

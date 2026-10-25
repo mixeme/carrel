@@ -626,7 +626,7 @@
       "collections": "4 / 4",
       "id": "r-run",
       "job": "Личное на домашний диск",
-      "size": "4.2 KB",
+      "size": "4.5 KB",
       "trigger": "by hand",
       "verified": [
         {
@@ -730,7 +730,7 @@
       "keep": 8,
       "lastNote": [
         {
-          "text": "4.2 KB · "
+          "text": "4.5 KB · "
         },
         {
           "hint": "The archive was read back from the destination and the checksum matched",
@@ -1036,7 +1036,7 @@
         },
         {
           "colour": "#9a9280",
-          "created": 0,
+          "created": 1,
           "happened": [
             {
               "mark": "danger",
@@ -1047,7 +1047,7 @@
           "name": "radicale · vps / Проекты"
         }
       ],
-      "subtitle": "3 collections · 1 record created · 1 not restored",
+      "subtitle": "3 collections · 2 records created · 1 not restored",
       "title": "Restored from 2026-08-10"
     },
     "source": {

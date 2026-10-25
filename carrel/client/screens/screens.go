@@ -171,7 +171,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NewSheet) },
-		Frames: []string{"s-notes-5", "s-notes-6", "s-notes-8", "s-notes-9", "s-notes-10"},
+		Frames: []string{"s-notes-5", "s-notes-6", "s-notes-8", "s-notes-9", "s-notes-10", "s-notes-34"},
 		Draw: func(model any) Root {
 			p := model.(*view.NewSheet)
 			return over(p.Under, quick.Sheet(p))
@@ -452,8 +452,7 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.TasksPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return tasks.Forms(model.(*view.TasksPage)) },
 		Waits: []Wait{
-			{Row: 31, Fixture: "app-tasks-all/normal"}, // ждёт библиотеку: U-5.5 #31
-			{Row: 32, Fixture: "app-tasks/normal"},     // ждёт библиотеку: U-5.5 #32
+			{Row: 32, Fixture: "app-tasks/normal"}, // ждёт библиотеку: U-5.5 #32
 		},
 	},
 	{

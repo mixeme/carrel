@@ -66,13 +66,13 @@ func TestTaskListIsTheFrame(t *testing.T) {
 		t.Errorf("subtitle = %q, want the shape of %q", page.Subtitle, frameSubtitle(t, "s-tasks-1"))
 	}
 	// The table counts rows, the rail records (the owner's decision of
-	// 09.10.2026): the linked task is one of «6 tasks» — the done one
+	// 09.10.2026): the linked task is one of «7 tasks» — the done one
 	// counts too —, and one of each of its lists in the rail.
-	if sub := frameSubtitle(t, "s-tasks-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 6 tasks") {
+	if sub := frameSubtitle(t, "s-tasks-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 7 tasks") {
 		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), sub)
 	}
-	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 7 {
-		t.Errorf("the rail's combined row = %+v, want the 7 tasks of the ticked lists", all.Count)
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 8 {
+		t.Errorf("the rail's combined row = %+v, want the 8 tasks of the ticked lists", all.Count)
 	}
 	// The section Tasks counts the overdue ones (Typecase's note 39, Р-47:
 	// «Tasks 2» of every frame — the two under Overdue).

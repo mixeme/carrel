@@ -89,6 +89,7 @@
   "filter": {
     "action": "/p/link-lichnyj-whole-token",
     "actions": [],
+    "clear": "/p/link-lichnyj-whole-token",
     "errors": [],
     "method": "GET",
     "sets": [
@@ -102,7 +103,7 @@
             "hint": "",
             "kind": "text",
             "label": "Filter by word",
-            "name": "q",
+            "name": "filter",
             "options": [],
             "readOnly": false,
             "required": false,

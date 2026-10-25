@@ -6,7 +6,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 32,
+    "loaded": 33,
     "range": null,
     "segments": [
       {
@@ -1458,7 +1458,7 @@
     }
   ],
   "print": {
-    "range": "32 records compared · 60 points and above",
+    "range": "33 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -1484,7 +1484,7 @@
         "method": "GET"
       },
       {
-        "count": 10,
+        "count": 11,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -1587,7 +1587,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "",
@@ -1690,7 +1690,7 @@
     "tags": [],
     "ticks": null
   },
-  "subtitle": "32 records compared · 2 to look at",
+  "subtitle": "33 records compared · 2 to look at",
   "threshold": {
     "default": 60,
     "form": {

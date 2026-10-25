@@ -28,6 +28,8 @@ func Filter(b view.ListBar, words string) w.Filter {
 	for _, r := range Rows(*b.FilterForm) {
 		f.Query.Name = r.Name
 	}
+	// The cross while it holds a word (Typecase's note 129 p. 2).
+	f.Clear = b.FilterForm.Clear
 	return f
 }
 

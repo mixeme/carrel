@@ -24,4 +24,14 @@ ORGANIZER;CN=Михаил Енученко:mailto:mix@example.org
 ATTENDEE;CN=Артём Белов;PARTSTAT=ACCEPTED:mailto:a.belov@example.
  org
 END:VEVENT
+BEGIN:VEVENT
+UID:9c28-4a71-b305
+DTSTAMP:20260720T090000Z
+DTSTART;TZID=Europe/Moscow:20260729T150000
+DTEND;TZID=Europe/Moscow:20260729T160000
+SUMMARY:Ревью вёрстки сборника
+ORGANIZER;CN=Михаил Енученко:mailto:mix@example.org
+ATTENDEE;CN=Анна Ковалёва;PARTSTAT=NEEDS-ACTION:mailto:a.kovale
+ va@example.org
+END:VEVENT
 END:VCALENDAR

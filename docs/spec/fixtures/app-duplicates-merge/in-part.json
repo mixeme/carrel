@@ -60,7 +60,7 @@
         "method": "GET"
       },
       {
-        "count": 10,
+        "count": 11,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -163,7 +163,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "",

@@ -186,6 +186,10 @@ type Details struct {
 	// Date — у заметки день и время, когда они у неё есть, моноширинно после
 	// Subtitle (s-notes-1), как NoteMeta.Date страницы; у прочих пусто
 	Date Text `json:"date"`
+	// Late — у задачи: насколько просрочена, «overdue by 3 days», бейджем
+	// тревоги после Subtitle, как на карточке (s-tasks-20, записка Typecase
+	// 130 п. 2); у прочих пусто
+	Late Text `json:"late"`
 	// TextFrom — у панели связанной заметки: коллекция её текста после
 	// Subtitle «in 2 notebooks · text from» (s-notes-1, записка Typecase 123
 	// п. 10); nil — выбора не было
@@ -199,13 +203,8 @@ type Details struct {
 	Rendered  []Block       `json:"rendered"`  // текст заметки, разобранный (C-6.9)
 	Attendees []AttendeeRow `json:"attendees"` // люди события, задачи, заметки (Р3), только чтение
 	Attach    []AttachRow   `json:"attach"`
-	// AttachHint — строка под вложениями задачи (s-tasks-1): до какого
-	// объёма файл пишется в саму запись, а больше — в папку вложений, «…up
-	// to 2 MB the file is written into the task itself…» (порог — настройка
-	// экземпляра, S-20); у прочих родов пусто
-	AttachHint Text          `json:"attachHint,omitempty"`
-	Related    []TimelineRow `json:"related"`
-	Foreign    []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
+	Related   []TimelineRow `json:"related"`
+	Foreign   []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
 	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign: без сценариев —
 	// ссылка на тот же список с этой панелью и ?foreign=1; nil — их нет или
 	// они раскрыты

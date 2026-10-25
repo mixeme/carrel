@@ -5,7 +5,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026readat=1786370760",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026readat=1786370760",
         "id": "record.save",
         "label": "Save",
         "method": "POST",
@@ -25,7 +25,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026from=edit\u0026op=attach",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026from=edit\u0026op=attach",
             "icon": "i-upload",
             "id": "attach.add",
             "label": "From this computer",
@@ -33,7 +33,7 @@
           },
           {
             "enabled": true,
-            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e26\u0026for=attach\u0026from=edit\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e27\u0026for=attach\u0026from=edit\u0026k=notes\u0026uid=5c81-77aa-0d64",
             "icon": "i-file",
             "id": "attach.files",
             "label": "From Files",
@@ -44,7 +44,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026from=edit\u0026op=attach",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026from=edit\u0026op=attach",
         "icon": "i-clip",
         "id": "attach.add",
         "label": "Attach",
@@ -261,6 +261,13 @@
             "value": "aa10-77bc-0e31"
           },
           {
+            "colour": "#3f6e8c",
+            "label": "Согласовать обложку",
+            "meta": "task · 4 Aug",
+            "selected": false,
+            "value": "bb22-6e1a-0c44"
+          },
+          {
             "colour": "#6b4e7a",
             "label": "Про дорогу до дачи",
             "meta": "note · 3 Aug",
@@ -342,7 +349,7 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "e26"
+              "value": "e27"
             },
             {
               "add": null,
@@ -468,7 +475,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026from=edit\u0026op=attach",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026from=edit\u0026op=attach",
             "icon": "i-upload",
             "id": "attach.add",
             "label": "From this computer",
@@ -476,7 +483,7 @@
           },
           {
             "enabled": true,
-            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e26\u0026for=attach\u0026from=edit\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e27\u0026for=attach\u0026from=edit\u0026k=notes\u0026uid=5c81-77aa-0d64",
             "icon": "i-file",
             "id": "attach.files",
             "label": "From Files",
@@ -487,7 +494,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026from=edit\u0026op=attach",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026from=edit\u0026op=attach",
         "icon": "i-clip",
         "id": "attach.add",
         "label": "Attach",
@@ -497,7 +504,7 @@
         "csrf": "csrf",
         "danger": true,
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e26",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e27",
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete note",
@@ -512,7 +519,7 @@
             "csrf": "csrf",
             "danger": true,
             "enabled": true,
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026from=edit\u0026n=0\u0026op=detach",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026from=edit\u0026n=0\u0026op=detach",
             "icon": "i-trash",
             "id": "attach.remove",
             "label": "Remove",
@@ -532,7 +539,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026from=edit\u0026n=1\u0026op=detach",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026from=edit\u0026n=1\u0026op=detach",
             "icon": "i-trash",
             "id": "attach.remove",
             "label": "Remove link, keep the file",

@@ -155,8 +155,13 @@ func foot(actions []view.Action, keys string) []w.SheetFootPart {
 		case a.Method == "POST":
 			b := bind.Submit(a)
 			b.To = a.Href
-			if !a.Enabled {
+			switch {
+			case !a.Enabled:
 				b.State, b.Reason = w.ButtonDisabled, string(a.Reason)
+			case a.Waits:
+				// Save while «where» is not chosen (s-notes-34): the
+				// browser does not send the form without it.
+				b.State, b.Reason = w.ButtonWaits, string(a.Reason)
 			}
 			out = append(out, b)
 			if a.Primary && keys != "" {

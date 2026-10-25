@@ -20,6 +20,7 @@ import (
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
@@ -3724,6 +3725,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	if markDone {
 		back = doneBack(c, uid, r.FormValue("from"))
 	}
+	// A task marked done stays where it was in a list answered from what
+	// the session read before (Р-42): kept, until the collection is read
+	// again.
+	if markDone && c.spec.kind == view.KindTask && !wasDone && taskDone(sent) {
+		c.sess.NoteTicked(c.conn.ID, c.col.Path, uid, s.now())
+	}
 	// A task that became done closes its open subtasks with it (the owner's
 	// decision of 12.10.2026, А9 of the audit of 11.10.2026): nobody is
 	// asked, and only what could not be closed is said.
@@ -4034,10 +4041,9 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 }
 
 // getKindNew: as a sheet, the target collection stated; as a page, the empty
-// edit form of the kind (C-5.4). From a combined view (?pick=1) there is no
-// target to open a form for, so without the fragment header the sheet is the
-// page: the choice is its options' links, as U-8 asks of a page without
-// scripts.
+// edit form of the kind (C-5.4). From a combined view (?pick=1) nothing is
+// chosen: the quick sheet where «where» waits, as a fragment and as the page
+// — its form posts the choice, as U-8 asks of a page without scripts.
 func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string) {
 	c, ok := s.openCollection(w, r, kind, false)
 	if !ok {
@@ -4049,10 +4055,18 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 	}
 	pick := r.URL.Query().Get("pick") != ""
 	switch {
-	case render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet:
-		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.newSheet(c, pick), nil)
 	case pick:
-		s.writePage(w, r, http.StatusOK, s.newSheet(c, true))
+		// Nothing chosen in a combined view: the quick sheet with its
+		// fields, Save waiting for «where» (s-notes-34; Typecase's note
+		// 128 p. 1).
+		sheet := s.quickSheet(c, editState{values: s.quickValues(c, r), isNew: true, readAt: s.now()}, true)
+		if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
+			_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
+			return
+		}
+		s.writePage(w, r, http.StatusOK, sheet)
+	case render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet:
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.newSheet(c, false), nil)
 	default:
 		values := s.newFormValues(c)
 		carried(c, r, values)
@@ -4083,8 +4097,8 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 // getKindQuickEntry is the way in from the shell, where no collection is known
 // (U-6.16). It opens the sheet on the collection a record of this kind was
 // last created in — the person's own last choice, not a guess. When there is
-// none, or it is gone or read-only now, the sheet asks where first and shows
-// no fields: filling in a form with nowhere to put it helps nobody.
+// none, or it is gone or read-only now, the sheet shows its fields with
+// «where» not chosen, and Save waits for the choice (s-notes-34).
 func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind string) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -4118,27 +4132,20 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 			}
 		}
 	}
-	for _, conn := range blob.Connections {
-		for _, col := range blob.CollectionsOf(conn.ID) {
-			if !writable(col) {
-				continue
-			}
-			c, made := s.collectionOf(sess, spec, conn.ID, col.Path)
-			if !made {
-				continue
-			}
-			sheet := s.newSheet(c, true)
-			for i := range sheet.Target.Options {
-				sheet.Target.Options[i].ID += carriedQuery(r)
-			}
-			if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
-				_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
-				return
-			}
-			sheet.Under = s.underOf(r, back, "/app/"+kind)
-			s.writePage(w, r, http.StatusOK, sheet)
+	// Nothing remembered, or gone (s-notes-34; Typecase's note 128 p. 1):
+	// the same sheet, its fields at once, «where» not chosen yet and Save
+	// waiting for it; the form posts to the way in, which writes where
+	// the person chose.
+	if c, made := s.quickBase(sess, spec); made {
+		sheet := s.quickSheet(c, editState{values: s.quickValues(c, r), isNew: true, readAt: s.now()}, true)
+		if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
+			_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 			return
 		}
+		sheet.Under = s.underOf(r, back, "/app/"+kind)
+		s.cancelTo(r, back, sheet.Form.Actions, "record.cancel")
+		s.writePage(w, r, http.StatusOK, sheet)
+		return
 	}
 	// Nowhere to write (s-notes-6): no collection of the kind takes a
 	// record. The sheet says so by having no target, and offers the way out
@@ -4156,6 +4163,30 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 
+// quickBase is the collection the sheet where nothing is chosen yet stands
+// on — its fields, its options —, not where it writes: the one New of a
+// combined view would take (firstWritable).
+func (s *Server) quickBase(sess *session.Session, spec kindSpec) (*collectionCtx, bool) {
+	o, ok := firstWritable(s.catalogOf(sess), spec.kind)
+	if !ok {
+		return nil, false
+	}
+	return s.collectionOf(sess, spec, o.conn.ID, o.col.Path)
+}
+
+// quickValues are the quick sheet's fields as it opens: empty, an event's
+// reminder the one it is made for (s-notes-9), as the full form starts with
+// it (newEventValues) — saved as shown, it is written —, and what the sheet
+// was opened for (carried).
+func (s *Server) quickValues(c *collectionCtx, r *http.Request) formValues {
+	values := s.emptyValues(c)
+	if c.spec.kind == view.KindEvent {
+		values["reminder"] = []string{"-PT10M", ""}
+	}
+	carried(c, r, values)
+	return values
+}
+
 // getKindQuick is the quick sheet (U-6.16): where the record goes, and the few
 // fields without which it does not exist. The full creation form lives at
 // /new; this sheet supplements it and does not replace it.
@@ -4168,14 +4199,7 @@ func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind strin
 		s.notFound(w, r)
 		return
 	}
-	values := s.emptyValues(c)
-	if c.spec.kind == view.KindEvent {
-		// The reminder an event is made for (s-notes-9), as the full form
-		// starts with it (newEventValues): saved as shown, it is written.
-		values["reminder"] = []string{"-PT10M", ""}
-	}
-	carried(c, r, values)
-	sheet := s.quickSheet(c, editState{values: values, isNew: true, readAt: s.now()})
+	sheet := s.quickSheet(c, editState{values: s.quickValues(c, r), isNew: true, readAt: s.now()}, false)
 	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
@@ -4197,6 +4221,40 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 	if !ok {
 		return
 	}
+	s.quickSave(w, r, c)
+}
+
+// postKindQuickEntry is the quick sheet sent from its way in, where nothing
+// was chosen before (s-notes-34): it writes where «into» says. Without a
+// choice the browser does not send it; one sent anyway gets the sheet back
+// with what was typed. «Open the card» needs no choice: the full form has its
+// own.
+func (s *Server) postKindQuickEntry(w http.ResponseWriter, r *http.Request, kind string) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	spec, known := recordKinds[kind]
+	if !known {
+		s.notFound(w, r)
+		return
+	}
+	c, made := s.quickBase(sess, spec)
+	if !made {
+		s.notFound(w, r)
+		return
+	}
+	if r.FormValue("into") == "" && r.URL.Query().Get("op") != "open" {
+		sheet := s.quickSheet(c, editState{values: s.submittedValues(c, r), isNew: true, readAt: s.now()}, true)
+		s.writePage(w, r, http.StatusUnprocessableEntity, sheet)
+		return
+	}
+	s.quickSave(w, r, c)
+}
+
+// quickSave saves what the quick sheet sent into the collection chosen
+// under «Where», or carries it into the full form (op=open).
+func (s *Server) quickSave(w http.ResponseWriter, r *http.Request, c *collectionCtx) {
 	// The collection chosen under «Where» (s-notes-5), when it is not the
 	// one of the address.
 	if into := r.FormValue("into"); into != "" && into != moveValue(c.conn.ID, c.col.Path) {
@@ -4290,8 +4348,12 @@ func quickTaskDay(kind view.Kind, vals formValues) {
 // fields are the full form's own, by name (quickFields), and the form posts to
 // the sheet's address; "Open the card" posts to the same address with op=open,
 // so what was typed travels in the body and never in the address bar.
-func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
-	sheet := s.newSheet(c, false)
+//
+// pick is the sheet where nothing is chosen yet (s-notes-34): no collection
+// stands chosen, the form posts to the way in (/app/{kind}/quick) and Save
+// waits for the choice.
+func (s *Server) quickSheet(c *collectionCtx, st editState, pick bool) view.NewSheet {
+	sheet := s.newSheet(c, pick)
 	// «Where» is a field of the form (s-notes-5): the collection chosen in
 	// it is where Save writes, whatever the address it posts to.
 	sheet.Target.Field = "into"
@@ -4304,10 +4366,15 @@ func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 		}
 	}
 	quick := c.listPath() + "/new/quick"
+	save := view.Action{ID: "record.save", Label: text("Save " + c.spec.noun), Method: "POST", Primary: true, Enabled: !c.col.ReadOnly}
+	if pick {
+		quick = "/app/" + c.spec.segment + "/quick"
+		save.Waits, save.Reason = true, text("Choose the "+strings.ToLower(collectionWord[c.spec.kind])+" the "+c.spec.noun+" goes to.")
+	}
 	form.Action = s.route(quick)
 	form.Method = "POST"
 	form.Actions = []view.Action{
-		{ID: "record.save", Label: text("Save " + c.spec.noun), Method: "POST", Primary: true, Enabled: !c.col.ReadOnly},
+		save,
 		{ID: "record.open", Label: "Open the card", Icon: "i-expand", Href: s.route(quick + "?op=open"), Method: "POST", Enabled: true},
 		s.cancelAction(c, st),
 	}

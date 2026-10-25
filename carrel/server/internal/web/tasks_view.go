@@ -255,11 +255,3 @@ func taskEditSubtitle(c *collectionCtx, obj *model.Object) view.Runs {
 	}
 	return nil
 }
-
-// taskAttachHint is the line under the attachments of a task's panel
-// (s-tasks-1): up to the limit the file goes into the task, above it into
-// the attachment folder (S-20) — the limit is the instance's.
-func taskAttachHint(c *collectionCtx) view.Text {
-	return text("The same block events and notes have: up to " + sizeText(attachLimit(c.col)) +
-		" the file is written into the task itself, above that it goes to the attachments folder and the task keeps a link. Pasting and dropping work the same way.")
-}

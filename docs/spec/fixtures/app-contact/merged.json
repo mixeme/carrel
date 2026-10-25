@@ -31,7 +31,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e28",
+      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e29",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -41,7 +41,7 @@
   ],
   "avatar": {
     "colour": "#9a9280",
-    "href": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?size=thumb\u0026v=e28",
+    "href": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?size=thumb\u0026v=e29",
     "initials": "ЛВ"
   },
   "books": [],
@@ -140,7 +140,7 @@
       "title": "Merged."
     }
   ],
-  "photoHref": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?v=e28",
+  "photoHref": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?v=e29",
   "photoNote": "External photo link; editing is not available.",
   "print": {
     "range": "nextcloud · Архив",

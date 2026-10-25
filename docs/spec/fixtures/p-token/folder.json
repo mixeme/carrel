@@ -35,7 +35,7 @@
             "hint": "",
             "kind": "text",
             "label": "Filter this folder",
-            "name": "q",
+            "name": "filter",
             "options": [],
             "readOnly": false,
             "required": false,
@@ -62,6 +62,20 @@
         "modified": "",
         "name": "2026-07",
         "open": "/p/link-attachments-token?in=2026-07",
+        "selected": false,
+        "size": "",
+        "thumb": "",
+        "type": "folder",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/download?in=2026-08",
+        "icon": "i-file",
+        "isDir": true,
+        "menu": [],
+        "modified": "",
+        "name": "2026-08",
+        "open": "/p/link-attachments-token?in=2026-08",
         "selected": false,
         "size": "",
         "thumb": "",
@@ -125,7 +139,7 @@
         "upload": null
       }
     ],
-    "total": "5 items · 4.4 MB"
+    "total": "6 items · 4.4 MB"
   },
   "foot": [
     {

@@ -355,6 +355,17 @@ write(u'radicale-vps/proekty.ics', cal(u'Проекты', [
     u'LOCATION:Переговорная 1',
     u'ORGANIZER;CN=Михаил Енученко:mailto:mix@example.org',
     u'ATTENDEE;CN=Артём Белов;PARTSTAT=ACCEPTED:mailto:a.belov@example.org',
+    u'END:VEVENT',
+    # Хронология Анны, июль (s-contacts-7; записка Typecase 131): она
+    # приглашена и не ответила.
+    u'BEGIN:VEVENT',
+    u'UID:9c28-4a71-b305',
+    u'DTSTAMP:20260720T090000Z',
+    u'DTSTART;TZID=Europe/Moscow:20260729T150000',
+    u'DTEND;TZID=Europe/Moscow:20260729T160000',
+    u'SUMMARY:Ревью вёрстки сборника',
+    u'ORGANIZER;CN=Михаил Енученко:mailto:mix@example.org',
+    u'ATTENDEE;CN=Анна Ковалёва;PARTSTAT=NEEDS-ACTION:mailto:a.kovaleva@example.org',
     u'END:VEVENT']))
 
 duty_radicale = [
@@ -455,7 +466,13 @@ write(u'nextcloud-home/rabota-zadachi.ics', cal(u'Работа · задачи',
       todo(u'bb20-4c17-8a52', u'Ответить подрядчику по смете',
            due=u';VALUE=DATE:20260808', cats=[u'релиз'], percent=40) +
       todo(u'bb21-0fa8-3d66', u'Дописать раздел про кэш',
-           due=u';VALUE=DATE:20260814', cats=[u'релиз'], percent=70)))
+           due=u';VALUE=DATE:20260814', cats=[u'релиз'], percent=70) +
+      # Хронология Анны (s-contacts-6, -7, -33; записка Typecase 131): она
+      # организатор, задача выполнена 04.08 — «Работа 4», «Done 2».
+      todo(u'bb22-6e1a-0c44', u'Согласовать обложку',
+           due=u';VALUE=DATE:20260804', percent=100,
+           extra=[u'STATUS:COMPLETED', u'COMPLETED:20260804T150000Z',
+                  u'ORGANIZER;CN=Анна Ковалёва:mailto:a.kovaleva@example.org'])))
 
 
 # Заметки (VJOURNAL)

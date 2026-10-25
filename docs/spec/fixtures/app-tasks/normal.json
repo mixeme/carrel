@@ -688,7 +688,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -743,7 +743,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 7,
+            "count": 8,
             "detail": "",
             "feed": false,
             "href": "/app/tasks",
@@ -774,7 +774,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 3,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",

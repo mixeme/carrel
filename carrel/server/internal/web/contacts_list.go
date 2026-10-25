@@ -131,8 +131,7 @@ func (s *Server) listFilter(base string, q url.Values, filter string) *view.Form
 		}
 	}
 	rows = append(rows, view.FormRow{Name: "filter", Label: "Filter", Kind: view.InputText, Value: text(filter)})
-	f := s.plainForm(base, "GET", rows...)
-	return &f
+	return s.filterForm(base, filter, rows...)
 }
 
 // filterContacts keeps the cards whose name, phone, address or organisation

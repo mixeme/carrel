@@ -349,7 +349,7 @@ spec/fixtures/<screen>/<state>.json
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/p/{token}` | GET | токен | страница | `PublishedPage`; `?uid=` — запись списка внутри ссылки (страница ссылки на одну запись); `?q=` — фильтр по слову (у календаря — по всему календарю, у ссылки на диапазон — внутри него; у папки — по именам всей папки до среза); `?width=reading` — ширина чтения у заметки и текста; у папки `?in=` — папка в ней, `?file=` — страница её файла (`File`, Download — поток файла); сверх `CARREL_FILES_MAX_ENTRIES` режется только листинг страницы, с `Notice` «Showing 500 of 2 340.»; мёртвый секрет — `DeadLinkPage` |
+| `/p/{token}` | GET | токен | страница | `PublishedPage`; `?uid=` — запись списка внутри ссылки (страница ссылки на одну запись); `?filter=` — фильтр по слову (записка Typecase 129; крестик в поле со словом — тот же адрес без него) (у календаря — по всему календарю, у ссылки на диапазон — внутри него; у папки — по именам всей папки до среза); `?width=reading` — ширина чтения у заметки и текста; у папки `?in=` — папка в ней, `?file=` — страница её файла (`File`, Download — поток файла); сверх `CARREL_FILES_MAX_ENTRIES` режется только листинг страницы, с `Notice` «Showing 500 of 2 340.»; мёртвый секрет — `DeadLinkPage` |
 | `/p/{token}/download` | GET | токен | файл, поток | — ; архив папки (`?in=` — вложенной) — целиком, без потолка (решение владельца 24.10.2026) |
 | `/p/{token}/{имя}` | GET | токен | файл | адрес строки подписки: календарь `{имя}.ics`, книга `{имя}.vcf` — тот же файл, что Download; имя — slug названия ссылки; другое имя — 404 |
 | `/p/{token}/file/{path…}` | GET | токен | поток | — |
@@ -400,7 +400,7 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже, с теми же параметрами: `?print=1`, `?open=`, `?filter=`, `?compact=`, у календаря окно и роды |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?filter=` — «Filter by word» по всему календарю (s-agenda-31), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `calendar`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом, `Doc.Bar`); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у события и задачи `?op=apart` с `day` — «Try again» вопроса перед записью серии (AskSheet, C-6); у всех `etag` показанной версии; POST правки серии, оставляющей встречи без дня, отвечает листом вопроса `AskSheet` (C-6; s-agenda-22…-24) поверх правки с набранным; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же; правка записи, которую удалили на сервере (Р-67), хранится, как отказанная, и POST ведёт на `…/conflict` |
@@ -427,7 +427,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; тетрадь — `.zip` из `.md` каждой заметки; с `?uid=` — одна запись (S-19); когда в файл не попали бы записи, которых Carrel не разобрал, — экран коллекции с уведомлением и действием `collection.export.without` («Export without them», тот же адрес с `&without=1`) |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage`; у контакта `?uid=` — форма с выбранной фотографией (`…/new/photo-preview`): её кадр в `Photo`, скрытое поле `uid`, Save создаёт карточку под этим UID с фотографией; UID, чьего кадра сеанс не держит, не берётся, а форма с таким `uid` не сохраняется молча без фотографии. У события, задачи и заметки — вложения до записи (s-agenda-15, S-20): POST с `?op=` — `attach` (multipart: вся форма и файл `file`, кнопка Attach шлёт саму форму — `Action.Submits`), `pickfile` (форма; редирект в дерево Files `?for=attach&new=`), `attachfile&file=` (файл Files), `detach&n=` (форма); первый шаг выдаёт UID записи, файлы ждут под ним с набранным, ответ — `/new?uid=` (форма как набрана, файлы в `Attach`, скрытое `uid`). До Save ничего не пишется: внутрь записи — до порога вместе, больший файл с этого компьютера не берётся (запись сначала сохраняют), больший файл Files — ссылка; Save создаёт запись под этим UID с файлами |
 | `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; «куда» — поле формы `into` (`Target.Field`, Value «подключение/коллекция»; s-notes-5): POST пишет в выбранную там коллекцию; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
-| `/app/{kind}/quick` | GET | вход | лист | `NewSheet` — вход из шапки: на последней использованной коллекции рода, а пока её нет — только выбор «куда» |
+| `/app/{kind}/quick` | GET, POST | вход | лист, редирект | `NewSheet` — вход из шапки: на последней использованной коллекции рода (редирект на её лист), а пока её нет или она пропала — тот же лист с полями сразу, «куда» без выбора (радио `into` с `required`), Save ждёт выбора (`Action.Waits`; s-notes-34, записка Typecase 128 п. 1); так же New сведённого вида (`…/new?pick=1`). POST — сохранить в выбранную под `into` коллекцию, как POST листа коллекции; `?op=open` — набранное в полную форму; без `into` — тот же лист с набранным, 422 |
 
 **Печать — тот же адрес с `?print=1`** (решение 4 плана клиента, U-10;
 имя и значение — `render.PrintParam`, `render.PrintValue`): тот же маршрут и
@@ -919,6 +919,7 @@ type Details struct {
     Title      Text
     Subtitle   Text          // под заголовком: «nextcloud · Записи»
     Date       Text          // у заметки — день и время, когда они есть, моноширинно после Subtitle (s-notes-1), как NoteMeta.Date; у прочих пусто
+    Late       Text          // у задачи: насколько просрочена, «overdue by 3 days» — бейджем тревоги после Subtitle, как на карточке (s-tasks-20, записка Typecase 130 п. 2); у прочих пусто
     TextFrom   *FieldFrom    // у панели связанной заметки: коллекция её текста после Subtitle «in 2 notebooks · text from» (s-notes-1); nil — выбора не было
     Avatar     *Avatar       // контакт: фото или инициалы; у других родов nil
     Preview    *Thumb        // файл папки (s-files-1): миниатюра или значок типа; у записей nil
@@ -927,7 +928,6 @@ type Details struct {
     Rendered   []Block       // текст заметки, разобранный (C-6.9): абзацы, задачи с отметками
     Attendees  []AttendeeRow // люди записи календаря — события, задачи, заметки (Р3) —, только чтение
     Attach     []AttachRow
-    AttachHint Text          // строка под вложениями задачи (s-tasks-1): «The same block events and notes have: up to 2 MB the file is written into the task itself, above that it goes to the attachments folder and the task keeps a link. …» — порог, настройка экземпляра (S-20); у прочих родов пусто, ключа нет
     Related    []TimelineRow
     Foreign    []Field       // контакт: «Kept as the server sent them»
     ForeignShow *Action      // «Show 3» — кнопка, раскрывающая Foreign; без сценариев — тот же список с этой панелью и ?foreign=1; nil — чужих свойств нет или они раскрыты
@@ -1094,7 +1094,8 @@ type ListBar struct {
     Filter   Text     // фильтр по уже загруженному, без второго опроса
     // Фильтр без сценариев — форма GET на адрес списка: поле filter и скрытые
     // поля запроса (task, sort, tag); nil — у списка фильтра нет. Со сценариями
-    // клиент просеивает загруженное сам
+    // клиент просеивает загруженное сам. Поле со словом несёт крестик —
+    // Form.Clear (записка Typecase 129)
     FilterForm *Form
     Loaded   int
     Total    *int
@@ -2799,6 +2800,7 @@ type Form struct { // общая форма: поля, ошибки, кнопк�
     Action  string
     Method  string
     Target  string // зона C-7.2, которую меняет ответ-фрагмент на форму, как у Action: sheet у формы листа, rail у формы рейла; пусто — переход
+    Clear   string // у формы фильтра со словом: тот же адрес без слова, со скрытыми полями формы — крестик в конце поля (записка Typecase 129 п. 2); пусто — у пустого фильтра и у прочих форм
     Sets    []FieldSet
     Errors  []FieldError
     Actions []Action
@@ -3793,7 +3795,7 @@ type PublishedPage struct { // записка Typecase 122: строка спи�
     AttachNote  Text
     File     *PublishedFile
     Folder   *PublishedFolder
-    Filter   *Form           // «Filter by word» (у папки «Filter this folder»): GET ?q=, у вложенной папки in скрытым; nil — фильтровать нечего (s-publish-35)
+    Filter   *Form           // «Filter by word» (у папки «Filter this folder»): GET ?filter=, у вложенной папки in скрытым; nil — фильтровать нечего (s-publish-35)
     Empty    Text            // «No events this week.», «This book is empty.», «This folder is empty.»
     Strip    *PublishedStrip // строка адреса: подписка календаря, адрес книги — когда скачивание разрешено; диск папки — всегда
     Width    []Action        // заметка и текст: «Full width» · «Reading width» ссылками (?width=reading), On — нынешняя

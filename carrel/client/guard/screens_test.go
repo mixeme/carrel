@@ -78,7 +78,7 @@ func loadLib() (lib, error) {
 		return l, err
 	}
 	l.tcMock = string(raw)
-	if l.shape, err = shape.Parse(l.mock); err != nil {
+	if l.shape, err = shape.Parse(unbanded(l.mock)); err != nil {
 		return l, err
 	}
 	css, err := typecase.CSS()
@@ -373,7 +373,7 @@ func frameFindings(l lib, all []screens.Screen) []string {
 			}
 			if w, ok := waits(scr, key(path)); ok {
 				out = append(out, classFindings(l, at+" on "+fx, root.Render())...)
-				if l.shape.Check(frame, root.Render()) == nil {
+				if l.shape.Check(frame, unbanded(root.Render())) == nil {
 					out = append(out, fmt.Sprintf("%s on %s: waits (U-5.5 #%d) and matches its frame", at, fx, w.Row))
 				}
 				continue
@@ -389,11 +389,45 @@ func frameFindings(l lib, all []screens.Screen) []string {
 	return out
 }
 
+// unbanded is HTML — a frame's, a screen's — as the check reads it
+// (Typecase's note 127 p. 3): the band of notices (tc-notices, display:
+// contents) is its children in its place, so that messages drawn in the page
+// and in a band compare alike. Typecase's shape does not read it so yet
+// (to-typecase task 238); then this goes.
+func unbanded(html string) string {
+	const open = `<div class="tc-notices"`
+	for {
+		i := strings.Index(html, open)
+		if i < 0 {
+			return html
+		}
+		start := i + strings.Index(html[i:], ">") + 1
+		depth, j := 1, start
+		for {
+			o, c := strings.Index(html[j:], "<div"), strings.Index(html[j:], "</div>")
+			if c < 0 {
+				return html
+			}
+			if o >= 0 && o < c {
+				depth, j = depth+1, j+o+len("<div")
+				continue
+			}
+			if depth--; depth == 0 {
+				j += c
+				break
+			}
+			j += c + len("</div>")
+		}
+		html = html[:i] + html[start:j] + html[j+len("</div>"):]
+	}
+}
+
 // htmlFindings holds a screen's printed HTML against its frame: the frame's
 // make-up (shape.Check) — a sheet drawn over nothing, by its sheet
 // (sheetFindings) — and no class Typecase's CSS does not have.
 func htmlFindings(l lib, frame, at, html, forms string) []string {
 	var out []string
+	html = unbanded(html)
 	switch {
 	case strings.Contains(html, overlayOpen):
 		out = sheetFindings(l, frame, at, html)

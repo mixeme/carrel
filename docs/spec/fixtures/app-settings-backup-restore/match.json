@@ -626,7 +626,7 @@
       "collections": "4 / 4",
       "id": "r-run",
       "job": "Личное на домашний диск",
-      "size": "4.2 KB",
+      "size": "4.5 KB",
       "trigger": "by hand",
       "verified": [
         {
@@ -730,7 +730,7 @@
       "keep": 8,
       "lastNote": [
         {
-          "text": "4.2 KB · "
+          "text": "4.5 KB · "
         },
         {
           "hint": "The archive was read back from the destination and the checksum matched",
@@ -1179,7 +1179,7 @@
         },
         {
           "colour": "#3f6e8c",
-          "count": 4,
+          "count": 5,
           "danger": false,
           "into": {
             "add": null,
@@ -1249,7 +1249,7 @@
         },
         {
           "colour": "#9a9280",
-          "count": 1,
+          "count": 2,
           "danger": true,
           "into": {
             "add": null,
@@ -1522,7 +1522,7 @@
     },
     "subtitle": [
       {
-        "text": "Job «Личное на домашний диск» · manifest read · 4 collections · 10 records · "
+        "text": "Job «Личное на домашний диск» · manifest read · 4 collections · 12 records · "
       },
       {
         "mark": "mono",

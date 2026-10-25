@@ -132,7 +132,7 @@ func Screen(p *view.EventPage) w.Shell {
 			lines = append(lines, bind.WithFrom([]w.SecItemPart{
 				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
 				w.Text(" "),
-				w.Dim{Parts: []w.Inline{w.Text(lead + string(r.Kind))}},
+				w.Dim{Parts: []w.Inline{w.Text(about(r))}},
 			}, r.From))
 		}
 		main = append(main, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
@@ -266,4 +266,14 @@ func keptRubric(linked bool) string {
 		return "Where this event is kept"
 	}
 	return "The same event in other calendars"
+}
+
+// about is what a related record is, and its day where it has one: «· event
+// · 11 Aug» (s-tasks-20; Typecase's note 130 p. 3), as a note's panel says
+// it.
+func about(r view.TimelineRow) string {
+	if r.When == "" {
+		return lead + string(r.Kind)
+	}
+	return lead + string(r.Kind) + " " + lead + string(r.When)
 }

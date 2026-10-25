@@ -565,6 +565,7 @@
       "label": "Show 3",
       "method": "GET"
     },
+    "late": "",
     "linkedRecord": true,
     "menu": [
       {

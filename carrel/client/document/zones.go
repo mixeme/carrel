@@ -17,7 +17,7 @@ import (
 // their buttons submit after the zone's widget (Typecase's note 124: the
 // layer puts each in place of the page's form of that ID).
 func init() {
-	bind.Zones = []string{render.TargetMain, render.TargetRail, render.TargetDetails, render.TargetSheet, render.TargetPoll, render.TargetQueue}
+	bind.Zones = []string{render.TargetMain, render.TargetRail, render.TargetDetails, render.TargetSheet, render.TargetNotices, render.TargetPoll, render.TargetQueue}
 }
 
 // Zoned is a screen's root with the zones of C-7.2 named, as the library's
@@ -99,8 +99,92 @@ var EmptyPoll = PollZone(widget.Runbar{Closed: true}, nil)
 // (Zoned), the poll's bar the zone poll (withPoll), the queue of transfers
 // the zone queue (withQueue).
 func Root(scr screens.Screen, model any) screens.Root {
-	return withQueue(withPoll(Zoned(scr.Draw(model)), model))
+	return withQueue(withPoll(withNotices(Zoned(scr.Draw(model)), model), model))
 }
+
+// withNotices is a page's root with its band of notices the zone notices:
+// the band the screen draws, or, where none stands, its empty place after
+// the head and the bar of the list — the frames draw no empty band
+// (Typecase's note 127 p. 1); the poll's bar comes after it. Under a sheet
+// the page's band is named and none is added: the sheet is what is open.
+func withNotices(root screens.Root, model any) screens.Root {
+	shell, ok := root.(widget.Shell)
+	if !ok {
+		return root
+	}
+	if over, ok := shell.Body.(widget.Overlay); ok {
+		if items, named := namedNotices(over.Body.Main.Items); named {
+			over.Body.Main.Items = items
+			shell.Body = over
+		}
+		return shell
+	}
+	body, ok := shell.Body.(widget.ShellBody)
+	if !ok || !zone.Carries(model, render.TargetNotices) {
+		return root
+	}
+	items, named := namedNotices(body.Main.Items)
+	if !named {
+		lead := 0
+		for i, it := range items {
+			switch it.(type) {
+			case widget.Head, widget.Bar:
+				if lead == i {
+					lead = i + 1
+				}
+			}
+		}
+		items = append(items[:lead], append([]widget.MainPart{EmptyNotices}, items[lead:]...)...)
+	}
+	body.Main.Items = items
+	shell.Body = body
+	return shell
+}
+
+// namedNotices are a page's parts, a copy, with its band of notices named
+// the zone notices, and whether the page has one.
+func namedNotices(parts []widget.MainPart) ([]widget.MainPart, bool) {
+	items := append([]widget.MainPart(nil), parts...)
+	for i, it := range items {
+		if n, ok := it.(widget.Notices); ok {
+			items[i] = NoticesZone(n)
+			return items, true
+		}
+	}
+	return items, false
+}
+
+// BandOf is the band of notices a page's root carries (Root), and whether it
+// has one: a page whose screen draws its notices in a dialog has none.
+func BandOf(root screens.Root) (widget.Notices, bool) {
+	shell, ok := root.(widget.Shell)
+	if !ok {
+		return widget.Notices{}, false
+	}
+	var items []widget.MainPart
+	switch body := shell.Body.(type) {
+	case widget.ShellBody:
+		items = body.Main.Items
+	case widget.Overlay:
+		items = body.Body.Main.Items
+	}
+	for _, it := range items {
+		if n, ok := it.(widget.Notices); ok {
+			return n, true
+		}
+	}
+	return widget.Notices{}, false
+}
+
+// NoticesZone is a band of notices as the zone notices.
+func NoticesZone(n widget.Notices) widget.Notices {
+	n.Zone = render.TargetNotices
+	return n
+}
+
+// EmptyNotices is the zone of the notices on a page that has none: hidden
+// and empty, the place an answer's notices go.
+var EmptyNotices = widget.Notices{Zone: render.TargetNotices}
 
 // withQueue is a page's root with its queue of transfers the zone queue:
 // the queue the screen draws on the page, waiting hidden while an upload
@@ -176,7 +260,7 @@ func withPoll(root screens.Root, model any) screens.Root {
 		lead := 0
 		for i, it := range items {
 			switch it.(type) {
-			case widget.Head, widget.Bar, widget.Msg, widget.MainDiag:
+			case widget.Head, widget.Bar, widget.Notices, widget.Msg, widget.MainDiag:
 				if lead == i {
 					lead = i + 1
 				}

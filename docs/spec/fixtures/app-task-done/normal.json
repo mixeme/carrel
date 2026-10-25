@@ -418,7 +418,7 @@
             "id": "tasks.done",
             "label": "Done",
             "method": "GET",
-            "tally": "1"
+            "tally": "2"
           },
           {
             "enabled": true,
@@ -426,7 +426,7 @@
             "id": "tasks.all",
             "label": "All",
             "method": "GET",
-            "tally": "6"
+            "tally": "7"
           },
           {
             "enabled": true,
@@ -1035,7 +1035,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 3,
+            "count": 4,
             "fromCache": false,
             "message": "",
             "retry": null,
@@ -1046,7 +1046,7 @@
         "stream": "/app/search/progress/t-task",
         "summary": [
           {
-            "text": "Polled 2 of 2 sources · 6 tasks"
+            "text": "Polled 2 of 2 sources · 7 tasks"
           }
         ],
         "taskID": "t-task"
@@ -1104,7 +1104,7 @@
             "method": "GET"
           },
           {
-            "count": 9,
+            "count": 10,
             "enabled": true,
             "href": "/app/calendar",
             "icon": "i-cal",
@@ -1159,7 +1159,7 @@
             "rows": [
               {
                 "colour": "",
-                "count": 7,
+                "count": 8,
                 "detail": "",
                 "feed": false,
                 "href": "/app/tasks",
@@ -1190,7 +1190,7 @@
               },
               {
                 "colour": "#3f6e8c",
-                "count": 3,
+                "count": 4,
                 "detail": "",
                 "feed": false,
                 "href": "/app/tasks/a-nc-home/rabota",
@@ -1289,7 +1289,7 @@
           "target": "rail"
         }
       },
-      "subtitle": "2 of 3 lists · nextcloud · 6 tasks",
+      "subtitle": "2 of 3 lists · nextcloud · 7 tasks",
       "title": "Combined list",
       "top": {
         "lock": null,

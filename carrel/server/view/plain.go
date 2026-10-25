@@ -140,7 +140,7 @@ type PublishedPage struct {
 	File        *PublishedFile        `json:"file"`
 	Folder      *PublishedFolder      `json:"folder"`
 	// Filter — «Filter by word» у книги, календаря, задач и тетради, «Filter
-	// this folder» у папки: форма GET ?q= (у вложенной папки in скрытым);
+	// this folder» у папки: форма GET ?filter= (у вложенной папки in скрытым);
 	// nil — пустой список, фильтровать нечего (s-publish-35)
 	Filter *Form `json:"filter"`
 	// Empty — слова пустого: «No events this week.», «This book is empty.»,

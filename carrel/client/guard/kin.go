@@ -117,6 +117,13 @@ func unseen(v reflect.Value) bool {
 // decision of 01.10.2026, U-15.2, 3).
 var menus = map[string]bool{"Drop": true, "TopDrop": true}
 
+// bands are the widgets that stand for their parts in their place: the band
+// of notices (Typecase's Notices, display: contents) is its messages and
+// their technical blocks, as the frames draw them in the page or in a band
+// alike (Typecase's note 127 p. 3) — the frame check reads it so too
+// (unbanded).
+var bands = map[string]bool{"Notices": true}
+
 func skeleton(v reflect.Value, pkg string) *Node {
 	t := v.Type()
 	if menus[t.Name()] {
@@ -150,9 +157,20 @@ func skeleton(v reflect.Value, pkg string) *Node {
 			}
 		case reflect.Slice, reflect.Array:
 			for j := range fv.Len() {
-				if w := deref(fv.Index(j)); isWidget(w, pkg) {
-					n.part(f.Name, skeleton(w, pkg))
+				w := deref(fv.Index(j))
+				if !isWidget(w, pkg) {
+					continue
 				}
+				if bands[w.Type().Name()] {
+					items := w.FieldByName("Items")
+					for k := range items.Len() {
+						if it := deref(items.Index(k)); isWidget(it, pkg) {
+							n.part(f.Name, skeleton(it, pkg))
+						}
+					}
+					continue
+				}
+				n.part(f.Name, skeleton(w, pkg))
 			}
 		}
 	}

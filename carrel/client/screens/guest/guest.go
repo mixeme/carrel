@@ -85,8 +85,8 @@ func stage(f *view.PublishedFile) bool {
 }
 
 // banner is the head of the page: the mark, what the visitor may do, and
-// at the end the width and the downloads — pushed right as one line; a
-// picture's download alone (s-publish-9). A calendar's or a book's page,
+// at the end the width and the downloads — pushed right as one line, one
+// button too (Typecase's note 126 p. 8). A calendar's or a book's page,
 // with its address under the banner, has more room between its pieces.
 func banner(p *view.PublishedPage) w.Banner {
 	b := w.Banner{Logo: logo, Wide: p.Strip != nil && p.Folder == nil}
@@ -107,17 +107,7 @@ func banner(p *view.PublishedPage) w.Banner {
 	for _, a := range p.Actions {
 		items = append(items, bind.Button(a, ""))
 	}
-	switch {
-	case len(items) == 0:
-	case p.File != nil && p.File.Preview == view.PreviewImage:
-		var push []w.PushPart
-		for _, it := range items {
-			if btn, ok := it.(w.Button); ok {
-				push = append(push, btn)
-			}
-		}
-		b.End = w.Push{Items: push}
-	default:
+	if len(items) > 0 {
 		b.End = w.Line{Gap: w.LineGap6, Place: w.Pushed, Items: items}
 	}
 	return b
@@ -194,6 +184,8 @@ func filter(f view.Form) w.Filter {
 			out.Query.Placeholder, out.Waiting = string(r.Label), true
 		}
 	}
+	// The cross while it holds a word (Typecase's note 129 p. 2).
+	out.Clear = f.Clear
 	return out
 }
 

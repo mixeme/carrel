@@ -406,9 +406,10 @@ func TestNoticeDiagAndEmpty(t *testing.T) {
 	msg := w.Msg{Parts: []w.MsgPart{w.Strong("Контакты is unavailable"), w.Text(" "), w.Text("Nothing comes from it."), w.Text(" "),
 		w.Button{Label: "Try again", Small: true, Href: "/k"}}, Tone: w.MsgAlert}
 	same(t, "a notice, its button small", bind.Notice(n, w.MsgSpacePage), msg)
-	same(t, "the notices, each with its technical block", bind.Notices([]view.Notice{n, {Body: "Saved."}}, w.MsgSpacePage), []w.MainPart{
+	same(t, "the notices, one band, each with its technical block", bind.Notices([]view.Notice{n, {Body: "Saved."}}, w.MsgSpacePage), []w.MainPart{w.Notices{Items: []w.NoticesPart{
 		msg, w.MainDiag{Diag: w.Diag{Text: "REPORT /a/\nnextcloud\ndav: HTTP 503"}}, w.Msg{Parts: []w.MsgPart{w.Text("Saved.")}},
-	})
+	}}})
+	same(t, "no band without notices", bind.Notices(nil, w.MsgSpacePage), []w.MainPart(nil))
 	empty := view.Notice{Title: "This book is empty.", Body: "Add a contact, or import a file of them.", Actions: []view.Action{
 		{ID: "record.new", Label: "New contact", Icon: "i-plus", Href: "/new", Method: "GET", Enabled: true, Primary: true},
 		{ID: "collection.import", Label: "Import", Href: "/import", Method: "GET", Enabled: true},

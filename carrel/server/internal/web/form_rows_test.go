@@ -355,13 +355,14 @@ func frameSheetFields(t *testing.T, id string) []string {
 	return out
 }
 
-// sheetFields are the rows a sheet shows: not its hidden fields, nor the
-// numbers of «Custom…» while a step is chosen (FormRow.Hidden, s-agenda-19).
+// sheetFields are the rows a sheet draws: not its hidden fields; the numbers
+// of «Custom…» are, hidden in the same row while a step is chosen
+// (FormRow.Hidden; s-notes-9, -10, Typecase's note 128 p. 2).
 func sheetFields(f view.Form) []string {
 	out := []string{}
 	for _, set := range f.Sets {
 		for _, row := range set.Rows {
-			if row.Kind != view.InputHidden && !row.Hidden {
+			if row.Kind != view.InputHidden {
 				ph := string(row.Placeholder)
 				if row.Kind == view.InputSelect {
 					ph = "" // a list's placeholder is its search (C-6.8)

@@ -259,7 +259,7 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	nested := strings.Join(more, "/")
 	// «Filter this folder» sifts the whole listing by name, before the cut
 	// (s-publish-31; note 122 p. 10).
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	q := strings.TrimSpace(r.URL.Query().Get("filter"))
 	if len(entries) > 0 || q != "" {
 		page.Filter = s.publicFilter(here, "Filter this folder", q, nested)
 	}

@@ -1389,7 +1389,7 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	// combined calendar's, s-agenda-1).
 	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
 	// With a word: what is found in the whole calendar, by day (s-agenda-31).
-	found := app.listPath(t, "calendar", "lichnyj") + "?q=" + url.QueryEscape("синк")
+	found := app.listPath(t, "calendar", "lichnyj") + "?filter=" + url.QueryEscape("синк")
 	app.compare(t, "app-agenda/filtered.json", app.h.do(get(found, app.sess)))
 }
 
@@ -1733,12 +1733,38 @@ func TestFixtureCombinedTasks(t *testing.T) {
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	page := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// «Продлить страховку» just marked done from its row (Р-42; s-tasks-1,
+	// -20 and Typecase's note 130 p. 1): it stays under Open, crossed, until
+	// the list is read anew.
+	tickMockupTask(t, app, page, "Продлить страховку")
 	open := app.listPath(t, "tasks", "dela") + "/aa11-2d09-5f84"
 	app.compare(t, "app-tasks-all/normal.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
 	// The panel of a task of one list (s-tasks-20, Typecase's note 125
 	// p. 9): «Отправить документы в МФЦ».
 	one := app.listPath(t, "tasks", "dela") + "/aa10-77bc-0e31"
 	app.compare(t, "app-tasks-all/panel-one.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(one), app.sess)))
+}
+
+// tickMockupTask marks a task done from its row of the list, as a person
+// ticks it.
+func tickMockupTask(t *testing.T, app *mockupApp, page view.TasksPage, summary string) {
+	t.Helper()
+	for _, g := range page.Groups {
+		for _, r := range g.Rows {
+			if string(r.Summary) != summary || r.Tick == nil {
+				continue
+			}
+			u, err := url.Parse(r.Tick.Href)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if rec := app.h.do(postForm(u.EscapedPath(), app.sess, u.Query())); rec.Code != http.StatusSeeOther {
+				t.Fatalf("tick %s: %d %s", summary, rec.Code, rec.Body.String())
+			}
+			return
+		}
+	}
+	t.Fatalf("no row %s to tick", summary)
 }
 
 // C-14.2: one notebook — its own frame since Typecase 80d1319 (s-notes-31,
@@ -2669,6 +2695,24 @@ func TestFixtureQuickSheets(t *testing.T) {
 			app.compare(t, "app-quick/"+one.state+".json", app.h.do(get(rec.Header().Get("Location"), app.sess)))
 		})
 	}
+	// Nothing remembered (s-notes-34): the fields at once, «Write into»
+	// not chosen, Save waiting for it; the form posts to the way in.
+	t.Run("pick", func(t *testing.T) {
+		editBlob(t, app.h, app.sess, func(blob *sealed.Blob) {
+			blob.LastUsed = slices.DeleteFunc(blob.LastUsed, func(s sealed.Selection) bool { return s.Kind == view.KindNote })
+		})
+		rec := app.h.do(get("/app/notes/quick?back="+url.QueryEscape(under["calendar"]()), app.sess))
+		sheet := decode[view.NewSheet](t, rec)
+		if sheet.Target.Chosen != "" || sheet.Form.Action != "/app/notes/quick" || !sheet.Form.Actions[0].Waits {
+			t.Fatalf("the sheet with nothing remembered: chosen %q, action %q, save %+v", sheet.Target.Chosen, sheet.Form.Action, sheet.Form.Actions[0])
+		}
+		app.compare(t, "app-quick/pick.json", rec)
+		// Sent anyway without a choice: the sheet again, what was typed in it.
+		again := app.h.do(postForm("/app/notes/quick", app.sess, url.Values{"description": {"Позвонить в МФЦ"}}))
+		if again.Code != http.StatusUnprocessableEntity {
+			t.Fatalf("the sheet sent without «where»: %d", again.Code)
+		}
+	})
 	// Nowhere to write (s-notes-6): every notebook read-only — last, as
 	// it takes them away from what comes after.
 	t.Run("nowhere", func(t *testing.T) {

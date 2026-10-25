@@ -81,7 +81,7 @@ func TestPublicCalendarIsTheFrames(t *testing.T) {
 	sub := frameOne(t, frameSub, whole, "the days under the title")[1]
 	foot := frameOne(t, frameFoot, whole, "foot")[1]
 	arrows := regexp.MustCompile(`(?s)<a class="tc-btn" href="[^"]*" title="([^"]*)">(?:<svg.*?</svg>)?</a><a class="tc-btn" href="[^"]*">([^<]*)</a><a class="tc-btn" href="[^"]*" title="([^"]*)">(?:<svg.*?</svg>)?</a>`).FindStringSubmatch(whole)
-	filter := frameOne(t, regexp.MustCompile(`name="q" placeholder="([^"]*)"`), whole, "filter")[1]
+	filter := frameOne(t, regexp.MustCompile(`name="filter" placeholder="([^"]*)"`), whole, "filter")[1]
 	empty := frameOne(t, frameEmptyLine, mockupFrame(t, "s-publish-25"), "empty week")[1]
 	if arrows == nil || strings.Contains(whole, "tc-main__strip") || strings.Contains(whole, "Download") {
 		t.Fatal("s-publish-24 changed: read it again")
@@ -96,7 +96,7 @@ func TestPublicCalendarIsTheFrames(t *testing.T) {
 		page.Range.Presets[1].Label != view.Text(arrows[2]) || page.Range.Presets[2].Label != view.Text(arrows[3]) {
 		t.Errorf("range = %+v, the frame %q", page.Range, arrows[1:])
 	}
-	if page.Filter == nil || formRow(*page.Filter, "q") == nil || string(formRow(*page.Filter, "q").Label) != filter || page.Filter.Method != "GET" {
+	if page.Filter == nil || formRow(*page.Filter, "filter") == nil || string(formRow(*page.Filter, "filter").Label) != filter || page.Filter.Method != "GET" {
 		t.Errorf("filter = %+v, the frame «%s» by q", page.Filter, filter)
 	}
 	repeats := false
@@ -169,7 +169,7 @@ func TestPublicRecordIsTheFrames(t *testing.T) {
 	}
 
 	task := mockupFrame(t, "s-publish-27")
-	if !regexp.MustCompile(`<div class="tc-head__sub">Due [A-Z][a-z]+day, \d+ [A-Z][a-z]+ \d{4} · `).MatchString(task) || !strings.Contains(task, `<dt>Status</dt><dd>In process <span class="tc-mono">40%</span></dd>`) {
+	if !regexp.MustCompile(`<div class="tc-head__sub">Due [A-Z][a-z]+day, \d+ [A-Z][a-z]+ \d{4}</div>`).MatchString(task) || !strings.Contains(task, `<dt>Status</dt><dd>Needs action</dd>`) {
 		t.Fatal("s-publish-27 changed: read it again")
 	}
 	tk := publicPage(t, f, publishWith(t, f, f.publishHref("tasks", pubTasks, "t1"), "title", "location", "description"))
@@ -235,7 +235,7 @@ func TestPublicListsAreTheFrames(t *testing.T) {
 	if none := publicPage(t, f, book.Contacts[0].Rows[0].Href+"x").Notices; noticeTitled(none, "No longer there.") == nil {
 		t.Errorf("a row of nothing: %+v", none)
 	}
-	filtered := publicPage(t, f, publishWith(t, f, f.publishHref("contacts", searchBook, ""))+"?q=nobody")
+	filtered := publicPage(t, f, publishWith(t, f, f.publishHref("contacts", searchBook, ""))+"?filter=nobody")
 	if len(filtered.Contacts) != 0 || filtered.Filter == nil {
 		t.Errorf("filtered = %+v", filtered.Contacts)
 	}
@@ -255,7 +255,7 @@ func TestPublicListsAreTheFrames(t *testing.T) {
 func TestPublicFolderIsTheFrames(t *testing.T) {
 	frame := mockupFrame(t, "s-publish-12")
 	total := frameOne(t, regexp.MustCompile(`<span class="tc-dim">· ([^<]*)</span>`), frame, "total")[1]
-	filter := frameOne(t, regexp.MustCompile(`name="q" placeholder="([^"]*)"`), frame, "filter")[1]
+	filter := frameOne(t, regexp.MustCompile(`name="filter" placeholder="([^"]*)"`), frame, "filter")[1]
 	label := frameOne(t, regexp.MustCompile(`<span class="tc-dim--muted tc-dim--t12">([^<]*)</span>`), frame, "strip label")[1]
 	note := frameOne(t, regexp.MustCompile(`<span class="tc-dim tc-dim--t11">([^<]*)</span>`), frame, "strip note")[1]
 	var mount []string
@@ -279,7 +279,7 @@ func TestPublicFolderIsTheFrames(t *testing.T) {
 			t.Errorf("a file's row %+v", r)
 		}
 	}
-	if page.Filter == nil || string(formRow(*page.Filter, "q").Label) != filter {
+	if page.Filter == nil || string(formRow(*page.Filter, "filter").Label) != filter {
 		t.Errorf("filter = %+v, the frame %q", page.Filter, filter)
 	}
 	var got []string
@@ -348,22 +348,22 @@ func TestPublicTroubleIsTheFrames(t *testing.T) {
 }
 
 // s-agenda-31, -17, s-publish-39: «Filter by word» first in the calendar's
-// bar, a GET by q; with a word what is found in the whole calendar stands by
+// bar, a GET by filter (note 129); with a word what is found in the whole calendar stands by
 // day, a series once, the week and ← Today → gone, the line under the title
 // counting what was found.
 func TestCalendarFilterIsTheFrames(t *testing.T) {
 	owner := mockupFrame(t, "s-agenda-31")
 	sub := frameOne(t, regexp.MustCompile(`· (\d+) events with «([^»]*)»`), owner, "found")
-	if !strings.Contains(mockupFrame(t, "s-agenda-17"), `<input class="tc-q" type="search" name="q" placeholder="Filter by word"`) || sub == nil {
+	if !strings.Contains(mockupFrame(t, "s-agenda-17"), `<input class="tc-q" type="search" name="filter" placeholder="Filter by word"`) || sub == nil {
 		t.Fatal("s-agenda-17, -31 changed: read them again")
 	}
 	f := pub122(t)
 	cal := "/app/calendar/" + f.id + "/" + url.PathEscape(searchWork)
 	week := decode[view.AgendaPage](t, f.h.do(get(cal+"?from=2026-08-10", f.sess)))
-	if week.Bar.FilterForm == nil || formRow(*week.Bar.FilterForm, "q") == nil {
+	if week.Bar.FilterForm == nil || formRow(*week.Bar.FilterForm, "filter") == nil {
 		t.Fatalf("the week's filter = %+v", week.Bar.FilterForm)
 	}
-	found := decode[view.AgendaPage](t, f.h.do(get(cal+"?q=sync", f.sess)))
+	found := decode[view.AgendaPage](t, f.h.do(get(cal+"?filter=sync", f.sess)))
 	if found.Bar.Range != nil || len(found.Days) != 1 || len(found.Days[0].Rows) != 1 || !strings.HasSuffix(runsText(found.Subtitle), " · 1 event with «sync»") {
 		t.Errorf("found = %+v, subtitle %q", found.Days, runsText(found.Subtitle))
 	}
@@ -373,7 +373,7 @@ func TestCalendarFilterIsTheFrames(t *testing.T) {
 		t.Fatal("s-publish-39 changed: read it again")
 	}
 	link := pubWhole(t, f)
-	p := publicPage(t, f, link+"?q=papers")
+	p := publicPage(t, f, link+"?filter=papers")
 	if p.Range != nil || runsText(p.Lede) != "1 event with «papers»" || len(p.Days) != 1 || !strings.HasPrefix(p.Days[0].Rows[0].Href, link+"?uid=") {
 		t.Errorf("the guest's found = %+v, lede %q", p.Days, runsText(p.Lede))
 	}

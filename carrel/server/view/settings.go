@@ -6,7 +6,11 @@ type Form struct {
 	Method string `json:"method"`
 	// Target — зона C-7.2, которую меняет ответ-фрагмент на эту форму, как
 	// у Action: sheet у формы листа, rail у формы рейла; пусто — переход
-	Target  string       `json:"target,omitempty"`
+	Target string `json:"target,omitempty"`
+	// Clear — у формы фильтра со словом: тот же адрес без слова, со скрытыми
+	// полями формы — крестик в конце поля (записка Typecase 129 п. 2); пусто
+	// — у пустого фильтра и у прочих форм
+	Clear   string       `json:"clear,omitempty"`
 	Sets    []FieldSet   `json:"sets"`
 	Errors  []FieldError `json:"errors"`
 	Actions []Action     `json:"actions"`

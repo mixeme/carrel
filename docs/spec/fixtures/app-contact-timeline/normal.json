@@ -119,7 +119,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 1,
+    "loaded": 3,
     "range": null,
     "segments": [
       {
@@ -129,7 +129,7 @@
         "label": "All",
         "method": "GET",
         "on": true,
-        "tally": "1"
+        "tally": "3"
       },
       {
         "enabled": true,
@@ -137,7 +137,7 @@
         "id": "timeline.kind.event",
         "label": "Events",
         "method": "GET",
-        "tally": "1"
+        "tally": "2"
       },
       {
         "enabled": true,
@@ -145,7 +145,7 @@
         "id": "timeline.kind.task",
         "label": "Tasks",
         "method": "GET",
-        "tally": "0"
+        "tally": "1"
       },
       {
         "enabled": true,
@@ -297,6 +297,7 @@
     ],
     "foreign": [],
     "foreignShow": null,
+    "late": "",
     "menu": [
       {
         "enabled": true,
@@ -356,7 +357,7 @@
   "details": null,
   "groups": [
     {
-      "count": 1,
+      "count": 2,
       "rows": [
         {
           "colour": "#4a6b52",
@@ -368,9 +369,37 @@
           "title": "Синк-ап по релизу",
           "when": "10 Aug",
           "why": "attendee · accepted"
+        },
+        {
+          "colour": "#3f6e8c",
+          "from": null,
+          "href": "/app/tasks/a-nc-home/rabota/bb22-6e1a-0c44",
+          "kind": "task",
+          "stamp": "nextcloud · Работа",
+          "target": "details",
+          "title": "Согласовать обложку",
+          "when": "4 Aug",
+          "why": "organiser"
         }
       ],
       "rubric": "August 2026"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "colour": "#6b4e7a",
+          "from": null,
+          "href": "/app/calendar/a-rad-vps/proekty/9c28-4a71-b305",
+          "kind": "event",
+          "stamp": "radicale · vps · Проекты",
+          "target": "details",
+          "title": "Ревью вёрстки сборника",
+          "when": "29 Jul",
+          "why": "attendee"
+        }
+      ],
+      "rubric": "July 2026"
     }
   ],
   "linked": {
@@ -455,12 +484,12 @@
       },
       {
         "colour": "#3f6e8c",
-        "count": 0,
+        "count": 1,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "nextcloud · Работа",
-        "state": "empty"
+        "state": "done"
       },
       {
         "colour": "#4a6b52",
@@ -491,12 +520,12 @@
       },
       {
         "colour": "#6b4e7a",
-        "count": 0,
+        "count": 1,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "radicale · vps · Проекты",
-        "state": "empty"
+        "state": "done"
       },
       {
         "colour": "#8c6239",
@@ -666,7 +695,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 1,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/calendar",
@@ -690,7 +719,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 0,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/rabota",
@@ -714,7 +743,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 0,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-rad-vps/proekty",

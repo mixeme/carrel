@@ -216,8 +216,14 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 		if err != nil {
 			return "", false
 		}
-		// The messages: a notice's technical block (MainDiag, under it on the
-		// page) prints nothing alone in the library — the zone carries none.
+		// The band as the page carries it: each message and its technical
+		// block under it, the zone itself (Typecase's note 127 p. 4) — empty
+		// and hidden with none.
+		if band, ok := document.BandOf(document.Root(scr, model)); ok {
+			return band.Render() + forms(scr, model), true
+		}
+		// A screen that draws its notices in its dialog: the messages, as
+		// they stand there; a technical block prints nothing alone.
 		out := ""
 		for _, n := range ns.([]view.Notice) {
 			space := scr.Notices

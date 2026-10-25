@@ -89,7 +89,7 @@ func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
 // which the frames, drawn without the live layer, do not have — shell-1
 // alone draws the place.
 func unzoned(root string) string {
-	for _, empty := range []string{document.EmptyDetails.Render(), document.EmptySheet.Render(), document.EmptyPoll.Render()} {
+	for _, empty := range []string{document.EmptyDetails.Render(), document.EmptySheet.Render(), document.EmptyPoll.Render(), document.EmptyNotices.Render()} {
 		root = strings.ReplaceAll(root, empty, "")
 	}
 	return root

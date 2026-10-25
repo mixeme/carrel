@@ -458,7 +458,6 @@ func (s *Server) linkedDetails(ctx context.Context, sess *session.Session, spec 
 	// card does (s-contacts-1, -33; Typecase's note 125 p. 2). The source
 	// and the deletion are a copy's.
 	out.Source, out.DeleteNote = view.SourceBlock{}, ""
-	out.AttachHint = "" // the line of Attach, which a linked record has not (s-tasks-1)
 	out.Books = s.keptRows(lr, func(q question) []recValue { return q.shownValues() })
 	actions, menu := s.linkedActions(sess, spec.segment, lr.base.ref.UID, g.ID)
 	// The panel's Edit is a small button, as its neighbours (s-contacts-1).

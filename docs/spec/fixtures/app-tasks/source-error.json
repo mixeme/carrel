@@ -364,7 +364,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 6,
+            "count": 7,
             "detail": "",
             "feed": false,
             "href": "/app/tasks",
@@ -395,7 +395,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",

@@ -58,6 +58,8 @@ func TestFixturePublicPages(t *testing.T) {
 	sftp.Grow(docs+"carrel/server-log-august.txt", 14600<<10)
 	sftp.SetModified(docs+"carrel/server-log-august.txt", mockupDayAt(t, "2026-08-11 09:00"))
 	sftp.SeedFolder(docs + "carrel/черновики/")
+	// The note's recording beside its board (s-publish-8: two files).
+	attachMockupRecording(t, app)
 	// The folder in the folder holds six, as s-publish-30 draws it.
 	sftp.SeedFile(docs+"carrel/attachments/2026-07/whiteboard-2.jpg", "\xff\xd8\xff")
 	sftp.SetModified(docs+"carrel/attachments/2026-07/whiteboard-2.jpg", mockupDayAt(t, "2026-07-14 16:22"))
@@ -77,8 +79,8 @@ func TestFixturePublicPages(t *testing.T) {
 		// (s-publish-7).
 		{"addressbook", record("komanda", "contacts", "komanda", "", "lives", "30", "name", "on", "phones", "on", "emails", "on", "download", "on")},
 		{"whole", whole}, // s-publish-24
-		{"whole-empty", whole + "?from=2027-01-04"},           // s-publish-25: a week with nothing in it
-		{"filtered", whole + "?q=" + url.QueryEscape("синк")}, // s-publish-39
+		{"whole-empty", whole + "?from=2027-01-04"},                // s-publish-25: a week with nothing in it
+		{"filtered", whole + "?filter=" + url.QueryEscape("синк")}, // s-publish-39
 		// One event with all but the files and the tags, its .ics
 		// (s-publish-16); one contact with the phones, the addresses and the
 		// note, no .vcf (-26); one task with Location and Description (-27).

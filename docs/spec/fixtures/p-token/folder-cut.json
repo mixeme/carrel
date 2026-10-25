@@ -35,7 +35,7 @@
             "hint": "",
             "kind": "text",
             "label": "Filter this folder",
-            "name": "q",
+            "name": "filter",
             "options": [],
             "readOnly": false,
             "required": false,

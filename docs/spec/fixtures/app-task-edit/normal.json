@@ -782,6 +782,13 @@
                 "value": "bb20-4c17-8a52"
               },
               {
+                "colour": "#3f6e8c",
+                "label": "Согласовать обложку",
+                "meta": "task · 4 Aug",
+                "selected": false,
+                "value": "bb22-6e1a-0c44"
+              },
+              {
                 "colour": "#4a6b52",
                 "label": "Продлить страховку",
                 "meta": "task",
@@ -1023,7 +1030,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",

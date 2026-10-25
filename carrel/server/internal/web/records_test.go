@@ -377,9 +377,10 @@ func TestEditContactWritesOnlyWhatChanged(t *testing.T) {
 }
 
 // U-6.16: the way in from the shell. The create menu points at it; the first
-// time there is nothing to go by, so the sheet asks where and shows no fields;
-// once a record has been made somewhere, the next one starts there — the
-// person's own last choice, remembered, not guessed.
+// time there is nothing to go by, so the sheet shows its fields with «where»
+// not chosen and Save waiting for it (s-notes-34); once a record has been
+// made somewhere, the next one starts there — the person's own last choice,
+// remembered, not guessed.
 func TestQuickSheetFromTheShellRemembersWhereRecordsGo(t *testing.T) {
 	f := contactsFixture(t, false)
 	entry := "/app/contacts/quick"
@@ -389,20 +390,22 @@ func TestQuickSheetFromTheShellRemembersWhereRecordsGo(t *testing.T) {
 		t.Errorf("the create menu points at %q, want %q", href, entry)
 	}
 
-	// Nothing made yet: the sheet asks where, and carries no fields.
+	// Nothing made yet: the fields at once, nothing chosen, Save waiting;
+	// the form posts to the way in.
 	sheet := decode[view.NewSheet](t, f.h.do(get(entry, f.sess)))
-	if len(sheet.Form.Sets) != 0 {
-		t.Errorf("the sheet offered fields before a collection was chosen: %+v", sheet.Form)
+	if len(sheet.Form.Sets) == 0 || sheet.Form.Action != entry || sheet.Target.Chosen != "" || !sheet.Form.Actions[0].Waits {
+		t.Errorf("the sheet with nothing chosen yet: %+v", sheet.Form)
 	}
 	if len(sheet.Target.Options) == 0 {
 		t.Fatalf("the sheet asks where, but offers nothing: %+v", sheet.Target)
 	}
 
-	// Make one through the sheet of the collection itself.
+	// Make one through it, «where» chosen.
 	quick := f.path("contacts") + "/new/quick"
-	form := formFields(decode[view.NewSheet](t, f.h.do(get(quick, f.sess))).Form)
+	form := formFields(sheet.Form)
 	form.Set("fn", "Ada Lovelace")
-	if resp := f.h.do(postForm(quick, f.sess, form)); resp.Code != http.StatusSeeOther {
+	form.Set("into", sheet.Target.Options[0].Value)
+	if resp := f.h.do(postForm(entry, f.sess, form)); resp.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
 	}
 
