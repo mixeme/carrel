@@ -106,7 +106,9 @@ func where(t view.TargetPicker) w.Drop {
 		case o.ReadOnly:
 			it.Reason, it.Trail = string(o.Reason), w.Badge{Label: readOnly, Place: w.Pushed}
 		case t.Field != "":
-			it.Name, it.Value = t.Field, o.Value
+			// Nothing chosen yet (s-notes-34): the browser does not send
+			// the sheet without a choice, without a script too.
+			it.Name, it.Value, it.Required = t.Field, o.Value, t.Chosen == ""
 		default:
 			it.Href = o.ID
 		}

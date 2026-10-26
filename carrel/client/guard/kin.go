@@ -120,8 +120,8 @@ var menus = map[string]bool{"Drop": true, "TopDrop": true}
 // bands are the widgets that stand for their parts in their place: the band
 // of notices (Typecase's Notices, display: contents) is its messages and
 // their technical blocks, as the frames draw them in the page or in a band
-// alike (Typecase's note 127 p. 3) — the frame check reads it so too
-// (unbanded).
+// alike (Typecase's note 127 p. 3) — Typecase's shape reads it so too
+// (note 133 p. 1).
 var bands = map[string]bool{"Notices": true}
 
 func skeleton(v reflect.Value, pkg string) *Node {
