@@ -4,6 +4,38 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.2 — 2026-10-26
+
+Server `v0.2.373`, Typecase `fb5a005`. Typecase's note 135: **a restore
+asks about what is already here**, a folder's own delete sheet in Files,
+the words of the passing screens.
+
+### Added
+
+- **The restore's question** (s-backup-8, -20): `RestoreMatch.Existing`
+  as an own-line field over the bar — its label, Skip them · Replace them
+  · Import as copies a segment of links, what the one on does under it.
+- **How many are already here** in «What will happen» (s-backup-8): «· 2
+  already here» after the row's words, plain — after an alarm only the
+  words are alarmed (`RestoreRow.Here`).
+- **«What is pointing at it now»** on the delete sheet of Files
+  (s-files-27): `FileOpSheet.References` after the alarm; the guard knows
+  s-files-27.
+
+### Changed
+
+- The restore's note under the table keeps the frame's spacing
+  (`MsgFlushSides`); the folder panel's links note is the frame's words.
+
+### Removed
+
+- The report's note under its table (`RestoreReport.Note` is gone).
+
+### Not yet
+
+- The drop sheets of Typecase's note 136 (s-io-1, -20 … -23, and a
+  folder's of note 60): the client draws no drop sheet yet.
+
 ## v0.11.1 — 2026-10-26
 
 Server `v0.2.372`, Typecase `d7ba208`. **The keys' sheet** (U-7, account-6;
