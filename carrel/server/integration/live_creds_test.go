@@ -2,7 +2,37 @@
 
 package integration
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+// The owner keeps the file in myenv/carrel/ beside the checkout
+// (D:\Local\Git\myenv beside D:\Local\Git\carrel, 26.10.2026): it is found
+// from the sources of a checkout and of a worktree under .claude/worktrees
+// alike, and nowhere is an empty answer.
+func TestCredentialsFileIsFoundAboveTheSources(t *testing.T) {
+	git := t.TempDir()
+	want := filepath.Join(git, "myenv", "carrel", "credentials.txt")
+	if err := os.MkdirAll(filepath.Dir(want), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(want, []byte("# Baikal\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, src := range []string{
+		filepath.Join(git, "carrel", "carrel", "server", "integration"),
+		filepath.Join(git, "carrel", ".claude", "worktrees", "creds", "carrel", "carrel", "server", "integration"),
+	} {
+		if got := findCredentials(src); got != want {
+			t.Errorf("from %s: %q, want %q", src, got, want)
+		}
+	}
+	if got := findCredentials(filepath.Join(t.TempDir(), "carrel", "carrel", "server", "integration")); got != "" {
+		t.Errorf("without the file: %q, want nothing", got)
+	}
+}
 
 // The credentials file is edited by hand, and a live test that cannot find its
 // server skips itself — silently, which is the danger. This holds the shapes
