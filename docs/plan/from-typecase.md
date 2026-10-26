@@ -4653,6 +4653,37 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
       "#keys", Key: "?", ScriptOnly: true}` (`account-5`, `desktop-2`).
       Таблицы U-7 без сценария нет нигде — клавиши без него и не работают.
 
+Записка 135 от 26.10.2026 (Typecase `485aad5`; без задачи — проход по
+Р-77). **Последний коммит Typecase, который она описывает, — `485aad5`**
+(559 кадров).
+
+135. **Пояснения проходных экранов и вопрос восстановления.**
+   1. **Слова плашек** — короче, без механики и без чисел, которые серверу
+      пришлось бы считать, а человеку они не нужны (решение владельца 26.10,
+      дописано в Р-77). Изменились 52 кадра; слова — как в кадрах, по ним.
+      Главное: удаление — «Carrel keeps no copy: this cannot be undone.»
+      (запись, файлы, коллекция, папка хранилища, письма); отмена
+      участникам — «nextcloud may send its attendees a cancellation.», без
+      числа участников; вложения в записях — «Notes or events may hold them
+      as attachments: Carrel does not look through the records.»; у мастера
+      импорта ушли плашки шагов 1 и 2 (кроме заметок без front matter и
+      отказов); слияние, письма со ссылками, ключи, пароли, davloom, ящики —
+      по одной короткой фразе.
+   2. **Удаление папки** — новый фрагмент `s-files-27`: «Delete folder»,
+      «Everything in it goes too. …», без числа (обход дерева). Так же
+      начинается плашка `s-profile-19`. Опубликованный файл лист удаления
+      называет блоком «What is pointing at it now», как у коллекции.
+   3. **Восстановление спрашивает «уже есть», как импорт** (Р-63, владелец
+      26.10): поле над таблицей — «5 records of the archive are already here
+      and differ», сегмент Skip them (по умолчанию) · Replace them · Import as
+      copies (`?existing=skip|replace|copy`), подсказка как у импорта
+      (`s-backup-8`; у `s-backup-20` без числа — сравнивается при
+      восстановлении). Строки — «· 3 already here». Отчёт `s-backup-18` —
+      «141 records created · 5 already here, skipped · 1 not restored»,
+      «… already here — skipped». Плашка — «Restoring is an import: records
+      made since the archive stay, nothing is deleted.» Прежнее «a colliding
+      UID gets a new one» — теперь ответ «Import as copies».
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
