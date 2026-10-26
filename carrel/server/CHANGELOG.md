@@ -17,6 +17,62 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.373 — 2026-10-26
+
+Typecase's note 135 (Typecase `fb5a005`): the words of the passing screens
+(Р-77), a restore that asks about what is already here, a folder's own
+delete sheet in Files.
+
+### Added
+
+- **What of the archive is already here and differs** (s-backup-8, -18,
+  -20; the owner's decision of 26.10.2026): `RestoreMatch.Existing`
+  (`ImportExisting`, always present, `null` when there is nothing to ask)
+  asks «2 records of the archive are already here and differ» — «Records of
+  the archive that are already here and differ» before an archive from this
+  computer is read — with Skip them (without an answer), Replace them,
+  Import as copies: GET links `/app/settings/backup/restore?existing=skip|replace|copy`,
+  the answer kept with the restore. `RestoreRow.Here` is how many of a
+  row's records are such; its `Will` without anything missing is «matched
+  by path». The restore skips them, overwrites them in place, or writes
+  them with a fresh UID; the report says «2 already here — skipped»
+  (`replaced`, `imported as copies`) in the row and «2 already here,
+  skipped» in the sums.
+- **`FileOpSheet.References`** (s-files-27): what points at what is
+  deleted — the attachment folder inside it, published links —, drawn as
+  «What is pointing at it now» after `Alert`. One folder deleted is «Delete
+  folder» with its path in `Subject`.
+
+### Changed
+
+- **The words of the frames** (Р-77): the delete sheets of a collection,
+  a record and files say «Carrel keeps no copy: this cannot be undone.» (a
+  folder's first «Everything in it goes too.»); a scheduling server «may
+  send the attendees of its meetings a cancellation» / «may send its
+  attendees a cancellation»; the archive line is «Last archived
+  ‹2026-08-14›; a restore makes a **new** calendar at a new address.» (no
+  archive, and none whole yet, keep their words — Typecase task 240). The
+  merge's warning has no title («The other record is deleted. This cannot
+  be undone.»), a refused delete is «Merged, but nothing was deleted:» /
+  «… not everything …». Import: no note on the first step except notes',
+  none on the preview. davloom, the deposited key's withdraw sheet (one
+  sentence), a reset, a published folder, a link's password, refusals to
+  create and rename a collection, a letter's links instead of
+  attachments: the frames' words.
+- **The restore's note** is «Restoring is an import: records made since
+  the archive stay, nothing is deleted.».
+
+### Removed
+
+- **`RestoreReport.Note`**: the report has no note under its table.
+
+### For consumers
+
+Draw `RestoreMatch.Existing` as an own-line field over the bar (its
+options a segment of links, the hint under it), `RestoreRow.Here` after
+`Will` as « · 2 already here», and `FileOpSheet.References` after `Alert`.
+Stop reading `RestoreReport.Note`.
+
 ## v0.2.372 — 2026-10-26
 
 Typecase's notes 126–132 (Typecase `a08489b`): paper for every kind, the
