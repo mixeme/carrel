@@ -6,7 +6,7 @@ entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/clien
 
 ## v0.11.0 — 2026-10-26
 
-Server `v0.2.372`, Typecase `a08489b`. **All the screens** (U-6.16,
+Server `v0.2.372`, Typecase `ff7397d`. **All the screens** (U-6.16,
 U-6.17): every address of C-5 is built (`CARREL_ACCEPTANCE=1` green).
 **Tagged:** `client-v0.11.0`.
 
@@ -37,8 +37,9 @@ U-6.17): every address of C-5 is built (`CARREL_ACCEPTANCE=1` green).
 
 ### Changed
 
-- The guard reads the notices' band through, in the frame check and in
-  kinship, as Typecase's note 127 p. 3 says the library will.
+- Kinship reads the notices' band through, as Typecase's shape does
+  (notes 127 p. 3, 133 p. 1); the quick sheet's «where» with nothing chosen
+  is required (`MenuItem.Required`).
 
 ## v0.10.0 — 2026-10-25
 
