@@ -1,0 +1,41 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "danger": true,
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?etag=\u0026go=1\u0026item=2026-07\u0026op=delete",
+      "id": "file.delete.confirm",
+      "label": "Delete",
+      "method": "POST",
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "id": "file.op.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "alert": [
+    {
+      "text": "Everything in it goes too. Carrel keeps no copy: this cannot be undone."
+    }
+  ],
+  "failure": null,
+  "form": null,
+  "items": [
+    "2026-07"
+  ],
+  "op": "delete",
+  "servers": [],
+  "subject": "Documents / carrel / attachments / 2026-07",
+  "target": null,
+  "title": "Delete folder",
+  "warning": [
+    {
+      "text": "Notes or events may hold files from it as attachments: Carrel does not look through the records."
+    }
+  ]
+}

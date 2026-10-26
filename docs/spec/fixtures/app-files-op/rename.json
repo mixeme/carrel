@@ -72,7 +72,7 @@
   "title": "Rename",
   "warning": [
     {
-      "text": "The name of a file is its address: a note or an event that keeps a link to it, and a published link, will not find it under the new name."
+      "text": "Notes, events and published links that point at it will not find it under the new name."
     }
   ]
 }

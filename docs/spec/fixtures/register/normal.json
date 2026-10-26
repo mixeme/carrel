@@ -34,6 +34,7 @@
             "add": null,
             "error": "",
             "extra": null,
+            "focus": true,
             "hint": "",
             "kind": "text",
             "label": "Login",
@@ -41,8 +42,7 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "",
-            "focus": true
+            "value": ""
           },
           {
             "add": null,
@@ -96,19 +96,19 @@
   "notices": [
     {
       "actions": [],
-      "body": "Your password is the only key to your own data. Nobody — including this server — can recover it for you.",
+      "body": "Nobody can recover this password, this server included.",
       "details": null,
       "role": "alert",
       "title": ""
     }
   ],
   "sent": false,
-  "title": "Create an account",
   "signIn": {
     "enabled": true,
     "href": "/login",
     "id": "register.login",
     "label": "Already have an account? Sign in",
     "method": "GET"
-  }
+  },
+  "title": "Create an account"
 }

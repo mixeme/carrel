@@ -418,7 +418,7 @@
   },
   "warning": {
     "actions": [],
-    "body": "The merge was written and 0 records deleted; Вера Лебедева refused, and the rest were not tried. Nothing is undone.",
+    "body": "Вера Лебедева refused, the rest were not tried.",
     "details": {
       "lines": [
         "nextcloud",
@@ -427,6 +427,6 @@
       "summary": "DELETE /alice/contacts/arhiv/e7c2-3b95-6a14.vcf"
     },
     "role": "alert",
-    "title": "Written, but not every other record was deleted."
+    "title": "Merged, but nothing was deleted:"
   }
 }

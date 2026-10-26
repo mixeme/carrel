@@ -166,11 +166,7 @@
     "kinds": [
       ".vcf"
     ],
-    "note": [
-      {
-        "text": "Nothing is written until the preview has been read: the next step counts what was parsed and names what failed."
-      }
-    ],
+    "note": [],
     "preview": null,
     "taken": []
   },

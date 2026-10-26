@@ -103,7 +103,7 @@
   "kind": "file",
   "link": "",
   "local": false,
-  "note": "The visitor gets the folder with everything inside it, read-only, and the same address mounts as a drive in Windows, macOS and Linux.",
+  "note": "The same address mounts as a read-only drive in Windows, macOS and Linux.",
   "target": "carrel · 1 file",
   "title": "Publish a folder",
   "under": {

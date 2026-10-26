@@ -307,14 +307,14 @@
   "fromName": "Михаил Енученко",
   "links": [
     {
-      "text": "One of these goes as a link, not as a file: a folder always goes as a link. The link can be revoked in "
+      "text": "The folder goes as a link; revoking it in "
     },
     {
       "mark": "strong",
       "text": "Published links"
     },
     {
-      "text": " — including for the people in this letter."
+      "text": " closes it for this letter too."
     }
   ],
   "notAsked": [],

@@ -445,9 +445,9 @@
   },
   "warning": {
     "actions": [],
-    "body": "The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. This cannot be undone from here.",
+    "body": "The other record is deleted. This cannot be undone.",
     "details": null,
     "role": "info",
-    "title": "One record is rewritten and 1 other deleted."
+    "title": ""
   }
 }

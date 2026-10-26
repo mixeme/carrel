@@ -323,11 +323,7 @@
     "kinds": [
       ".ics"
     ],
-    "note": [
-      {
-        "text": "A repeating event keeps its rule: the series is one record, not fifty-two."
-      }
-    ],
+    "note": [],
     "preview": null,
     "taken": []
   },

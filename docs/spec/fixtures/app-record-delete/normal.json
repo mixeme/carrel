@@ -27,7 +27,7 @@
       "what": "agenda-10-08.pdf"
     }
   ],
-  "cancels": "The event has 3 attendees, and nextcloud sends invitations itself: the server may tell them the meeting is cancelled.",
+  "cancels": "nextcloud may send its attendees a cancellation.",
   "form": {
     "action": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete",
     "actions": [],
@@ -707,5 +707,5 @@
     "taskEdit": null,
     "tasks": null
   },
-  "warning": "The event is deleted on nextcloud · Личный. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+  "warning": "Carrel keeps no copy: this cannot be undone."
 }

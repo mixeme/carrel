@@ -601,7 +601,7 @@
     "password": null,
     "subtitle": "An app password for one device, with its own key wrapper",
     "title": "Add device",
-    "warning": "The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered."
+    "warning": "Shown once and stored nowhere: lost, it cannot be recovered."
   },
   "enabled": true,
   "look": {
@@ -620,7 +620,7 @@
       "text": "not"
     },
     {
-      "text": " disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it."
+      "text": " disconnect devices; only revoking does."
     }
   ],
   "notices": [],

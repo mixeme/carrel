@@ -127,7 +127,7 @@ check("6b. названные правила введены заголовком
 # 7. Фикстуры разбираются и лежат по правилам имён
 states = {"folder-cut","book-empty","panel-one","whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","pick","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
-          "tiles","copy","elsewhere","rename","delete","attach","single","in-part","merged",
+          "tiles","copy","elsewhere","rename","delete","delete-folder","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",

@@ -23,7 +23,7 @@
   "explain": "This account may sign in and read, but nextcloud would not let it create here. The server does not say why — no such right for the user, or a password issued read-only; whoever runs the server can tell.",
   "failure": {
     "actions": [],
-    "body": "The server would not make it. Nothing was created, and the form is as you left it.",
+    "body": "The server would not make it.",
     "details": {
       "lines": [
         "[create]  MKCALENDAR /alice/calendars/poezdki/ → 403",

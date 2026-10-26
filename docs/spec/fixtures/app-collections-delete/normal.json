@@ -20,21 +20,21 @@
   ],
   "archive": [
     {
-      "text": "Last time it was in an archive: "
+      "text": "Last archived "
     },
     {
       "mark": "mono",
       "text": "2026-08-16"
     },
     {
-      "text": ". Restoring brings the records back into a "
+      "text": "; a restore makes a "
     },
     {
       "mark": "strong",
       "text": "new"
     },
     {
-      "text": " collection — not into this one, and not to this address."
+      "text": " collection at a new address."
     }
   ],
   "export": {
@@ -2218,17 +2218,10 @@
   },
   "warning": [
     {
-      "text": "The calendar and all "
+      "text": "Carrel keeps no copy: this cannot be undone."
     },
     {
-      "mark": "strong",
-      "text": "4"
-    },
-    {
-      "text": " events in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
-    },
-    {
-      "text": " nextcloud may tell the attendees of its meetings that they are cancelled."
+      "text": " nextcloud may send the attendees of its meetings a cancellation."
     }
   ]
 }

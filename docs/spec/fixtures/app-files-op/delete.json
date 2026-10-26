@@ -20,11 +20,7 @@
   ],
   "alert": [
     {
-      "mark": "strong",
-      "text": "3"
-    },
-    {
-      "text": " files, 3.2 MB, are deleted on sftpgo · vps. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+      "text": "Carrel keeps no copy: this cannot be undone."
     }
   ],
   "failure": null,
@@ -41,7 +37,7 @@
   "title": "Delete 3 items",
   "warning": [
     {
-      "text": "Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting."
+      "text": "Notes or events may hold them as attachments: Carrel does not look through the records."
     }
   ]
 }

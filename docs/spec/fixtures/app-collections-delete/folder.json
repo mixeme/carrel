@@ -20,21 +20,21 @@
   ],
   "archive": [
     {
-      "text": "Last time it was in an archive: "
+      "text": "Last archived "
     },
     {
       "mark": "mono",
       "text": "2026-08-14"
     },
     {
-      "text": ". Restoring brings the files back into a "
+      "text": "; a restore makes a "
     },
     {
       "mark": "strong",
       "text": "new"
     },
     {
-      "text": " folder — not into this one, and not to this address."
+      "text": " folder at a new address."
     }
   ],
   "export": {
@@ -2218,14 +2218,7 @@
   },
   "warning": [
     {
-      "text": "The folder and all "
-    },
-    {
-      "mark": "strong",
-      "text": "1"
-    },
-    {
-      "text": " file in it are deleted on sftpgo · vps. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+      "text": "Everything in it goes too. Carrel keeps no copy: this cannot be undone."
     }
   ]
 }

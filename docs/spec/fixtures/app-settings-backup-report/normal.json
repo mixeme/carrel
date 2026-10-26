@@ -989,14 +989,7 @@
     "match": null,
     "note": [
       {
-        "text": "Restoring "
-      },
-      {
-        "mark": "strong",
-        "text": "creates"
-      },
-      {
-        "text": " records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes."
+        "text": "Restoring is an import: records made since the archive stay, nothing is deleted."
       }
     ],
     "open": true,
@@ -1009,14 +1002,13 @@
         "method": "GET",
         "primary": true
       },
-      "note": "Nothing on the server was deleted or overwritten.",
       "rows": [
         {
           "colour": "#4a6b52",
-          "created": 1,
+          "created": 2,
           "happened": [
             {
-              "text": "1 missing record created"
+              "text": "2 missing records created · 2 already here — skipped"
             }
           ],
           "into": "nextcloud · Личный",
@@ -1047,7 +1039,7 @@
           "name": "radicale · vps / Проекты"
         }
       ],
-      "subtitle": "3 collections · 2 records created · 1 not restored",
+      "subtitle": "3 collections · 3 records created · 2 already here, skipped · 1 not restored",
       "title": "Restored from 2026-08-10"
     },
     "source": {

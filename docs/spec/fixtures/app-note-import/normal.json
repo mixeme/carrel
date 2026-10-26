@@ -251,14 +251,7 @@
     "many": true,
     "note": [
       {
-        "text": "Front matter is read when present: title, date, tags, UID and "
-      },
-      {
-        "mark": "mono",
-        "text": "X-"
-      },
-      {
-        "text": "properties exported earlier. A file without it becomes a note dated by its own timestamp."
+        "text": "A file without front matter is dated by its own timestamp."
       }
     ],
     "preview": {

@@ -34,17 +34,17 @@
             "add": null,
             "error": "",
             "extra": null,
+            "focus": true,
             "hint": "",
             "kind": "text",
             "label": "Login",
+            "mono": true,
             "name": "login",
             "options": [],
+            "placeholder": "a-z 0-9 . _ -",
             "readOnly": false,
             "required": true,
-            "value": "",
-            "placeholder": "a-z 0-9 . _ -",
-            "focus": true,
-            "mono": true
+            "value": ""
           },
           {
             "add": null,
@@ -53,13 +53,13 @@
             "hint": "",
             "kind": "email",
             "label": "Email",
+            "labelAside": "(optional)",
             "name": "email",
             "options": [],
+            "placeholder": "—",
             "readOnly": false,
             "required": false,
-            "value": "",
-            "labelAside": "(optional)",
-            "placeholder": "—"
+            "value": ""
           },
           {
             "add": null,
@@ -100,7 +100,7 @@
   "notices": [
     {
       "actions": [],
-      "body": "Your password is the only key to your own data. Nobody — including this server — can recover it for you.",
+      "body": "Nobody can recover this password, this server included.",
       "details": null,
       "role": "alert",
       "title": ""

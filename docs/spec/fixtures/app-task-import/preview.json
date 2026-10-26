@@ -261,11 +261,7 @@
     "kinds": [
       ".ics"
     ],
-    "note": [
-      {
-        "text": "STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done."
-      }
-    ],
+    "note": [],
     "preview": null,
     "taken": []
   },

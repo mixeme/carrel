@@ -219,7 +219,7 @@
       "text": "not"
     },
     {
-      "text": " disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it."
+      "text": " disconnect devices; only revoking does."
     }
   ],
   "notices": [],

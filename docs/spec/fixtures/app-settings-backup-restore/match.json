@@ -996,6 +996,34 @@
     ],
     "fromHint": "One archive, one of three. The other two stay empty until you switch.",
     "match": {
+      "existing": {
+        "hint": "They stay as they are here; the archive's version is not written.",
+        "note": "2 records of the archive are already here and differ",
+        "options": [
+          {
+            "enabled": true,
+            "href": "/app/settings/backup/restore?existing=skip",
+            "id": "restore.existing.skip",
+            "label": "Skip them",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "enabled": true,
+            "href": "/app/settings/backup/restore?existing=replace",
+            "id": "restore.existing.replace",
+            "label": "Replace them",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/app/settings/backup/restore?existing=copy",
+            "id": "restore.existing.copy",
+            "label": "Import as copies",
+            "method": "GET"
+          }
+        ]
+      },
       "form": {
         "action": "/app/settings/backup/restore/match",
         "actions": [
@@ -1111,6 +1139,7 @@
           "colour": "#4a6b52",
           "count": 4,
           "danger": false,
+          "here": 2,
           "into": {
             "add": null,
             "error": "",
@@ -1175,7 +1204,7 @@
             "required": false,
             "value": "true"
           },
-          "will": "matched by path — no differences"
+          "will": "matched by path — 2 records missing, will be created"
         },
         {
           "colour": "#3f6e8c",
@@ -1392,14 +1421,7 @@
     },
     "note": [
       {
-        "text": "Restoring "
-      },
-      {
-        "mark": "strong",
-        "text": "creates"
-      },
-      {
-        "text": " records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes."
+        "text": "Restoring is an import: records made since the archive stay, nothing is deleted."
       }
     ],
     "open": true,

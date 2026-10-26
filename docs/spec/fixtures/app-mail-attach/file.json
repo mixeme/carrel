@@ -65,14 +65,14 @@
   },
   "note": [
     {
-      "text": "This file is over the limit for an attachment, so the letter will carry a secret link to it instead. The link is listed in "
+      "text": "Over the attachment limit: the letter carries a link instead, for 30 days. Revoke it in "
     },
     {
       "mark": "strong",
       "text": "Published links"
     },
     {
-      "text": ", works for 30 days, and revoking it there closes it for whoever got the letter."
+      "text": "."
     }
   ],
   "preview": [

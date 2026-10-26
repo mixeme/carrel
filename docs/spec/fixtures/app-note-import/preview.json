@@ -342,11 +342,7 @@
       ".ics"
     ],
     "many": true,
-    "note": [
-      {
-        "text": "Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties."
-      }
-    ],
+    "note": [],
     "preview": {
       "csrf": "csrf",
       "enabled": false,

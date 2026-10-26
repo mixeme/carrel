@@ -21,7 +21,7 @@
   "address": "…/alice/calendars/dni-rozhdeniya/",
   "failure": {
     "actions": [],
-    "body": "The server would not rename it. Nothing changed, and the form is as you left it.",
+    "body": "The server would not rename it.",
     "details": {
       "lines": [
         "[rename]  PROPPATCH /alice/calendars/dni-rozhdeniya/ → 403",

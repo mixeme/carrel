@@ -527,5 +527,5 @@
     "taskEdit": null,
     "tasks": null
   },
-  "warning": "The task is deleted on nextcloud · Дела. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+  "warning": "Carrel keeps no copy: this cannot be undone."
 }

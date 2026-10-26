@@ -66,14 +66,14 @@
   "in": "In it · 1 folder · 6 files",
   "note": [
     {
-      "text": "A folder always goes as a link: the letter carries a secret link to it, with all that is in it. The link is listed in "
+      "text": "A folder goes as a link, for 30 days. Revoke it in "
     },
     {
       "mark": "strong",
       "text": "Published links"
     },
     {
-      "text": ", works for 30 days, and revoking it there closes it for whoever got the letter."
+      "text": "."
     }
   ],
   "preview": [

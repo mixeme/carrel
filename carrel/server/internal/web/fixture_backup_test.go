@@ -76,19 +76,19 @@ func TestFixtureBackupStates(t *testing.T) {
 	if _, err := real.h.users.RemoveConnection(real.sess.AccountID(), key, real.realAccount(t, "proekty")); err != nil {
 		t.Fatal(err)
 	}
-	// Since the copy Личный lost four events on its server and three were
-	// changed there (s-backup-8: «4 records missing, will be created · 3
+	// Since the copy Личный lost two events on its server and two were
+	// changed there (s-backup-8: «2 records missing, will be created · 2
 	// already here»; s-backup-18: created, and skipped without an answer).
 	nc := real.servers["nextcloud"]
 	lichnyj := real.realPath(t, "lichnyj")
 	held := nc.Paths(lichnyj)
-	if len(held) < 7 {
-		t.Fatalf("Личный holds %d events, the frames lose four and change three", len(held))
+	if len(held) < 4 {
+		t.Fatalf("Личный holds %d events, the frames lose two and change two", len(held))
 	}
-	for _, p := range held[:4] {
+	for _, p := range held[:2] {
 		nc.Unseed(p)
 	}
-	for _, p := range held[4:7] {
+	for _, p := range held[2:4] {
 		body, _, _ := nc.Object(p)
 		nc.Seed(p, strings.Replace(body, "SUMMARY:", "SUMMARY:Moved · ", 1))
 	}

@@ -291,11 +291,7 @@
     "kinds": [
       ".vcf"
     ],
-    "note": [
-      {
-        "text": "What is skipped is listed in the report, and so is what could not be read."
-      }
-    ],
+    "note": [],
     "preview": null,
     "taken": []
   },

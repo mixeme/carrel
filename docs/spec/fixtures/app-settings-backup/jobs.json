@@ -988,14 +988,7 @@
     "match": null,
     "note": [
       {
-        "text": "Restoring "
-      },
-      {
-        "mark": "strong",
-        "text": "creates"
-      },
-      {
-        "text": " records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes."
+        "text": "Restoring is an import: records made since the archive stay, nothing is deleted."
       }
     ],
     "open": false,
