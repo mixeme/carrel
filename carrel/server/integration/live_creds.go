@@ -207,7 +207,7 @@ func credEnv(text string) map[string]string {
 	set("CARREL_SOGO_PASS", sogo.get("password"))
 	// The same account is the mailbox letters are delivered to (S-26): its
 	// server takes IMAP as well as SMTP.
-	set("CARREL_IMAP_HOST", sogo.get("smtp/imap server"))
+	set("CARREL_IMAP_HOST", sogo.get("smtp/imap", "smtp/imap server"))
 	set("CARREL_IMAP_USER", sogo.get("e-mail/login", "login"))
 	set("CARREL_IMAP_PASS", sogo.get("password"))
 
