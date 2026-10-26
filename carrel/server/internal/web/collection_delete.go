@@ -93,9 +93,10 @@ func recordNoun(col sealed.Collection) string {
 // in it, or -1 when it did not say.
 func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, count int, typed string, errText view.Text, back string) view.CollectionDeleteSheet {
 	noun, label, host := collectionNoun(col), collectionLabel(col), connLabel(conn)
-	what := []view.Run{plainRun("everything in it")}
-	if count > 0 {
-		what = append(allOf(count, recordNoun(col)), plainRun(" in it"))
+	warning := "Carrel keeps no copy: this cannot be undone."
+	if col.Has(view.KindFile) {
+		// What is in a folder is not on the sheet (s-profile-19).
+		warning = "Everything in it goes too. " + warning
 	}
 	q := collectionDeleteQuery(conn, col)
 	if back != "" {
@@ -107,7 +108,7 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 		Title: "Delete on the server",
 		// The server, then the collection (s-profile-9, s-profile-19).
 		Subject: text(host + " · " + label),
-		Warning: join("The "+noun+" and ", what, " are deleted on "+host+". Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."),
+		Warning: line(warning),
 		// What else points at it and stops working with it (S-12.4): the
 		// person's published links (S-25), copy jobs (S-24) and davloom
 		// devices whose scope names it (S-27).
@@ -129,7 +130,7 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 	// a cancellation (the owner's decision of 12.10.2026, А12; Кл18) — the
 	// last sentence of what is lost (s-profile-9, note 112 p. 5).
 	if col.Has(view.KindEvent) && conn.Scheduling == discover.SchedulingYes && count != 0 {
-		sheet.Warning = append(sheet.Warning, plainRun(" "+host+" may tell the attendees of its meetings that they are cancelled."))
+		sheet.Warning = append(sheet.Warning, plainRun(" "+host+" may send the attendees of its meetings a cancellation."))
 	}
 	if count == 0 {
 		sheet.Warning = line(fmt.Sprintf("The %s is deleted on %s. It holds nothing now; Carrel keeps no copy of it either.", noun, host))
@@ -325,10 +326,11 @@ func (s *Server) collectionArchive(sess *session.Session, conn sealed.Connection
 			last = at
 		}
 	}
+	// The other cases are said as the caption of s-profile-9 says them.
 	restore := []view.Run{plainRun("Restoring brings the " + what + " back into a "), strongRun("new"), plainRun(" " + into + " — not into this one, and not to this address.")}
 	switch {
 	case !last.IsZero():
-		return join("Last time it was in an archive: ", monoRun(last.In(s.timeFor(sess).tz).Format("2006-01-02")), ". ", restore)
+		return join("Last archived ", monoRun(last.In(s.timeFor(sess).tz).Format("2006-01-02")), "; a restore makes a ", strongRun("new"), " "+into+" at a new address.")
 	case copied:
 		return join("A backup job copies it, but none has finished whole yet, so there is no archive of it here. ", restore)
 	}

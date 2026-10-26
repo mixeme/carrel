@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -53,40 +54,31 @@ func msgDrawn(list []string, s string) bool {
 	return false
 }
 
-// s-profile-9: «… all ⟨51⟩ events in it are deleted …», «Last time it was
-// in an archive: ⟨2026-08-14⟩. Restoring brings the records back into a
-// ⟨new⟩ collection …».
+// s-profile-9: «Last archived ⟨2026-08-14⟩; a restore makes a ⟨new⟩
+// collection at a new address.»
 func TestCollectionDeleteMarksItsPieces(t *testing.T) {
 	msgs := frameMsgs(t, "s-profile-9")
-	shape := regexp.MustCompile(`⟨strong:\d+⟩`)
-	var count string
+	shape := regexp.MustCompile(`^Last archived ⟨mono:(\d{4}-\d\d-\d\d)⟩; .*⟨strong:new⟩`)
+	var archive string
+	var day []string
 	for _, m := range msgs {
-		if shape.MatchString(m) && strings.Contains(m, "are deleted on") {
-			count = m
+		if d := shape.FindStringSubmatch(m); d != nil {
+			archive, day = m, d
 		}
 	}
-	if count == "" {
-		t.Fatalf("s-profile-9 draws no count in bold: %q", msgs)
+	if archive == "" {
+		t.Fatalf("s-profile-9 draws no archive line with its day monospaced and «new» in bold: %q", msgs)
 	}
 	f := calendarFixture(t, nil,
-		"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART:20260810T100000Z\nSUMMARY:One\nEND:VEVENT"),
-		"e2.ics", ics("BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260101T000000Z\nDTSTART:20260811T100000Z\nSUMMARY:Two\nEND:VEVENT"))
+		"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART:20260810T100000Z\nSUMMARY:One\nEND:VEVENT"))
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		b.BackupJobs = append(b.BackupJobs, sealed.BackupJob{ID: "j-1", Name: "Личное",
+			Sources: []sealed.Selection{{Kind: view.KindEvent, AccountID: f.id, Path: f.col}}})
+	})
+	lastArchived(t, f, "j-1", day[1])
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get("/app/collections/delete?"+url.Values{"a": {f.id}, "c": {f.col}}.Encode(), f.sess)))
-	got := saidRuns(sheet.Warning)
-	want := shape.ReplaceAllString(count, "⟨strong:2⟩")
-	// The frame's server schedules and its calendar has meetings: its last
-	// sentence says the attendees may hear of it (note 112 p. 5). This one
-	// does not schedule; the sentence is TestAMoveSaysTheAttendeesMayHearOfACancellation's.
-	want = strings.Replace(want, " nextcloud may tell the attendees of its meetings that they are cancelled.", "", 1)
-	host := regexp.MustCompile(`deleted on .*?\. Carrel`)
-	want = host.ReplaceAllString(want, "deleted on X. Carrel")
-	got = host.ReplaceAllString(got, "deleted on X. Carrel")
-	// What the calendar holds names its unit: «events», or «records» for
-	// one that takes tasks too.
-	unit := regexp.MustCompile(`⟩ \w+ in it`)
-	want, got = unit.ReplaceAllString(want, "⟩ X in it"), unit.ReplaceAllString(got, "⟩ X in it")
-	if want != got {
-		t.Errorf("warning = %q,\nthe frame %q", got, want)
+	if got := saidRuns(sheet.Archive); got != archive {
+		t.Errorf("archive = %q,\nthe frame %q", got, archive)
 	}
 }
 
@@ -136,8 +128,9 @@ func TestNoticeTitlesAreTheFramesBoldSentence(t *testing.T) {
 	}
 	f.load(t)
 	p := openMerge(t, f.h, f.sess, onlyGroup(t, f.page(t)), nil)
-	if b := bold("s-dup-4"); !b[string(p.Warning.Title)] {
-		t.Errorf("merge: title %q, the frame %v", p.Warning.Title, b)
+	// The plan is said without a bold sentence (s-dup-4, note 135).
+	if b := bold("s-dup-4"); len(b) != 0 || p.Warning.Title != "" || !msgDrawn(frameMsgs(t, "s-dup-4"), string(p.Warning.Body)) {
+		t.Errorf("merge: title %q, body %q; the frame %q", p.Warning.Title, p.Warning.Body, frameMsgs(t, "s-dup-4"))
 	}
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	f.other.Refuse(http.MethodDelete, http.StatusForbidden, "no")

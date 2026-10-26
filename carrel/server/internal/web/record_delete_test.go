@@ -54,9 +54,16 @@ func TestDeleteAsksWhatIsLost(t *testing.T) {
 	if _, _, ok := f.srv.Object(at); !ok {
 		t.Fatal("the sheet deleted the event")
 	}
-	if sheet.Title != "Delete event" || sheet.Subject != "Review" || !strings.HasPrefix(string(sheet.Warning), "The event is deleted on ") ||
-		!strings.HasSuffix(string(sheet.Warning), "Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.") {
-		t.Errorf("head = %q %q %q", sheet.Title, sheet.Subject, sheet.Warning)
+	// The words of s-agenda-26 (note 135), its server's name aside.
+	msgs := frameMsgs(t, "s-agenda-26")
+	if sheet.Title != "Delete event" || sheet.Subject != "Review" || !msgDrawn(msgs, string(sheet.Warning)) {
+		t.Errorf("head = %q %q %q, the frame %q", sheet.Title, sheet.Subject, sheet.Warning, msgs)
+	}
+	cancels := ""
+	for _, m := range msgs {
+		if strings.HasSuffix(m, "a cancellation.") {
+			_, cancels, _ = strings.Cut(m, " ")
+		}
 	}
 	refs := map[string]string{}
 	for _, r := range sheet.References {
@@ -66,8 +73,8 @@ func TestDeleteAsksWhatIsLost(t *testing.T) {
 		refs["1 record related to it"] != "among the loaded ones; their link is left pointing at nothing" {
 		t.Errorf("references = %v", refs)
 	}
-	if !strings.Contains(string(sheet.Cancels), "The event has 2 attendees") || !strings.Contains(string(sheet.Cancels), "may tell them the meeting is cancelled") {
-		t.Errorf("cancels = %q", sheet.Cancels)
+	if cancels == "" || !strings.HasSuffix(string(sheet.Cancels), " "+cancels) {
+		t.Errorf("cancels = %q, the frame «… %s»", sheet.Cancels, cancels)
 	}
 	atts := map[string]string{}
 	for _, a := range sheet.Attachments {

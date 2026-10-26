@@ -61,8 +61,12 @@ func TestImportWizardByFrames(t *testing.T) {
 	if got := saidRuns(page.Source.Hint); got != framePieces(hint[1]) {
 		t.Errorf("hint = %q, the frame %q", got, framePieces(hint[1]))
 	}
-	if got := saidRuns(page.Source.Note); !msgDrawn(frameMsgs(t, "s-io-3"), got) {
-		t.Errorf("note = %q, the frame %q", got, frameMsgs(t, "s-io-3"))
+	// The first step says nothing of its own (note 135).
+	if strings.Contains(mockupFrame(t, "s-io-3"), `class="tc-msg`) {
+		t.Fatal("s-io-3 draws a message: read the frame again")
+	}
+	if len(page.Source.Note) != 0 {
+		t.Errorf("note = %q, the frame draws none", saidRuns(page.Source.Note))
 	}
 
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "Разное (mix).vcf", []byte(importedCards))))
@@ -72,6 +76,9 @@ func TestImportWizardByFrames(t *testing.T) {
 	}
 	if got := importCounts(page); got != "2 ready, 1 already here" {
 		t.Errorf("counts = %q", got)
+	}
+	if len(page.Source.Note) != 0 {
+		t.Errorf("preview note = %q, s-io-5 draws none", saidRuns(page.Source.Note))
 	}
 
 	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))

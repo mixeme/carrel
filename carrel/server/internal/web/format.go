@@ -38,15 +38,6 @@ func runs(parts ...view.Run) view.Runs {
 
 func plainRun(s string) view.Run { return view.Run{Text: view.Text(s)} }
 
-// allOf is «all 51 events» with the number in bold, as the sheets of a
-// collection write it (s-profile-8, -9, -19).
-func allOf(n int, unit string) []view.Run {
-	if n != 1 {
-		unit += "s"
-	}
-	return []view.Run{plainRun("all "), strongRun(fmt.Sprint(n)), plainRun(" " + unit)}
-}
-
 // join is the pieces of a sentence in order: runs, the marked ones among
 // them, and plain strings between.
 func join(parts ...any) view.Runs {

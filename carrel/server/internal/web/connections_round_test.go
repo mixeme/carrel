@@ -161,9 +161,7 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 	for _, m := range frameRefItem.FindAllStringSubmatch(frame, -1) {
 		refs = append(refs, frameText(m[1]))
 	}
-	count := regexp.MustCompile(`all (\d+) files`).FindStringSubmatch(warning)
-	host := regexp.MustCompile(`deleted on ([^.]+)\.`).FindStringSubmatch(warning)
-	if field == nil || count == nil || host == nil || len(refs) != 2 || !strings.HasPrefix(refs[0], "Attachments — ") {
+	if field == nil || len(refs) != 2 || !strings.HasPrefix(refs[0], "Attachments — ") {
 		t.Fatalf("s-profile-19 field %q, warning %q, references %q: read it again", field, warning, refs)
 	}
 	job := regexp.MustCompile(`«([^»]+)»`).FindStringSubmatch(refs[1])
@@ -187,10 +185,8 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 	if sheet.Subject != "vps · Docs" {
 		t.Errorf("head = %q, the frame %q (the storage · the folder)", sheet.Subject, subject)
 	}
-	// The server is named by its connection, as on the move sheet (s-profile-8).
-	want := strings.Replace(strings.Replace(warning, "all "+count[1]+" files", "all 1 file", 1), "on "+host[1]+".", "on vps.", 1)
-	if plainText(sheet.Warning) != want {
-		t.Errorf("warning = %q\nwant      %q", sheet.Warning, want)
+	if plainText(sheet.Warning) != warning {
+		t.Errorf("warning = %q\nthe frame %q", sheet.Warning, warning)
 	}
 	if !equalStrings(refLines(sheet.References), refs) {
 		t.Errorf("references = %q, the frame %q", sheet.References, refs)

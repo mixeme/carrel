@@ -224,9 +224,8 @@ func (s *Server) adminUserMenu(snap store.State, u *store.User) []view.MenuItem 
 
 // resetWarning is what a reset destroys, said before the button (S-10.6):
 // the wipe of S-10.4, whole.
-const resetWarning = "The passwords this person saved for DAV servers are sealed with their own password, and a reset destroys them: " +
-	"every account they connected has to be connected again, and their published links, devices and external backup triggers stop. " +
-	"Their records on the servers stay as they are."
+const resetWarning = "A reset destroys the DAV passwords this person saved: every account has to be connected again, " +
+	"and their published links, devices and external backup triggers stop."
 
 // resetHint is the hint under the temporary password (s-admin-13): who hands
 // it over, and the way that destroys nothing.

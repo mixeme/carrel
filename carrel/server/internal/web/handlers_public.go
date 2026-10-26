@@ -77,7 +77,7 @@ const (
 
 // passwordWarning stands over the fields of every form that sets a password
 // from outside the shell (s-auth-2, s-auth-4, s-auth-11, s-auth-12).
-const passwordWarning = "Your password is the only key to your own data. Nobody — including this server — can recover it for you."
+const passwordWarning = "Nobody can recover this password, this server included."
 
 func passwordNotice() []view.Notice {
 	return []view.Notice{{Role: view.NoticeAlert, Body: passwordWarning}}

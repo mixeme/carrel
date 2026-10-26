@@ -435,12 +435,11 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	}
 	// The plan is said, not alarmed (s-dup-2, -4; Дб16): the button that
 	// deletes is the alarm.
-	page.Warning = view.Notice{
-		Role:  view.NoticeInfo,
-		Title: text(fmt.Sprintf("One record is rewritten and %s deleted.", plural(len(others), "other"))),
-		Body: "The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. " +
-			"This cannot be undone from here.",
+	said := "The other record is deleted."
+	if len(others) > 1 {
+		said = fmt.Sprintf("The other %d records are deleted.", len(others))
 	}
+	page.Warning = view.Notice{Role: view.NoticeInfo, Body: text(said + " This cannot be undone.")}
 	confirm.Enabled, confirm.Href = true, s.mergeHref(mr.g.id, target.place, q)
 	page.Actions = []view.Action{confirm, back}
 	// Where it stays: a segment of the sources (s-dup-2), the kept one on,
@@ -554,11 +553,14 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 	var deleted []mergeMember
 	for i, o := range others {
 		if err := o.c.remove(ctx, o.obj.Path, o.obj.ETag); err != nil {
-			n := moveFailure(o.c, "Written, but not every other record was deleted.", "DELETE", o.obj.Path, err)
-			n.Body = text(fmt.Sprintf("The merge was written and %s deleted; %s refused, and the rest were not tried. Nothing is undone.",
-				plural(len(deleted), "record"), mergeTitle(o.c, o.obj)))
+			title, done := "Merged, but nothing was deleted:", ""
+			if len(deleted) > 0 {
+				title, done = "Merged, but not everything was deleted:", plural(len(deleted), "record")+" deleted; "
+			}
+			n := moveFailure(o.c, title, "DELETE", o.obj.Path, err)
+			n.Body = text(done + mergeTitle(o.c, o.obj) + " refused, the rest were not tried.")
 			if dav.IsStatus(err, http.StatusPreconditionFailed) {
-				n.Body = text(o.label() + " changed after it was read, so it was kept, and the rest were not tried. The merge was written; nothing is undone.")
+				n.Body = text(done + o.label() + " changed after it was read and was kept, the rest were not tried.")
 			}
 			if n.Details != nil {
 				n.Details.Lines = append(n.Details.Lines, rep.lines()...)

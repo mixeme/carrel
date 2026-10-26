@@ -222,7 +222,7 @@ func TestRefusedCreateLeavesNothing(t *testing.T) {
 	// means —, what it means for the person under it, the server in the
 	// head; the form travels hidden with Back to the form and Try again.
 	n := sheet.Failure
-	if n == nil || n.Title != "" || n.Body != "The server would not make it. Nothing was created, and the form is as you left it." || n.Details == nil ||
+	if n == nil || n.Title != "" || n.Body != "The server would not make it." || n.Details == nil ||
 		!strings.HasPrefix(string(n.Details.Summary), "MKCALENDAR "+davtest.CalendarHome+"trips/") {
 		t.Fatalf("failure = %+v", n)
 	}
@@ -294,7 +294,7 @@ func TestRenameWritesTheLabelNotTheAddress(t *testing.T) {
 	f.srv.Refuse("PROPPATCH", http.StatusForbidden, "")
 	sheet = decode[view.CollectionRenameSheet](t, f.h.do(postForm(u.Path+"?"+u.RawQuery, f.sess, url.Values{"name": {"Elsewhere"}})))
 	// The refusal stays in the sheet, what was typed in its form (s-profile-30).
-	if sheet.Failure == nil || sheet.Failure.Body != "The server would not rename it. Nothing changed, and the form is as you left it." ||
+	if sheet.Failure == nil || sheet.Failure.Body != "The server would not rename it." ||
 		sheet.Failure.Details == nil || !strings.Contains(string(sheet.Failure.Details.Lines[0]), "[rename]  PROPPATCH") || rowNamed(t, sheet.Form, "name").Value != "Elsewhere" {
 		t.Errorf("refused rename = %+v", sheet)
 	}

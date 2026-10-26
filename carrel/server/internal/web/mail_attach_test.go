@@ -55,14 +55,14 @@ func TestAttachSheetsAreTheirFrames(t *testing.T) {
 		t.Errorf("file sheet = %q, tree %v, crumbs %+v, goes %v", files.Title, files.Tree != nil, files.Crumbs, goes)
 	}
 	big := sheet(url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"big.bin"}})
-	if !strings.HasPrefix(runsText(big.Note), "This file is over the limit for an attachment") || !strings.Contains(saidRuns(big.Note), "⟨strong:Published links⟩") {
+	if saidRuns(big.Note) != "Over the attachment limit: the letter carries a link instead, for 30 days. Revoke it in ⟨strong:Published links⟩." {
 		t.Errorf("big file's note = %q", saidRuns(big.Note))
 	}
 
 	// A folder: what is in it, its files off, always a link.
 	folder := sheet(url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "dir": {"share"}})
 	if folder.Title != "Attach a folder" || folder.In != "In it · 1 file" || len(folder.Rows) != 1 || !folder.Rows[0].Off || folder.Rows[0].Href != "" ||
-		!strings.HasPrefix(runsText(folder.Note), "A folder always goes as a link") {
+		runsText(folder.Note) != "A folder goes as a link, for 30 days. Revoke it in Published links." {
 		t.Errorf("folder sheet = %q, in %q, rows %+v, note %q", folder.Title, folder.In, folder.Rows, runsText(folder.Note))
 	}
 }

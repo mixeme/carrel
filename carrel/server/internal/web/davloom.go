@@ -176,8 +176,7 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 		// How the address goes into a client, and whose password (s-davloom-1).
 		AddressHint: "In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.",
 		// «not» in bold (s-davloom-1).
-		Note: join("Changing your Carrel password does ", strongRun("not"), " disconnect devices: each has its own key wrapper. "+
-			"To disconnect one, revoke it here — that is the only thing that stops it."),
+		Note: join("Changing your Carrel password does ", strongRun("not"), " disconnect devices; only revoking does."),
 		// The tree is a sheet of its own (s-davloom-9; owner's decision 19.10).
 		Sees: view.Action{ID: "davloom.tree", Label: "What the client sees", Href: s.route("/app/settings/davloom/tree"), Method: "GET", Enabled: true, Target: render.TargetSheet},
 	}
@@ -335,7 +334,7 @@ func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob seale
 	}
 	head := []view.FormRow{csrfField(sess)}
 	dialog := &view.DeviceDialog{Title: "Add device", Subtitle: "An app password for one device, with its own key wrapper"}
-	dialog.Warning = "The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered."
+	dialog.Warning = "Shown once and stored nowhere: lost, it cannot be recovered."
 	name := ""
 	if posted {
 		name = typed.Get("name")

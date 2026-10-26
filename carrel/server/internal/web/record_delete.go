@@ -38,8 +38,7 @@ func (s *Server) recordDeleteSheet(ctx context.Context, c *collectionCtx, uid st
 	noun := c.spec.noun
 	sheet := view.RecordDeleteSheet{
 		Kind: c.spec.kind, Title: text("Delete " + noun), Subject: text(recordTitle(c.spec.kind, obj)),
-		Warning: text("The " + noun + " is deleted on " + string(c.stamp()) +
-			". Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."),
+		Warning:    "Carrel keeps no copy: this cannot be undone.",
 		References: []view.Reference{}, Attachments: []view.Reference{},
 	}
 	blob := s.catalogOf(c.sess)
@@ -68,13 +67,8 @@ func (s *Server) recordDeleteSheet(ctx context.Context, c *collectionCtx, uid st
 
 	// Its attendees, on a server that sends invitations itself: it may tell
 	// them — «may», as the sheets of a move say it (А12).
-	if n := len(obj.Props()["ATTENDEE"]); n > 0 && c.conn.Scheduling == discover.SchedulingYes {
-		what := "the meeting"
-		if c.spec.kind != view.KindEvent {
-			what = "the " + noun
-		}
-		sheet.Cancels = text("The " + noun + " has " + plural(n, "attendee") + ", and " + connLabel(c.conn) +
-			" sends invitations itself: the server may tell them " + what + " is cancelled.")
+	if len(obj.Props()["ATTENDEE"]) > 0 && c.conn.Scheduling == discover.SchedulingYes {
+		sheet.Cancels = text(connLabel(c.conn) + " may send its attendees a cancellation.")
 	}
 
 	// Its attachments: written into it, they go with it; a link stays, and

@@ -450,18 +450,9 @@ var importHints = map[view.Kind]view.Runs{
 // importFolderHint is the line under the tree of folders (s-io-4).
 var importFolderHint = join("Every ", monoRun(".md"), " directly in that folder. Subfolders are not walked, nothing on the server is moved or deleted — the files stay where they were.")
 
-// importNotes are the message of the first step and of the preview, by kind
-// (s-io-3…8).
-var (
-	importFirstNote = line("Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.")
-	importNoteFirst = join("Front matter is read when present: title, date, tags, UID and ", monoRun("X-"), "properties exported earlier. A file without it becomes a note dated by its own timestamp.")
-	importNotes     = map[view.Kind]view.Runs{
-		view.KindContact: line("What is skipped is listed in the report, and so is what could not be read."),
-		view.KindEvent:   line("A repeating event keeps its rule: the series is one record, not fifty-two."),
-		view.KindTask:    line("STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done."),
-		view.KindNote:    line("Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties."),
-	}
-)
+// importNoteFirst is the message of the first step of notes (s-io-4); the
+// other first steps and the previews have none (note 135).
+var importNoteFirst = line("A file without front matter is dated by its own timestamp.")
 
 func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 	page := view.ImportPage{
@@ -487,7 +478,7 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 	}
 	page.Into = s.importTargets(c, st.dest)
 	// Notes take several files at once (Typecase's note 111 p. 3).
-	page.Source = view.ImportSource{Kinds: importFormats(c.spec.kind), Hint: importHints[c.spec.kind], Note: importFirstNote, Many: c.spec.kind == view.KindNote}
+	page.Source = view.ImportSource{Kinds: importFormats(c.spec.kind), Hint: importHints[c.spec.kind], Many: c.spec.kind == view.KindNote}
 	if c.spec.kind == view.KindNote {
 		page.Source.Note = importNoteFirst
 		page.Source.Folder, page.Source.Preview = s.noteFolders(c, st)
@@ -513,12 +504,11 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		page.Subtitle = importSubtitle(st.draft)
 		page.Counts = importCounts(st.draft, st.taken)
 		page.Existing = s.importExisting(c, st)
-		// The message of the step is the frames' (from-typecase note 52: no
-		// longer «Import always creates» — the records already here go as
-		// the question above says).
-		page.Source.Note = importNotes[c.spec.kind]
+		// The preview has no message of its own (note 135): only what
+		// the file lacked.
+		page.Source.Note = nil
 		if st.draft.Note != "" {
-			page.Source.Note = join(page.Source.Note, " "+st.draft.Note)
+			page.Source.Note = line(st.draft.Note)
 		}
 		// «Import 122 contacts» (s-io-5…8): what the press writes — the
 		// records already there are not among them while they are skipped.

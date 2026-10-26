@@ -653,7 +653,7 @@ func createRefused(f *collectionForm, server, step, method, path string, err err
 	if code == 0 {
 		f.explain = "The server did not answer: nothing was sent that it could refuse."
 	}
-	return &view.Notice{Role: view.NoticeAlert, Body: text(createRefusal.title + ". " + createRefusal.nothing), Details: d}
+	return &view.Notice{Role: view.NoticeAlert, Body: text(createRefusal.title + "."), Details: d}
 }
 
 // refusalDetails is the server's answer as a refusal shows it (s-profile-6,
@@ -679,7 +679,7 @@ func refusalDetails(step, method, path string, err error) *view.Diagnostic {
 // renameRefused is a rename the server refused, in the sheet (s-profile-30):
 // what was typed stays in the form, Save tries again.
 func renameRefused(method, path string, err error) *view.Notice {
-	return &view.Notice{Role: view.NoticeAlert, Body: "The server would not rename it. Nothing changed, and the form is as you left it.",
+	return &view.Notice{Role: view.NoticeAlert, Body: "The server would not rename it.",
 		Details: refusalDetails("rename", method, path, err)}
 }
 
@@ -1297,7 +1297,6 @@ var (
 	createRefusal = refusalText{
 		title:     "The server would not make it",
 		forbidden: "This account can read here but not create",
-		nothing:   "Nothing was created, and the form is as you left it.",
 	}
 )
 
@@ -1317,7 +1316,7 @@ func davRefusal(rt refusalText, conn sealed.Connection, method, path string, err
 	switch {
 	case code == http.StatusForbidden:
 		n.Title = text(rt.forbidden)
-		n.Body = text(rt.nothing + " The server does not give this account the right: either the user has no such right there, or the password was issued read-only.")
+		n.Body = text(strings.TrimSpace(rt.nothing + " The server does not give this account the right: either the user has no such right there, or the password was issued read-only."))
 	case code == 0:
 		n.Title = text("Could not reach the server")
 	}

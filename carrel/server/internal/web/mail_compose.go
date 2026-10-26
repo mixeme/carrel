@@ -862,44 +862,55 @@ func partPublishQuery(p mailPart, i int) url.Values {
 	return q
 }
 
-// linkReason is why a part goes as a link, as the line under the list says
-// it (s-mail-1): a folder always; a file over the attachment's ceiling; one
-// the letter has no room left for.
+// linkFolder is how the line under the list names a folder (s-mail-1).
+const linkFolder = "the folder"
+
+// linkReason is a part that goes as a link as the line under the list names
+// it, why in brackets (s-mail-1): «the PDF (over 2 MB)», a folder — it
+// always goes so —, one the letter has no room left for.
 func (s *Server) linkReason(p mailPart) string {
-	switch {
-	case p.Folder:
-		return "a folder always goes as a link"
-	case p.Size > s.mailPolicy().Attach:
-		what := "«" + p.Title + "»"
+	if p.Folder {
+		return linkFolder
+	}
+	what := "«" + p.Title + "»"
+	if p.Size > s.mailPolicy().Attach {
 		if i := strings.LastIndex(p.Name, "."); i >= 0 && i < len(p.Name)-1 {
 			what = "the " + strings.ToUpper(p.Name[i+1:])
 		}
-		return what + " is over the " + string(formatSize(s.mailPolicy().Attach)) + " ceiling"
+		return what + " (over " + string(formatSize(s.mailPolicy().Attach)) + ")"
 	}
-	return "«" + p.Title + "» would take the letter over " + string(formatSize(s.mailPolicy().Letter))
+	return what + " (the letter would be over " + string(formatSize(s.mailPolicy().Letter)) + ")"
 }
 
 // linksLine is the line under the list when something goes as a link
-// (s-mail-1): how many and why, and where they are revoked — «Published
-// links» in bold. Nil without links.
+// (s-mail-1): what and why, and that revoking one in «Published links», in
+// bold, closes it for this letter too. Nil without links.
 func linksLine(why []string) view.Runs {
 	if len(why) == 0 {
 		return nil
 	}
 	var reasons []string
+	folders := 0
 	for _, w := range why {
+		if w == linkFolder {
+			folders++
+		}
 		if !slices.Contains(reasons, w) {
 			reasons = append(reasons, w)
 		}
 	}
+	if folders > 1 {
+		reasons[slices.Index(reasons, linkFolder)] = fmt.Sprintf("the %d folders", folders)
+	}
 	said := reasons[0]
 	if n := len(reasons); n > 1 {
-		said = strings.Join(reasons[:n-1], ", ") + ", and " + reasons[n-1]
+		said = strings.Join(reasons[:n-1], ", ") + " and " + reasons[n-1]
 	}
-	n := countWord(len(why))
-	head := strings.ToUpper(n[:1]) + n[1:] + " of these go as links, not as files: " + said + ". Each link can be revoked in "
+	if rest, ok := strings.CutPrefix(said, "the "); ok {
+		said = "The " + rest
+	}
 	if len(why) == 1 {
-		head = "One of these goes as a link, not as a file: " + said + ". The link can be revoked in "
+		return join(said+" goes as a link; revoking it in ", strongRun("Published links"), " closes it for this letter too.")
 	}
-	return join(head, strongRun("Published links"), " — including for the people in this letter.")
+	return join(said+" go as links; revoking one in ", strongRun("Published links"), " closes it for this letter too.")
 }

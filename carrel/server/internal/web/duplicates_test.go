@@ -505,7 +505,7 @@ func TestMergeStopsAtTheFirstRefusedDelete(t *testing.T) {
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	f.other.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	got := decode[view.DuplicatesMergePage](t, f.h.do(postForm(mergeAction(t, p, "duplicates.merge.confirm").Href, f.sess, url.Values{})))
-	if got.Warning.Title != "Written, but not every other record was deleted." || got.Warning.Details == nil {
+	if got.Warning.Title != "Merged, but nothing was deleted:" || !strings.HasSuffix(string(got.Warning.Body), " refused, the rest were not tried.") || got.Warning.Details == nil {
 		t.Fatalf("result = %+v", got.Warning)
 	}
 	// What happened under its rubric (s-dup-5, Дб19); the server's answer

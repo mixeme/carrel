@@ -47,9 +47,8 @@ func TestALetterLinkHasItsTerms(t *testing.T) {
 		t.FailNow()
 	}
 	links := runsText(sheet.Links)
-	if !strings.HasPrefix(links, "Two of these go as links, not as files: ") || !strings.Contains(links, "and a folder always goes as a link.") ||
-		!strings.HasSuffix(links, " — including for the people in this letter.") {
-		t.Errorf("the line under the list = %q", links)
+	if want := "The BIN (over 1000 B) and the folder go as links; revoking one in Published links closes it for this letter too."; links != want {
+		t.Errorf("the line under the list = %q, want %q (s-mail-1)", links, want)
 	}
 
 	// Change…: the publish sheet with the row's terms; Apply keeps them in

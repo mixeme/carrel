@@ -104,7 +104,7 @@ func (s *Server) fileSheet(ctx context.Context, sess *session.Session, c *fileCt
 	if dir {
 		// What the visitor gets, said on the sheet before the link and after
 		// it (s-publish-5): the same secret mounts the folder (S-25.1).
-		sheet.Note = "The visitor gets the folder with everything inside it, read-only, and the same address mounts as a drive in Windows, macOS and Linux."
+		sheet.Note = "The same address mounts as a read-only drive in Windows, macOS and Linux."
 	}
 	return sheet
 }

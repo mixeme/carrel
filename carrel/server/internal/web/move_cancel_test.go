@@ -103,7 +103,7 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 		said := saidRuns(w)
 		i := strings.Index(said, " may send attendees")
 		if i < 0 {
-			i = strings.Index(said, " may tell the attendees")
+			i = strings.Index(said, " may send the attendees")
 		}
 		if i < 0 {
 			return ""

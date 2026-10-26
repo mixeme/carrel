@@ -223,17 +223,13 @@ func (s *Server) calendarSpan(sess *session.Session, p mailPart) []view.FormRow 
 // (s-mail-6, -13): a folder always; anything over the ceiling of an
 // attachment, or of the letter. Nil when it goes as a file.
 func (s *Server) attachNote(p mailPart) view.Runs {
-	tail := ". The link is listed in "
-	end := ", works for 30 days, and revoking it there closes it for whoever got the letter."
 	switch {
 	case !p.AsLink:
 		return nil
 	case p.Folder:
-		return join("A folder always goes as a link: the letter carries a secret link to it, with all that is in it"+tail, strongRun("Published links"), end)
-	case p.Kind == view.KindFile:
-		return join("This file is over the limit for an attachment, so the letter will carry a secret link to it instead"+tail, strongRun("Published links"), end)
+		return join("A folder goes as a link, for 30 days. Revoke it in ", strongRun("Published links"), ".")
 	}
-	return join("This is over the limit for an attachment, so the letter will carry a secret link to it instead"+tail, strongRun("Published links"), end)
+	return join("Over the attachment limit: the letter carries a link instead, for 30 days. Revoke it in ", strongRun("Published links"), ".")
 }
 
 func attachRow(p mailPart) view.MailAttachRow {

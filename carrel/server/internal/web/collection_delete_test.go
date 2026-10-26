@@ -46,7 +46,7 @@ func TestCollectionDeleteSheetSaysWhatGoes(t *testing.T) {
 	if sheet.Kind != view.KindEvent || !strings.HasSuffix(string(sheet.Subject), " · Work") {
 		t.Errorf("sheet = %+v", sheet)
 	}
-	if w := plainText(sheet.Warning); !strings.Contains(w, "all 2 records") || !strings.Contains(w, "Carrel holds no copy") {
+	if w := plainText(sheet.Warning); w != "Carrel keeps no copy: this cannot be undone." {
 		t.Errorf("warning = %q", w)
 	}
 	if sheet.References == nil || len(sheet.References) != 0 {
@@ -188,7 +188,7 @@ func TestCollectionDeleteAlreadyGone(t *testing.T) {
 
 var (
 	frameArchiveMsg = regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush">(.*?)</div>`)
-	frameArchiveDay = regexp.MustCompile(`: (\d{4}-\d\d-\d\d)\.`)
+	frameArchiveDay = regexp.MustCompile(`^Last archived (\d{4}-\d\d-\d\d);`)
 )
 
 // pointers are what s-profile-9 or s-profile-19 says points at the
@@ -221,8 +221,8 @@ func lastArchived(t *testing.T, f davFixture, job, day string) {
 // s-profile-9 (from-typecase note 20): what points at the collection is
 // counted by kind — «1 published link», «3 devices through davloom» — and a
 // backup job is named; the archive line says when it was last in an archive
-// and that a restore brings the records into a new collection. The server is
-// named by its connection, as in the head.
+// and that a restore makes a new collection (note 135). The warning is the
+// frame's, less the sentence of a server that schedules.
 func TestCollectionDeleteSheetIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-profile-9")
 	subject := frameOne(t, frameSheetSub, frame, "subject")[1]
@@ -234,8 +234,9 @@ func TestCollectionDeleteSheetIsTheFrame(t *testing.T) {
 	links := regexp.MustCompile(`^(\d+) published links? — `).FindStringSubmatch(refs[0])
 	devices := regexp.MustCompile(`^(\d+) devices through davloom — `).FindStringSubmatch(refs[len(refs)-1])
 	day := frameArchiveDay.FindStringSubmatch(archive)
-	if links == nil || devices == nil || day == nil ||
-		!strings.Contains(warning, "deleted on "+strings.Split(subject, " · ")[0]+".") {
+	host := strings.Split(subject, " · ")[0]
+	schedules := " " + host + " may send the attendees of its meetings a cancellation."
+	if links == nil || devices == nil || day == nil || !strings.HasSuffix(warning, schedules) {
 		t.Fatalf("s-profile-9 references %q, archive %q, head %q, warning %q: read it again", refs, archive, subject, warning)
 	}
 	job := regexp.MustCompile(`«([^»]+)»`).FindStringSubmatch(refs[1])
@@ -268,9 +269,8 @@ func TestCollectionDeleteSheetIsTheFrame(t *testing.T) {
 	}
 
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get(colDeleteHref(f), f.sess)))
-	host := strings.Split(string(sheet.Subject), " · ")[0]
-	if !strings.Contains(plainText(sheet.Warning), "deleted on "+host+".") {
-		t.Errorf("head %q, warning %q: the server named as in the head", sheet.Subject, sheet.Warning)
+	if want := strings.TrimSuffix(warning, schedules); plainText(sheet.Warning) != want {
+		t.Errorf("warning = %q, the frame %q", sheet.Warning, want)
 	}
 	if !equalStrings(refLines(sheet.References), refs) {
 		t.Errorf("references = %q,\nthe frame    %q", sheet.References, refs)

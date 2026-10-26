@@ -147,7 +147,7 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 // (account-11).
 const (
 	escrowWithdrawNote      view.Text = "Then nobody can recover the account."
-	escrowWithdrawSheetNote view.Text = "After withdrawal nobody can recover this account, including you."
+	escrowWithdrawSheetNote view.Text = "Then nobody can recover this account, you included."
 )
 
 // depositSheet is the unlock sheet with the deposit's purpose and button
