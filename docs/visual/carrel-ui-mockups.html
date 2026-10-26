@@ -900,6 +900,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-dialog .tc-head{padding-left:0;padding-right:0}
 .tc-dialog .tc-form{padding-left:0;padding-right:0}
 .tc-dialog .tc-formfoot{padding-left:0;padding-right:0}
+/* Вопрос мастера над полосой выбора — с зазором (восстановление, «уже есть»). */
+.tc-dialog > .tc-field + .tc-bar{margin-top:14px}
 .tc-steps{display:flex;gap:0;align-items:center;font-size:11px;color:var(--tc-dusty);margin-bottom:14px;letter-spacing:.1em;text-transform:uppercase}
 .tc-steps__item{padding:0 12px 0 0}
 .tc-steps__item.is-on{color:var(--tc-ink);font-weight:600}
@@ -6080,7 +6082,7 @@ Read  2 min ago · changed on server 3 days ago</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Синк-ап по релизу</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush">The event is deleted on nextcloud · Личный. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
+          <div class="tc-msg is-alert tc-msg--flush">Carrel keeps no copy: this cannot be undone.</div>
           <div class="tc-sheet__block">
             <div class="tc-rubric tc-rubric--bot7">What is pointing at it now</div>
             <div class="tc-stack tc-stack--gap-6 tc-line__text">
@@ -6088,7 +6090,7 @@ Read  2 min ago · changed on server 3 days ago</div>
               <span class="tc-stack__item"><b>2 records related to it</b> <span class="tc-dim">— among the loaded ones; their link is left pointing at nothing</span></span>
             </div>
           </div>
-          <div class="tc-msg tc-msg--flush">The event has 3 attendees, and nextcloud sends invitations itself: the server may tell them the meeting is cancelled.</div>
+          <div class="tc-msg tc-msg--flush">nextcloud may send its attendees a cancellation.</div>
           <div class="tc-sheet__block">
             <div class="tc-rubric tc-rubric--bot7">Attachments</div>
             <div class="tc-stack tc-stack--gap-6 tc-line__text">
@@ -7017,7 +7019,7 @@ Read  2 min ago · not changed on server</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Отправить документы в МФЦ</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush">The task is deleted on nextcloud · Дела. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
+          <div class="tc-msg is-alert tc-msg--flush">Carrel keeps no copy: this cannot be undone.</div>
           <div class="tc-sheet__block">
             <div class="tc-rubric tc-rubric--bot7">What is pointing at it now</div>
             <div class="tc-stack tc-stack--gap-6 tc-line__text">
@@ -8975,7 +8977,7 @@ Read  2 min ago</div>
             <button class="tc-btn tc-close tc-push" title="Close" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
           </div>
           <div class="tc-sheet__body">
-            <div class="tc-msg tc-msg--flush">There is nowhere to write. Connect an account that has a journal, or create a notebook after connecting — the note is not kept in this window.</div>
+            <div class="tc-msg tc-msg--flush">There is nowhere to write: connect an account that holds notes first.</div>
           </div>
           <div class="tc-sheet__foot">
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg>Connect account</button>
@@ -9947,7 +9949,7 @@ Read  2 min ago</div>
         </dl>
         <div class="tc-sec">
           <div class="tc-rubric">Links</div>
-          <div class="tc-sec__note">Carrel keeps no index of what points at this file. It may be attached to a note or an event — check before deleting.</div>
+          <div class="tc-sec__note">Notes or events may hold it as an attachment: Carrel does not look through the records.</div>
         </div>
         <div class="tc-danger"><button class="tc-btn is-danger-solid" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg>Delete</button></div>
       </div>
@@ -10145,7 +10147,7 @@ Read  2 min ago</div>
         </div>
         <div class="tc-sheet__body">
           <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" value="release-checklist.md" aria-label="Name"></div>
-          <div class="tc-msg tc-msg--flush">The name of a file is its address: a note or an event that keeps a link to it, and a published link, will not find it under the new name.</div>
+          <div class="tc-msg tc-msg--flush">Notes, events and published links that point at it will not find it under the new name.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="button">Rename</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/files/sftpgo/documents">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </div>
@@ -10165,14 +10167,35 @@ Read  2 min ago</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Documents / carrel / attachments</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush"><b>3</b> files, 4.4 MB, are deleted on sftpgo · vps. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
-          <div class="tc-msg tc-msg--flush">Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting.</div>
+          <div class="tc-msg is-alert tc-msg--flush">Carrel keeps no copy: this cannot be undone.</div>
+          <div class="tc-msg tc-msg--flush">Notes or events may hold them as attachments: Carrel does not look through the records.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="button">Delete</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/files/sftpgo/documents">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </div>
     </div>
   </div>
-  <figcaption>Удаление спрашивает один раз и говорит главное: сколько исчезнет, что копии нет и что ссылки на файлы никто не считал. Имени набирать не просят — это файлы, а не хранилище; у папки строка говорит «The folder and everything in it».</figcaption>
+  <figcaption>Удаление спрашивает один раз и говорит главное: что копии нет и что вложений в записях никто не искал. Опубликованный файл лист называет блоком «What is pointing at it now», как у коллекции; здесь среди выбранных таких нет. Имени набирать не просят — это файлы, а не хранилище.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 330px">
+  <div class="frame" data-frame="s-files-27">
+    <div class="frame-label"><span>Файлы · удаление папки</span><span class="frag">фрагмент</span><i>лист из Delete у папки</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-sheet tc-sheet--w480">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.6" fill="none" class="tc-ico--danger"><use href="#i-trash"/></svg>
+        <b class="tc-sheet__title">Delete folder</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Documents / carrel / attachments / 2026-07</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-msg is-alert tc-msg--flush">Everything in it goes too. Carrel keeps no copy: this cannot be undone.</div>
+          <div class="tc-msg tc-msg--flush">Notes or events may hold files from it as attachments: Carrel does not look through the records.</div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="button">Delete</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/files/sftpgo/documents">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Что внутри папки, на экране не видно, поэтому лист говорит: уходит всё. Без числа — его пришлось бы считать обходом всего дерева.</figcaption>
   </figure>
 
 <figure style="flex:1 1 330px">
@@ -11789,7 +11812,7 @@ Read  2 min ago</div>
       <div class="tc-main">
         <div class="tc-dialog">
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Merge on the server</div><div class="tc-head__sub">Вера Лебедева · 2 records</div></div></div>
-          <div class="tc-msg tc-msg--mr0-ml0"><b>One record is rewritten and 1 other deleted.</b> The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. This cannot be undone from here.</div>
+          <div class="tc-msg tc-msg--mr0-ml0">The other record is deleted. This cannot be undone.</div>
           <div class="tc-card tc-card--top14">
             <div class="tc-rubric">Where the merged record stays</div>
             <span class="tc-seg"><a class="tc-seg__opt" href="/app/duplicates/merge?group=g1&amp;keep=1">nextcloud · Контакты</a><a class="is-on tc-seg__opt" href="/app/duplicates/merge?group=g1&amp;keep=2">nextcloud · Архив</a></span>
@@ -11882,7 +11905,7 @@ Read  2 min ago</div>
       <div class="tc-main">
         <div class="tc-dialog">
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Merge on the server</div><div class="tc-head__sub">Дежурство: первая линия · 2 records</div></div></div>
-          <div class="tc-msg tc-msg--mr0-ml0"><b>One record is rewritten and 1 other deleted.</b> The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. This cannot be undone from here.</div>
+          <div class="tc-msg tc-msg--mr0-ml0">The other record is deleted. This cannot be undone.</div>
           <div class="tc-card tc-card--top14">
             <div class="tc-rubric">Where the merged record stays</div>
             <span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/duplicates/merge?group=g2&amp;keep=1">nextcloud · Работа</a><a class="tc-seg__opt" href="/app/duplicates/merge?group=g2&amp;keep=2">radicale · vps · Дежурства</a></span>
@@ -11959,7 +11982,7 @@ Read  2 min ago</div>
       <div class="tc-main">
         <div class="tc-dialog">
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Merge on the server</div><div class="tc-head__sub">Вера Лебедева · 2 records</div></div></div>
-          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Written, but not every other record was deleted.</b> The merge was written and 0 records deleted; Лебедева Вера refused, and the rest were not tried. Nothing is undone.</div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Merged, but nothing was deleted:</b> Лебедева Вера refused, the rest were not tried.</div>
           <div class="tc-card tc-card--top14">
             <div class="tc-rubric">What happened</div>
             <ul class="tc-stack tc-stack--gap-4 tc-card__list">
@@ -13068,6 +13091,71 @@ dav: HTTP 503: the server is busy</div>
 <figcaption><b>Тот же файл, тот же экран, другой исход.</b> На этом экране есть «Import», и по предыдущему кадру бросок открыл бы мастер. Но под курсором открытая карточка — и выигрывает она: файл становится вложением этого события, и никакого мастера не открывается. Совместимость расширения тут ни при чём: вложением карточка берёт любой файл, и <span class="tc-mono">.ics</span> в том числе.<br><br><b>Скрима здесь нет нарочно.</b> На предыдущем кадре цель — всё окно, и накладка гасит экран целиком. Здесь цель — одна панель, и обведена только она: граница подсветки и есть ответ на вопрос «куда это сейчас упадёт». Погасить всё окно в этот момент значило бы солгать о том, что произойдёт. Увести курсор с панели — подсветка съезжает на окно, и бросок снова ведёт в мастер.<br><br><b>Где окажется файл, сказано до броска</b>, а не после: до 2&nbsp;МБ — внутрь события, дальше — в папку вложений со ссылкой в записи (<a href="#attachments">7.12</a>). Размера в этот момент никто не знает — браузер его ещё не отдал, — поэтому коробка называет правило, а не исход.<br><br>На узком экране панели нет вовсе (<a href="#phone">10</a>), и спора о цели там не возникает.</figcaption>
 </figure>
 
+<h3 id="io-drop-fields">Бросок там, где файл выбирают</h3>
+<p>Где файл выбирают с компьютера, его можно и бросить на окно (Р-70): лист броска называет форму этого поля, брошенный файл встаёт в поле, как выбранный, дальше путь тот же. Ближайшая цель по-прежнему побеждает: открытая в панели карточка берёт файл сама (<code>s-io-2</code>).</p>
+<table class="doc">
+  <tr><th style="width:34%">Где</th><th style="width:30%">Лист броска</th><th>Куда встаёт файл</th></tr>
+  <tr><td>Список записей, первый шаг импорта</td><td>«Drop to import» (<code>s-io-1</code>)</td><td>поле файла мастера</td></tr>
+  <tr><td>Событие, задача, заметка на своей странице</td><td>«Drop to attach» с названием записи</td><td>Attach → From this computer</td></tr>
+  <tr><td>Правка и новая запись: событие, задача, заметка</td><td>«Drop to attach · Attached when you save»</td><td>список вложений правки</td></tr>
+  <tr><td>Правка и новый контакт</td><td>«Drop a photo»</td><td>поле фотографии</td></tr>
+  <tr><td>Восстановление с этого компьютера</td><td>«Drop the archive»</td><td>поле архива</td></tr>
+  <tr><td>Папка, лист выбора файла, пустая папка</td><td>как нарисованы (<code>s-files-1</code>, <code>s-notes-11</code>, <code>states-32</code>)</td><td>загрузка в открытую папку</td></tr>
+</table>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<figure style="flex:1 1 330px">
+<div class="frame" data-frame="s-io-20">
+  <div class="frame-label"><span>Событие на своей странице · бросок</span><span class="frag">фрагмент</span><i>лист броска</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--pad14">
+        <div class="tc-empty tc-empty--drop">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-clip"/></svg>
+          <b class="tc-empty__lead">Drop to attach</b>
+          <span class="tc-dim--t12-5">to <b>Синк-ап по релизу</b></span>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Over 2 MB it goes to <span class="tc-mono">Documents / carrel</span> and the event keeps a link</span>
+        </div>
+  </div>
+</div>
+</figure>
+<figure style="flex:1 1 330px">
+<div class="frame" data-frame="s-io-21">
+  <div class="frame-label"><span>Правка события · бросок</span><span class="frag">фрагмент</span><i>лист броска</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--pad14">
+        <div class="tc-empty tc-empty--drop">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-clip"/></svg>
+          <b class="tc-empty__lead">Drop to attach</b>
+          <span class="tc-dim--t12-5">Attached when you save</span>
+        </div>
+  </div>
+</div>
+</figure>
+<figure style="flex:1 1 330px">
+<div class="frame" data-frame="s-io-22">
+  <div class="frame-label"><span>Правка контакта · бросок фотографии</span><span class="frag">фрагмент</span><i>лист броска</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--pad14">
+        <div class="tc-empty tc-empty--drop">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-img"/></svg>
+          <b class="tc-empty__lead">Drop a photo</b>
+          <span class="tc-dim--t12-5">It replaces the photo when you save</span>
+        </div>
+  </div>
+</div>
+</figure>
+<figure style="flex:1 1 330px">
+<div class="frame" data-frame="s-io-23">
+  <div class="frame-label"><span>Восстановление с этого компьютера · бросок</span><span class="frag">фрагмент</span><i>лист броска</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--pad14">
+        <div class="tc-empty tc-empty--drop">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-restore"/></svg>
+          <b class="tc-empty__lead">Drop the archive</b>
+          <span class="tc-dim--t12-5">One <span class="tc-mono">.zip</span> of a Carrel backup</span>
+        </div>
+  </div>
+</div>
+</figure>
+</div>
+
+
 <h3 id="io-source">Шаг 1 · откуда берут</h3>
 <p>Источник выбирают до предпросмотра, и вместе с ним — коллекцию, куда всё ляжет. Экранов здесь два, а не пять: у контактов, событий и задач он общий, у заметок свой, потому что источника у них два.</p>
 
@@ -13119,7 +13207,6 @@ dav: HTTP 503: the server is busy</div>
               </span></div>
             <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
           </div>
-          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
         </div>
       </div>
     </div>
@@ -13180,7 +13267,6 @@ dav: HTTP 503: the server is busy</div>
               </span></div>
             <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar 2.0. One file holds any number of events; tasks and journal entries in it are skipped and named in the report.</div>
           </div>
-          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
         </div>
       </div>
     </div>
@@ -13236,7 +13322,6 @@ dav: HTTP 503: the server is busy</div>
               </span></div>
             <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar 2.0. One file holds any number of tasks; events and journal entries in it are skipped and named in the report.</div>
           </div>
-          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
         </div>
       </div>
     </div>
@@ -13293,7 +13378,6 @@ dav: HTTP 503: the server is busy</div>
               </span></div>
             <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
           </div>
-          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
         </div>
       </div>
     </div>
@@ -13351,7 +13435,6 @@ dav: HTTP 503: the server is busy</div>
               </span></div>
             <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
           </div>
-          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
         </div>
       </div>
     </div>
@@ -13412,7 +13495,6 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg tc-msg--mr0-ml0">What is skipped is listed in the report, and so is what could not be read.</div>
         </div>
       </div>
     </div>
@@ -13499,7 +13581,7 @@ dav: HTTP 503: the server is busy</div>
           <button class="tc-btn is-primary" type="button">Preview folder</button>
         </div>
       </div>
-      <div class="tc-msg tc-msg--mr0-ml0">Front matter is read when present: title, date, tags, UID and <span class="tc-mono">X-</span>properties exported earlier. A file without it becomes a note dated by its own timestamp.</div>
+      <div class="tc-msg tc-msg--mr0-ml0">A file without front matter is dated by its own timestamp.</div>
     </div></div></div>
   </div>
 </div>
@@ -13582,7 +13664,6 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg tc-msg--mr0-ml0">What is skipped is listed in the report, and so is what could not be read.</div>
         </div>
       </div>
     </div>
@@ -13653,7 +13734,6 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 23: cannot read DTSTART «2026-02-30»</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg tc-msg--mr0-ml0">A repeating event keeps its rule: the series is one record, not fifty-two.</div>
         </div>
       </div>
     </div>
@@ -13740,7 +13820,6 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Дела.ics</td><td>Сдать отчёт</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 88: cannot read DUE «2026-13-01»</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg tc-msg--mr0-ml0">STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done.</div>
         </div>
       </div>
     </div>
@@ -13824,7 +13903,6 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">pustoj.md</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">Empty file: nothing to store and nothing to name it by</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg tc-msg--mr0-ml0">Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties.</div>
         </div>
       </div>
     </div>
@@ -14232,7 +14310,7 @@ dav: HTTP 503: the server is busy</div>
         <b class="tc-sheet__title">Withdraw my deposited key</b>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush">After withdrawal nobody can recover this account, including you. The copy of your data key on this server is destroyed; your records and connections stay as they are.</div>
+          <div class="tc-msg is-alert tc-msg--flush">Then nobody can recover this account, you included.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="submit">Withdraw my deposited key</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -15876,7 +15954,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">sftpgo · vps · Documents</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush">The folder and all <b>412</b> files in it are deleted on sftpgo · vps. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
+          <div class="tc-msg is-alert tc-msg--flush">Everything in it goes too. Carrel keeps no copy: this cannot be undone.</div>
           <div class="tc-sheet__block">
             <div class="tc-rubric tc-rubric--bot7">What is pointing at it now</div>
             <div class="tc-stack tc-stack--gap-6 tc-line__text">
@@ -15884,7 +15962,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <span class="tc-stack__item"><b>Backup job «Личное на домашний диск»</b> <span class="tc-dim">— copies this folder; it will run one short and say so</span></span>
             </div>
           </div>
-          <div class="tc-msg tc-msg--flush">Last time it was in an archive: <span class="tc-mono">2026-08-14</span>. Restoring brings the files back into a <b>new</b> folder — not into this one, and not to this address.</div>
+          <div class="tc-msg tc-msg--flush">Last archived <span class="tc-mono">2026-08-14</span>; a restore makes a <b>new</b> folder at a new address.</div>
           <div class="tc-line tc-line--gap-8">
             <a class="tc-btn" href="/app/files/sftpgo/documents"><svg viewBox="0 0 24 24"><use href="#i-file"/></svg>Open in Files</a>
             <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Download what you need from it there first.</span>
@@ -16011,7 +16089,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush">The server would not rename it. Nothing changed, and the form is as you left it.</div>
+          <div class="tc-msg is-alert tc-msg--flush">The server would not rename it.</div>
           <div class="tc-diag">[rename]  PROPPATCH /remote.php/dav/calendars/mix/birthdays/ → 403
 &lt;d:error&gt;&lt;s:message&gt;This calendar is maintained by the server&lt;/s:message&gt;&lt;/d:error&gt;</div>
           <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in" type="text" name="name" value="ДР друзей" aria-label="Name"></div>
@@ -16810,7 +16888,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">radicale · vps</span>
             </div>
             <div class="tc-sheet__body">
-              <div class="tc-msg is-alert tc-msg--flush">The server would not make it. Nothing was created, and the form is as you left it.</div>
+              <div class="tc-msg is-alert tc-msg--flush">The server would not make it.</div>
               <div class="tc-diag">[create]  MKCALENDAR /mix/poezdki/ → 403
               &lt;D:error&gt;&lt;D:need-privileges/&gt;&lt;/D:error&gt;
               no DAV:bind on the calendar home-set</div>
@@ -17084,7 +17162,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Личный</span>
             </div>
             <div class="tc-sheet__body">
-              <div class="tc-msg is-alert tc-msg--flush">The calendar and all <b>128</b> events in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with. nextcloud may tell the attendees of its meetings that they are cancelled.</div>
+              <div class="tc-msg is-alert tc-msg--flush">Carrel keeps no copy: this cannot be undone. nextcloud may send the attendees of its meetings a cancellation.</div>
               <div class="tc-sheet__block">
                 <div class="tc-rubric tc-rubric--bot7">What is pointing at it now</div>
                 <div class="tc-stack tc-stack--gap-6 tc-line__text">
@@ -17093,7 +17171,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                   <span class="tc-stack__item"><b>3 devices through davloom</b> <span class="tc-dim">— it disappears for them at the next sync</span></span>
                 </div>
               </div>
-              <div class="tc-msg tc-msg--flush">Last time it was in an archive: <span class="tc-mono">2026-08-14</span>. Restoring brings the records back into a <b>new</b> collection — not into this one, and not to this address.</div>
+              <div class="tc-msg tc-msg--flush">Last archived <span class="tc-mono">2026-08-14</span>; a restore makes a <b>new</b> collection at a new address.</div>
               <div class="tc-line tc-line--gap-8">
                 <a class="tc-btn" href="/app/calendar/nextcloud/lichnyj/export"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download <span class="tc-mono tc-mono--t11">.ics</span> first</a>
                 <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">128 events, one file, straight to you</span>
@@ -18061,7 +18139,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </div>
           </div>
         </form>
-        <div class="tc-msg is-alert tc-msg--mr0-ml0">The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered.</div>
+        <div class="tc-msg is-alert tc-msg--mr0-ml0">Shown once and stored nowhere: lost, it cannot be recovered.</div>
         <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="device">Create password</button><button class="tc-btn" type="button">Cancel</button></div>
       </div></div></div>
         <div class="tc-scrim tc-scrim--padt26">
@@ -18370,7 +18448,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </span>
             <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
         </div>
-        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
+        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices; only revoking does.</div>
         <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">3</span></div>
         <table class="tc-table tc-table--fit">
           <thead><tr><th>Device</th><th>What it can see and do</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
@@ -18480,7 +18558,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </div>
           </div>
         </form>
-        <div class="tc-msg is-alert tc-msg--mr0-ml0">The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered.</div>
+        <div class="tc-msg is-alert tc-msg--mr0-ml0">Shown once and stored nowhere: lost, it cannot be recovered.</div>
         <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="device">Create password</button><button class="tc-btn" type="button">Cancel</button></div>
       </div></div></div>
     </div>
@@ -18626,7 +18704,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </span>
             <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
         </div>
-        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
+        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices; only revoking does.</div>
         <div class="tc-list__group"><span class="tc-rubric">Devices</span></div>
         <div class="tc-empty"><b>No devices yet.</b></div>
       </div>
@@ -18686,7 +18764,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </span>
             <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
         </div>
-        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
+        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices; only revoking does.</div>
         <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">3</span></div>
         <table class="tc-table tc-table--fit">
           <thead><tr><th>Device</th><th>What it can see and do</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
@@ -18808,7 +18886,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </span>
             <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
         </div>
-        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
+        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices; only revoking does.</div>
         <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">3</span></div>
         <table class="tc-table tc-table--fit">
           <thead><tr><th>Device</th><th>What it can see and do</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
@@ -18899,7 +18977,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </span>
             <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
         </div>
-        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
+        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices; only revoking does.</div>
         <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">3</span></div>
         <table class="tc-table tc-table--fit">
           <thead><tr><th>Device</th><th>What it can see and do</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
@@ -20147,6 +20225,8 @@ jobs:
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Restore from 2026-08-14</div><div class="tc-head__sub">Job «Личное на домашний диск» · manifest read · 4 collections · 1 214 records · <span class="tc-mono">carrel-backup/2026-08-14T09-12.zip</span></div></div>
         <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="submit" name="op" value="restore"><svg viewBox="0 0 24 24"><use href="#i-restore"/></svg>Restore 3 collections</button></div>
       </div>
+      <div class="tc-field is-own-line"><label>5 records of the archive are already here and differ</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/settings/backup/restore?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/settings/backup/restore?existing=copy">Import as copies</a></span>
+        <span class="tc-field__hint">They stay as they are here; the archive's version is not written.</span></div>
       <div class="tc-bar tc-bar--sel">
         <span class="tc-bar__count">3 selected</span>
         <span class="tc-bar__sep"></span>
@@ -20159,24 +20239,24 @@ jobs:
         <tbody>
           <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" name="collection" value="nextcloud/personal" aria-label="Pick" checked></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">nextcloud / personal</span></span></td><td class="tc-mono tc-table__n3 is-2nd">312</td>
-            <td class="tc-table__n4 tc-table__n4--pos-relative"><details class="tc-drop"><summary class="tc-in is-pick" title="Restore into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop tc-menu--w290"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="radicale|proekty"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="nextcloud|lichnyj" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="nextcloud|rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="new">New collection</label><label class="tc-menu__item tc-menu__item--dusty"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="skip">Skip this one</label></div></details></td><td>matched by path — 4 records missing, will be created</td></tr>
+            <td class="tc-table__n4 tc-table__n4--pos-relative"><details class="tc-drop"><summary class="tc-in is-pick" title="Restore into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop tc-menu--w290"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="radicale|proekty"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="nextcloud|lichnyj" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="nextcloud|rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="new">New collection</label><label class="tc-menu__item tc-menu__item--dusty"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.1" value="skip">Skip this one</label></div></details></td><td>matched by path — 4 records missing, will be created · 3 already here</td></tr>
           <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" name="collection" value="radicale/projects" aria-label="Pick" checked></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">radicale / projects</span></span></td><td class="tc-mono tc-table__n3 is-2nd">86</td>
             <td class="tc-table__n4 tc-table__n4--pos-relative"><details class="tc-drop"><summary class="tc-in is-pick" title="Restore into"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.2" value="radicale|proekty" checked><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.2" value="nextcloud|lichnyj"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.2" value="nextcloud|rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.2" value="new">New collection</label><label class="tc-menu__item tc-menu__item--dusty"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.2" value="skip">Skip this one</label></div></details></td><td>matched by path — no differences</td></tr>
           <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" name="collection" value="baikal/shared" aria-label="Pick" checked></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#9A9280"></span><span class="tc-table__filename">baikal / shared</span></span></td><td class="tc-mono tc-table__n3 is-2nd">140</td>
             <td class="tc-table__n4 tc-table__n4--pos-relative"><details class="tc-drop"><summary class="tc-in is-pick" title="Restore into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop tc-menu--w290"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.3" value="radicale|proekty"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.3" value="nextcloud|lichnyj" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.3" value="nextcloud|rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.3" value="new">New collection</label><label class="tc-menu__item tc-menu__item--dusty"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into.3" value="skip">Skip this one</label></div></details></td>
-            <td class="tc-dim--danger">that server is gone — another collection chosen</td></tr>
+            <td><span class="tc-dim--danger">that server is gone — another collection chosen</span> · 2 already here</td></tr>
           <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" name="collection" value="nextcloud/birthdays" aria-label="Pick"></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#A05A2C"></span><span class="tc-table__filename">nextcloud / birthdays</span></span></td><td class="tc-mono tc-table__n3 is-2nd">51</td>
             <td class="tc-mono is-ph tc-table__n4 tc-table__n4--dusty">—</td><td class="tc-dim">skip</td></tr>
         </tbody>
       </table>
-      <div class="tc-msg is-alert">Restoring <b>creates</b> records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.</div>
+      <div class="tc-msg is-alert tc-msg--mr0-ml0">Restoring is an import: records made since the archive stay, nothing is deleted.</div>
     </form></div></div>
   </div>
 </div>
-<figcaption><b>Как выбирают.</b> Флажок в строке — что восстанавливать; колонка «Restore into» — куда, и это обычный выпадающий список коллекций с полосками, а не угадывание по имени. Carrel заранее подставляет совпавшую по пути коллекцию, поэтому в обычном случае трогать её не нужно вовсе. Несколько строк отмечаются флажками (с <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Shift</kbd> — диапазон), и тогда «Restore into» в панели сверху с выбором цели рядом назначает её всем сразу; у каждой строки цель — закрытый выбор, без сценария его меняют там же (Carrel 212 пп. 6, 7) — иначе при двадцати коллекциях выбор пришлось бы повторять двадцать раз. Последний пункт списка — «Skip this one», потому что «не восстанавливать эту» — такой же выбор цели, как и остальные.<br><br>Главный экран всей функции: не «восстановить», а <b>что именно и куда</b>. Коллекция, чей сервер исчез, не блокирует восстановление — ей назначают другую цель прямо в строке. Обещание сформулировано так, чтобы его можно было выполнить: восстановление — это импорт, а не откат.</figcaption>
+<figcaption><b>Как выбирают.</b> Флажок в строке — что восстанавливать; колонка «Restore into» — куда, и это обычный выпадающий список коллекций с полосками, а не угадывание по имени. Carrel заранее подставляет совпавшую по пути коллекцию, поэтому в обычном случае трогать её не нужно вовсе. Несколько строк отмечаются флажками (с <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Shift</kbd> — диапазон), и тогда «Restore into» в панели сверху с выбором цели рядом назначает её всем сразу; у каждой строки цель — закрытый выбор, без сценария его меняют там же (Carrel 212 пп. 6, 7) — иначе при двадцати коллекциях выбор пришлось бы повторять двадцать раз. Последний пункт списка — «Skip this one», потому что «не восстанавливать эту» — такой же выбор цели, как и остальные.<br><br>Главный экран всей функции: не «восстановить», а <b>что именно и куда</b>. Коллекция, чей сервер исчез, не блокирует восстановление — ей назначают другую цель прямо в строке. Обещание сформулировано так, чтобы его можно было выполнить: восстановление — это импорт, а не откат. <b>Что уже есть и отличается</b> — тот же вопрос, что у импорта: Skip them по умолчанию, Replace them, Import as copies (владелец, 26.10).</figcaption>
 </figure>
 
 <figure>
@@ -20219,6 +20299,8 @@ jobs:
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Restore from 2026-08-14</div><div class="tc-head__sub">From this computer · manifest read · 4 collections · 1 214 records · <span class="tc-mono">carrel-backup-2026-08-14.zip</span></div></div>
         <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="submit" name="op" value="restore"><svg viewBox="0 0 24 24"><use href="#i-restore"/></svg>Restore 3 collections</button></div>
       </div>
+      <div class="tc-field is-own-line"><label>Records of the archive that are already here and differ</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/settings/backup/restore?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/settings/backup/restore?existing=copy">Import as copies</a></span>
+        <span class="tc-field__hint">They stay as they are here; the archive's version is not written.</span></div>
       <div class="tc-bar tc-bar--sel">
         <span class="tc-bar__count">3 selected</span>
         <span class="tc-bar__sep"></span>
@@ -20244,7 +20326,7 @@ jobs:
             <td class="tc-mono is-ph tc-table__n4 tc-table__n4--dusty">—</td><td class="tc-dim">skip</td></tr>
         </tbody>
       </table>
-      <div class="tc-msg is-alert">Restoring <b>creates</b> records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.</div>
+      <div class="tc-msg is-alert tc-msg--mr0-ml0">Restoring is an import: records made since the archive stay, nothing is deleted.</div>
     </form></div></div>
   </div>
 </div>
@@ -20288,22 +20370,21 @@ jobs:
       </div>
       <div class="tc-main"><div class="tc-dialog is-wide">
       <div class="tc-steps"><span class="tc-steps__item">1 · Archive</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Match</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">3 · Report</span></div>
-      <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Restored from 2026-08-14</div><div class="tc-head__sub">3 collections · 143 records created · 2 with a new UID · 1 not restored</div></div>
+      <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Restored from 2026-08-14</div><div class="tc-head__sub">3 collections · 141 records created · 5 already here, skipped · 1 not restored</div></div>
         <div class="tc-acts"><a class="tc-btn is-primary" href="/app/settings/backup">Done</a></div>
       </div>
       <table class="tc-table tc-table--fit">
         <thead><tr><th>In the archive</th><th class="tc-table__n4 tc-table__col--w26">Restored into</th><th class="tc-table__n3 is-2nd">Created</th><th>What happened</th></tr></thead>
         <tbody>
-          <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">nextcloud / personal</span></span></td><td class="tc-mono tc-table__n4">nextcloud · Личный</td><td class="tc-mono tc-table__n3 is-2nd">4</td><td>4 missing records created</td></tr>
+          <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">nextcloud / personal</span></span></td><td class="tc-mono tc-table__n4">nextcloud · Личный</td><td class="tc-mono tc-table__n3 is-2nd">4</td><td>4 missing records created · 3 already here — skipped</td></tr>
           <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">radicale / projects</span></span></td><td class="tc-mono tc-table__n4">radicale · vps · Проекты</td><td class="tc-mono tc-table__n3 is-2nd">0</td><td class="tc-dim">no differences</td></tr>
-          <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#9A9280"></span><span class="tc-table__filename">baikal / shared</span></span></td><td class="tc-mono tc-table__n4">nextcloud · Личный</td><td class="tc-mono tc-table__n3 is-2nd">139</td><td>2 with a new UID · <span class="tc-dim--danger">1 not restored: the server refused it (413, too large)</span></td></tr>
+          <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#9A9280"></span><span class="tc-table__filename">baikal / shared</span></span></td><td class="tc-mono tc-table__n4">nextcloud · Личный</td><td class="tc-mono tc-table__n3 is-2nd">137</td><td>2 already here — skipped · <span class="tc-dim--danger">1 not restored: the server refused it (413, too large)</span></td></tr>
         </tbody>
       </table>
-      <div class="tc-msg">Nothing on the server was deleted or overwritten.</div>
     </div></div></div>
   </div>
 </div>
-<figcaption>Отчёт — по строке на коллекцию: куда легло, сколько записей создано, у скольких новый UID (совпал с существующим), что не легло и почему. Ничего не удалено и не перезаписано — это сказано тем же сообщением, что на шаге 2. Done ведёт к заданиям.</figcaption>
+<figcaption>Отчёт — по строке на коллекцию: куда легло, сколько записей создано, что уже было и как с ним поступили (ответ на вопрос шага 2), что не легло и почему. Done ведёт к заданиям.</figcaption>
 </figure>
 
 <h2 id="s-publish">7.16 Настройки · публикация по ссылке</h2>
@@ -21613,7 +21694,7 @@ Read  2 min ago</div>
             <div class="tc-sheet__head"><b class="tc-sheet__title">Publish a folder</b><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Материалы к релизу · 12 files</span></div>
             <div class="tc-sheet__body">
               <div class="tc-field tc-field--sm"><label>Link lives for</label><details class="tc-drop"><summary class="tc-in is-pick">14 days</summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="7">7 days</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="14" checked>14 days</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="30">30 days</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="never">No expiry</label></div></details></div>
-              <div class="tc-msg tc-msg--flush">The visitor gets the folder with everything inside it, read-only, and the same address mounts as a drive in Windows, macOS and Linux.</div>
+              <div class="tc-msg tc-msg--flush">The same address mounts as a read-only drive in Windows, macOS and Linux.</div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Create link</button><a class="tc-btn" href="/app/files">Cancel</a></div>
           </form>
@@ -22652,7 +22733,7 @@ Read  2 min ago</div>
                   <button class="tc-btn is-sm" type="submit" formaction="/app/mail/send?op=change&amp;i=3">Change…</button>
                   <button class="tc-btn is-sm" title="Remove" type="submit" formaction="/app/mail/send?op=remove&amp;i=3"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button></div>
               </div>
-              <div class="tc-msg is-accent tc-msg--flush-top11">Two of these go as links, not as files: the PDF is over the 2 MB ceiling, and a folder always goes as a link. Each link can be revoked in <b>Published links</b> — including for the people in this letter.</div>
+              <div class="tc-msg is-accent tc-msg--flush-top11">The PDF (over 2 MB) and the folder go as links; revoking one in <b>Published links</b> closes it for this letter too.</div>
             </div>
           </div>
           <div class="tc-sheet__foot">
@@ -23110,7 +23191,7 @@ Read  2 min ago</div>
             </table>
           </div>
         </div>
-        <div class="tc-msg is-accent tc-msg--m0-14-12">This file is over the limit for an attachment, so the letter will carry a secret link to it instead. The link is listed in <b>Published links</b>, works for 30 days, and revoking it there closes it for whoever got the letter.</div>
+        <div class="tc-msg is-accent tc-msg--m0-14-12">Over the attachment limit: the letter carries a link instead, for 30 days. Revoke it in <b>Published links</b>.</div>
       </div>
       <div class="tc-sheet__foot">
         <button class="tc-btn is-primary" type="submit"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg>Attach</button>
@@ -23326,7 +23407,7 @@ Read  2 min ago</div>
             </table>
           </div>
         </div>
-        <div class="tc-msg is-accent tc-msg--m0-14-12">A folder always goes as a link: the letter carries a secret link to it, with all that is in it. The link is listed in <b>Published links</b>, works for 30 days, and revoking it there closes it for whoever got the letter.</div>
+        <div class="tc-msg is-accent tc-msg--m0-14-12">A folder goes as a link, for 30 days. Revoke it in <b>Published links</b>.</div>
       </div>
       <div class="tc-sheet__foot">
         <button class="tc-btn is-primary" type="submit"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg>Attach</button>
@@ -23734,7 +23815,7 @@ password  9f2-brick-lamp</div>
         </div>
         <div class="tc-sheet__body">
           <div class="tc-field tc-field--w100"><label>Whose</label><span class="tc-in is-pick"><select class="tc-in__list" name="login" aria-label="Whose"><option value="anna.user" selected>anna · User</option></select></span></div>
-          <div class="tc-msg is-alert tc-msg--flush">The passwords this person saved for DAV servers are sealed with their own password, and a reset destroys them: every account they connected has to be connected again, and their published links, devices and external backup triggers stop. Their records on the servers stay as they are.</div>
+          <div class="tc-msg is-alert tc-msg--flush">A reset destroys the DAV passwords this person saved: every account has to be connected again, and their published links, devices and external backup triggers stop.</div>
           <div class="tc-field tc-field--w100"><label>Temporary password</label><input class="tc-in is-mono" type="text" name="password" value="4c1-tide-oven" aria-label="Temporary password"><span class="tc-field__hint">Hand it over yourself; they choose their own at the next sign-in. If their key is deposited, recover the account in Key escrow instead: nothing is destroyed then.</span></div>
           <div class="tc-field tc-field--w100"><label>Type the login to confirm</label><input class="tc-in is-focus is-ph" type="text" name="confirm" placeholder="anna" aria-label="Type the login to confirm"></div>
         </div>
@@ -23816,7 +23897,7 @@ password  9f2-brick-lamp</div>
         </div>
         <div class="tc-sheet__body">
           <div class="tc-field tc-field--w100"><label>Whose</label><span class="tc-in is-pick"><select class="tc-in__list" name="login" aria-label="Whose"><option value="anna.user" selected>anna · User</option></select></span></div>
-          <div class="tc-msg is-alert tc-msg--flush">The passwords this person saved for DAV servers are sealed with their own password, and a reset destroys them: every account they connected has to be connected again, and their published links, devices and external backup triggers stop. Their records on the servers stay as they are.</div>
+          <div class="tc-msg is-alert tc-msg--flush">A reset destroys the DAV passwords this person saved: every account has to be connected again, and their published links, devices and external backup triggers stop.</div>
           <div class="tc-field tc-field--w100"><label>Temporary password</label><input class="tc-in is-mono" type="text" name="password" value="4c1-tide-oven" aria-label="Temporary password"><span class="tc-field__hint">Hand it over yourself; they choose their own at the next sign-in. If their key is deposited, recover the account in Key escrow instead: nothing is destroyed then.</span></div>
           <div class="tc-field tc-field--w100"><label>Type the login to confirm</label><input class="tc-in is-focus is-ph" type="text" name="confirm" placeholder="anna" aria-label="Type the login to confirm"></div>
         </div>
@@ -25023,7 +25104,7 @@ password  9f2-brick-lamp</div>
         <div class="tc-dialog tc-dialog--max440-padt0-padb0">
           <div class="tc-head__title tc-head__title--bot4">Create an account</div>
           <div class="tc-head__sub tc-head__sub--bot12">A confirmation link will be sent to the address you give; the account cannot be used until you open it.</div>
-          <div class="tc-msg is-alert tc-msg--flush-bot12">Your password is the only key to your own data. Nobody — including this server — can recover it for you.</div>
+          <div class="tc-msg is-alert tc-msg--flush-bot12">Nobody can recover this password, this server included.</div>
           <div class="tc-form tc-form--pad0">
             <div class="tc-field tc-field--md"><label>Login</label><input class="tc-in is-focus" type="text" value="viktor" aria-label="Login"></div>
             <div class="tc-field tc-field--md"><label>Email</label><input class="tc-in" type="text" value="v@example.org" aria-label="Email"></div>
@@ -25046,7 +25127,7 @@ password  9f2-brick-lamp</div>
         <div class="tc-dialog tc-dialog--max440-padt0-padb0">
           <div class="tc-head__title tc-head__title--bot4">Join carrel.example</div>
           <div class="tc-head__sub tc-head__sub--bot12">mix invited you. Choose a login and a password.</div>
-          <div class="tc-msg is-alert tc-msg--flush-bot12">Your password is the only key to your own data. Nobody — including this server — can recover it for you.</div>
+          <div class="tc-msg is-alert tc-msg--flush-bot12">Nobody can recover this password, this server included.</div>
           <div class="tc-form tc-form--pad0">
             <div class="tc-field tc-field--md"><label>Login</label><input class="tc-in is-focus" type="text" value="anna" aria-label="Login"></div>
             <div class="tc-field tc-field--md"><label>Email</label><input class="tc-in" type="text" value="anna@example.org" aria-label="Email"><span class="tc-field__hint">The address the invitation went to. Another one is confirmed by a letter.</span></div>
@@ -25068,7 +25149,7 @@ password  9f2-brick-lamp</div>
         <div class="tc-dialog tc-dialog--max440-padt0-padb0">
           <div class="tc-head__title tc-head__title--bot4">Join carrel.example</div>
           <div class="tc-head__sub tc-head__sub--bot12">mix invited you. Choose a login and a password.</div>
-          <div class="tc-msg is-alert tc-msg--flush-bot12">Your password is the only key to your own data. Nobody — including this server — can recover it for you.</div>
+          <div class="tc-msg is-alert tc-msg--flush-bot12">Nobody can recover this password, this server included.</div>
           <div class="tc-form tc-form--pad0">
             <div class="tc-field tc-field--md"><label>Login</label><input class="tc-in is-focus" type="text" value="anna" aria-label="Login"></div>
             <div class="tc-field tc-field--md"><label>Email</label><input class="tc-in is-ph" type="text" placeholder="you@example.org" aria-label="Email"><span class="tc-field__hint">Confirmed by a letter.</span></div>
@@ -25112,7 +25193,7 @@ Sending again with the same login and address, while the account is unconfirmed,
         <div class="tc-dialog tc-dialog--max440-padt0-padb0">
           <div class="tc-head__title tc-head__title--bot4">Set up Carrel</div>
           <div class="tc-head__sub tc-head__sub--bot12">The account you create here is the first one, and it can manage everyone else.</div>
-          <div class="tc-msg is-alert tc-msg--flush-bot12">Your password is the only key to your own data. Nobody — including this server — can recover it for you.</div>
+          <div class="tc-msg is-alert tc-msg--flush-bot12">Nobody can recover this password, this server included.</div>
           <div class="tc-form tc-form--pad0">
             <div class="tc-field tc-field--md"><label>Login</label><input class="tc-in is-focus is-mono is-ph" type="text" placeholder="a-z 0-9 . _ -" aria-label="Login"></div>
             <div class="tc-field tc-field--md"><label>Email <span class="tc-dim">(optional)</span></label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Email"></div>
@@ -25281,7 +25362,7 @@ The account itself stays: same login, role and confirmed address, the same first
         <div class="tc-dialog tc-dialog--max440-padt0-padb0">
           <div class="tc-head__title tc-head__title--bot4">Set a new password</div>
           <div class="tc-head__sub tc-head__sub--bot12">The account <span class="tc-mono">mix</span> is empty. Nothing was kept.</div>
-          <div class="tc-msg is-alert tc-msg--flush-bot12">Your password is the only key to your own data. Nobody — including this server — can recover it for you.</div>
+          <div class="tc-msg is-alert tc-msg--flush-bot12">Nobody can recover this password, this server included.</div>
           <div class="tc-form tc-form--pad0">
             <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-focus" type="text" value="••••••••••••" aria-label="Password"></div>
             <div class="tc-field tc-field--md"><label>Repeat password</label><input class="tc-in" type="text" value="••••••••••••" aria-label="Repeat password"></div>
@@ -26572,7 +26653,7 @@ Read    2 min ago</div>
                 <div class="tc-tree__row tc-tree__row--padl22"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Проекты</div>
               </div>
             </div>
-            <div class="tc-msg is-accent tc-msg--flush">No answer goes to the organiser. The event lands in your calendar, and Анна does not learn from Carrel that you accepted. If she is waiting for an answer, reply to her letter.</div>
+            <div class="tc-msg is-accent tc-msg--flush">Анна gets no answer from Carrel; if she is waiting for one, reply to her letter.</div>
           </div>
           <div class="tc-sheet__foot">
             <button class="tc-btn is-primary" type="button">Add to Работа</button>
@@ -27317,7 +27398,7 @@ SMTP  smtp.yandex.ru:465  TLS
       from autoconfig.yandex.ru</div>
             <button class="tc-btn is-sm" type="button">Enter servers by hand</button>
           </div>
-          <div class="tc-msg is-alert tc-msg--flush tc-grow"><b>Key escrow is on on this instance.</b> The administrator can open the passwords you keep in Carrel, and this one too. Whoever reads a mailbox can reset the passwords of your other services through it.</div>
+          <div class="tc-msg is-alert tc-msg--flush tc-grow"><b>Key escrow is on:</b> the administrator can open this password too — and through a mailbox, reset your other passwords.</div>
         </div>
         <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Connect</button><button class="tc-btn" type="button">Test only</button><button class="tc-btn" type="button">Cancel</button></div>
       </div></div>
@@ -27399,7 +27480,7 @@ SMTP  smtp.yandex.ru:465  TLS
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max560">
         <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect a mailbox</div><div class="tc-head__sub">office · m.yenuchenko@office.example</div></div></div>
-        <div class="tc-msg is-accent tc-msg--flush"><b>Saved. Reading works, sending does not.</b> The mail server let Carrel read the mailbox but refused the password for sending. You can read office now; letters from it cannot go out until this is fixed.</div>
+        <div class="tc-msg is-accent tc-msg--flush"><b>Saved. Reading works, sending does not:</b> the server refused the password for sending.</div>
         <div class="tc-sec tc-sec--flush-flush-padt11">
           <div class="tc-rubric">What was tried</div>
           <div class="tc-diag">[srv]   _imaps._tcp.office.example       → mail.office.example:993
@@ -27692,7 +27773,7 @@ SMTP  mail.home.example:465  TLS
           <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">home · Trash · 3 letters</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush">The 3 letters are deleted on <span class="tc-mono">mail.home.example</span>. Carrel keeps no copy of mail, so nothing here can bring them back.</div>
+          <div class="tc-msg is-alert tc-msg--flush">Carrel keeps no copy: this cannot be undone.</div>
           <div class="tc-line tc-line--gap-8"><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download <span class="tc-mono tc-mono--t11">.eml</span> first</button><span class="tc-dim tc-dim--t11-5 tc-dim--wrap">3 files, straight to you</span></div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="button">Delete forever</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
@@ -27713,7 +27794,7 @@ SMTP  mail.home.example:465  TLS
           <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">office · Inbox · 1 letter</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush"><b>office has no Trash folder</b>, so this is not a move: the letter is deleted on the server straight away and cannot be restored. If the mailbox has a trash under another name, set it on the Connections screen.</div>
+          <div class="tc-msg is-alert tc-msg--flush"><b>office has no Trash folder:</b> the letter is deleted at once and cannot be restored. A trash under another name is set in Connections.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="button">Delete forever</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </div>
@@ -27733,13 +27814,13 @@ SMTP  mail.home.example:465  TLS
           <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">from office</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg tc-msg--flush">office has no Drafts folder, so there is nowhere to keep this letter. <b>Closing loses the text</b> — 214 words. Carrel does not keep drafts of its own.</div>
+          <div class="tc-msg tc-msg--flush">office has no Drafts folder: <b>closing loses the text</b>.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="button">Close and lose the text</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn is-primary" type="button">Keep writing</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </div>
     </div>
   </div>
-  <figcaption><b>Единственный случай, когда закрытие листа спрашивает.</b> Если у ящика есть Drafts, закрытие с текстом просто кладёт черновик туда. Кнопки «Save draft» в таком листе нет вовсе (M-7). Главное действие — продолжать писать: оно ничего не теряет, и Esc ведёт к нему. Число слов делает потерю конкретной.</figcaption>
+  <figcaption><b>Единственный случай, когда закрытие листа спрашивает.</b> Если у ящика есть Drafts, закрытие с текстом просто кладёт черновик туда. Кнопки «Save draft» в таком листе нет вовсе (M-7). Главное действие — продолжать писать: оно ничего не теряет, и Esc ведёт к нему.</figcaption>
   </figure>
 </div>
 
