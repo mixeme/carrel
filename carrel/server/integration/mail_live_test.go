@@ -39,7 +39,7 @@ func TestSelfPostRelayDelivers(t *testing.T) {
 		security = cmail.TLS
 	}
 	// The relay sends only from an address the login owns, and which one
-	// that is only its owner knows: the relay section of dev/credentials.txt
+	// that is only its owner knows: the relay section of credentials.txt
 	// names it as "From:" (the relay refused both the login at its host and
 	// the mailbox, 19.09.2026).
 	from := os.Getenv("CARREL_SMTP_FROM")

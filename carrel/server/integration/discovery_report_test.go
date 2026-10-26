@@ -29,7 +29,7 @@ func TestLiveDiscoveryReport(t *testing.T) {
 	for _, s := range liveServers() {
 		t.Run(s.name, func(t *testing.T) {
 			if s.url == "" || s.user == "" || s.pass == "" {
-				t.Skip("no credentials in dev/credentials.txt")
+				t.Skip("no credentials in myenv/carrel/credentials.txt")
 			}
 			reportServer(t, s)
 		})

@@ -36,7 +36,7 @@ func TestLiveSchedulingIsKnown(t *testing.T) {
 		}
 		t.Run(s.name, func(t *testing.T) {
 			if s.url == "" || s.user == "" || s.pass == "" {
-				t.Skip("no credentials in dev/credentials.txt")
+				t.Skip("no credentials in myenv/carrel/credentials.txt")
 			}
 			res, _, err := discover.Run(context.Background(), testGuard(t), s.url, s.user, s.pass, "")
 			if err != nil {

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// dev/credentials.txt is written for people, not for programs: sections under
+// credentials.txt is written for people, not for programs: sections under
 // "# Name", subsections under "## Name", then "key: value" lines and bare
 // URLs. It is read here into CARREL_* variables when they are not set already,
 // so a live test finds its server without anyone exporting anything first. A
@@ -31,14 +31,33 @@ func liveCredEnv() {
 	}
 }
 
+// credentialsFile is the one CARREL_CREDENTIALS names, or else
+// myenv/carrel/credentials.txt in the nearest folder above the sources that
+// holds one: the owner keeps it beside the checkout, out of the repository,
+// so a worktree under .claude/worktrees finds the same file.
 func credentialsFile() string {
+	if f := os.Getenv("CARREL_CREDENTIALS"); f != "" {
+		return f
+	}
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
 		return ""
 	}
-	// integration/live_creds.go → carrel/server → carrel_reborn
-	root := filepath.Clean(filepath.Join(filepath.Dir(file), "..", "..", ".."))
-	return filepath.Join(root, "dev", "credentials.txt")
+	return findCredentials(filepath.Dir(file))
+}
+
+func findCredentials(dir string) string {
+	for {
+		p := filepath.Join(dir, "myenv", "carrel", "credentials.txt")
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+		up := filepath.Dir(dir)
+		if up == dir {
+			return ""
+		}
+		dir = up
+	}
 }
 
 func setIfEmpty(key, val string) {
