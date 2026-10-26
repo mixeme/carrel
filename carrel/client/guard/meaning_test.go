@@ -217,6 +217,14 @@ func TestMeaningRules(t *testing.T) {
 		"a link without Href":        {login(named, submit, w.Link{Text: "Forgotten your password?"}), []string{"Links[0](Link): no Href"}},
 		"a field without Name":       {login(w.Input{}, submit), []string{"(Input): a field without Name"}},
 		"a cross without Href":       {w.Close{Label: "Close"}, []string{"Close: no Href"}},
+		// A page's own sheet without an address (Shell.Dialogs, Typecase's
+		// note 134): the script opens and shuts it — its cross and a button
+		// that Closes need nothing more; anything else in it is held.
+		"a page's own sheet": {w.Shell{Dialogs: []w.Scrim{{ID: "keys", Closed: true, Content: w.Sheet{
+			Head: []w.SheetHeadPart{w.Close{Label: "Close"}}, Foot: []w.SheetFootPart{w.Button{Label: "Close", Closes: true}}}}}}, nil},
+		"a page's own sheet with a button that does nothing": {w.Shell{Dialogs: []w.Scrim{{ID: "keys", Closed: true, Content: w.Sheet{
+			Foot: []w.SheetFootPart{w.Button{Label: "Close"}}}}}}, []string{"(Button): a button with nothing"}},
+		"a sheet's Close that only closes": {w.Sheet{Foot: []w.SheetFootPart{w.Button{Label: "Close", Closes: true}}}, []string{"(Button): a button with nothing"}},
 		"a control the guard lacks":  {w.CardPick{}, []string{"CardPick carries meaning the guard's contract does not know"}},
 		"rows that lead":             {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
 		"rows that lead nowhere":     {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},

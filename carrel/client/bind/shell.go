@@ -29,6 +29,12 @@ type TopWords struct {
 	// out (account-5): a setting of this browser, not of the server (U-12).
 	// Its label empty — no switch.
 	Theme ThemeWords
+	// Keys is the item of the keys' sheet in the account's menu, after the
+	// theme (account-5): a link to the sheet the document puts on the page
+	// (KeysSheet), pressed by its key and shown only with a script — without
+	// one the keys do not work either (U-7; Typecase's note 134). Its label
+	// empty — no item.
+	Keys KeysWords
 }
 
 // ThemeWords are the words of the theme's switch: its label and its three
@@ -36,6 +42,18 @@ type TopWords struct {
 type ThemeWords struct {
 	Label, Auto, Light, Dark string
 }
+
+// KeysWords are the words of the keys' item: its label, its icon and the
+// key that opens the sheet, drawn at its end.
+type KeysWords struct {
+	Label string
+	Icon  w.Icon
+	Key   string
+}
+
+// KeysSheet is the ID of the keys' sheet (Shell.Dialogs): the page's own,
+// closed until the account's item or its key opens it.
+const KeysSheet = "keys"
 
 // Top is the top bar (TopBar): the mark, the search that sends its query to
 // Search.Action under Search.Name — the screen's words its placeholder and
@@ -87,7 +105,7 @@ func Top(t view.TopBar, words TopWords) w.Top {
 		}}
 		actions = append(actions, w.TopDrop{
 			Trigger: user,
-			Menu:    w.Menu{Items: append(items, withTheme(MenuItems(t.User, ""), words.Theme)...), Width: w.MenuWidth290},
+			Menu:    w.Menu{Items: append(items, withTheme(MenuItems(t.User, ""), words.Theme, words.Keys)...), Width: w.MenuWidth290},
 			End:     true,
 		})
 	}
@@ -104,12 +122,22 @@ func Top(t view.TopBar, words TopWords) w.Top {
 	return top
 }
 
-// withTheme are the items of the account's menu with the theme's switch
-// before the last rule — the one over Sign out —, a rule of its own before
-// it (account-5): Settings, Administration, the theme, Sign out. The
-// library's script keeps the choice in this browser (Seg.Theme).
-func withTheme(items []w.MenuPart, words ThemeWords) []w.MenuPart {
-	if words.Label == "" {
+// withTheme are the items of the account's menu with the theme's switch and
+// the keys' item before the last rule — the one over Sign out —, a rule of
+// their own before them (account-5): Settings, Administration, the theme,
+// Keyboard shortcuts, Sign out. The library's script keeps the theme chosen
+// in this browser (Seg.Theme).
+func withTheme(items []w.MenuPart, theme ThemeWords, keys KeysWords) []w.MenuPart {
+	var own []w.MenuPart
+	if theme.Label != "" {
+		own = append(own, w.MenuColumn{Label: theme.Label, Control: w.Seg{Theme: true, Variant: w.SegStartSmall,
+			Options: []w.SegOption{{Label: theme.Auto, On: true}, {Label: theme.Light}, {Label: theme.Dark}}}})
+	}
+	if keys.Label != "" {
+		own = append(own, w.MenuItem{Icon: keys.Icon, Trail: w.Kbd{Keys: keys.Key}, Label: keys.Label,
+			ScriptOnly: true, Href: "#" + KeysSheet, Key: keys.Key})
+	}
+	if len(own) == 0 {
 		return items
 	}
 	at := len(items)
@@ -118,9 +146,7 @@ func withTheme(items []w.MenuPart, words ThemeWords) []w.MenuPart {
 			at = i
 		}
 	}
-	theme := w.MenuColumn{Label: words.Label, Control: w.Seg{Theme: true, Variant: w.SegStartSmall,
-		Options: []w.SegOption{{Label: words.Auto, On: true}, {Label: words.Light}, {Label: words.Dark}}}}
-	out := append(append([]w.MenuPart(nil), items[:at]...), w.MenuSep{}, theme)
+	out := append(append(append([]w.MenuPart(nil), items[:at]...), w.MenuSep{}), own...)
 	return append(out, items[at:]...)
 }
 

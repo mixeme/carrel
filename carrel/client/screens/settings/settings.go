@@ -16,6 +16,7 @@ var top = bind.TopWords{
 	Search: "Search everything…",
 	NewKey: "n", SearchKey: "/",
 	Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
+	Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?"},
 }
 
 // The words of the settings (U-1.3): the rubric of the rail, the emblem of

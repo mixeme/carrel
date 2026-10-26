@@ -2279,6 +2279,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
       </div>
     </div>
     <div class="tc-scrim" hidden></div>
+    <div class="tc-scrim" id="keys" hidden></div>
   </div>
 </div>
 <figcaption><b>Поиск стоит по центру полосы</b> — см. <a href="#conventions">§1</a>: сквозной, не принадлежит ни рейлу, ни разделу. <b>Крестик панели подробностей</b> — в правом верхнем углу, вынут из потока.<br><br><b>Верхняя панель</b> — 52&nbsp;px: знак, поиск по всем источникам, <b>New note</b> (одно нажатие с любого экрана, стрелка — всё остальное, что можно создать), <b>кнопка обновления</b> с временем последнего опроса, меню пользователя. Кнопка перезапускает веерный опрос <b>отмеченных коллекций текущего раздела</b> — ровно тот, что показывает полоса опроса: нажимают её, глядя на список, и ждут, что обновится он, а не все пять разделов сразу. «2 min ago» — <b>когда закончился последний опрос</b>, а не когда открыли страницу: подпись отвечает на «насколько свежее то, что я вижу». Пока опрос идёт, это сказано подписью, и второго опроса кнопка не запускает. Счётчики в рейле обновляются этим же опросом (<a href="#components">§6</a>). <b>Rail</b> — разделы и источники в одном столбце: выбор «где искать» и «что смотреть» — одно движение. Поиска среди разделов нет: он живёт в шапке (7.6.1). Первая строка списка источников — «Combined calendar» / «Combined address book»: единый вид принадлежит разделу, отдельной страницы «всё сразу» нет. <b>Content</b> — единственная резиновая зона. <b>Details</b> — карточка выбранной записи; список при этом остаётся на месте.<br><br><b>Подвал рейла — последняя строка окна, и последняя строка в нём — версия.</b> Над ней стоят кнопки раздела (завести коллекцию, подключить сервер, подписаться), под ними — <span class="tc-mono">Carrel 0.0.1 · 786949a</span> ссылкой на «о программе» (<a href="#rest">7.21</a>). Это не украшение и не отладочная подпись: <b>C-13 (AGPL) требует видимой ссылки на исходники именно запущенной версии</b>, а видимой она бывает только там, где человек находится, — то есть в оболочке, а не на странице, куда попадают до входа. Хеш сборки стоит рядом с номером по той же причине, по какой он стоит на самой странице: <b>в отчётах об ошибках спрашивают именно его</b> — между двумя сборками одной версии номер не различает ничего, а копировать его человек будет оттуда, где он попался на глаза. Заодно это отвечает на вопрос «какая у меня версия» без похода в настройки. Подвал прижат к низу столбца и в узком рейле (56&nbsp;px) не показывается — там его место занимает сам рейл. Пятая зона — место листа над всей оболочкой: затемнение стоит последним в оболочке, закрытое, и живой слой кладёт в него лист, открытый ссылкой. Над содержимым ждут скрыто ещё две зоны живого слоя — полоса сообщений и строка хода; их, как место листа, ставит документ, а не кадр экрана.</figcaption>
@@ -14523,7 +14524,7 @@ dav: HTTP 503: the server is busy</div>
                 <div class="tc-menu__item tc-menu__item--col">
                   <span class="tc-line tc-line--gap-9 tc-menu__item-indent">Theme</span>
                   <span class="tc-seg tc-seg--start tc-seg--h22 tc-seg--t11-5"><button class="is-on tc-seg__opt" type="button">Auto</button><button class="tc-seg__opt" type="button">Light</button><button class="tc-seg__opt" type="button">Dark</button></span></div>
-                <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-search"/></svg>Keyboard shortcuts<kbd class="tc-kbd">?</kbd></button>
+                <a class="tc-menu__item tc-js" href="#keys" role="menuitem" data-tc-key="?"><svg><use href="#i-search"/></svg>Keyboard shortcuts<kbd class="tc-kbd">?</kbd></a>
                 <span class="tc-menu__sep"></span>
                 <button class="tc-menu__item" type="submit" form="post-signout" role="menuitem">Sign out</button>
               </div>
@@ -14765,7 +14766,7 @@ dav: HTTP 503: the server is busy</div>
         </div>
         </div>
       </div>
-      <div class="tc-scrim">
+      <div class="tc-scrim" id="keys">
         <div class="tc-sheet tc-sheet--w480">
           <div class="tc-sheet__head">
             <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-search"/></svg>
@@ -14794,7 +14795,7 @@ dav: HTTP 503: the server is busy</div>
     </div>
   </div>
 </div>
-<figcaption><b>Лист, не маршрут.</b> Экран под ним — тот, с которого открыли меню, и после закрытия человек остаётся на нём. Семь клавиш — ровно те, что в U-7: ничего разрушительного, ничего, пока курсор в поле. <kbd class="tc-kbd">?</kbd> в подвале напоминает, чем лист открыли, и чем его можно открыть снова. C, E, T живут в меню «New …» у самой кнопки — повторять их здесь незачем: они видны в момент, когда ими пользуются.</figcaption>
+<figcaption><b>Лист, не маршрут.</b> Экран под ним — тот, с которого открыли меню, и после закрытия человек остаётся на нём. Семь клавиш — ровно те, что в U-7: ничего разрушительного, ничего, пока курсор в поле. <kbd class="tc-kbd">?</kbd> в подвале напоминает, чем лист открыли, и чем его можно открыть снова. C, E, T живут в меню «New …» у самой кнопки — повторять их здесь незачем: они видны в момент, когда ими пользуются. Лист закрыт на каждой странице оболочки (<code>#keys</code>, схема <code>shell-1</code>); без сценария пункта «Keyboard shortcuts» нет — клавиши без него и не работают.</figcaption>
 </figure>
 
 
@@ -31789,7 +31790,7 @@ dav: HTTP 503: the server is busy</div></div>
       <div class="tc-menu__item tc-menu__item--col">
         <span class="tc-line tc-line--gap-9 tc-menu__item-indent">Theme</span>
         <span class="tc-seg tc-seg--start tc-seg--h22 tc-seg--t11-5"><button class="is-on tc-seg__opt" type="button">Auto</button><button class="tc-seg__opt" type="button">Light</button><button class="tc-seg__opt" type="button">Dark</button></span></div>
-      <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-search"/></svg>Keyboard shortcuts<kbd class="tc-kbd">?</kbd></button>
+      <a class="tc-menu__item tc-js" href="#keys" role="menuitem" data-tc-key="?"><svg><use href="#i-search"/></svg>Keyboard shortcuts<kbd class="tc-kbd">?</kbd></a>
       <span class="tc-menu__sep"></span>
       <button class="tc-menu__item" type="button" role="menuitem">Sign out…</button>
     </div>

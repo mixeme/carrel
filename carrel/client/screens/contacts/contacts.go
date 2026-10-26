@@ -31,6 +31,7 @@ var (
 		Search: "Search everything…",
 		NewKey: "n", SearchKey: "/",
 		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
+		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?"},
 	}
 	rail    = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
 	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}

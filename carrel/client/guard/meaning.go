@@ -61,6 +61,11 @@ type control struct {
 	// the layer sends with the file —, and a queue's Hide that folds it in
 	// place (Queue.Fold) where the server gave it nothing to follow.
 	scripted bool
+	// dialog: the widget stands in a page's own sheet without an address
+	// (Shell.Dialogs, Typecase's note 134): only the library's script opens
+	// it, and what shuts it — its cross, a button that Closes — is the
+	// script's too. Everything else in it is held as anywhere.
+	dialog bool
 	// picture: the widget is a row of a tree, not the rail's, none of whose
 	// rows leads or sends — the tree is a picture of a place, not a choice:
 	// what a client sees at davloom's address (s-davloom-9)
@@ -233,6 +238,9 @@ var contract = map[string]rule{
 		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens || c.scripted || picksFile(c) || c.flag("ScriptOnly") || c.flag("Removes") {
 			return ""
 		}
+		if c.dialog && c.flag("Closes") {
+			return ""
+		}
 		// CopyFrom copies a block that stands on the page: without a script
 		// it is read there (the password shown once, s-admin-30); Copy puts
 		// the words it carries on the clipboard, and they stand beside it to
@@ -250,8 +258,13 @@ var contract = map[string]rule{
 		}
 		return "a button with nothing to follow or send (Href, Form, Submit in a form, Adds, Opens)"
 	},
-	"Close": needs("Href"),
-	"Link":  needs("Href"),
+	"Close": func(c control) string {
+		if c.dialog {
+			return ""
+		}
+		return needs("Href")(c)
+	},
+	"Link": needs("Href"),
 	// Words in a face (tc-dim--…): with Href a link — «Already have an
 	// account? Sign in» (s-auth-2), an action of the model drawn as words
 	// (bind.Span) —, without it words nobody presses, as a Text is. Neither
@@ -633,15 +646,16 @@ func Meaning(v any, forms ...string) []string {
 			at := c.path + "." + f.Name
 			opens := closed && f.Name == "Trigger"
 			scripted := scripted || (c.scripted && name == "QueueItem") || liveQueuePart(c, name, f.Name)
+			dialog := c.dialog || (name == "Shell" && f.Name == "Dialogs")
 			switch f.Type.Kind() {
 			case reflect.Struct, reflect.Pointer, reflect.Interface:
 				if w := deref(fv); isControl(w, pkg) {
-					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm, holder: name, opens: opens, scripted: scripted, picture: picture})
+					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm, holder: name, opens: opens, scripted: scripted, dialog: dialog, picture: picture})
 				}
 			case reflect.Slice, reflect.Array:
 				for j := range fv.Len() {
 					if w := deref(fv.Index(j)); isControl(w, pkg) {
-						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm, holder: name, scripted: scripted, picture: picture})
+						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm, holder: name, scripted: scripted, dialog: dialog, picture: picture})
 					}
 				}
 			}
