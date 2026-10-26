@@ -9,78 +9,89 @@ import "testing"
 // the file actually uses: "# Section", "## Subsection", bare addresses, keys
 // with a comma in them, a token instead of a password, a login that must grow
 // its domain. A shape that stops being read here stops the whole live set.
-const credsSample = `Carrel admin
-mix
-Access123456
+const credsSample = `# Carrel panel
+## Admin user
+login: mix
+password: Access123456
 
 Тестовые учётные записи. Можно делать всё, что необходимо для тестирования.
-# Baikal DAV
-https://baikal.example.org/dav.php
+# Baikal, CardDAV/CalDAV
+url: https://baikal.example.org/dav.php
 login: baikal-user
 password: baikal-pass
 
-# SFTPGo WebDAV
-https://webdav.example.org/
+# SFTPGo, WebDAV
+url: https://webdav.example.org/
 login: sftpgo-user
 password: sftpgo-pass
 
-# OpenCloud WebDAV
+# OpenCloud, WebDAV
+url: https://opencloud.example.org/dav/spaces/space$id
 login: oc-user
 password: oc-password
 token: oc token with spaces
-url: https://opencloud.example.org/dav/spaces/space$id
 
-# Yandex
+# Yandex, CardDAV/CalDAV/WebDAV
 login: someone
+
+## CardDAV
+url: https://carddav.yandex.ru
+app password: card-pass
+
+## CalDAV
+url: https://caldav.yandex.ru.
+app password: cal-pass
 
 ## WebDAV (may not work)
 url: https://webdav.yandex.ru
-app password, WebDAV: disk-pass
+app password: disk-pass
 
-## CardDAV
-url: carddav.yandex.ru.
-app password, CardDAV: card-pass
-
-## CalDAV
-url: caldav.yandex.ru
-app password, CalDAV: cal-pass
-
-# Mail.ru
+# Mail.ru, CalDAV
+url: https://calendar.mail.ru/principals/mail.ru/person/calendars/c97b/
 login: person@mail.ru
-app password, CalDAV: mailru-pass
-https://calendar.mail.ru/principals/mail.ru/person/calendars/c97b/
+app password: mailru-pass
 
-# Почтовый ящик для тестов + SoGO
-E-mail/login: carrel@example.org
-password: sogo-pass
-SMTP/IMAP server: mc.example.org
-CalDAV: https://sogo.example.org/SOGo/dav/carrel@example.org/Calendar/personal/
+# Почтовый ящик для тестов + SoGO, SMTP/IMAP/CardDAV/CalDAV
+SMTP/IMAP: mc.example.org
 CardDAV: https://sogo.example.org/SOGo/dav/carrel@example.org/Contacts/personal/
+CalDAV: https://sogo.example.org/SOGo/dav/carrel@example.org/Calendar/personal/
+e-mail/login: carrel@example.org
+password: sogo-pass
 
-# Google
+# Google, CardDAV/CalDAV
 login: someone@gmail.com
 app password, CarrelDAV: abcd efgh ijkl mnop
 
-Проверено: оба адреса ниже отвечают, OAuth не нужен.
+Проверено 17.09.2026 паролем приложения: оба адреса ниже отвечают.
+OAuth не нужен.
 
 CardDAV: https://www.googleapis.com/carddav/v1/principals/
 CalDAV: https://www.google.com/calendar/dav/
 
-не работает, 401 loginRequired: https://apidata.googleusercontent.com/caldav/v2/
+не работает, 401 loginRequired — нужен OAuth2: https://apidata.googleusercontent.com/caldav/v2/
+не работает, 404 HTML: https://www.google.com/carddav/v1/
+Лента календаря — файл, не сервер CalDAV.
 
 https://calendar.google.com/calendar/ical/someone/private-feed/basic.ics
 
 # Nextcloud, CardDAV/CalDAV/WebDAV
+url: https://nextcloud.example.org/remote.php/dav/
 login: nc-user
 password: nc-pass
-https://nextcloud.example.org/remote.php/dav/
 
-# iCloud
+# iCloud, CardDAV/CalDAV
 login: robot@example.org
 app password, Carrel: qrst uvwx yzab cdef
 
 CardDAV: https://contacts.icloud.com
 CalDAV: https://caldav.icloud.com
+
+# Релей SelfPost, SMTP
+host: relay.example.org
+port: 587
+from: carrel@example.org
+login: relay-user
+password: relay-pass
 `
 
 func TestCredentialsFileIsRead(t *testing.T) {
@@ -116,6 +127,17 @@ func TestCredentialsFileIsRead(t *testing.T) {
 		"CARREL_SOGO_CARD_URL": "https://sogo.example.org/SOGo/dav/carrel@example.org/Contacts/personal/",
 		"CARREL_SOGO_USER":     "carrel@example.org",
 		"CARREL_SOGO_PASS":     "sogo-pass",
+		// The same mailbox takes IMAP: letters are delivered there (S-26).
+		"CARREL_IMAP_HOST": "mc.example.org",
+		"CARREL_IMAP_USER": "carrel@example.org",
+		"CARREL_IMAP_PASS": "sogo-pass",
+
+		// The relay sends the letters, from the address it lets this login use.
+		"CARREL_SMTP_HOST": "relay.example.org",
+		"CARREL_SMTP_PORT": "587",
+		"CARREL_SMTP_USER": "relay-user",
+		"CARREL_SMTP_PASS": "relay-pass",
+		"CARREL_SMTP_FROM": "carrel@example.org",
 
 		// Google names its protocols under keys of their own, and the CardDAV
 		// prefix is completed with the login: the prefix alone answers 404
