@@ -68,7 +68,7 @@ trap 'rm -rf "$tmp"' EXIT
   git -C "$root" archive --format=tar --prefix=carrel/ HEAD | tar -xf -
   git -C "$tcdir" archive --format=tar --prefix=typecase/ "$tc" | tar -xf -
   # The run of the gates: where it stands is where the tar was unpacked.
-  # Go of the host is older than go.mod (GOTOOLCHAIN=auto, dev/env.txt);
+  # Go of the host is older than go.mod (GOTOOLCHAIN=auto, myenv/carrel/env.txt);
   # CARREL_DAVIS=1 takes the Davis stand of the gates in.
   cat > run.sh <<EOF
 #!/bin/bash

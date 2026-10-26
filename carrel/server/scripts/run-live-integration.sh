@@ -1,34 +1,14 @@
 #!/usr/bin/env bash
-# Live S-30.2 integration tests. Credentials from dev/credentials.txt (not in git).
+# Live S-30.2 integration tests.
+#
+# The credentials are read by the tests themselves (integration/live_creds.go):
+# myenv/carrel/credentials.txt in the nearest folder above the checkout, or the
+# file CARREL_CREDENTIALS names. A second reader of that file is a second thing
+# to break when the file is edited. It is not in git and never travels to the
+# Linux machine, so there the servers that need it skip themselves.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-CREDS="${CREDS_FILE:-$(cd ../.. && pwd)/dev/credentials.txt}"
-if [[ ! -f "$CREDS" ]]; then
-  echo "missing credentials: $CREDS" >&2
-  exit 1
-fi
-
-section=""
-while IFS= read -r line || [[ -n "$line" ]]; do
-  case "$line" in
-    "Baikal DAV") section=baikal; continue ;;
-    "SFTPGo WebDAV") section=sftpgo; continue ;;
-    "") section=""; continue ;;
-  esac
-  case "$section" in
-    baikal)
-      if [[ "$line" =~ ^https?:// ]]; then export CARREL_BAIKAL_URL="$line"
-      elif [[ "$line" =~ ^login:\ (.+)$ ]]; then export CARREL_BAIKAL_USER="${BASH_REMATCH[1]}"
-      elif [[ "$line" =~ ^password:\ (.+)$ ]]; then export CARREL_BAIKAL_PASS="${BASH_REMATCH[1]}"
-      fi ;;
-    sftpgo)
-      if [[ "$line" =~ ^https?:// ]]; then export CARREL_SFTPGO_URL="$line"
-      elif [[ "$line" =~ ^login:\ (.+)$ ]]; then export CARREL_SFTPGO_USER="${BASH_REMATCH[1]}"
-      elif [[ "$line" =~ ^password:\ (.+)$ ]]; then export CARREL_SFTPGO_PASS="${BASH_REMATCH[1]}"
-      fi ;;
-  esac
-done < "$CREDS"
 
 if [[ "$(uname -s)" == "Linux" ]]; then
   echo "== Radicale (compose) =="

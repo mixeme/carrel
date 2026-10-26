@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Manual gates for the Linux dev machine (docs/plan/server.md, «Linux-машина»).
-# Run from carrel/server after reading dev/env.txt on that host.
+# Run from carrel/server on that host; access to it is in myenv/carrel/env.txt.
 #
 # The code comes packed by scripts/linux-ship.sh and unpacked into
 # /opt/carrel-dev/run-<commit>/: this repository as carrel/ and the clone of
