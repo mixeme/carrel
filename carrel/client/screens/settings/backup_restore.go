@@ -32,6 +32,8 @@ const (
 	chooseFile    = "Choose a file"
 	colHappened   = "What happened"
 	colRestored   = "Restored into"
+	alreadyHere   = " already here"
+	sepDot        = " · "
 	// restoreZone is the zone of the page's column (C-7.2 main) the steps
 	// of an archive from this computer answer into.
 	restoreZone = "main"
@@ -202,11 +204,12 @@ func copiesTable(r view.FormRow) w.Table {
 
 // matchDialog is the archive opened (s-backup-8), one form: its day in the
 // title, the job, what the manifest holds and where it lies under it,
-// Cancel and «Restore 3 collections» in the head; the bar over the ticked
-// rows — how many, Restore into, Skip, Select all —; a row a collection of
-// the archive — ticked to restore, its mark and name, how many records,
-// where it goes, what will happen —; that restoring creates and erases
-// nothing, in alarm.
+// Cancel and «Restore 3 collections» in the head; what becomes of the
+// records already here that differ — the answers a segment of links, what
+// the one on does under it —; the bar over the ticked rows — how many,
+// Restore into, Skip, Select all —; a row a collection of the archive —
+// ticked to restore, its mark and name, how many records, where it goes,
+// what will happen —; that restoring is an import, in alarm.
 func matchDialog(r view.RestoreBlock, m *view.RestoreMatch) w.Dialog {
 	// An archive from this computer opened in parts (s-backup-20): Restore
 	// sends the parts of the collections chosen from the file step 1 kept.
@@ -235,9 +238,21 @@ func matchDialog(r view.RestoreBlock, m *view.RestoreMatch) w.Dialog {
 			bar.Right = &w.BarRight{Items: []w.BarPart{b}}
 		}
 	}
-	d.Items = append(d.Items, w.Steps{Items: []string{stepArchive, stepMatch, stepReport}, On: 2}, h, bar, matchTable(m))
+	d.Items = append(d.Items, w.Steps{Items: []string{stepArchive, stepMatch, stepReport}, On: 2}, h)
+	if e := m.Existing; e != nil {
+		seg := w.Seg{}
+		for _, o := range e.Options {
+			seg.Options = append(seg.Options, w.SegOption{Label: string(o.Label), Href: o.Href, On: o.On})
+		}
+		parts := []w.FieldPart{seg}
+		if e.Hint != "" {
+			parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(e.Hint)}})
+		}
+		d.Items = append(d.Items, w.Field{Label: string(e.Note), Parts: parts, OwnLine: true})
+	}
+	d.Items = append(d.Items, bar, matchTable(m))
 	if len(r.Note) > 0 {
-		d.Items = append(d.Items, w.Msg{Parts: bind.MsgParts(r.Note), Tone: w.MsgAlert})
+		d.Items = append(d.Items, w.Msg{Parts: bind.MsgParts(r.Note), Tone: w.MsgAlert, Space: w.MsgFlushSides})
 	}
 	return d
 }
@@ -299,11 +314,7 @@ func matchTable(m *view.RestoreMatch) w.Table {
 			row.Cells = append(row.Cells, w.TableCell{Parts: []w.CellPart{w.Text(noTarget)}, Mono: true, Unset: true, Tone: w.CellDusty},
 				w.TableCell{Parts: []w.CellPart{w.Text(r.Will)}, Dim: true})
 		} else {
-			will := w.TableCell{Parts: []w.CellPart{w.Text(r.Will)}}
-			if r.Danger {
-				will.Tone = w.CellDanger
-			}
-			row.Cells = append(row.Cells, w.TableCell{Parts: []w.CellPart{intoPick(r.Into)}}, will)
+			row.Cells = append(row.Cells, w.TableCell{Parts: []w.CellPart{intoPick(r.Into)}}, willCell(r))
 		}
 		if tick == w.TickedOn {
 			row.State = w.RowPicked
@@ -311,6 +322,28 @@ func matchTable(m *view.RestoreMatch) w.Table {
 		t.Rows = append(t.Rows, row)
 	}
 	return t
+}
+
+// willCell is what will happen to a row going somewhere (s-backup-8): its
+// words, in alarm where they are one, then how many of its records are
+// already here, plain — after an alarm only the words are alarmed.
+func willCell(r view.RestoreRow) w.TableCell {
+	if r.Here == 0 {
+		c := w.TableCell{Parts: []w.CellPart{w.Text(r.Will)}}
+		if r.Danger {
+			c.Tone = w.CellDanger
+		}
+		return c
+	}
+	here := strconv.Itoa(r.Here) + alreadyHere
+	switch {
+	case r.Will == "":
+		return w.TableCell{Parts: []w.CellPart{w.Text(here)}}
+	case r.Danger:
+		runs := view.Runs{{Text: r.Will, Mark: view.RunDanger}, {Text: view.Text(sepDot + here)}}
+		return w.TableCell{Parts: as[w.CellPart](bind.Inlines(runs))}
+	}
+	return w.TableCell{Parts: []w.CellPart{w.Text(string(r.Will) + sepDot + here)}}
 }
 
 // intoPick is a row's «Restore into», or the bar's for the ticked rows
