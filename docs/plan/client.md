@@ -438,11 +438,11 @@ main лучше начинать после влития перехода: он�
 которые ветка перехода переставила.
 
 *Гигиена:* `go clean -cache` регулярно (кэш сборки занял 51 ГБ и забил C:).
-Помощники вне репозиториев — `D:\Local\wt\tools`: `reshoot.sh <дерево>`
-(переснять фикстуры и `check.py`), `linux-run-template.sh` (запуск Linux-ворот
-на машине: заменить COMMIT, `scp` в `run-<коммит>/run.sh`, `setsid nohup`,
-ждать `LINUX-FINISHED` в `gates.log`; кавычки через PowerShell-ssh не
-вкладывать).
+Помощники — в репозитории: `carrel/server/scripts/reshoot.sh <дерево>`
+(переснять фикстуры и `check.py`); Linux-ворота — `linux-ship.sh` кладёт в
+архив `run.sh` своего коммита (`setsid nohup bash run.sh </dev/null`, ждать
+`LINUX-FINISHED` последней строкой `gates.log`; кавычки через PowerShell-ssh
+не вкладывать).
 
 **Срез 16.10.2026, день — читать первым.** Main — сервер `v0.2.318`,
 клиент `v0.4.52`, Typecase сборки `49412c3`. После среза ниже: записка 71
