@@ -137,8 +137,10 @@ if [[ "$ctype" != "text/html; charset=utf-8" ]]; then
 fi
 files=$(grep -oE '(src|href)="/static/tc/[0-9a-f]{12}/[^"]+"' /tmp/carrel-linux-gates-login.html | sed -E 's/^(src|href)="//; s/"$//')
 rm -f /tmp/carrel-linux-gates-login.html
-if [[ $(grep -c . <<<"$files") -ne 3 ]]; then
-  echo "/login does not name the three files of the library: $files" >&2
+# The theme's script, the stylesheet, the library's script and its live
+# layer (Typecase's note 124).
+if [[ $(grep -c . <<<"$files") -ne 4 ]]; then
+  echo "/login does not name the four files of the library: $files" >&2
   exit 1
 fi
 for f in $files; do
