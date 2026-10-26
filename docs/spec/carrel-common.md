@@ -2287,7 +2287,7 @@ type CollectionMoveSheet struct {
     Title   Text         // «Move calendar», «Copy address book», «Move folder» (s-profile-8)
     Subject Text         // что переносят: «nextcloud · Дни рождения»
     Target  TargetPicker // цель — подключение, а не коллекция (S-12.3)
-    Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8); у календаря с сервера, который планирует, последней фразой — «nextcloud may tell the attendees of its meetings that they are cancelled.» (А12, записка 112 п. 5); у папки — куда она ляжет: «in nextcloud · Files» или «on sftpgo · vps beside Documents and Public», «all ‹9› files» (s-profile-34); у хранилища целиком — что адрес остаётся пустым (s-profile-35, Р-74)
+    Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8); у календаря с сервера, который планирует, последней фразой — «nextcloud may send attendees a cancellation.» (А12, записка 112 п. 5); у папки — куда она ляжет: «in nextcloud · Files» или «on sftpgo · vps beside Documents and Public», «all ‹9› files» (s-profile-34); у хранилища целиком — что адрес остаётся пустым (s-profile-35, Р-74)
     Stays   Text // вторая строка хранилища целиком (s-profile-35): что сервер не даст удалить, то скопируется и останется; у прочих пусто
     Form    Form // лист — форма (s-profile-8): POST на адрес переноса (a, c, back в адресе), скрытые _csrf и copy у копии; выбранный сервер — под Target.Field «to» (TargetOption.Value — подключение); без выбора выбран первый подходящий; закрытый — с причиной: «already there», неответ сервера («password · 401») — прежде прочих, «files only», «no files»; у папки подходящий — «files»
     Actions []Action // Move или Copy — Submits, кнопка формы; Cancel
@@ -2307,9 +2307,9 @@ type RecordDeleteSheet struct {
     Kind        Kind
     Title       Text        // «Delete event», «Delete task»
     Subject     Text        // название записи
-    Warning     Text        // где удаляется и что копии у Carrel нет — тревожным сообщением
+    Warning     Text        // «Carrel keeps no copy: this cannot be undone.» — тревожным сообщением (s-agenda-26, записка 135)
     References  []Reference // «What is pointing at it now»: опубликованные ссылки, связанные записи среди загруженных — счёт жирным, что с ними станет
-    Cancels     Text        // участникам сервер может сообщить об отмене («may»); пусто — сказать нечего
+    Cancels     Text        // «nextcloud may send its attendees a cancellation.»; пусто — сказать нечего
     Attachments []Reference // имя жирным: записанное в запись уходит с ней, ссылка в папку вложений остаётся
     Form        Form        // CSRF, etag, sheet=1; отметки attachment (удалить файл ссылки тоже) и copy (копии связанной записи, открытая отмечена)
     Actions     []Action    // Delete (тревожная, кнопка формы) · Cancel
@@ -2320,9 +2320,9 @@ type CollectionDeleteSheet struct {
     Kind       Kind
     Title      Text // «Delete on the server» (s-profile-9, -19)
     Subject    Text
-    Warning    Runs    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
+    Warning    Runs    // «Carrel keeps no copy: this cannot be undone.», у папки впереди «Everything in it goes too.»; у календаря с сервера, который планирует, — «nextcloud may send the attendees of its meetings a cancellation.» (s-profile-9, -19, записка 135)
     References []Reference // что на неё ссылается и что с ним станет: ссылки и устройства счётом, задания по имени
-    Archive    Runs    // когда попадала в архив — день моноширинно — и чего восстановление не сделает, «new» жирным (s-profile-9, -19)
+    Archive    Runs    // «Last archived ‹2026-08-14›; a restore makes a **new** calendar at a new address.» — день моноширинно (s-profile-9, -19); без архива и не целиком — прежние слова подписи s-profile-9
     Export     *Action // «сначала скачать»; nil — экспортировать нечем
     ExportNote Text
     Form       Form    // подтверждение набором имени

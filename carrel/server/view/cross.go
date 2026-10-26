@@ -622,15 +622,15 @@ type RecordDeleteSheet struct {
 	Kind    Kind `json:"kind"`
 	Title   Text `json:"title"`   // «Delete event», «Delete task»
 	Subject Text `json:"subject"` // название записи
-	// Warning — где удаляется и что копии у Carrel нет: «The event is
-	// deleted on nextcloud · Личный. Carrel holds no copy — …»
+	// Warning — что копии у Carrel нет: «Carrel keeps no copy: this cannot
+	// be undone.» (s-agenda-26, записка 135)
 	Warning Text `json:"warning"`
 	// References — «What is pointing at it now»: опубликованные ссылки и
 	// записи, связанные с ней, среди загруженных; What жирным, Then — что с
 	// ними станет
 	References []Reference `json:"references"`
-	// Cancels — участникам сервер может сообщить об отмене («may», как у
-	// листов переноса); пусто — сказать нечего
+	// Cancels — участникам сервер может сообщить об отмене: «nextcloud may
+	// send its attendees a cancellation.»; пусто — сказать нечего
 	Cancels Text `json:"cancels"`
 	// Attachments — имя жирным; записанное в запись уходит с ней, ссылка в
 	// папку вложений остаётся (её файл можно удалить отметкой формы)
@@ -648,11 +648,11 @@ type CollectionDeleteSheet struct {
 	Kind    Kind `json:"kind"`
 	Title   Text `json:"title"` // «Delete on the server» (s-profile-9, -19)
 	Subject Text `json:"subject"`
-	Warning Runs `json:"warning"` // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
+	Warning Runs `json:"warning"` // что копии у Carrel нет; у папки — что всё в ней уходит тоже; у планирующего сервера — что участники могут получить отмену (s-profile-9, -19)
 	// References — что на неё ссылается и что с ним станет (s-profile-9,
 	// -19; Кл16): ссылки и устройства счётом, задания по имени
 	References []Reference `json:"references"`
-	Archive    Runs        `json:"archive"` // когда попадала в архив (день моноширинно) и чего восстановление не сделает («new» жирным; s-profile-9, -19)
+	Archive    Runs        `json:"archive"` // «Last archived ‹день›; a restore makes a **new** … at a new address.» (s-profile-9, -19); без архива и не целиком — прежние слова
 	Export     *Action     `json:"export"`  // «сначала скачать»; nil — экспортировать нечем
 	ExportNote Text        `json:"exportNote"`
 	Form       Form        `json:"form"` // подтверждение набором имени
