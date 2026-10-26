@@ -99,17 +99,17 @@ func TestFixtureBackupStates(t *testing.T) {
 	// collection chosen · 1 already here»); the other is the one the server
 	// refuses (s-backup-18: «1 already here — skipped · 1 not restored»).
 	vps := real.servers["radicale · vps"]
-	copied := 0
+	var copied []string
 	for _, p := range vps.Paths(proekty) {
 		if strings.Contains(p, "9c27-0e5d-4412") {
 			continue
 		}
 		body, _, _ := vps.Object(p)
-		nc.Seed(lichnyj+path.Base(p), strings.Replace(body, "SUMMARY:", "SUMMARY:Moved · ", 1))
-		copied++
+		copied = append(copied, lichnyj+path.Base(p))
+		nc.Seed(copied[len(copied)-1], strings.Replace(body, "SUMMARY:", "SUMMARY:Moved · ", 1))
 	}
-	if copied != 1 {
-		t.Fatalf("Проекты gives Личный %d changed events, the frames one", copied)
+	if len(copied) != 1 {
+		t.Fatalf("Проекты gives Личный %d changed events, the frames one", len(copied))
 	}
 	if rec := real.h.do(postForm("/app/settings/backup/restore", real.sess, url.Values{
 		"source": {"run"}, "run": {own + "|" + made.ID}, "password": {"archive-pw"},
@@ -138,8 +138,7 @@ func TestFixtureBackupStates(t *testing.T) {
 
 	// The same archive brought from this computer by the live layer
 	// (s-backup-20, Typecase's note 109): opened by its start and end, the
-	// records not read yet — compared when restored —, the last skipped as
-	// on s-backup-8.
+	// last skipped as on s-backup-8.
 	var archive []byte
 	for _, srv := range real.servers {
 		if body, ok := srv.File(real.realPath(t, "Files") + "carrel-backup/" + made.File); ok {
@@ -149,6 +148,10 @@ func TestFixtureBackupStates(t *testing.T) {
 	if archive == nil {
 		t.Fatal("the home job's archive is not on its storage")
 	}
+	// This archive is small enough to come whole, so its rows are compared;
+	// the frame's is not, and its gone server says no count: Проекты's
+	// event goes from Личный again.
+	nc.Unseed(copied[0])
 	step1 := url.Values{"source": {"upload"}, "store": {""}, "password": {"archive-pw"}}
 	if rec := real.h.do(restoreParts(t, real, "/app/settings/backup/restore?from=file", step1, archive, backup.OpenSpans(int64(len(archive))))); rec.Code != http.StatusSeeOther {
 		t.Fatalf("open in parts: %d %s", rec.Code, rec.Body.String())
