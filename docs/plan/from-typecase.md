@@ -4753,6 +4753,25 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      sheet with text: a quick note, a letter». Клиенту: Send письма и ответа
      нажимается Ctrl+Enter (`Button.Key`), как Save быстрой заметки.
 
+Записка 139 от 26.10.2026 (Typecase `d79d392`; задача 194 п. 7, вопрос
+«Discard»). **Последний коммит Typecase, который она описывает, — `d79d392`**
+(565 кадров).
+
+139. **Cancel письма и черновик** (решение владельца 26.10; Пб24 скана
+   publish-mail).
+   1. **Кнопки Discard в листе письма нет — есть один Cancel**, и он
+      отправляет форму: `Button{Label: "Cancel", Submit, To:
+      "/app/mail/send?op=close"}` с Esc (`s-mail-1`, и у просмотра
+      `s-mail-14`). Текста нет — лист закрывается (на `back`), черновик
+      забыт. Текст набран — ответ листом `s-mail-15` «Close the letter?»:
+      «Carrel keeps no drafts: closing loses the text.», «Close and lose the
+      text» (`POST /app/mail/send?op=discard` — ваше `mail.discard`; затем на
+      `back`) и «Keep writing» (ссылка `/app/mail/compose`, Esc) — письмо как
+      было.
+   2. Черновики писем (где держать, как вернуться) владелец отложил до
+      раздела почты.
+   Остался вопрос «что видно после Send».
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
