@@ -998,7 +998,7 @@
     "match": {
       "existing": {
         "hint": "They stay as they are here; the archive's version is not written.",
-        "note": "2 records of the archive are already here and differ",
+        "note": "3 records of the archive are already here and differ",
         "options": [
           {
             "enabled": true,
@@ -1282,6 +1282,7 @@
           "colour": "#9a9280",
           "count": 2,
           "danger": true,
+          "here": 1,
           "into": {
             "add": null,
             "error": "",

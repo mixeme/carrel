@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"testing"
@@ -73,6 +74,7 @@ func TestFixtureBackupStates(t *testing.T) {
 	}
 	real.archive = strings.TrimSuffix(fmt.Sprintf("%.1f", float64(made.Size)/1024), ".0") + " KB"
 	key, _ := real.sess.DataKey()
+	proekty := real.realPath(t, "proekty")
 	if _, err := real.h.users.RemoveConnection(real.sess.AccountID(), key, real.realAccount(t, "proekty")); err != nil {
 		t.Fatal(err)
 	}
@@ -91,6 +93,23 @@ func TestFixtureBackupStates(t *testing.T) {
 	for _, p := range held[2:4] {
 		body, _, _ := nc.Object(p)
 		nc.Seed(p, strings.Replace(body, "SUMMARY:", "SUMMARY:Moved · ", 1))
+	}
+	// Проекты, whose server is gone, go into Личный, which already holds
+	// one of its events changed (s-backup-8: «that server is gone — another
+	// collection chosen · 1 already here»); the other is the one the server
+	// refuses (s-backup-18: «1 already here — skipped · 1 not restored»).
+	vps := real.servers["radicale · vps"]
+	copied := 0
+	for _, p := range vps.Paths(proekty) {
+		if strings.Contains(p, "9c27-0e5d-4412") {
+			continue
+		}
+		body, _, _ := vps.Object(p)
+		nc.Seed(lichnyj+path.Base(p), strings.Replace(body, "SUMMARY:", "SUMMARY:Moved · ", 1))
+		copied++
+	}
+	if copied != 1 {
+		t.Fatalf("Проекты gives Личный %d changed events, the frames one", copied)
 	}
 	if rec := real.h.do(postForm("/app/settings/backup/restore", real.sess, url.Values{
 		"source": {"run"}, "run": {own + "|" + made.ID}, "password": {"archive-pw"},

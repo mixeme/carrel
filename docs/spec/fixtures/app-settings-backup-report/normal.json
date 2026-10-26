@@ -1028,8 +1028,11 @@
         },
         {
           "colour": "#9a9280",
-          "created": 1,
+          "created": 0,
           "happened": [
+            {
+              "text": "1 already here — skipped · "
+            },
             {
               "mark": "danger",
               "text": "1 not restored: the server refused it (413, too large)"
@@ -1039,7 +1042,7 @@
           "name": "radicale · vps / Проекты"
         }
       ],
-      "subtitle": "3 collections · 3 records created · 2 already here, skipped · 1 not restored",
+      "subtitle": "3 collections · 2 records created · 3 already here, skipped · 1 not restored",
       "title": "Restored from 2026-08-10"
     },
     "source": {
