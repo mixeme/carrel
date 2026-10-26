@@ -165,7 +165,7 @@ func restoreRun(t *testing.T, f davFixture, href string, form url.Values) *view.
 		t.Fatalf("restore: %d %s %s", rec.Code, rec.Header().Get("Location"), rec.Body.String())
 	}
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup/restore/report", f.sess)))
-	if page.Restore.Report == nil || page.Restore.Report.Note != "Nothing on the server was deleted or overwritten." {
+	if page.Restore.Report == nil {
 		t.Fatalf("report = %+v", page.Restore.Report)
 	}
 	return page.Restore.Report

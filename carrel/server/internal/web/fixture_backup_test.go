@@ -76,6 +76,22 @@ func TestFixtureBackupStates(t *testing.T) {
 	if _, err := real.h.users.RemoveConnection(real.sess.AccountID(), key, real.realAccount(t, "proekty")); err != nil {
 		t.Fatal(err)
 	}
+	// Since the copy Личный lost four events on its server and three were
+	// changed there (s-backup-8: «4 records missing, will be created · 3
+	// already here»; s-backup-18: created, and skipped without an answer).
+	nc := real.servers["nextcloud"]
+	lichnyj := real.realPath(t, "lichnyj")
+	held := nc.Paths(lichnyj)
+	if len(held) < 7 {
+		t.Fatalf("Личный holds %d events, the frames lose four and change three", len(held))
+	}
+	for _, p := range held[:4] {
+		nc.Unseed(p)
+	}
+	for _, p := range held[4:7] {
+		body, _, _ := nc.Object(p)
+		nc.Seed(p, strings.Replace(body, "SUMMARY:", "SUMMARY:Moved · ", 1))
+	}
 	if rec := real.h.do(postForm("/app/settings/backup/restore", real.sess, url.Values{
 		"source": {"run"}, "run": {own + "|" + made.ID}, "password": {"archive-pw"},
 	})); rec.Code != http.StatusSeeOther {
@@ -92,13 +108,8 @@ func TestFixtureBackupStates(t *testing.T) {
 	}
 	real.compare(t, "app-settings-backup-restore/match.json", real.h.do(get("/app/settings/backup/restore", real.sess)))
 	// Restore pressed (s-backup-18, Typecase's note 99): the report, a row
-	// a collection restored — Личный lost an event on its server since the
-	// copy, and the server refuses Проекты's one record as too large.
-	nc := real.servers["nextcloud"]
-	lichnyj := real.realPath(t, "lichnyj")
-	if gone := nc.Paths(lichnyj); len(gone) > 0 {
-		nc.Unseed(gone[0])
-	}
+	// a collection restored, and the server refuses Проекты's one record as
+	// too large.
 	nc.RefuseAt("PUT", lichnyj+"9c27-0e5d-4412", http.StatusRequestEntityTooLarge, "")
 	m := decode[view.BackupPage](t, real.h.do(get("/app/settings/backup/restore", real.sess))).Restore.Match
 	if rec := real.h.do(postForm(match+"restore", real.sess, matchForm(*m))); rec.Code != http.StatusSeeOther {

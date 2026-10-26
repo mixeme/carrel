@@ -59,7 +59,7 @@ func restoreMain(p *view.BackupPage) []w.MainPart {
 // reportDialog is the third step (s-backup-18): what was restored from the
 // archive's day, the sums under it, Done; a row a collection — its mark and
 // name, where it went, how many were created, what happened, a refusal in
-// alarm, «no differences» muted —; that nothing was deleted or overwritten.
+// alarm, «no differences» muted.
 func reportDialog(rep *view.RestoreReport) w.Dialog {
 	h := w.Head{Title: &w.HeadTitle{Text: string(rep.Title)}, Acts: &w.Acts{Items: []w.ActsPart{bind.Button(rep.Done, "")}}}
 	if rep.Subtitle != "" {
@@ -80,11 +80,7 @@ func reportDialog(rep *view.RestoreReport) w.Dialog {
 			happened,
 		}})
 	}
-	d := w.Dialog{Variant: w.DialogWide, Items: []w.DialogPart{w.Steps{Items: []string{stepArchive, stepMatch, stepReport}, On: 3}, h, t}}
-	if rep.Note != "" {
-		d.Items = append(d.Items, w.Msg{Parts: []w.MsgPart{w.Text(rep.Note)}})
-	}
-	return d
+	return w.Dialog{Variant: w.DialogWide, Items: []w.DialogPart{w.Steps{Items: []string{stepArchive, stepMatch, stepReport}, On: 3}, h, t}}
 }
 
 // sourceDialog is the first step (s-backup-7): where the archive is — one

@@ -72,9 +72,10 @@ func davDelete(t *testing.T, f davFixture, p string) {
 // import, not a rollback. Each collection of the archive gets its target in
 // its row, preset to the collection matched by path; what is missing there
 // is created, the same record (same UID, same content) is not made twice,
-// a UID held by a record changed since the copy gets a fresh UID and a line
-// in the report; nothing on the server is deleted or overwritten. The rows
-// say what will happen before anything is written.
+// a record changed there since the copy is counted «already here» and, the
+// question not answered, skipped (the owner, 26.10.2026); nothing on the
+// server is deleted. The rows say what will happen before anything is
+// written.
 func TestRestoreIntoTheCollectionsMatchedByPath(t *testing.T) {
 	f := backupFixture(t)
 	m := openArchive(t, f, func() {
@@ -84,16 +85,22 @@ func TestRestoreIntoTheCollectionsMatchedByPath(t *testing.T) {
 	if len(m.Rows) != 3 || m.Selected != 3 {
 		t.Fatalf("rows %d, selected %d", len(m.Rows), m.Selected)
 	}
-	want := []struct{ into, will string }{
-		{sel(f, searchBook), "matched by path — 1 record missing, will be created"},
-		{sel(f, searchWork), "matched by path — 1 changed since the copy, created again with a fresh UID"},
-		{sel(f, filesDocs), "matched by path — missing files are uploaded, none is overwritten"},
+	want := []struct {
+		into, will string
+		here       int
+	}{
+		{sel(f, searchBook), "matched by path — 1 record missing, will be created", 0},
+		{sel(f, searchWork), "matched by path", 1},
+		{sel(f, filesDocs), "matched by path — missing files are uploaded, none is overwritten", 0},
 	}
 	for i, r := range m.Rows {
-		if got := firstSelected(r.Into); got != want[i].into || string(r.Will) != want[i].will || r.Danger || r.Pick.Value != "true" ||
+		if got := firstSelected(r.Into); got != want[i].into || string(r.Will) != want[i].will || r.Here != want[i].here || r.Danger || r.Pick.Value != "true" ||
 			r.Into.Name != "into."+strconv.Itoa(i) || r.Pick.Name != "pick."+strconv.Itoa(i) {
-			t.Errorf("row %d (%s): into %q, will %q, danger %v, pick %+v; want %q, %q", i, r.Name, got, r.Will, r.Danger, r.Pick, want[i].into, want[i].will)
+			t.Errorf("row %d (%s): into %q, will %q · %d already here, danger %v, pick %+v; want %q, %q · %d", i, r.Name, got, r.Will, r.Here, r.Danger, r.Pick, want[i].into, want[i].will, want[i].here)
 		}
+	}
+	if e := m.Existing; e == nil || e.Note != "1 record of the archive is already here and differs" || len(e.Options) != 3 || !e.Options[0].On {
+		t.Errorf("the question = %+v, want it about one record, Skip it on", e)
 	}
 	last := m.Rows[0].Into.Options
 	if n := len(last); n < 3 || last[n-2].Value != "new" || !last[n-2].Separator || last[n-1].Value != "skip" || last[n-1].Label != "Skip this one" {
@@ -112,13 +119,13 @@ func TestRestoreIntoTheCollectionsMatchedByPath(t *testing.T) {
 	if body, _, _ := f.srv.Object(searchWork + "e1.ics"); !strings.Contains(body, "Standup moved") {
 		t.Errorf("the changed event was overwritten: %s", body)
 	}
-	if n := len(f.srv.Paths(searchWork)); n != before+1 {
-		t.Errorf("the calendar holds %d, want %d: the changed event once more, the task not twice", n, before+1)
+	if n := len(f.srv.Paths(searchWork)); n != before {
+		t.Errorf("the calendar holds %d, want %d: the changed event skipped, the task not twice", n, before)
 	}
-	// The report (s-backup-18): the fresh UID counted, the same records
-	// not repeated.
-	if lines := reportLines(rep); !strings.Contains(lines, "1 record with a new UID") || !strings.Contains(string(rep.Subtitle), "1 with a new UID") {
-		t.Errorf("the report does not name the fresh UID:\n%s\n%s", rep.Subtitle, lines)
+	// The report (s-backup-18): what was already here, skipped; the same
+	// records not repeated.
+	if lines := reportLines(rep); !strings.Contains(lines, "1 already here — skipped") || !strings.Contains(string(rep.Subtitle), "1 already here, skipped") {
+		t.Errorf("the report does not name what was skipped:\n%s\n%s", rep.Subtitle, lines)
 	}
 	if body, ok := f.srv.File(filesDocs + "share/readme.txt"); !ok || body != "hello" {
 		t.Errorf("the file there = %q %v", body, ok)

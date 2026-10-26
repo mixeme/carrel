@@ -857,27 +857,26 @@ type RestoreBlock struct {
 	// /app/settings/backup/restore/report): что сделало восстановление;
 	// nil — не было
 	Report  *RestoreReport `json:"report"`
-	Note    Runs           `json:"note"`    // восстановление создаёт, как импорт, а не откатывает; «creates» — жирным (s-backup-8)
+	Note    Runs           `json:"note"`    // «Restoring is an import: records made since the archive stay, nothing is deleted.» (s-backup-8)
 	Actions []Action       `json:"actions"` // Cancel открытого архива
 }
 
 // RestoreReport — отчёт восстановления (s-backup-18, записка Typecase 99):
-// «Restored from 2026-08-14», итог строкой, строка на коллекцию, что ничего
-// не удалено и не перезаписано, Done.
+// «Restored from 2026-08-14», итог строкой, строка на коллекцию, Done.
 type RestoreReport struct {
 	Title Text `json:"title"`
-	// Subtitle — «3 collections · 143 records created · 2 with a new UID · 1
-	// not restored»
+	// Subtitle — «3 collections · 141 records created · 5 already here,
+	// skipped · 1 not restored» (у ответов Replace и копий — «replaced»,
+	// «imported as copies»)
 	Subtitle Text               `json:"subtitle"`
 	Rows     []RestoreReportRow `json:"rows"`
-	Note     Text               `json:"note"` // «Nothing on the server was deleted or overwritten.»
 	Done     Action             `json:"done"` // GET /app/settings/backup
 }
 
 // RestoreReportRow — коллекция архива: имя и метка, куда восстановлена,
-// сколько создано, что случилось — «4 missing records created», «no
-// differences» (Same — приглушённо), «2 with a new UID · ‹danger›1 not
-// restored: the server refused it (413, too large)».
+// сколько создано, что случилось — «4 missing records created · 3 already
+// here — skipped», «no differences» (Same — приглушённо), «2 already here —
+// skipped · ‹danger›1 not restored: the server refused it (413, too large)».
 type RestoreReportRow struct {
 	Name     Text   `json:"name"`
 	Colour   Colour `json:"colour"`
@@ -889,15 +888,22 @@ type RestoreReportRow struct {
 
 // RestoreMatch — сопоставление (s-backup-8): строка на коллекцию архива,
 // отметка — что восстанавливать, «Restore into» — куда. Восстановление —
-// импорт (S-24.3): недостающее создаётся, такое же не повторяется, занятый
-// UID с другим содержимым получает новый; ничего не удаляется и не
-// перезаписывается. Без сценариев — одна форма: строки шлют pick.N и
-// into.N, кнопки полосы — та же форма на свой адрес.
+// импорт (S-24.3): недостающее создаётся, такое же не повторяется, ничего
+// не удаляется; что уже есть и отличается — как ответил вопрос Existing.
+// Без сценариев — одна форма: строки шлют pick.N и into.N, кнопки полосы —
+// та же форма на свой адрес.
 type RestoreMatch struct {
 	// Form — POST ?op=restore-run, скрытый _csrf; кнопки — «Restore 3
 	// collections» (основная) и полосы: Restore into, Skip, Select all
 	Form     Form `json:"form"`
 	Selected int  `json:"selected"` // «3 selected»
+	// Existing — вопрос над полосой (s-backup-8, -20; владелец, 26.10):
+	// «5 records of the archive are already here and differ», у архива,
+	// который сравнят лишь при восстановлении, — «Records of the archive
+	// that are already here and differ»; ответы — ссылки GET
+	// ?existing=skip|replace|copy, выбранный On (без ответа — Skip them),
+	// Hint — что он сделает. nil — нечего спрашивать
+	Existing *ImportExisting `json:"existing,omitempty"`
 	// Into — список «Restore into» полосы: цель всем отмеченным строкам
 	Into FormRow      `json:"into"`
 	Rows []RestoreRow `json:"rows"`
@@ -925,6 +931,9 @@ type RestoreRow struct {
 	// be created», «that server is gone — another collection chosen», «skip»
 	Will   Text `json:"will"`
 	Danger bool `json:"danger"` // Will тревогой: сервер исчез, архив не читается
+	// Here — сколько записей архива цель держит иными; за Will, не тревогой:
+	// « · 3 already here» (s-backup-8). 0 — таких нет или не сравнивали
+	Here int `json:"here,omitempty"`
 }
 
 type AppearancePage struct {

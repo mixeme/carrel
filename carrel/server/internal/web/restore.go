@@ -35,8 +35,10 @@ import (
 // Restore (S-24.3) is an import, not a rollback: each collection of the
 // archive goes where its row says (s-backup-8) — the collection it came from
 // by default, another, a new one, or nowhere —, what is missing there is
-// created and nothing there is deleted or overwritten, so nothing made after
-// the copy is lost. It is checked on the same screen before anything is
+// created and nothing there is deleted, so nothing made after the copy is
+// lost; a record there that differs from the archive's is skipped, replaced
+// or copied beside, as the step's question is answered — the import's
+// (the owner, 26.10.2026). It is checked on the same screen before anything is
 // written: the archive is opened, its manifest read and each collection's
 // outcome said in its row. Three sources: a run of a job, a file on a WebDAV storage, a
 // file from this computer. The archive waits for the next step in a temporary
@@ -80,10 +82,13 @@ type storedArchive struct {
 type restoreDone struct {
 	Name, Colour, Into   string
 	Created, Fresh, Same int
-	Refused              int
-	Why                  string // why the refused were refused, the server's words
-	Files                bool
-	Matched              bool // into the collection the archive was taken of
+	// Here, Replaced — records already there that differed: skipped, or
+	// written over; copied beside, they are Fresh
+	Here, Replaced int
+	Refused        int
+	Why            string // why the refused were refused, the server's words
+	Files          bool
+	Matched        bool // into the collection the archive was taken of
 }
 
 func (t *restoreTask) ID() string    { return t.id }
@@ -144,8 +149,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run
 	if typed == nil {
 		typed = url.Values{}
 	}
-	b := view.RestoreBlock{Note: join("Restoring ", strongRun("creates"), " records, the way import does: a colliding UID gets a fresh one and a line in the report. "+
-		"Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.")}
+	b := view.RestoreBlock{Note: line("Restoring is an import: records made since the archive stay, nothing is deleted.")}
 	// A job's copies: one row a job, its newest verified copy — its day, its
 	// size, how many collections (s-backup-7, Нс74).
 	var runs, stores []view.Option
@@ -282,11 +286,14 @@ const (
 )
 
 // restoreChoice is what the matching says of every collection of the
-// archive: where it goes and whether its row is ticked. The task keeps it
-// between the steps; a form of the step sends it again.
+// archive: where it goes and whether its row is ticked, and what becomes of
+// the records already there that differ — an answer of the import
+// (existingChoice), skipped without one. The task keeps it between the
+// steps; a form of the step sends the rows again.
 type restoreChoice struct {
-	into   []string
-	picked []bool
+	into     []string
+	picked   []bool
+	existing string
 }
 
 // restoreTarget is where one collection of the archive can go: a collection
@@ -403,7 +410,7 @@ func validInto(blob sealed.Blob, e backup.Entry, v string) bool {
 // postedChoice reads the matching form: into.N and pick.N of every row;
 // a choice that is not one of the row's is the one kept before.
 func postedChoice(fields url.Values, blob sealed.Blob, t *restoreTask, kept restoreChoice) restoreChoice {
-	c := restoreChoice{into: append([]string{}, kept.into...), picked: make([]bool, len(kept.picked))}
+	c := restoreChoice{into: append([]string{}, kept.into...), picked: make([]bool, len(kept.picked)), existing: kept.existing}
 	for i, e := range t.manifest.Collections {
 		if v := fields.Get("into." + strconv.Itoa(i)); validInto(blob, e, v) {
 			c.into[i] = v
@@ -421,7 +428,7 @@ func (t *restoreTask) choiceOf(blob sealed.Blob) restoreChoice {
 	if len(t.choice.into) != len(t.manifest.Collections) {
 		t.choice = presetChoice(blob, t)
 	}
-	return restoreChoice{into: append([]string{}, t.choice.into...), picked: append([]bool{}, t.choice.picked...)}
+	return restoreChoice{into: append([]string{}, t.choice.into...), picked: append([]bool{}, t.choice.picked...), existing: t.choice.existing}
 }
 
 func (t *restoreTask) keep(c restoreChoice) {
@@ -525,7 +532,7 @@ func (s *Server) restoreMatch(sess *session.Session, blob sealed.Blob, t *restor
 	m := &view.RestoreMatch{}
 	bar := view.FormRow{Name: "into", Label: "Restore into", Kind: view.InputSelect}
 	seen := map[string]bool{}
-	going := 0
+	going, here, unread := 0, 0, false
 	for i, e := range t.manifest.Collections {
 		col, matched := matchedByPath(blob, e)
 		colour := catalogColour(sealed.Collection{AccountID: e.AccountID, Path: e.Path})
@@ -551,15 +558,19 @@ func (s *Server) restoreMatch(sess *session.Session, blob sealed.Blob, t *restor
 			row.Into.Options = append(row.Into.Options, view.Option{Value: restoreNew, Label: "New collection", Separator: true, Selected: choice.into[i] == restoreNew})
 		}
 		row.Into.Options = append(row.Into.Options, view.Option{Value: restoreSkip, Label: "Skip this one", Separator: !validInto(blob, e, restoreNew), Selected: choice.into[i] == restoreSkip})
-		row.Will, row.Danger = s.restoreWill(sess, blob, t, zr, i, e, choice.into[i], matched && choice.into[i] == selValue(col.AccountID, col.Path))
+		would := s.restoreWill(sess, blob, t, zr, i, e, choice.into[i], matched && choice.into[i] == selValue(col.AccountID, col.Path))
+		row.Will, row.Danger, row.Here = would.will, would.danger, would.here
 		if choice.picked[i] {
 			m.Selected++
 			if choice.into[i] != restoreSkip {
 				going++
+				here += would.here
+				unread = unread || would.unread
 			}
 		}
 		m.Rows = append(m.Rows, row)
 	}
+	m.Existing = s.restoreExisting(here, unread, choice.existing)
 	bar.Options = append(bar.Options,
 		view.Option{Value: restoreNew, Label: "New collection", Separator: true},
 		view.Option{Value: restoreSkip, Label: "Skip this one"})
@@ -594,13 +605,25 @@ func (s *Server) restoreMatch(sess *session.Session, blob sealed.Blob, t *restor
 	return m
 }
 
-// restoreWill is «What will happen» of a row, and whether it is an alarm.
-func (s *Server) restoreWill(sess *session.Session, blob sealed.Blob, t *restoreTask, zr *zip.Reader, i int, e backup.Entry, into string, matched bool) (view.Text, bool) {
+// restoreWould is «What will happen» of a row: the words, whether they are
+// an alarm, how many records of the archive the target holds otherwise, and
+// whether the target is compared only when the restore runs.
+type restoreWould struct {
+	will   view.Text
+	danger bool
+	here   int
+	unread bool
+}
+
+// restoreWill is «What will happen» of a row (s-backup-8): what goes where,
+// then how many are already there and differ — their fate is the step's
+// question.
+func (s *Server) restoreWill(sess *session.Session, blob sealed.Blob, t *restoreTask, zr *zip.Reader, i int, e backup.Entry, into string, matched bool) restoreWould {
 	if e.Error != "" {
-		return text("not whole in this archive: " + e.Error), true
+		return restoreWould{will: text("not whole in this archive: " + e.Error), danger: true}
 	}
 	if into == restoreSkip {
-		return "skip", false
+		return restoreWould{will: "skip"}
 	}
 	// What the archive cannot give is said first: nothing of it is written.
 	// An archive from this computer sent in parts holds no records until
@@ -608,49 +631,89 @@ func (s *Server) restoreWill(sess *session.Session, blob sealed.Blob, t *restore
 	read := t.holds(e)
 	if e.Kind != view.KindFile && read {
 		if _, err := s.archiveRecords(zr, e); err != nil {
-			return text("cannot be restored: " + err.Error()), true
+			return restoreWould{will: text("cannot be restored: " + err.Error()), danger: true}
 		}
 	}
-	_, connThere := blob.Connection(e.AccountID)
 	switch {
-	case !connThere && into != restoreNew:
-		return "that server is gone — another collection chosen", true
 	case e.Kind == view.KindFile && into == restoreNew:
 		col, _ := newRestoreFolder(blob, e)
 		conn, _ := blob.Connection(col.AccountID)
-		return text("a new folder in " + string(stamp(connLabel(conn), collectionLabel(col))) + " — " + plural(e.Count, "file") + " will be uploaded"), false
+		return restoreWould{will: text("a new folder in " + string(stamp(connLabel(conn), collectionLabel(col))) + " — " + plural(e.Count, "file") + " will be uploaded")}
 	case into == restoreNew:
 		conn, _ := newRestoreConn(blob, e)
-		return text("a new collection on " + connLabel(conn) + " — " + plural(e.Count, "record") + " will be created"), false
+		return restoreWould{will: text("a new collection on " + connLabel(conn) + " — " + plural(e.Count, "record") + " will be created")}
 	}
 	prefix := ""
 	if matched {
 		prefix = "matched by path — "
 	}
-	if e.Kind == view.KindFile {
-		return text(prefix + "missing files are uploaded, none is overwritten"), false
+	var w restoreWould
+	missing := 0
+	if e.Kind != view.KindFile {
+		if !read {
+			w.unread = true
+		} else {
+			n := s.countFor(sess, blob, t, zr, i, e, into)
+			if n.err != nil {
+				return restoreWould{will: text(prefix + "cannot be read now: " + n.err.Error()), danger: true}
+			}
+			missing, w.here = n.missing, n.changed
+		}
 	}
-	if !read {
-		return text(prefix + "compared when you restore"), false
-	}
-	n := s.countFor(sess, blob, t, zr, i, e, into)
-	if n.err != nil {
-		return text(prefix + "cannot be read now: " + n.err.Error()), true
-	}
-	var parts []string
-	if n.missing > 0 {
-		parts = append(parts, plural(n.missing, "record")+" missing, will be created")
+	// A server that is gone says so in alarm; what the collection chosen
+	// instead holds follows, plain (s-backup-8).
+	if _, there := blob.Connection(e.AccountID); !there {
+		w.will, w.danger = "that server is gone — another collection chosen", true
+		return w
 	}
 	switch {
-	case n.changed == 1:
-		parts = append(parts, "1 changed since the copy, created again with a fresh UID")
-	case n.changed > 1:
-		parts = append(parts, strconv.Itoa(n.changed)+" changed since the copy, created again with fresh UIDs")
+	case e.Kind == view.KindFile:
+		w.will = text(prefix + "missing files are uploaded, none is overwritten")
+	case w.unread:
+		w.will = text(prefix + "compared when you restore")
+	case missing > 0:
+		w.will = text(prefix + plural(missing, "record") + " missing, will be created")
+	case w.here > 0:
+		w.will = text(strings.TrimSuffix(prefix, " — "))
+	default:
+		w.will = text(prefix + "no differences")
 	}
-	if len(parts) == 0 {
-		return text(prefix + "no differences"), false
+	return w
+}
+
+// restoreExisting is the step's question about the records of the archive
+// already there that differ (s-backup-8, -20; the owner, 26.10.2026): the
+// import's three answers, Skip them without one. How many is said when every
+// target was read; an archive sent in parts is compared when it is restored.
+func (s *Server) restoreExisting(here int, unread bool, answer string) *view.ImportExisting {
+	if here == 0 && !unread {
+		return nil
 	}
-	return text(prefix + strings.Join(parts, " · ")), false
+	options := []struct{ id, word, label, hint string }{
+		{"skip", existingSkip, "Skip them", "They stay as they are here; the archive's version is not written."},
+		{"replace", existingReplace, "Replace them", "The ones here are overwritten with the archive's version."},
+		{"copy", existingCopies, "Import as copies", "Each gets a new UID and stands beside the one here."},
+	}
+	out := &view.ImportExisting{Note: text(plural(here, "record") + " of the archive are already here and differ")}
+	switch {
+	case unread:
+		out.Note = "Records of the archive that are already here and differ"
+	case here == 1:
+		out.Note = "1 record of the archive is already here and differs"
+		options = []struct{ id, word, label, hint string }{
+			{"skip", existingSkip, "Skip it", "It stays as it is here; the archive's version is not written."},
+			{"replace", existingReplace, "Replace it", "The one here is overwritten with the archive's version."},
+			{"copy", existingCopies, "Import as a copy", "It gets a new UID and stands beside the one here."},
+		}
+	}
+	for _, o := range options {
+		if answer == o.word {
+			out.Hint = text(o.hint)
+		}
+		out.Options = append(out.Options, view.Action{ID: "restore.existing." + o.id, Label: text(o.label), Method: "GET", Enabled: true,
+			Href: s.route("/app/settings/backup/restore?" + url.Values{"existing": {o.id}}.Encode()), On: answer == o.word})
+	}
+	return out
 }
 
 // matchRestore is a press on the bar of the matching (s-backup-8): the form
@@ -1032,7 +1095,7 @@ func (s *Server) runRestore(w http.ResponseWriter, r *http.Request, sess *sessio
 		if e.Kind == view.KindFile {
 			done, err = s.restoreFiles(ctx, blob, zr, e, into, day)
 		} else {
-			done, err = s.restoreRecords(ctx, sess, key, blob, zr, e, into, day)
+			done, err = s.restoreRecords(ctx, sess, key, blob, zr, e, into, day, choice.existing)
 		}
 		if err != nil && done.Why == "" {
 			done.Why, done.Refused = err.Error(), max(done.Refused, 1)
@@ -1090,18 +1153,21 @@ func (s *Server) getBackupRestoreReport(w http.ResponseWriter, r *http.Request) 
 }
 
 // restoreReport is the report's words (s-backup-18): «Restored from …», the
-// sums in a line, a row a collection — what was created, which records got
-// a new UID, what was refused and why, in alarm —, that nothing was deleted
-// or overwritten, Done.
+// sums in a line, a row a collection — what was created, what was already
+// there and what became of it as the step's question was answered, what was
+// refused and why, in alarm —, Done.
 func (s *Server) restoreReport(held restoreReportOf) *view.RestoreReport {
-	rep := &view.RestoreReport{Title: "Restored", Note: "Nothing on the server was deleted or overwritten.",
+	rep := &view.RestoreReport{Title: "Restored",
 		Done: view.Action{ID: "restore.done", Label: "Done", Href: s.route("/app/settings/backup"), Method: "GET", Primary: true, Enabled: true}}
 	if held.Day != "" {
 		rep.Title = text("Restored from " + held.Day)
 	}
-	created, fresh, refused := 0, 0, 0
+	created, here, replaced, copies, refused := 0, 0, 0, 0, 0
 	for _, d := range held.Rows {
-		created, fresh, refused = created+d.Created, fresh+d.Fresh, refused+d.Refused
+		created, here, replaced, refused = created+d.Created, here+d.Here, replaced+d.Replaced, refused+d.Refused
+		if !d.Files {
+			copies += d.Fresh
+		}
 		row := view.RestoreReportRow{Name: text(d.Name), Colour: view.Colour(d.Colour), Into: text(d.Into), Created: d.Created}
 		var parts []any
 		add := func(p ...any) {
@@ -1117,12 +1183,15 @@ func (s *Server) restoreReport(held restoreReportOf) *view.RestoreReport {
 		if d.Created > 0 && d.Matched {
 			add(plural(d.Created, "missing "+noun) + " created")
 		}
-		if d.Fresh > 0 {
-			if d.Files {
-				add(plural(d.Fresh, "file") + " put beside the one there")
-			} else {
-				add(plural(d.Fresh, "record") + " with a new UID")
-			}
+		switch {
+		case d.Here > 0:
+			add(fmt.Sprintf("%d already here — skipped", d.Here))
+		case d.Replaced > 0:
+			add(fmt.Sprintf("%d already here — replaced", d.Replaced))
+		case d.Fresh > 0 && d.Files:
+			add(plural(d.Fresh, "file") + " put beside the one there")
+		case d.Fresh > 0:
+			add(fmt.Sprintf("%d already here — imported as copies", d.Fresh))
 		}
 		if d.Refused > 0 {
 			add(view.Run{Text: text(fmt.Sprintf("%d not restored: %s", d.Refused, d.Why)), Mark: view.RunDanger})
@@ -1139,8 +1208,13 @@ func (s *Server) restoreReport(held restoreReportOf) *view.RestoreReport {
 		rep.Rows = append(rep.Rows, row)
 	}
 	sums := []string{plural(len(held.Rows), "collection"), plural(created, "record") + " created"}
-	if fresh > 0 {
-		sums = append(sums, fmt.Sprintf("%d with a new UID", fresh))
+	for _, n := range []struct {
+		count int
+		then  string
+	}{{here, "skipped"}, {replaced, "replaced"}, {copies, "imported as copies"}} {
+		if n.count > 0 {
+			sums = append(sums, fmt.Sprintf("%d already here, %s", n.count, n.then))
+		}
 	}
 	if refused > 0 {
 		sums = append(sums, fmt.Sprintf("%d not restored", refused))
@@ -1153,8 +1227,10 @@ func (s *Server) restoreReport(held restoreReportOf) *view.RestoreReport {
 // target — an existing collection, or a new one of its kinds on the server
 // newRestoreConn names: a record missing there is created under its UID,
 // the same record is left as it is, and a UID held there by different
-// content gets a fresh UID and a line. The first line says the counts.
-func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key [32]byte, blob sealed.Blob, zr *zip.Reader, e backup.Entry, into, day string) (restoreDone, error) {
+// content goes as existing says — skipped, written over the version read a
+// moment ago (one changed since is refused), or created again under a fresh
+// UID.
+func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key [32]byte, blob sealed.Blob, zr *zip.Reader, e backup.Entry, into, day, existing string) (restoreDone, error) {
 	done := restoreDone{}
 	objs, err := s.archiveRecords(zr, e)
 	if err != nil {
@@ -1192,7 +1268,7 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 	}
 	done.Into = string(stamp(connLabel(conn), collectionLabel(col)))
 	dests := map[view.Kind]*collectionCtx{}
-	made, same, refused := 0, 0, 0
+	made, same, refused, here, replaced := 0, 0, 0, 0, 0
 	var renamed []string
 	for _, o := range objs {
 		k := view.KindContact
@@ -1217,6 +1293,22 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 				same++
 				continue
 			}
+			switch existing {
+			case existingSkip:
+				here++
+				continue
+			case existingReplace:
+				o.Path, o.ETag = ex.Path, ex.ETag
+				if err := dest.update(ctx, o); err != nil {
+					refused++
+					if done.Why == "" {
+						done.Why = refusedWhy(err)
+					}
+					continue
+				}
+				replaced++
+				continue
+			}
 			fresh, err := model.NewUID()
 			if err == nil {
 				o, err = setUID(dest, o, fresh)
@@ -1238,6 +1330,7 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 		made++
 	}
 	done.Created, done.Same, done.Fresh, done.Refused = made, same, len(renamed), refused
+	done.Here, done.Replaced = here, replaced
 	return done, nil
 }
 
@@ -1475,6 +1568,15 @@ func (s *Server) getBackupRestore(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Cache-Control", "no-store")
 	q := r.URL.Query()
+	// The answer about the records already there (s-backup-8): kept with
+	// the open archive until Restore.
+	if v, ok := existingChoice(q.Get("existing")); ok {
+		if t := restoreOf(sess); t != nil {
+			c := t.choiceOf(s.catalogOf(sess))
+			c.existing = v
+			t.keep(c)
+		}
+	}
 	page := s.restorePage(sess, q.Get("from"), q.Get("run"))
 	if q.Get("store") != "" || q.Get("path") != "" {
 		// Back from Browse with the archive chosen (s-backup-17).
