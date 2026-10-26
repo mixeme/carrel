@@ -82,13 +82,13 @@ func TestTop(t *testing.T) {
 	// link to the page's sheet, pressed by «?», shown only with a script.
 	got = bind.Top(bar, bind.TopWords{Brand: brand,
 		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
-		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?"}})
+		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?", Sheet: "keys"}})
 	same(t, "the keys after the theme", got.Actions[1].(w.TopDrop).Menu.Items[4:], []w.MenuPart{
 		w.MenuItem{Icon: "search", Trail: w.Kbd{Keys: "?"}, Label: "Keyboard shortcuts", ScriptOnly: true, Href: "#keys", Key: "?"},
 		w.MenuSep{},
 		w.MenuItem{Label: "Sign out", Form: "user.logout"},
 	})
-	got = bind.Top(bar, bind.TopWords{Brand: brand, Keys: bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?"}})
+	got = bind.Top(bar, bind.TopWords{Brand: brand, Keys: bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?", Sheet: "keys"}})
 	same(t, "the keys without the theme", got.Actions[1].(w.TopDrop).Menu.Items[2:], []w.MenuPart{
 		w.MenuSep{},
 		w.MenuItem{Icon: "search", Trail: w.Kbd{Keys: "?"}, Label: "Keyboard shortcuts", ScriptOnly: true, Href: "#keys", Key: "?"},

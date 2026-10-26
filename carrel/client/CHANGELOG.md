@@ -4,6 +4,25 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.1 — 2026-10-26
+
+Server `v0.2.372`, Typecase `d7ba208`. **The keys' sheet** (U-7, account-6;
+Typecase's note 134).
+
+### Added
+
+- **Keyboard shortcuts** in the account's menu after the theme
+  (account-5): a link to `#keys`, pressed by «?», shown only with a
+  script (`TopWords.Keys`).
+- **The keys' sheet**, closed, on every page of the shell whose menu opens
+  it (`document.Keys`, `Shell.Dialogs`): the table of U-7 over the screen,
+  shut by its cross, Close and Esc.
+
+### Changed
+
+- The guard of meaning knows a page's own sheet without an address: its
+  cross and a Close that `Closes` are the script's.
+
 ## v0.11.0 — 2026-10-26
 
 Server `v0.2.372`, Typecase `ff7397d`. **All the screens** (U-6.16,

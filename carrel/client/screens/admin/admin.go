@@ -16,7 +16,7 @@ var (
 		Search: "Search everything…",
 		NewKey: "n", SearchKey: "/",
 		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
-		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?"},
+		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?", Sheet: "keys"},
 	}
 	rail = bind.RailWords{None: "—", ReadOnly: "ro", Davloom: "davloom"}
 )

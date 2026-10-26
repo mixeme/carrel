@@ -31,7 +31,7 @@ type TopWords struct {
 	Theme ThemeWords
 	// Keys is the item of the keys' sheet in the account's menu, after the
 	// theme (account-5): a link to the sheet the document puts on the page
-	// (KeysSheet), pressed by its key and shown only with a script — without
+	// (KeysWords.Sheet), pressed by its key and shown only with a script — without
 	// one the keys do not work either (U-7; Typecase's note 134). Its label
 	// empty — no item.
 	Keys KeysWords
@@ -43,17 +43,15 @@ type ThemeWords struct {
 	Label, Auto, Light, Dark string
 }
 
-// KeysWords are the words of the keys' item: its label, its icon and the
-// key that opens the sheet, drawn at its end.
+// KeysWords are the words of the keys' item: its label, its icon, the key
+// that opens the sheet, drawn at its end, and the ID of the sheet — the
+// page's own (Shell.Dialogs), closed until the item or its key opens it.
 type KeysWords struct {
 	Label string
 	Icon  w.Icon
 	Key   string
+	Sheet string
 }
-
-// KeysSheet is the ID of the keys' sheet (Shell.Dialogs): the page's own,
-// closed until the account's item or its key opens it.
-const KeysSheet = "keys"
 
 // Top is the top bar (TopBar): the mark, the search that sends its query to
 // Search.Action under Search.Name — the screen's words its placeholder and
@@ -135,7 +133,7 @@ func withTheme(items []w.MenuPart, theme ThemeWords, keys KeysWords) []w.MenuPar
 	}
 	if keys.Label != "" {
 		own = append(own, w.MenuItem{Icon: keys.Icon, Trail: w.Kbd{Keys: keys.Key}, Label: keys.Label,
-			ScriptOnly: true, Href: "#" + KeysSheet, Key: keys.Key})
+			ScriptOnly: true, Href: "#" + keys.Sheet, Key: keys.Key})
 	}
 	if len(own) == 0 {
 		return items

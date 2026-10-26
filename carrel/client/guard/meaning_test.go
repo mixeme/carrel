@@ -225,9 +225,9 @@ func TestMeaningRules(t *testing.T) {
 		"a page's own sheet with a button that does nothing": {w.Shell{Dialogs: []w.Scrim{{ID: "keys", Closed: true, Content: w.Sheet{
 			Foot: []w.SheetFootPart{w.Button{Label: "Close"}}}}}}, []string{"(Button): a button with nothing"}},
 		"a sheet's Close that only closes": {w.Sheet{Foot: []w.SheetFootPart{w.Button{Label: "Close", Closes: true}}}, []string{"(Button): a button with nothing"}},
-		"a control the guard lacks":  {w.CardPick{}, []string{"CardPick carries meaning the guard's contract does not know"}},
-		"rows that lead":             {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
-		"rows that lead nowhere":     {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
+		"a control the guard lacks":        {w.CardPick{}, []string{"CardPick carries meaning the guard's contract does not know"}},
+		"rows that lead":                   {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
+		"rows that lead nowhere":           {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
 		// A task's row (Typecase's task 95): its title leads to the record,
 		// its tick posts the form of Mark done.
 		"a task's row that leads": {w.List{Rows: []w.ListRow{w.DueRow{Href: "/t", Tick: w.Tick{Label: "Done", Send: w.Send{Form: "post"}}}}}, nil},

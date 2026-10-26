@@ -22,7 +22,7 @@ var (
 		Search: "Search everything…",
 		NewKey: "n", SearchKey: "/",
 		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
-		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?"},
+		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?", Sheet: "keys"},
 	}
 	// The sources compared: no ticks — what is compared is what the lists
 	// read —, a number for each, the dash before it was compared (s-dup-6).

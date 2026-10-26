@@ -1,7 +1,6 @@
 package document
 
 import (
-	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/client/screens"
 	"carrel.dev/typecase/widget"
 )
@@ -12,7 +11,7 @@ import (
 // its cross, Close and Esc shut it (Typecase's note 134). The keys are the
 // client's, not a screen's: the same on every page of the shell.
 var Keys = widget.Scrim{
-	ID:     bind.KeysSheet,
+	ID:     "keys",
 	Closed: true,
 	Content: widget.Sheet{
 		Icon:  "search",
@@ -37,7 +36,7 @@ var Keys = widget.Scrim{
 
 // withKeys is a page of the shell with the sheet of the keys among its own
 // closed sheets (Shell.Dialogs), where its account's menu has the item that
-// opens it (bind.TopWords.Keys): the frames draw it in the zones' scheme
+// opens it (bind.TopWords.Keys, its Sheet this ID): the frames draw it in the zones' scheme
 // only (shell-1).
 func withKeys(root screens.Root) screens.Root {
 	shell, ok := root.(widget.Shell)
@@ -59,7 +58,7 @@ func opensKeys(top *widget.Top) bool {
 			continue
 		}
 		for _, it := range drop.Menu.Items {
-			if m, ok := it.(widget.MenuItem); ok && m.Href == "#"+bind.KeysSheet {
+			if m, ok := it.(widget.MenuItem); ok && m.Href == "#"+Keys.ID {
 				return true
 			}
 		}
