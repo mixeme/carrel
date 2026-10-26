@@ -2744,11 +2744,15 @@ type FileOpSheet struct {
     Items   []Text
     Servers []FileServer // выбор сервера в шапке листа переноса и копии; у прочих операций пусто
     Target  *FileTree
-    // Alert — у удаления, тревогой перед Warning (s-files-22): сколько
-    // исчезнет, какого объёма, на каком сервере и что копии нет; число
-    // жирным; у папки — «The folder and everything in it …».
+    // Alert — у удаления, тревогой перед Warning (s-files-22, -27): «Carrel
+    // keeps no copy: this cannot be undone.», у папки впереди «Everything in
+    // it goes too.» (Title «Delete folder», Subject — путь с её именем).
     Alert   Runs
-    Warning Runs // перенос: на одном сервере `MOVE` моноширинно (s-files-4); переименование — кого заденет новый адрес (s-files-21); удаление — что ссылок никто не считал (s-files-22)
+    // References — у удаления, блок «What is pointing at it now» после
+    // Alert (s-files-27): папка вложений в ней, опубликованные ссылки —
+    // счёт жирным, что с ними станет; пусто — блока нет
+    References []Reference
+    Warning Runs // перенос: на одном сервере `MOVE` моноширинно (s-files-4); переименование — кого заденет новый адрес (s-files-21); удаление — что записи могут держать это вложением, а Carrel их не просматривает (s-files-22, -27)
     Failure *Notice
     // Лист New folder (Op new, s-files-23): Title «New folder», Subject «in
     // Documents / carrel / attachments», Form — POST на адрес mkcol с полем
@@ -3433,9 +3437,10 @@ type GoSentryJob struct {
     Arguments []Text // по одному аргументу в строке, без кавычек
 }
 // RestoreReport — отчёт восстановления (s-backup-18): «Restored from
-// 2026-08-14», итог строкой, строка на коллекцию, Note «Nothing on the server
-// was deleted or overwritten.», Done (GET /app/settings/backup).
-type RestoreReport struct { Title Text; Subtitle Text; Rows []RestoreReportRow; Note Text; Done Action }
+// 2026-08-14», итог строкой — с «2 already here, skipped|replaced|imported
+// as copies», строка на коллекцию — с «2 already here — skipped» (записка
+// 135), Done (GET /app/settings/backup). Заметки под таблицей нет.
+type RestoreReport struct { Title Text; Subtitle Text; Rows []RestoreReportRow; Done Action }
 // Строка: имя и метка коллекции архива, куда восстановлена, сколько создано,
 // что случилось — отказ в Happened тревогой; Same — «no differences»
 // приглушённо.
@@ -3457,21 +3462,28 @@ type RestoreBlock struct {
     Ranges  string // у шага «From this computer» — адрес, который живой слой спрашивает, какие куски архива слать вместо файла (FileField.Ranges, s-backup-15; записки Typecase 98, 109): `/app/settings/backup/restore?op=ranges`; у прочих пусто
     Match   *RestoreMatch // шаг сопоставления (s-backup-8, -20); nil — архив не открыт
     Report  *RestoreReport // шаг «3 · Report» (s-backup-18, /app/settings/backup/restore/report); nil — восстановления не было
-    Note    Runs // восстановление создаёт, как импорт, а не откатывает: «creates» жирным (s-backup-8)
+    Note    Runs // «Restoring is an import: records made since the archive stay, nothing is deleted.» тревогой (s-backup-8)
     Actions []Action // Cancel открытого архива
 }
 // Сопоставление (s-backup-8): строка на коллекцию архива — отметка, что
 // восстанавливать, и «Restore into» — куда. Восстановление — импорт (S-24.3):
 // в выбранной коллекции создаются недостающие записи, такие же (тот же UID,
-// то же содержимое) не повторяются, запись с занятым UID и другим
-// содержимым получает новый UID и строку отчёта; на сервере ничего не
-// удаляется и не перезаписывается. Без сценариев всё — одна форма: строки
+// то же содержимое) не повторяются; что с записями, которые уже есть и
+// отличаются, решает Existing (записка 135, решение владельца 26.10.2026);
+// на сервере ничего не удаляется. Без сценариев всё — одна форма: строки
 // шлют pick.N и into.N, каждая кнопка — та же форма со своим op
 // (`/app/settings/backup/restore/match?op=restore|into|skip|all|cancel`),
 // ответ — страница восстановления с новым выбором.
 type RestoreMatch struct {
     Form     Form       // POST `/app/settings/backup/restore/match`: скрытый _csrf; кнопки — «Restore 3 collections» (по отмеченным строкам, основная) и полосы: Restore into, Skip, Select all
     Selected int        // «3 selected» на полосе
+    // Existing — вопрос над полосой, поле своей строкой (s-backup-8, -20):
+    // Note — «5 records of the archive are already here and differ», у
+    // несчитанного архива — «Records of the archive that are already here
+    // and differ»; Options — Skip them (без ответа) · Replace them · Import
+    // as copies, ссылки GET `/app/settings/backup/restore?existing=skip|replace|copy`,
+    // ответ — On; Hint — что делает выбранный. nil — таких записей нет
+    Existing *ImportExisting
     Into     FormRow    // список «Restore into» полосы (into): цель всем отмеченным строкам — коллекции, черта, New collection, Skip this one
     Rows     []RestoreRow
     // Ranges, RangesOf — архив с этого компьютера, открытый кусками
@@ -3496,9 +3508,14 @@ type RestoreRow struct {
     // «What will happen»: «matched by path — 4 records missing, will be
     // created», «matched by path — no differences», «that server is gone —
     // another collection chosen», «a new collection on nextcloud — 312
-    // records will be created», «skip»
+    // records will be created», «skip»; если отличаются только уже
+    // имеющиеся — «matched by path» (их счёт — Here)
     Will   Text
     Danger bool // Will тревогой: сервер исчез, архив не читается
+    // Here — сколько записей архива цель держит иными; клиент пишет за Will
+    // « · 3 already here» обычным текстом, без Will — «3 already here»
+    // (s-backup-8). 0 — таких нет или архив не сравнивали
+    Here   int
 }
 
 type AppearancePage struct {

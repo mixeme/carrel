@@ -903,7 +903,7 @@ type RestoreMatch struct {
 	// that are already here and differ»; ответы — ссылки GET
 	// ?existing=skip|replace|copy, выбранный On (без ответа — Skip them),
 	// Hint — что он сделает. nil — нечего спрашивать
-	Existing *ImportExisting `json:"existing,omitempty"`
+	Existing *ImportExisting `json:"existing"`
 	// Into — список «Restore into» полосы: цель всем отмеченным строкам
 	Into FormRow      `json:"into"`
 	Rows []RestoreRow `json:"rows"`

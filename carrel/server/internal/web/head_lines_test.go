@@ -97,7 +97,7 @@ func TestPublicLinesAreMonospaced(t *testing.T) {
 }
 
 // Messages in pieces: the panel of a subscription says what Check does
-// (s-profile-10), the restore that it creates (s-backup-8).
+// (s-profile-10), the restore that it is an import (s-backup-8).
 func TestMessagesInPieces(t *testing.T) {
 	f := feedHarness(t)
 	page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections?op=feed", f.sess)))
@@ -109,7 +109,7 @@ func TestMessagesInPieces(t *testing.T) {
 	}
 	b := backupFixture(t)
 	restore := decode[view.BackupPage](t, b.h.do(get("/app/settings/backup", b.sess))).Restore
-	if got := saidRuns(restore.Note); !strings.HasPrefix(got, "Restoring ⟨strong:creates⟩") {
-		t.Errorf("restore note = %q", got)
+	if got := saidRuns(restore.Note); !msgDrawn(frameMsgs(t, "s-backup-8"), got) {
+		t.Errorf("restore note = %q, the frame %q", got, frameMsgs(t, "s-backup-8"))
 	}
 }

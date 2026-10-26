@@ -125,7 +125,7 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 		// What is pressed is what happens: the title is the button
 		// (account-11), and the one warning says what will be no more.
 		Title:   "Withdraw my deposited key",
-		Warning: escrowWithdrawSheetNote + " The copy of your data key on this server is destroyed; your records and connections stay as they are.",
+		Warning: escrowWithdrawSheetNote,
 		Form: s.plainForm("/app/settings/escrow", "POST", csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "withdraw"}),
 		Actions: []view.Action{
@@ -143,8 +143,8 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 }
 
 // escrowWithdrawNote is the line beside the withdraw button (account-4, note
-// 81 of Typecase); the sheet's warning keeps the longer sentence
-// (account-11).
+// 81 of Typecase); escrowWithdrawSheetNote is the sheet's whole warning
+// (account-11, note 135).
 const (
 	escrowWithdrawNote      view.Text = "Then nobody can recover the account."
 	escrowWithdrawSheetNote view.Text = "Then nobody can recover this account, you included."

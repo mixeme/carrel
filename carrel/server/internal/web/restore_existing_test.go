@@ -20,7 +20,10 @@ var (
 // what it does, and the report what became of them (s-backup-18).
 func TestRestoreAsksAboutWhatIsAlreadyHere(t *testing.T) {
 	frame := mockupFrame(t, "s-backup-8")
-	q := frameOne(t, frameRestoreQuestion, frame, "question about what is already here")
+	q := frameRestoreQuestion.FindStringSubmatch(frame)
+	if q == nil {
+		t.Fatal("s-backup-8 asks nothing about what is already here: read the frame again")
+	}
 	label := regexp.MustCompile(`^\d+ `).ReplaceAllString(frameText(q[1]), "2 ")
 	var frameOpts [][]string
 	for _, m := range frameSegLink.FindAllStringSubmatch(q[2], -1) {

@@ -826,7 +826,7 @@ func TestFileOperationsOnOneServer(t *testing.T) {
 
 	page = decode[view.FilesPage](t, f.h.do(get(f.at("", "sub", ""), f.sess)))
 	del := opSheet(t, f, rowMenu(t, fileRow(t, page, "inner.txt"), "file.delete"), url.Values{})
-	if !del.Actions[0].Danger || !strings.Contains(plainText(del.Warning), "no index") {
+	if !del.Actions[0].Danger || !strings.Contains(plainText(del.Warning), "does not look through the records") {
 		t.Errorf("delete sheet = %+v", del)
 	}
 	f.srv.SeedFile(filesDocs+"sub/inner.txt", "changed elsewhere, longer")

@@ -78,8 +78,8 @@ func TestCollectionDeleteSheetExportByKind(t *testing.T) {
 	if sheet.Export == nil || string(sheet.Export.Label) != "Download .vcf first" || sheet.Export.Href != book.path("contacts")+"/export" {
 		t.Errorf("book export = %+v", sheet.Export)
 	}
-	if !strings.Contains(plainText(sheet.Warning), "address book and all 1 contact in it") {
-		t.Errorf("warning = %q", sheet.Warning)
+	if plainText(sheet.Warning) != "Carrel keeps no copy: this cannot be undone." || !strings.HasPrefix(string(sheet.ExportNote), "1 contact,") {
+		t.Errorf("warning = %q, export note %q", sheet.Warning, sheet.ExportNote)
 	}
 
 	empty := calendarFixture(t, nil)
