@@ -58,19 +58,26 @@ func TestRenameSheetIsTheFrame(t *testing.T) {
 	}
 }
 
-// ФН12: a deletion says first what goes, how much and from which server,
-// and that Carrel holds no copy — the count strong —, then that nothing
-// counted the links to these files (s-files-22); the path stands without
-// «from». A folder goes with everything in it.
+// ФН12, note 135: a deletion says that Carrel keeps no copy, then that
+// nobody looked for the files among the records (s-files-22); the path
+// stands without «from». One folder is «Delete folder» with its own path,
+// and says that everything in it goes too (s-files-27); the folder of
+// attachments inside it points at it.
 func TestDeleteSheetIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-files-22")
 	path := frameText(frameOne(t, frameOpPath, frame, "path")[1])
-	raw := frameOne(t, frameOpFlushAlert, frame, "alert")[1]
-	alert := regexp.MustCompile(`^(\d+) files, (.+?), are deleted on (.+?)\. (Carrel holds no copy.*)$`).FindStringSubmatch(strings.Join(strings.Fields(raw), " "))
+	alert := frameText(frameOne(t, frameOpFlushAlert, frame, "alert")[1])
 	msg := frameText(frameOne(t, frameOpFlushMsg, frame, "message")[1])
 	segs := strings.Split(path, " / ")
-	if alert == nil || alert[1] != "3" || len(segs) < 2 {
-		t.Fatalf("s-files-22 says %q under %q: read the frame again", raw, path)
+	if alert != "Carrel keeps no copy: this cannot be undone." || len(segs) < 2 {
+		t.Fatalf("s-files-22 says %q under %q: read the frame again", alert, path)
+	}
+	folderFrame := mockupFrame(t, "s-files-27")
+	folderTitle := frameText(frameOne(t, regexp.MustCompile(`<b class="tc-sheet__title">(.*?)</b>`), folderFrame, "title")[1])
+	folderAlert := frameText(frameOne(t, frameOpFlushAlert, folderFrame, "alert")[1])
+	folderMsg := frameText(frameOne(t, frameOpFlushMsg, folderFrame, "message")[1])
+	if !strings.HasSuffix(folderAlert, " "+alert) {
+		t.Fatalf("s-files-27 says %q: read the frame again", folderAlert)
 	}
 
 	f := filesFixture(t, true)
@@ -80,33 +87,33 @@ func TestDeleteSheetIsTheFrame(t *testing.T) {
 	}
 	f.srv.SeedFolder(dir + "sub/")
 	f.srv.SeedFile(dir+"sub/inside.txt", "x")
-	server := string(decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess))).Accounts[0].Title)
 	sheet := opSheetOf(t, f, "delete", []string{"a.txt", "b.txt", "c.txt"}, segs[1:]...)
 	if want := "Docs / " + strings.Join(segs[1:], " / "); string(sheet.Subject) != want {
 		t.Errorf("subject = %q, want %q", sheet.Subject, want)
 	}
-	want := "3 files, 4.4 KB, are deleted on " + server + ". " + frameText(alert[4])
-	if plainText(sheet.Alert) != want || len(sheet.Alert) == 0 || sheet.Alert[0].Mark != view.RunStrong || sheet.Alert[0].Text != "3" {
-		t.Errorf("alert = %+v\nwant %q, the count strong", sheet.Alert, want)
-	}
-	if plainText(sheet.Warning) != msg {
-		t.Errorf("warning = %q, want %q", plainText(sheet.Warning), msg)
+	if plainText(sheet.Alert) != alert || plainText(sheet.Warning) != msg || len(sheet.References) != 0 {
+		t.Errorf("alert = %q, warning %q, references %+v; the frame %q, %q and none", plainText(sheet.Alert), plainText(sheet.Warning), sheet.References, alert, msg)
 	}
 	if a := actionByID(sheet.Actions, "file.delete.confirm"); a == nil || !a.Danger || a.Primary {
 		t.Errorf("Delete = %+v", a)
 	}
 
-	one := opSheetOf(t, f, "delete", []string{"a.txt"}, segs[1:]...)
-	if got := plainText(one.Alert); !strings.HasPrefix(got, "1 file, 1.5 KB, is deleted on "+server+". ") {
-		t.Errorf("one file: %q", got)
-	}
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		b.Attachments = &sealed.AttachmentFolder{AccountID: f.id, Path: filesDocs, Folder: append(segs[1:len(segs):len(segs)], "sub", "2026-07")}
+	})
 	folder := opSheetOf(t, f, "delete", []string{"sub"}, segs[1:]...)
-	if got := plainText(folder.Alert); !strings.HasPrefix(got, "The folder and everything in it are deleted on "+server+". ") {
-		t.Errorf("a folder: %q", got)
+	if want := "Docs / " + strings.Join(segs[1:], " / ") + " / sub"; string(folder.Title) != folderTitle || string(folder.Subject) != want {
+		t.Errorf("a folder: title %q, subject %q; want %q, %q", folder.Title, folder.Subject, folderTitle, want)
+	}
+	if plainText(folder.Alert) != folderAlert || plainText(folder.Warning) != folderMsg {
+		t.Errorf("a folder: alert %q, warning %q; the frame %q, %q", plainText(folder.Alert), plainText(folder.Warning), folderAlert, folderMsg)
+	}
+	if got := refLines(folder.References); len(got) != 1 || !strings.HasPrefix(got[0], "Attachments — ") {
+		t.Errorf("a folder holding the attachments: references %q", got)
 	}
 	mixed := opSheetOf(t, f, "delete", []string{"sub", "a.txt"}, segs[1:]...)
-	if got := plainText(mixed.Alert); !strings.HasPrefix(got, "2 items, the folder among them with everything in it, are deleted on "+server+". ") {
-		t.Errorf("a folder and a file: %q", got)
+	if got := plainText(mixed.Alert); got != "Everything in the folder goes too. "+alert || plainText(mixed.Warning) != msg {
+		t.Errorf("a folder and a file: alert %q, warning %q", got, plainText(mixed.Warning))
 	}
 }
 

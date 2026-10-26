@@ -236,15 +236,19 @@ type FileOpSheet struct {
 	// хранилища выбранного. У прочих операций пусто
 	Servers []FileServer `json:"servers"`
 	Target  *FileTree    `json:"target"`
-	// Alert — у удаления, тревогой перед Warning (s-files-22): сколько
-	// исчезнет, какого объёма и на каком сервере, и что копии нет — «‹3›
-	// files, 4.4 MB, are deleted on sftpgo · vps. …», число жирным; у папки
-	// — «The folder and everything in it …». У прочих операций пусто
+	// Alert — у удаления, тревогой перед Warning (s-files-22): что копии нет
+	// — «Carrel keeps no copy: this cannot be undone.»; у одной папки
+	// (s-files-27) и у выбора с папками — сперва что уходит всё, что в них.
+	// У прочих операций пусто
 	Alert Runs `json:"alert"`
+	// References — у удаления: что указывает на удаляемое сейчас
+	// (опубликованные ссылки, папка вложений), блоком «What is pointing at
+	// it now», как у коллекции (подпись s-files-22). Пусто — не на что
+	References []Reference `json:"references,omitempty"`
 	// Warning — что сделает операция: перенос на одном сервере — MOVE
 	// (моноширинно, s-files-4), между хранилищами — скачивание и загрузка;
 	// переименование — кого заденет новый адрес (s-files-21); удаление —
-	// что ссылок на файлы никто не считал (s-files-22)
+	// что вложений в записях никто не искал (s-files-22, -27)
 	Warning Runs    `json:"warning"`
 	Failure *Notice `json:"failure"` // New folder не завёл папку; nil — отказа не было
 	// У листа New folder (Op new, s-files-23): Title «New folder», Subject «in

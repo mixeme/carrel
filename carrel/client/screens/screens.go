@@ -768,7 +768,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.FileOpSheet) },
-		Frames: []string{"s-files-4", "s-files-11", "s-files-12", "s-files-13", "s-files-21", "s-files-22", "s-files-23"},
+		Frames: []string{"s-files-4", "s-files-11", "s-files-12", "s-files-13", "s-files-21", "s-files-22", "s-files-23", "s-files-27"},
 		Draw:   func(model any) Root { return fileop.Screen(model.(*view.FileOpSheet)) },
 		Title:  func(model any) string { return string(model.(*view.FileOpSheet).Title) },
 		Forms:  func(model any) []widget.PostForm { return fileop.Forms(model.(*view.FileOpSheet)) },

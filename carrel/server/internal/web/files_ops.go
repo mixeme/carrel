@@ -1074,19 +1074,20 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		// The new name is the form's field "name".
 		confirm.Label = "Rename"
 		confirm = writeAction(c, confirm)
-		sheet.Warning = line("The name of a file is its address: a note or an event that keeps a link to it, and a published link, will not find it under the new name.")
+		sheet.Warning = line("Notes, events and published links that point at it will not find it under the new name.")
 	case view.FileDelete:
 		confirm.Label, confirm.Danger = "Delete", true
 		for _, e := range items {
 			run.Add("etag", e.ETag)
 		}
 		confirm = writeAction(c, confirm)
-		sheet.Alert = deletionAlert(items, connLabel(c.conn))
-		warning := "Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting."
-		if notes := s.deletionNotes(c, items); len(notes) > 0 {
-			warning += " " + strings.Join(notes, " ")
+		// One folder is its own sheet (s-files-27): the head names it.
+		if len(items) == 1 && items[0].Dir {
+			sheet.Title = "Delete folder"
+			sheet.Subject = text(string(sheet.Subject) + " / " + items[0].Name)
 		}
-		sheet.Warning = line(warning)
+		sheet.Alert, sheet.Warning = deletionWords(items)
+		sheet.References = s.deletionRefs(c, items)
 	default:
 		// «Move» and «Copy», not «Move here» (the owner's word of
 		// 09.10.2026; the frames still say «here» — Typecase's task 147).
@@ -1172,30 +1173,30 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 	return sheet
 }
 
-// deletionAlert says what a deletion takes, how much and from which server,
-// and that there is no copy to bring it back from (s-files-22): files by
-// their count, strong, and their size; a folder with everything in it — its
-// size nobody read.
-func deletionAlert(items []file.Entry, server string) view.Runs {
-	const tail = " on %s. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+// deletionWords are the deletion's alarm — that there is no copy, after
+// that what is in a folder goes too, since the screen does not show it — and
+// that nobody looked for the files among the records (s-files-22, -27).
+func deletionWords(items []file.Entry) (alert, warning view.Runs) {
+	const noCopy = "Carrel keeps no copy: this cannot be undone."
 	folders := 0
 	for _, e := range items {
 		if e.Dir {
 			folders++
 		}
 	}
-	n := strconv.Itoa(len(items))
 	switch {
-	case folders == 0 && len(items) == 1:
-		return join(strongRun(n), fmt.Sprintf(" file, %s, is deleted"+tail, sizeOf(items), server))
-	case folders == 0:
-		return join(strongRun(n), fmt.Sprintf(" files, %s, are deleted"+tail, sizeOf(items), server))
+	case len(items) == 1 && folders == 1:
+		return line("Everything in it goes too. " + noCopy), line("Notes or events may hold files from it as attachments: Carrel does not look through the records.")
 	case len(items) == 1:
-		return line(fmt.Sprintf("The folder and everything in it are deleted"+tail, server))
+		return line(noCopy), line("Notes or events may hold it as an attachment: Carrel does not look through the records.")
 	case folders == 1:
-		return join(strongRun(n), fmt.Sprintf(" items, the folder among them with everything in it, are deleted"+tail, server))
+		alert = line("Everything in the folder goes too. " + noCopy)
+	case folders > 1:
+		alert = line("Everything in the folders goes too. " + noCopy)
+	default:
+		alert = line(noCopy)
 	}
-	return join(strongRun(n), fmt.Sprintf(" items, the folders among them with everything in them, are deleted"+tail, server))
+	return alert, line("Notes or events may hold them as attachments: Carrel does not look through the records.")
 }
 
 // fileTree is where a move or a copy can go (C-6.7): every live file

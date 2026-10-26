@@ -491,6 +491,7 @@ STATE_FRAME = {
     "app-files-op/refused": "s-files-13",
     "app-files-op/rename": "s-files-21",
     "app-files-op/delete": "s-files-22",
+    "app-files-op/delete-folder": "s-files-27",
     "app-files-op/new": "s-files-23",
     "app-files/empty": "states-35",
     # Список без почты — страница целиком (записка 83 п. 15); s-publish-17 — фрагмент строк.

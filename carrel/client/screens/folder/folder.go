@@ -88,7 +88,7 @@ const (
 	noDropHint   = "Dropping files onto the window and the upload queue need scripts, and this page runs none. Upload sends the files; a name that is already taken is refused rather than overwritten."
 	closePanel   = "Close the panel"
 	links        = "Links"
-	linksNote    = "Carrel keeps no index of what points at this file. It may be attached to a note or an event — check before deleting."
+	linksNote    = "Notes or events may hold it as an attachment: Carrel does not look through the records."
 	upload       = "Upload"
 	sizeField    = "size"
 	takenOp      = "?op=taken"

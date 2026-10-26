@@ -3398,6 +3398,7 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	sheet("elsewhere", url.Values{"op": {"move"}, "item": three, "to": {app.filesAt(t, "Files", "")}})
 	sheet("rename", url.Values{"op": {"rename"}, "item": three[:1]})
 	sheet("delete", url.Values{"op": {"delete"}, "item": three})
+	sheet("delete-folder", url.Values{"op": {"delete"}, "item": {"2026-07"}}) // s-files-27
 	// New folder of the tree with a name taken in the chosen folder.
 	app.compare(t, "app-files-op/refused.json", app.h.do(postForm(op+"?"+url.Values{"op": {"move"}, "item": three, "mkcol": {"1"},
 		"to": {app.filesAt(t, "Documents", "", "carrel", "attachments")}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))

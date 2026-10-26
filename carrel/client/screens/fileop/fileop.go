@@ -3,8 +3,8 @@
 // folder —, drawn by frame «Перемещение и копирование» (s-files-4) of the
 // mockup and its states: the copy (s-files-11), another storage
 // (s-files-12), New folder of the tree refused (s-files-13), the rename
-// (s-files-21), the deletion (s-files-22), New folder of the head refused
-// (s-files-23). A sheet carries no shell: the screen draws it over nothing,
+// (s-files-21), the deletion (s-files-22) and of one folder (s-files-27),
+// New folder of the head refused (s-files-23). A sheet carries no shell: the screen draws it over nothing,
 // which is the sheet's own page without a script (C-7.2, U-8), and it is
 // held against the frame's sheet (guard/sheets_test.go).
 package fileop
@@ -28,11 +28,12 @@ const (
 // submits); a node's link swaps it with the live layer.
 const formSheet = "op-sheet"
 
-// The screen's words (U-1.3): the rubric of the tree, the name of the
-// choice of a server, the keys of the foot, the badge of a node that cannot
-// be chosen, the icon of a folder.
+// The screen's words (U-1.3): the rubric of the tree and of what points at
+// what a deletion takes, the name of the choice of a server, the keys of the
+// foot, the badge of a node that cannot be chosen, the icon of a folder.
 const (
 	where    = "Where to put it"
+	pointing = "What is pointing at it now"
 	server   = "Server"
 	enter    = "Enter"
 	esc      = "Esc"
@@ -60,7 +61,9 @@ var icons = map[view.FileOp]w.Icon{view.FileMove: "move", view.FileCopy: "dup", 
 //     code.
 //   - The body of a rename or a new folder: the field of the name, then why
 //     it was refused or what the new name does.
-//   - The body of a deletion: what goes, in alarm; what nobody counted.
+//   - The body of a deletion: that it cannot be undone, in alarm; what
+//     points at it, as a collection's sheet lists it; what nobody looked
+//     for.
 //   - The foot: the operation's button — its key where the tree chooses —,
 //     Cancel and its key at the end.
 func Screen(p *view.FileOpSheet) w.Overlay {
@@ -89,6 +92,13 @@ func Screen(p *view.FileOpSheet) w.Overlay {
 	}
 	if len(p.Alert) > 0 {
 		s.Body = append(s.Body, w.Msg{Parts: bind.MsgParts(p.Alert), Tone: w.MsgAlert, Space: w.MsgFlush})
+	}
+	if len(p.References) > 0 {
+		b := w.SheetBlock{Title: w.Rubric{Text: pointing, Variant: w.RubricBottom7}}
+		for _, r := range p.References {
+			b.Items = append(b.Items, w.SheetLine{Name: string(r.What), Note: w.Dim{Parts: []w.Inline{w.Text("— " + string(r.Then))}}})
+		}
+		s.Body = append(s.Body, b)
 	}
 	if len(p.Warning) > 0 {
 		space := w.MsgFlush

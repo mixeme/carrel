@@ -38,17 +38,18 @@ func (s *Server) afterPlaced(sess *session.Session, t *transfer) {
 	_ = s.users.SetAttachmentFolder(sess.AccountID(), key, next)
 }
 
-// deletionNotes are what the sheet of a deletion adds to its warning: a
-// folder that holds the attachment folder, and the published links that
-// open what is deleted.
-func (s *Server) deletionNotes(c *fileCtx, items []file.Entry) []string {
+// deletionRefs are what points at what a deletion takes, the sheet's «What
+// is pointing at it now» as a collection's (s-files-22): the folder of
+// attachments inside a folder deleted, and the published links that open
+// what is deleted, counted.
+func (s *Server) deletionRefs(c *fileCtx, items []file.Entry) []view.Reference {
 	blob := s.catalogOf(c.sess)
-	var notes []string
+	var refs []view.Reference
 	links := 0
 	for _, e := range items {
 		item := append(slices.Clone(c.segs), e.Name)
 		if att := blob.Attachments; e.Dir && att != nil && att.AccountID == c.conn.ID && att.Path == c.col.Path && under(att.Folder, item) {
-			notes = append(notes, "«"+e.Name+"» holds the folder of attachments: the next large attachment makes it again, empty.")
+			refs = append(refs, view.Reference{What: "Attachments", Then: "the attachment folder is in it; the next large attachment makes it again, empty"})
 		}
 		for _, l := range s.users.PublishedLinks(c.sess.AccountID()) {
 			if l.Target.Kind == string(view.KindFile) && l.Target.AccountID == c.conn.ID && l.Target.Col == c.col.Path &&
@@ -57,11 +58,8 @@ func (s *Server) deletionNotes(c *fileCtx, items []file.Entry) []string {
 			}
 		}
 	}
-	switch {
-	case links == 1:
-		notes = append(notes, "A published link opens what is deleted: it stops opening.")
-	case links > 1:
-		notes = append(notes, plural(links, "published link")+" open what is deleted: they stop opening.")
+	if links > 0 {
+		refs = append(refs, view.Reference{What: text(plural(links, "published link")), Then: linkThen})
 	}
-	return notes
+	return refs
 }
