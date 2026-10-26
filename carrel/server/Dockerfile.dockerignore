@@ -3,7 +3,8 @@
 # developer's machine, whatever else lies there. BuildKit reads this file,
 # named after the Dockerfile, instead of a .dockerignore at the context's
 # root, so what goes in is named here and nothing else: the server, the
-# client, Typecase. dev/ (credentials) is never in the context.
+# client, Typecase. The credentials (myenv/carrel/, outside the checkout) are
+# never in the context.
 *
 !carrel/carrel/server
 !carrel/carrel/client

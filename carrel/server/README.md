@@ -91,7 +91,7 @@ The event stream needs no `proxy_buffering off`: Carrel sends
 | Command | What it runs |
 |---|---|
 | `scripts/gates.sh` | gofmt, vet, the tests of every package, and the spec's own check. `--fix` formats. |
-| `go test -tags=integration ./integration/` | The live set against real servers. Credentials come from `dev/credentials.txt`, which is not in the repository. A server without credentials is skipped. |
+| `go test -tags=integration ./integration/` | The live set against real servers. Credentials come from `myenv/carrel/credentials.txt` in the nearest folder above the checkout (or the file `CARREL_CREDENTIALS` names), which is not in the repository. A server without credentials is skipped. |
 | `scripts/linux-gates.sh` | On Linux: the key file's permissions, the image and its first start, and Radicale. |
 | `scripts/proxy-check/run.sh` | On Linux: Carrel, nginx and Radicale in Docker. It runs the installation check and davloom through nginx, once with nginx at its defaults and once set up as above. |
 
