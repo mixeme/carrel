@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.3 — 2026-10-27
+
+Server `v0.2.373`, Typecase `fb5a005`. Tests only; nothing drawn changes.
+
+### Added
+
+- **The files' bind has tests of its own** (`bind/files_test.go`): the
+  rail and its shortcuts and foot (s-files-1, -6), the tree a sheet
+  chooses in (s-files-4, -16, s-notes-11), the upload queue (s-files-2),
+  the crumbs, a row's menu, a switch option's icon, the root's note.
+  Written with the files section on a branch that never reached main
+  (`wip/client-files`); the section came in rebuilt in `v0.5.0` without
+  them. Two expectations follow what main draws since: the queue has no
+  Hide button, and the tree indents three levels.
+
 ## v0.11.2 — 2026-10-26
 
 Server `v0.2.373`, Typecase `fb5a005`. Typecase's note 135: **a restore
