@@ -26,7 +26,8 @@ here=$(cd "$(dirname "$0")/.." && pwd)
 root=$(cd "$here/../.." && pwd)
 tcdir=$(cd "$root/.." && pwd)/typecase
 
-if [[ ! -d "$tcdir/.git" ]]; then
+# A worktree's .git is a file, a clone's a directory.
+if [[ ! -e "$tcdir/.git" ]]; then
   echo "no clone of Typecase at $tcdir (the replace of carrel/client/go.mod)" >&2
   exit 1
 fi
