@@ -31,7 +31,9 @@ func TestAMoveThatLosesPartOfTheRecordKeepsTheOriginal(t *testing.T) {
 		names string // what the notice names
 	}{
 		{"a reminder", "TRIGGER", "VALARM"},
-		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "RECURRENCE-ID"},
+		// The days of a series as days (Р-60, states-36), not by the
+		// property the server lost.
+		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "one day of the series"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f := calendarFixture(t, nil, "duty.ics", ics(remindedSeries))
@@ -47,7 +49,7 @@ func TestAMoveThatLosesPartOfTheRecordKeepsTheOriginal(t *testing.T) {
 			sheet := decode[view.MoveSheet](t, f.h.do(get(record+"/move?"+q.Encode(), f.sess)))
 			page := decode[view.EventPage](t, f.h.do(postForm(confirmOf(t, sheet).Href, f.sess, url.Values{})))
 			n := noticeTitled(page.Notices, "Copied, and the original kept")
-			if n == nil || !strings.Contains(string(n.Body), tc.names) {
+			if n == nil || !strings.Contains(string(n.Body), tc.names) || strings.Contains(string(n.Body), "RECURRENCE-ID") {
 				t.Fatalf("notices = %+v", page.Notices)
 			}
 			if _, _, ok := f.srv.Object(f.col + "duty.ics"); !ok {
@@ -62,7 +64,7 @@ func TestAMoveThatLosesPartOfTheRecordKeepsTheOriginal(t *testing.T) {
 func TestACollectionMoveThatLosesPartOfARecordKeepsBoth(t *testing.T) {
 	for _, tc := range []struct{ name, drop, names string }{
 		{"a reminder", "TRIGGER", "VALARM"},
-		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "RECURRENCE-ID"},
+		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "one day of the series"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f := calendarFixture(t, nil, "duty.ics", ics(remindedSeries))
@@ -74,7 +76,8 @@ func TestACollectionMoveThatLosesPartOfARecordKeepsBoth(t *testing.T) {
 
 			page := decode[view.ConnectionsPage](t, f.h.do(confirmCollection(t, cf, false)))
 			n := noticeTitled(page.Notices, "Copied, and the original kept")
-			if n == nil || n.Details == nil || !strings.Contains(string(n.Details.Lines[0]), tc.names) {
+			if n == nil || n.Details == nil || !strings.Contains(string(n.Details.Lines[0]), tc.names) ||
+				strings.Contains(string(n.Details.Lines[0]), "RECURRENCE-ID") {
 				t.Fatalf("notices = %+v", page.Notices)
 			}
 			if _, ok := f.srv.Calendar(f.col); !ok {
