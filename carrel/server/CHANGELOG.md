@@ -19,21 +19,36 @@ current mockup; fonts are in `docs/visual/fonts/`.
 
 ## v0.2.376 — 2026-10-27
 
-The full tick of a task just marked done in the combined list takes the
-mark off again (Р-42).
+A task just marked done stays under Open in the list of one collection too,
+and its full tick takes the mark off again (Р-42, s-tasks-15).
+
+### Changed
+
+- **The list of one collection after Mark done** (the owner's word of
+  27.10.2026): the list the tick comes back to holds the task where it
+  stood — crossed, its tick full, counted as it was read —, though the
+  server was asked anew; the next read of the list (open it again, Refresh)
+  has it among the done. Before, only the combined list answered from the
+  poll held it. The first list of the collection after Mark done from the
+  task's card holds it the same way.
+- **The time of a write**: `DTSTAMP`, `LAST-MODIFIED` and a card's `REV`
+  are stamped by the server's clock, the one its pages tell the time by —
+  the same time on a running server.
 
 ### Fixed
 
-- **Mark not done on a task just marked done**: in the list answered from
-  the poll, the row of a task just marked done kept the version read before
-  the mark in its tick and its menu, so Mark not done, and Delete, went to
-  the conflict page. Both carry the version the mark wrote now; the mark
-  taken off, the row is open again, its tick marking it done.
+- **Mark not done on a task just marked done**: the row of a task just
+  marked done kept the version read before the mark in its tick and its
+  menu, so Mark not done, and Delete, went to the conflict page. Both carry
+  the version the mark wrote now; the mark taken off, the row is open
+  again, its tick marking it done.
 
 ### For consumers
 
-Nothing to change: `TaskRow.Tick.Href` and the row menu carry the newer
-`etag=` as before.
+Nothing to change: a held row is a `TaskRow` with `Done` and its tick's
+`Mark not done`, as in the combined list; `TaskRow.Tick.Href` and the row
+menu carry the newer `etag=`. The fixture `app-tasks/normal` draws
+«Продлить страховку» just marked done (U-5.5 #32 closed).
 
 ## v0.2.375 — 2026-10-27
 

@@ -518,9 +518,6 @@ var All = []Screen{
 			}
 			return nil // nothing on paper is pressed
 		},
-		Waits: []Wait{
-			{Row: 32, Fixture: "app-tasks/normal"}, // ждёт библиотеку: U-5.5 #32
-		},
 	},
 	{
 		Model:  func() any { return new(view.TaskPage) },

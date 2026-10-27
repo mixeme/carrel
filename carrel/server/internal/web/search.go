@@ -1058,9 +1058,11 @@ func (s *Server) openSource(sess *session.Session, id string, conn sealed.Connec
 	}
 	if src.cal != nil {
 		src.cal.ReadWhole = src.readWhole
+		src.cal.SetClock(s.now)
 	}
 	if src.card != nil {
 		src.card.ReadWhole = src.readBook
+		src.card.SetClock(s.now)
 	}
 	return src
 }

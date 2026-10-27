@@ -1730,8 +1730,11 @@ func TestFixtureTaskList(t *testing.T) {
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	// Both task lists are counted in the frame (s-tasks-1): the combined
 	// list was opened first, as a person comes to it.
-	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
+	page := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// «Продлить страховку» just marked done (Р-42, s-tasks-15): the list it
+	// comes back to holds it under Open, crossed.
+	tickMockupTask(t, app, page, "Продлить страховку")
 	list := app.listPath(t, "tasks", "dela")
 	app.compare(t, "app-tasks/normal.json", app.h.do(get(list, app.sess)))
 }

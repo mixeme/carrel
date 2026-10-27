@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"carrel.dev/carrel/server/view"
 )
@@ -118,10 +119,57 @@ func TestATaskJustMarkedDoneStaysWhereItStood(t *testing.T) {
 	if fmt.Sprint(again.Bar.Segments) != fmt.Sprint(page.Bar.Segments) {
 		t.Errorf("the counts moved with the tick: %+v, were %+v", again.Bar.Segments, page.Bar.Segments)
 	}
-	// Read anew: among the done, not the open.
+	// Read anew: among the done, not the open — the first list of its own
+	// after the mark still holds it (the owner's word of 27.10.2026).
+	decode[view.TasksPage](t, f.h.do(get(f.path("tasks"), f.sess)))
 	fresh := decode[view.TasksPage](t, f.h.do(get(f.path("tasks"), f.sess)))
 	if _, _, ok := row(fresh, "Slides"); ok {
 		t.Errorf("a list read anew still shows Slides among the open: %+v", fresh.Groups)
+	}
+}
+
+// Р-42 in the list of one collection (s-tasks-15; the owner's word of
+// 27.10.2026): the list the tick comes back to holds the task where it stood
+// — crossed, its tick full and taking the mark off, counted as it was read —
+// though the server was asked anew; the next read of the list has it among
+// the done.
+func TestTheListATickComesBackToHoldsTheTask(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nEND:VTODO"),
+		"t2.ics", ics("BEGIN:VTODO\nUID:t2\nDTSTAMP:20260101T000000Z\nSUMMARY:Notes\nEND:VTODO"))
+	list := f.path("tasks")
+	slides := func(p view.TasksPage) (view.TaskRow, bool) {
+		for _, g := range p.Groups {
+			for _, r := range g.Rows {
+				if string(r.Summary) == "Slides" {
+					return r, true
+				}
+			}
+		}
+		return view.TaskRow{}, false
+	}
+	page := decode[view.TasksPage](t, f.h.do(get(list, f.sess)))
+	before, ok := slides(page)
+	if !ok || before.Done || before.Tick == nil {
+		t.Fatalf("Slides before = %+v", before)
+	}
+	f.h.srv.SetClock(time.Now().Add(time.Second))
+	resp := f.h.do(postHref(f, before.Tick.Href))
+	if resp.Code != 303 || resp.Header().Get("Location") != list {
+		t.Fatalf("Mark done: %d %q", resp.Code, resp.Header().Get("Location"))
+	}
+	back := decode[view.TasksPage](t, f.h.do(get(list, f.sess)))
+	after, ok := slides(back)
+	if !ok || !after.Done || after.Tick == nil || after.Tick.Label != "Mark not done" {
+		t.Errorf("Slides in the list the tick came back to = %+v, want it crossed under Open", after)
+	}
+	if fmt.Sprint(back.Bar.Segments) != fmt.Sprint(page.Bar.Segments) {
+		t.Errorf("the counts moved with the tick: %+v, were %+v", back.Bar.Segments, page.Bar.Segments)
+	}
+	mustContain(t, body(t, f, "t1.ics"), "STATUS:COMPLETED")
+	f.h.srv.SetClock(time.Now().Add(2 * time.Second))
+	if _, ok := slides(decode[view.TasksPage](t, f.h.do(get(list, f.sess)))); ok {
+		t.Error("the next read of the list still shows Slides among the open")
 	}
 }
 

@@ -50,6 +50,9 @@ func New(t dav.Transport) (*Provider, error) {
 	return &Provider{t: t, c: c, now: time.Now}, nil
 }
 
+// SetClock is the time a write is stamped with (stamp): the caller's clock.
+func (p *Provider) SetClock(now func() time.Time) { p.now = now }
+
 // stamp marks a write as a revision of the main component. For an object
 // without METHOD, DTSTAMP is when it was last revised (RFC 5545 §3.8.7.2), and
 // LAST-MODIFIED says the same (§3.8.7.3); left as they were, a client shows the

@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.5 — 2026-10-27
+
+Server `v0.2.376`, Typecase `2c6b5c8`. The list of one collection of tasks
+matches its frame s-tasks-15: U-5.5 row 32 closed.
+
+### Changed
+
+- **A task just marked done in the list of one collection**: crossed under
+  Open with its tick full (Р-42), as the server holds it now; the screen
+  no longer waits on `app-tasks/normal`.
+
 ## v0.11.4 — 2026-10-27
 
 Server `v0.2.374`, Typecase `2c6b5c8`. Typecase's notes 137–140: **a

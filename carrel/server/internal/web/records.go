@@ -191,9 +191,11 @@ func (s *Server) newCollectionCtx(sess *session.Session, spec kindSpec, conn sea
 		c.feed = s.newFeedReader(sess, conn)
 	}
 	if spec.kind == view.KindContact {
-		c.card, err = card.New(client)
-	} else {
-		c.cal, err = cal.New(client)
+		if c.card, err = card.New(client); err == nil {
+			c.card.SetClock(s.now)
+		}
+	} else if c.cal, err = cal.New(client); err == nil {
+		c.cal.SetClock(s.now)
 	}
 	if err != nil {
 		return nil, err
@@ -1771,7 +1773,8 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 // open in what the session read and marked done since (Р-42; the owner's
 // word of 09.10.2026) stays where it stood, counted as it was read, crossed
 // with its tick full — the tick takes the mark off again — until its
-// collection is read anew.
+// collection is read anew; the list of one collection, which a write sends
+// back to the server, holds it in the first read after the mark.
 func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, items []listed, segment string, mark bool, filter tagFilter, now time.Time, by string) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
 	type item struct {
 		row      view.TaskRow
@@ -1788,9 +1791,13 @@ func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, item
 		isDone := taskDone(o)
 		var ticked bool
 		etag := o.ETag
-		if !isDone && sess != nil {
+		if sess != nil {
+			// The list of one collection asks the server anew after the
+			// tick and finds the task done: the first such list holds it
+			// open as it was read all the same (the owner's word of
+			// 27.10.2026, s-tasks-15).
 			if wrote, ok := sess.TickedSinceRead(it.from.conn.ID, it.from.col.Path, uid); ok {
-				ticked, etag = true, wrote
+				ticked, etag, isDone = true, wrote, false
 			}
 		}
 		if isDone {

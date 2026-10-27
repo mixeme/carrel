@@ -46,6 +46,9 @@ func New(t dav.Transport) (*Provider, error) {
 	return &Provider{t: t, c: c, now: time.Now}, nil
 }
 
+// SetClock is the time a write is stamped with (stamp): the caller's clock.
+func (p *Provider) SetClock(now func() time.Time) { p.now = now }
+
 // stamp marks a write as a revision: REV is when the card was last revised
 // (RFC 6350 §6.7.4), and Carrel shows it as the server's time of change. The
 // loss check ignores it.
