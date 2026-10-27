@@ -65,6 +65,9 @@ func TriggerSheet(p *view.BackupTriggerSheet) w.Sheet {
 			continue
 		}
 		s.Foot = append(s.Foot, bind.Button(a, ""))
+		if a.Primary {
+			s.Foot = append(s.Foot, w.Kbd{Keys: enterKey})
+		}
 	}
 	return s
 }

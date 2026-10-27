@@ -14,7 +14,8 @@ const (
 // UnlockSheet is the password's sheet, /app/settings/unlock and
 // /app/settings/escrow/deposit (UnlockSheet): what it is asked for in its
 // title, whose on its right; the password and what the window opens; the
-// action itself and Cancel (s-plan-3, s-davloom-5). Deleting the account
+// action itself with Enter and Cancel with Esc pushed right (s-plan-3,
+// s-davloom-5). Deleting the account
 // says what goes, in alarm, with the bin (account-15); depositing the key
 // what an administrator gets, with the shield, the password's hint under
 // it (account-2).
@@ -38,15 +39,8 @@ func UnlockSheet(p *view.UnlockSheet) w.Sheet {
 	if p.Warning != "" {
 		s.Body = append(s.Body, w.Dim{Parts: []w.Inline{w.Text(p.Warning)}, Size: w.Dim11_5, Variant: w.DimWrap})
 	}
-	deposit := p.For == view.UnlockForDeposit
 	for _, a := range p.Form.Actions {
 		if a.Method == "GET" {
-			// Cancel: at the end with Esc; the deposit's beside its action,
-			// Esc pushed (account-2).
-			if deposit {
-				s.Foot = append(s.Foot, bind.Button(a, ""), w.Kbd{Keys: escKey, Place: w.Pushed})
-				continue
-			}
 			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
 			continue
 		}
@@ -54,10 +48,7 @@ func UnlockSheet(p *view.UnlockSheet) w.Sheet {
 		if a.Href != "" && a.Href != p.Form.Action {
 			b.To = a.Href
 		}
-		s.Foot = append(s.Foot, b)
-		if !deposit {
-			s.Foot = append(s.Foot, w.Kbd{Keys: enterKey})
-		}
+		s.Foot = append(s.Foot, b, w.Kbd{Keys: enterKey})
 	}
 	return s
 }

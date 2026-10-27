@@ -64,8 +64,8 @@ var icons = map[view.FileOp]w.Icon{view.FileMove: "move", view.FileCopy: "dup", 
 //   - The body of a deletion: that it cannot be undone, in alarm; what
 //     points at it, as a collection's sheet lists it; what nobody looked
 //     for.
-//   - The foot: the operation's button — its key where the tree chooses —,
-//     Cancel and its key at the end.
+//   - The foot: the operation's button with its key — a deletion's has
+//     none (Р-81) —, Cancel and its key at the end.
 func Screen(p *view.FileOpSheet) w.Overlay {
 	tree := p.Op == view.FileMove || p.Op == view.FileCopy
 	s := w.Sheet{Icon: icons[p.Op], Title: string(p.Title), Width: w.SheetWidth480, ID: formSheet}
@@ -107,7 +107,7 @@ func Screen(p *view.FileOpSheet) w.Overlay {
 		}
 		s.Body = append(s.Body, w.Msg{Parts: code(bind.MsgParts(p.Warning)), Space: space})
 	}
-	s.Foot = foot(p, tree)
+	s.Foot = foot(p)
 	return w.Overlay{Scrim: w.Scrim{Content: s, Pad: w.ScrimPad26}}
 }
 
@@ -229,9 +229,9 @@ func Forms(p *view.FileOpSheet) []w.PostForm {
 }
 
 // foot is the sheet's foot: the operation — a submit of the sheet where it
-// is a form, else of its own form — and, where the tree chooses, its key;
+// is a form, else of its own form — and its key but where it deletes;
 // Cancel and its key at the end.
-func foot(p *view.FileOpSheet, tree bool) []w.SheetFootPart {
+func foot(p *view.FileOpSheet) []w.SheetFootPart {
 	var out []w.SheetFootPart
 	var cancel []w.LinePart
 	for _, a := range p.Actions {
@@ -254,7 +254,7 @@ func foot(p *view.FileOpSheet, tree bool) []w.SheetFootPart {
 			continue
 		}
 		out = append(out, b)
-		if tree {
+		if !a.Danger {
 			out = append(out, w.Kbd{Keys: enter})
 		}
 	}

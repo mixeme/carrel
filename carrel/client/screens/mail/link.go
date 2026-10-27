@@ -91,13 +91,13 @@ func LinkSheet(p *view.MailLinkSheet) w.Sheet {
 			if a.Href != p.Form.Action {
 				b.To = a.Href
 			}
-			foot = append(foot, b)
+			foot = append(foot, b, w.Kbd{Keys: enterKey})
 		case copyID:
 			b := bind.Submit(a)
 			b.To = a.Href
 			foot = append(foot, b)
 		case cancelID:
-			foot = append(foot, w.Push{Items: []w.PushPart{bind.Button(a, "")}})
+			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
 		}
 	}
 	return w.Sheet{

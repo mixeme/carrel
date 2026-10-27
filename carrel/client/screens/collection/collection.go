@@ -39,7 +39,7 @@ const (
 //     folder, whose name is its address (s-profile-18).
 //   - What renaming does and does not (Note), but over a refusal.
 //   - The foot: Save (Rename for a folder) — the form's button — with
-//     Enter, but for a folder; Cancel with Esc.
+//     Enter; Cancel with Esc.
 func Rename(p *view.CollectionRenameSheet) w.Sheet {
 	folder := p.Kind == view.KindFile
 	s := w.Sheet{Icon: "pencil", Title: string(p.Title), Width: w.SheetWidth520,
@@ -80,7 +80,7 @@ func Rename(p *view.CollectionRenameSheet) w.Sheet {
 		}
 		s.Body = append(s.Body, w.Msg{Parts: []w.MsgPart{w.Text(p.Note)}, Space: space})
 	}
-	s.Foot = foot(p.Actions, !folder)
+	s.Foot = foot(p.Actions, true)
 	return s
 }
 
@@ -169,7 +169,7 @@ func refusal(n view.Notice) []w.SheetPart {
 }
 
 // foot is a sheet's foot: the main answer — the form's button — with
-// Enter when the frame keys it, and the way out pushed right with Esc.
+// Enter but where it deletes (Р-81), and the way out pushed right with Esc.
 func foot(actions []view.Action, keyed bool) []w.SheetFootPart {
 	var out []w.SheetFootPart
 	for _, a := range actions {
@@ -372,7 +372,7 @@ func New(p *view.CollectionNewSheet) w.Sheet {
 		if p.Note != "" {
 			s.Body = append(s.Body, w.Msg{Parts: []w.MsgPart{w.Text(p.Note)}, Tone: w.MsgAlert, Space: w.MsgFlush})
 		}
-		s.Foot = foot(p.Actions, false)
+		s.Foot = foot(p.Actions, true)
 		return s
 	}
 	s.Action, s.Method, s.Fields = p.Form.Action, p.Form.Method, bind.Hidden(p.Form)
@@ -389,7 +389,7 @@ func New(p *view.CollectionNewSheet) w.Sheet {
 		if p.Explain != "" {
 			s.Body = append(s.Body, w.SheetNote{Text: string(p.Explain)})
 		}
-		s.Foot = foot(p.Actions, false)
+		s.Foot = foot(p.Actions, true)
 		return s
 	}
 	for _, set := range p.Form.Sets {

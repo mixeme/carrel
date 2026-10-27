@@ -23,6 +23,8 @@ const (
 	copyWord  = "Copy"
 	copied    = "Copied"
 	copyIcon  = "dup"
+	enterKey  = "Enter"
+	escKey    = "Esc"
 )
 
 // The names of the contract the screen places by (C-7.5): the rows of the
@@ -45,10 +47,10 @@ const (
 //     its ticks one under another, Time on and off with its reason, the
 //     line under them; «Allow .ics download…»; «Link lives for» — a choice
 //     with its menu; what a folder's visitor gets (Note). The foot: Create
-//     link, Cancel.
+//     link with Enter, Cancel with Esc pushed right.
 //   - After: «Link» — the address whole, read-only, with Copy — and its
-//     day under it (Expires). The foot: Send by letter, Open the link, All
-//     published links.
+//     day under it (Expires). The foot: Send by letter with Enter, Open the
+//     link, All published links.
 func Sheet(p *view.PublishSheet) w.Sheet {
 	head := []w.SheetHeadPart{}
 	if p.Local {
@@ -131,10 +133,15 @@ func Sheet(p *view.PublishSheet) w.Sheet {
 		switch {
 		case a.ID == closeID:
 			head = append(head, w.Close{Label: closeWord, Href: a.Href})
+		case a.ID == cancelID:
+			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
 		case a.Method == "POST" && a.Href == p.Form.Action:
 			foot = append(foot, bind.Submit(a))
 		default:
 			foot = append(foot, bind.Button(a, ""))
+		}
+		if a.Primary {
+			foot = append(foot, w.Kbd{Keys: enterKey})
 		}
 	}
 	return w.Sheet{

@@ -24,7 +24,7 @@ var Keys = widget.Scrim{
 				{Keys: "Enter", Does: "Open the selected record full screen"},
 				{Keys: "Esc", Does: "Close a sheet, the details panel or focus mode"},
 				{Keys: "Ctrl+S", Does: "Save in the editor"},
-				{Keys: "Ctrl+Enter", Does: "Save a quick note"},
+				{Keys: "Ctrl+Enter", Does: "Save or send a sheet with text: a quick note, a letter"},
 				{Keys: "Ctrl+V", Does: "Paste an image as an attachment"},
 			}},
 			widget.SheetHint{Text: "Shortcuts do nothing while the cursor is in a field. None of them destroy anything."},

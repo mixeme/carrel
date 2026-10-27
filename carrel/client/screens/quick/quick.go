@@ -55,7 +55,7 @@ func Sheet(p *view.NewSheet) w.Sheet {
 		if p.Note != "" {
 			s.Body = []w.SheetPart{w.Msg{Parts: []w.MsgPart{w.Text(p.Note)}, Space: w.MsgFlush}}
 		}
-		s.Foot = foot(p.Actions, "")
+		s.Foot = foot(p.Actions, enter)
 		return s
 	}
 	s.Head = []w.SheetHeadPart{where(p.Target), closer}
@@ -174,6 +174,9 @@ func foot(actions []view.Action, keys string) []w.SheetFootPart {
 			}
 		default:
 			out = append(out, bind.Button(a, ""))
+			if a.Primary && keys != "" {
+				out = append(out, w.Kbd{Keys: keys})
+			}
 		}
 	}
 	return out

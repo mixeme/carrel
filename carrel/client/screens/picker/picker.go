@@ -226,8 +226,9 @@ func Forms(p *view.FilePickerSheet) []w.PostForm {
 	return out
 }
 
-// foot is the sheet's foot: Upload — the sheet's submit — and Enter, or
-// Attach, off with why while no file is chosen; Cancel and Esc at the end.
+// foot is the sheet's foot: Upload — the sheet's submit — or Attach, off
+// with why after its Enter while no file is chosen; Cancel and Esc at the
+// end.
 func foot(actions []view.Action, cancel *w.Button, uploading bool) []w.SheetFootPart {
 	var out []w.SheetFootPart
 	for _, a := range actions {
@@ -239,12 +240,9 @@ func foot(actions []view.Action, cancel *w.Button, uploading bool) []w.SheetFoot
 			b = bind.Submit(a)
 			b.To = ""
 		}
-		out = append(out, b)
-		switch {
-		case !a.Enabled && a.Reason != "":
+		out = append(out, b, w.Kbd{Keys: enter})
+		if !a.Enabled && a.Reason != "" {
 			out = append(out, w.Dim{Parts: []w.Inline{w.Text(a.Reason)}, Size: w.Dim11_5})
-		case uploading:
-			out = append(out, w.Kbd{Keys: enter})
 		}
 	}
 	if cancel != nil {

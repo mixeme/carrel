@@ -32,7 +32,7 @@ const (
 //   - The alarm (Alert), and the line that says what each answer does
 //     (Note).
 //   - The foot: the answers in their order — the first the primary, with
-//     Enter when it stands alone; the last (Cancel, «Leave it in the
+//     Enter; the last (Cancel, «Leave it in the
 //     series») pushed right with Esc. Each sends the form to its own
 //     address, or leads where it says.
 func Sheet(p *view.AskSheet) w.Sheet {
@@ -56,7 +56,7 @@ func Sheet(p *view.AskSheet) w.Sheet {
 		switch {
 		case i == len(p.Actions)-1 && i > 0:
 			foot = append(foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
-		case a.Primary && len(p.Actions) == 2:
+		case a.Primary:
 			foot = append(foot, b, w.Kbd{Keys: enter})
 		default:
 			foot = append(foot, b)

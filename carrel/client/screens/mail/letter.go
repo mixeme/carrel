@@ -9,7 +9,8 @@ import (
 // The words of the letter (U-1.3): its title, its ID the recipients' Enter
 // sends, what leads the sender's address in the head, the rubric of what is
 // attached and Attach, a part as a file and as a link, the cross of a part,
-// the key of Cancel, the icon of Attach and the rule's place in its menu.
+// the keys of the main button and of Cancel, the icon of Attach and the
+// rule's place in its menu.
 const (
 	letterTitle = "Letter"
 	letterID    = "letter"
@@ -20,6 +21,8 @@ const (
 	asLink      = "as a link"
 	removeWord  = "Remove"
 	escKey      = "Esc"
+	enterKey    = "Enter"
+	ctrlEnter   = "Ctrl+Enter"
 	clipIcon    = "clip"
 	enterWord   = "Add"
 	enterName   = "op"
@@ -62,7 +65,8 @@ const LetterTitle = letterTitle
 //     a row a part — its icon, its title, its format and size or «folder»,
 //     «attached» or «as a link» on, a link's terms and Change…, the cross
 //     —; the line of why some go as links, in the accent.
-//   - The foot: Send, Preview, how it is signed, Cancel with Esc pushed.
+//   - The foot: Send with Ctrl+Enter — the text takes Enter —, Preview,
+//     how it is signed, Cancel with Esc pushed.
 func Letter(p *view.MailSheet) w.Sheet {
 	var cancel view.Action
 	for _, a := range p.Form.Actions {
@@ -94,7 +98,8 @@ func Letter(p *view.MailSheet) w.Sheet {
 			if a.Href != p.Form.Action {
 				b.To = a.Href
 			}
-			foot = append(foot, b)
+			b.Key = ctrlEnter // U-7: Send a letter
+			foot = append(foot, b, w.Kbd{Keys: ctrlEnter})
 		case previewID:
 			b := bind.Submit(a)
 			b.To = a.Href

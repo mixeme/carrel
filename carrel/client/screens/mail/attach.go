@@ -142,7 +142,8 @@ func Attach(p *view.MailAttachSheet) w.Sheet {
 	if calendar {
 		line.ID = lineID
 	}
-	foot := []w.SheetFootPart{button, line, w.Push{Items: []w.PushPart{bind.Button(cancel, "")}}}
+	foot := []w.SheetFootPart{button, w.Kbd{Keys: enterKey}, line,
+		w.Line{Items: []w.LinePart{bind.Button(cancel, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed}}
 	sheet := w.Sheet{
 		Icon: w.Icon(sheetIcons[p.What]), Title: string(p.Title),
 		Head: head, Body: body, Foot: foot, Flush: true, Width: w.SheetWidth900,
