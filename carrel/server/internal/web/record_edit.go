@@ -1393,7 +1393,10 @@ type change struct {
 	// document must carry; zoneYear is the year it is taken for.
 	zone     *time.Location
 	zoneYear int
-	errors   map[string]string
+	// movedOn: a repeating task marked done moves on to its next time
+	// (goOn); its series does not move.
+	movedOn bool
+	errors  map[string]string
 	// restored are the properties outside the form a conflict puts back as
 	// the version opened held them (model.SetRaw; Рв6): the save may change
 	// them, and they must read back so.
@@ -1422,17 +1425,20 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	if c.spec.kind == view.KindTask {
 		if why := doneAndStatus(have, want); why != "" {
 			ch.errors["status"] = why
-		} else if count, on := goOn(obj, have, want, tz); on && count != "" {
-			// The series counts its times from its start, and the start
-			// has moved one on.
-			rule := parseRule(cal.RawRRULE(obj)).set("COUNT", count)
-			ch.ops = append(ch.ops, textOps("RRULE", props["RRULE"], rule.String(), false)...)
-			// The form's Repeats says the count left, as the record will
-			// read back (Р1: a task's form holds its rule now).
-			if r := want["repeat"]; len(r) > repCount {
-				r = append([]string(nil), r...)
-				r[repCount] = count
-				want["repeat"] = r
+		} else if count, on := goOn(obj, have, want, tz); on {
+			ch.movedOn = true
+			if count != "" {
+				// The series counts its times from its start, and the
+				// start has moved one on.
+				rule := parseRule(cal.RawRRULE(obj)).set("COUNT", count)
+				ch.ops = append(ch.ops, textOps("RRULE", props["RRULE"], rule.String(), false)...)
+				// The form's Repeats says the count left, as the record
+				// will read back (Р1: a task's form holds its rule now).
+				if r := want["repeat"]; len(r) > repCount {
+					r = append([]string(nil), r...)
+					r[repCount] = count
+					want["repeat"] = r
+				}
 			}
 		}
 	}
@@ -2665,10 +2671,16 @@ func timeOps(prop string, cur []model.RawValue, row [3]string, allDay bool, shif
 
 // apply patches obj and, when the reminder set changed, rewrites it. A
 // series whose start the patch changed takes its exceptions with it
-// (cal.RetimeExceptions).
+// (cal.RetimeExceptions) — unless a repeating task moved on to its next
+// time (goOn): the series stays where it was, and the times changed by hand
+// that it passed go with the times they stood for, done (А2).
 func (c *collectionCtx) apply(obj *model.Object, ch change) (*model.Object, error) {
 	if len(ch.ops) > 0 {
 		started := obj.Props()["DTSTART"]
+		var passed []cal.Left
+		if ch.movedOn {
+			passed, _ = cal.LeftWithoutDay(obj, c.tf.tz)
+		}
 		patch, err := model.NewPatch(ch.ops...)
 		if err != nil {
 			return nil, err
@@ -2676,7 +2688,24 @@ func (c *collectionCtx) apply(obj *model.Object, ch change) (*model.Object, erro
 		if err := patch.Apply(obj); err != nil {
 			return nil, err
 		}
-		if obj.IsCalendar() && len(started) > 0 {
+		switch {
+		case ch.movedOn:
+			left, err := cal.LeftWithoutDay(obj, c.tf.tz)
+			if err != nil {
+				return nil, err
+			}
+			var days []time.Time
+			for _, l := range left {
+				if !slices.ContainsFunc(passed, func(p cal.Left) bool { return p.At.Equal(l.At) }) {
+					days = append(days, l.At)
+				}
+			}
+			if len(days) > 0 {
+				if obj, err = cal.DropLeft(obj, days, c.tf.tz); err != nil {
+					return nil, err
+				}
+			}
+		case obj.IsCalendar() && len(started) > 0:
 			if obj, _, err = cal.RetimeExceptions(obj, started[0]); err != nil {
 				return nil, err
 			}
@@ -4496,6 +4525,12 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		// The form shows a photo the session no longer holds: saving
 		// without it is the person's choice, not a silent one.
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notices: []view.Notice{lostPhotoNotice}}))
+		return
+	}
+	if c.cal != nil && formUID == "" && issuedUID(r.FormValue("uid")) != "" {
+		// The same with the files of a new event, task or note (Б7 of the
+		// audit of 11.10.2026): newer forms took their place.
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notebook: newNotebook(c, r), notices: []view.Notice{lostFilesNotice}}))
 		return
 	}
 	s.createRecord(w, r, c, want, formUID)

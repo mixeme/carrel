@@ -57,6 +57,14 @@ type draftFile struct {
 // oldest goes: a session does not hold files without end (C-12).
 const attachDraftsKept = 4
 
+// lostFilesNotice: the form names files the session no longer holds — newer
+// forms took their place, or the session is another. Nothing was saved;
+// saving again saves the record without them.
+var lostFilesNotice = view.Notice{
+	Role: view.NoticeAlert, Title: "Nothing was saved",
+	Body: "The files attached to this form are no longer kept: forms started later took their place. Attach them again, or save without them.",
+}
+
 // attachDrafts are the drafts of the session's new forms, the oldest first.
 func attachDrafts(c *collectionCtx) []attachDraft {
 	data := c.sess.Draft(session.DraftNewAttach)

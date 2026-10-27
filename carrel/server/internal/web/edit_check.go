@@ -338,7 +338,8 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 			fault.fields = append(fault.fields, name)
 		}
 	}
-	if first(want[taskNext]) == "on" {
+	movedOn := first(want[taskNext]) == "on"
+	if movedOn {
 		// A repeating task moved on to its next time counts one time fewer.
 		also["RRULE"] = true
 	}
@@ -346,6 +347,9 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 	for _, name := range retimes {
 		retimed = retimed || changed[name]
 	}
+	// Moved on, the series stays where it was: its exceptions keep their
+	// days, and those it passed go (А2).
+	retimed = retimed && !movedOn
 
 	gone, come := wireDiff(wireLines(was), wireLines(now))
 	allowed := func(l wireLine, added bool) bool {
@@ -363,7 +367,7 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 		case "VALARM":
 			return changed["reminder"]
 		case "exception":
-			return l.name == "RECURRENCE-ID" && retimed
+			return (l.name == "RECURRENCE-ID" && retimed) || (movedOn && !added)
 		case "VTIMEZONE":
 			// A zone comes with the times written in it; none ever goes.
 			return added && retimed

@@ -64,6 +64,9 @@ type transfer struct {
 	body               io.Reader
 	srcAccount, srcCol string
 	src                []string
+	// mergedFrom is the folder a move merged out of (mergeFolder), which goes
+	// once the answers have left nothing in it (А11).
+	mergedFrom []string
 }
 
 // label is what the queue row says: the path inside the chosen folder for a
@@ -1438,7 +1441,7 @@ func (s *Server) runOp(w http.ResponseWriter, r *http.Request, c *fileCtx, op vi
 		case file.CheckName(name) != nil:
 			notices = append(notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was renamed", Body: "A name cannot be empty, “.” or “..”, and cannot hold “/” or “\\”."})
 		case name != items[0].Name:
-			if err := s.startItem(ctx, c, c.at(c.segs), "rename", items[0], name); err != nil {
+			if err := s.startItem(ctx, c, c.at(c.segs), "rename", items[0], name, nil); err != nil {
 				http.Error(w, "could not keep the transfer", http.StatusInternalServerError)
 				return
 			}
@@ -1455,7 +1458,7 @@ func (s *Server) runOp(w http.ResponseWriter, r *http.Request, c *fileCtx, op vi
 		destFolder, _ := dest.path(dest.segs, true)
 		defer forgetFolder(c.sess, dest.conn.ID, destFolder)
 		for _, e := range items {
-			if err := s.startItem(ctx, c, dest, string(op), e, e.Name); err != nil {
+			if err := s.startItem(ctx, c, dest, string(op), e, e.Name, nil); err != nil {
 				http.Error(w, "could not keep the transfer", http.StatusInternalServerError)
 				return
 			}
@@ -1473,11 +1476,13 @@ func (s *Server) runOp(w http.ResponseWriter, r *http.Request, c *fileCtx, op vi
 // dest's folder, and keeps the row: done, failed, or a question when the name
 // is taken there. The name is looked up first, for servers that do not honour
 // If-None-Match; a name taken in between still answers 412 or 405.
-func (s *Server) startItem(ctx context.Context, c, dest *fileCtx, kind string, e file.Entry, name string) error {
+// mergedFrom is the folder a merge takes it out of (transfer.mergedFrom).
+func (s *Server) startItem(ctx context.Context, c, dest *fileCtx, kind string, e file.Entry, name string, mergedFrom []string) error {
 	t, err := newTransfer(kind, dest, name)
 	if err != nil {
 		return err
 	}
+	t.mergedFrom = mergedFrom
 	t.srcAccount, t.srcCol, t.src, t.dir, t.size = c.conn.ID, c.col.Path, append(slices.Clone(c.segs), e.Name), e.Dir, e.Size
 	defer func() { c.sess.KeepTransfer(t) }()
 	target, _ := dest.path(append(slices.Clone(dest.segs), name), false)
@@ -1771,6 +1776,9 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 		}
 	}
 	s.afterPlaced(c.sess, &next)
+	if t.kind == "move" && t.mergedFrom != nil {
+		s.dropEmptied(ctx, c.sess, t.srcAccount, t.srcCol, t.mergedFrom)
+	}
 	c.sess.KeepTransfer(&next)
 	folder, _ := c.path(c.segs, true)
 	forgetFolder(c.sess, c.conn.ID, folder)
@@ -1816,20 +1824,41 @@ func (s *Server) mergeFolder(ctx context.Context, c *fileCtx, t *transfer) error
 	from, into := *src, *c
 	from.segs = slices.Clone(t.src)
 	into.segs = append(append(slices.Clone(t.folder), t.rel...), t.name)
+	var mergedFrom []string
+	if t.kind == "move" {
+		mergedFrom = from.segs
+	}
 	for _, e := range entries {
-		if err := s.startItem(ctx, &from, &into, t.kind, e, e.Name); err != nil {
+		if err := s.startItem(ctx, &from, &into, t.kind, e, e.Name, mergedFrom); err != nil {
 			return err
 		}
 	}
 	if t.kind == "move" {
-		if left, err := src.files.List(ctx, srcPath); err == nil && len(left) == 0 {
-			_ = src.files.Delete(ctx, srcPath, "")
-		}
-		forgetFolder(c.sess, src.conn.ID, srcPath)
+		s.dropEmptied(ctx, c.sess, t.srcAccount, t.srcCol, mergedFrom)
 	}
 	dst, _ := into.path(into.segs, true)
 	forgetFolder(c.sess, c.conn.ID, dst)
 	return nil
+}
+
+// dropEmptied takes away a folder a move merged out of once nothing is left
+// in it (А11): at once, or when the last question about what it held is
+// answered — a question waiting keeps its file there, and so its folder.
+func (s *Server) dropEmptied(ctx context.Context, sess *session.Session, account, col string, segs []string) {
+	src, ok := s.fileCollection(sess, account, col)
+	if !ok || len(segs) == 0 {
+		return
+	}
+	folder, err := src.path(segs, true)
+	if err != nil {
+		return
+	}
+	if left, err := src.files.List(ctx, folder); err == nil && len(left) == 0 {
+		_ = src.files.Delete(ctx, folder, "")
+	}
+	forgetFolder(sess, src.conn.ID, folder)
+	up, _ := src.path(segs[:len(segs)-1], true)
+	forgetFolder(sess, src.conn.ID, up)
 }
 
 // freeName is the first name with a number the folder does not hold, read

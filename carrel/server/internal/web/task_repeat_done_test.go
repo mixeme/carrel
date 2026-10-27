@@ -86,6 +86,32 @@ func TestTheFormOfARepeatingTaskSaysWhatDoneDoes(t *testing.T) {
 	}
 }
 
+// А2, the rest: a time of the series changed by hand (RECURRENCE-ID) that
+// the task has moved past goes with the time it stood for — it was done —
+// and does not stay in the file as a time the series no longer has, read by
+// other clients as an open task of its own. One ahead of the new start
+// stays.
+func TestARepeatingTaskMovedOnDropsTheTimesItPassed(t *testing.T) {
+	doc := ics("BEGIN:VTODO\nUID:water\nDTSTAMP:20260101T000000Z\nSUMMARY:Water the plants\n" +
+		"DTSTART;TZID=Europe/Moscow:20260112T090000\nDUE;TZID=Europe/Moscow:20260112T180000\n" +
+		"RRULE:FREQ=WEEKLY;BYDAY=MO\nEND:VTODO\n" +
+		"BEGIN:VTODO\nUID:water\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID;TZID=Europe/Moscow:20260112T090000\nSUMMARY:Water the plants and the palm\n" +
+		"DTSTART;TZID=Europe/Moscow:20260112T100000\nDUE;TZID=Europe/Moscow:20260112T180000\nEND:VTODO\n" +
+		"BEGIN:VTODO\nUID:water\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID;TZID=Europe/Moscow:20260126T090000\nSUMMARY:Water the plants early\n" +
+		"DTSTART;TZID=Europe/Moscow:20260126T070000\nDUE;TZID=Europe/Moscow:20260126T180000\nEND:VTODO")
+	f := calendarFixture(t, nil, "water.ics", doc)
+	rec := f.path("tasks") + "/water"
+	page := decode[view.TaskPage](t, f.h.do(get(rec, f.sess)))
+	if resp := f.h.do(postForm(actionHref(t, page.Actions, "task.done"), f.sess, url.Values{})); resp.Code != 303 {
+		t.Fatalf("mark done: %d %s", resp.Code, resp.Body.String())
+	}
+	got := unfolded(body(t, f, "water.ics"))
+	mustContain(t, got, "DTSTART;TZID=Europe/Moscow:20260119T090000", "RECURRENCE-ID;TZID=Europe/Moscow:20260126T090000")
+	if strings.Contains(got, "RECURRENCE-ID;TZID=Europe/Moscow:20260112T090000") {
+		t.Errorf("the time done stays as a time of its own:\n%s", got)
+	}
+}
+
 // A task that repeats by its due day alone, a day skipped in the series.
 func TestARepeatingTaskSkipsADayLeftOut(t *testing.T) {
 	f := calendarFixture(t, nil, "bins.ics", ics("BEGIN:VTODO\nUID:bins\nDTSTAMP:20260101T000000Z\nSUMMARY:Bins\n"+

@@ -71,3 +71,52 @@ func TestReplaceOfAFolderMerges(t *testing.T) {
 		t.Errorf("a skipped file overwrote: %q", got)
 	}
 }
+
+// А11, the rest: a folder moved onto its name goes from where it came from
+// once its questions are answered and nothing is left in it — as a file
+// manager takes it away — not only when it empties at once. One question
+// skipped keeps it: its file is still there.
+func TestAMergedFolderGoesOnceItsQuestionsAreAnswered(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"src/team/a.txt", "mine a")
+	f.srv.SeedFile(filesDocs+"src/team/b.txt", "mine b")
+	f.srv.SeedFile(filesDocs+"src/team/c.txt", "mine c")
+	f.srv.SeedFile(filesDocs+"team/b.txt", "theirs b")
+	f.srv.SeedFile(filesDocs+"team/c.txt", "theirs c")
+
+	sheet := opSheetOf(t, f, "move", []string{"team"}, "src")
+	fields := formFields(*sheet.Form)
+	fields.Set(sheet.Target.Field, f.at(""))
+	f.h.do(postForm(sheet.Form.Action, f.sess, fields))
+	queue := func() *view.TransferQueue {
+		t.Helper()
+		return decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess))).Queue
+	}
+	f.h.do(postForm(option(t, queueRow(t, queue(), "team"), "transfer.overwrite"), f.sess, url.Values{}))
+	b, c := queueRow(t, queue(), "b.txt"), queueRow(t, queue(), "c.txt")
+
+	f.h.do(postForm(option(t, b, "transfer.both"), f.sess, url.Values{}))
+	if f.srv.Names(filesDocs+"src/team/") == nil {
+		t.Fatal("the folder went while a question about its file waited")
+	}
+	f.h.do(postForm(option(t, c, "transfer.overwrite"), f.sess, url.Values{}))
+	if names := f.srv.Names(filesDocs + "src/team/"); names != nil {
+		t.Errorf("the emptied folder stayed: %v", names)
+	}
+	if names := f.srv.Names(filesDocs + "src/"); names == nil {
+		t.Error("the folder above it went too")
+	}
+
+	// Skipped, the file keeps its folder.
+	f.srv.SeedFile(filesDocs+"src/team/d.txt", "mine d")
+	f.srv.SeedFile(filesDocs+"team/d.txt", "theirs d")
+	sheet = opSheetOf(t, f, "move", []string{"team"}, "src")
+	fields = formFields(*sheet.Form)
+	fields.Set(sheet.Target.Field, f.at(""))
+	f.h.do(postForm(sheet.Form.Action, f.sess, fields))
+	f.h.do(postForm(option(t, queueRow(t, queue(), "team"), "transfer.overwrite"), f.sess, url.Values{}))
+	f.h.do(postForm(option(t, queueRow(t, queue(), "d.txt"), "transfer.skip"), f.sess, url.Values{}))
+	if got, _ := f.srv.File(filesDocs + "src/team/d.txt"); got != "mine d" {
+		t.Errorf("a skipped file left its folder: %q", got)
+	}
+}

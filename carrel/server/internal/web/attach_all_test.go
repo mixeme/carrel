@@ -203,3 +203,41 @@ func TestTwoNewFormsKeepTheirOwnFiles(t *testing.T) {
 		}
 	}
 }
+
+// Б7: a new form whose files the session no longer holds — newer forms took
+// their place — is not saved without them in silence: nothing is written,
+// the form says why, and saving it again saves it without the files.
+func TestANewFormThatLostItsFilesSaysSo(t *testing.T) {
+	f := attachFixture(t, 0, []string{"carrel"})
+	list := f.path("calendar")
+	begin := func(title string) string {
+		t.Helper()
+		page := decode[view.EventEditPage](t, f.h.do(get(list+"/new", f.sess)))
+		form := formFields(page.Form)
+		form.Set("summary", title)
+		resp := f.h.do(attachForm(actionByID(page.Form.Actions, "attach.add").Href, f.sess, form, upload{title + ".txt", "text"}))
+		if resp.Code != http.StatusSeeOther {
+			t.Fatalf("attach to %s: %d %s", title, resp.Code, resp.Body.String())
+		}
+		return resp.Header().Get("Location")
+	}
+	lost := begin("Lost")
+	held := decode[view.EventEditPage](t, f.h.do(get(lost, f.sess)))
+	for _, title := range []string{"B", "C", "D", "E"} {
+		begin(title)
+	}
+	form := formFields(held.Form)
+	form.Set("start.date", "2026-08-12")
+	form.Set("start.time", "10:00")
+	resp := f.h.do(postForm(list+"/new", f.sess, form))
+	if resp.Code != http.StatusOK {
+		t.Fatalf("a form that lost its files was saved: %d %s", resp.Code, resp.Header().Get("Location"))
+	}
+	page := decode[view.EventEditPage](t, resp)
+	if len(page.Notices) == 0 || page.Notices[0].Title != "Nothing was saved" || !strings.Contains(string(page.Notices[0].Body), "files") {
+		t.Errorf("notices = %+v, want why nothing was saved", page.Notices)
+	}
+	if resp := f.h.do(postForm(list+"/new", f.sess, formFields(page.Form))); resp.Code != http.StatusSeeOther {
+		t.Errorf("saved again: %d, want the event made without the files", resp.Code)
+	}
+}

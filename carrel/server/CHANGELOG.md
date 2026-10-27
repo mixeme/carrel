@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.378 — 2026-10-28
+
+Three more leftovers of the audit of a record: a repeating task moved on
+past its times changed by hand, a folder merged out of that stayed empty, a
+new form that lost its files.
+
+### Fixed
+
+- **A repeating task marked done no longer moves its changed times** (А2):
+  moving on to the next time was written as a move of the whole series, so
+  every occurrence changed by hand (`RECURRENCE-ID`) was renamed a time
+  later — the change made for 26 January claimed 2 February. The series
+  stays where it was; the times changed by hand that the task moved past go
+  with the times they stood for, done, instead of staying in the file as
+  times the series no longer has. The save guard lets those go and nothing
+  else.
+- **A folder moved onto its name goes once its questions are answered**
+  (А11): «Replace» merged it and took it away only when it emptied at once;
+  a file that waited for an answer kept it, and after the answers it stayed,
+  empty. Now the last answer that leaves nothing in it takes it away; a file
+  skipped keeps it.
+- **A new event, task or note that lost its files says so** (Б7): past four
+  new forms with files the oldest form's files go, and its Save created the
+  record without them in silence. Now nothing is saved, the form comes back
+  with «Nothing was saved — The files attached to this form are no longer
+  kept: forms started later took their place. Attach them again, or save
+  without them.» (the executor's words, as the photo's of a new card), and
+  saving again saves it without them.
+
 ## v0.2.377 — 2026-10-27
 
 Four leftovers of the audit of a record (11.10.2026): a task's reminders
