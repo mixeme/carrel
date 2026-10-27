@@ -34,6 +34,7 @@ func routeKinds(t *testing.T) map[string]zone.Kind {
 	spec := readSpec(t)
 	c5 := section(t, spec, "## C-5. ", "## C-6. ")
 	ident := regexp.MustCompile("`([A-Z][A-Za-z]*)`")
+	leading := regexp.MustCompile("^\\s*`[A-Z][A-Za-z]*`(,\\s*`[A-Z][A-Za-z]*`)*")
 	kinds := map[string]zone.Kind{}
 	var fragments []string
 	sub := ""
@@ -52,9 +53,12 @@ func routeKinds(t *testing.T) map[string]zone.Kind {
 		answer, models := cells[3], ident.FindAllStringSubmatch(cells[4], -1)
 		switch {
 		case strings.Contains(answer, "лист") && len(models) > 0:
-			// The sheet is the row's first model; a later one is what the
-			// POST answers with (RewriteSheet → ContactPage).
-			kinds[models[0][1]] = zone.Sheet
+			// The sheets are the models the row opens with, one or a list
+			// (/app/mail/send); a later one is what the POST answers with
+			// (RewriteSheet → ContactPage).
+			for _, m := range ident.FindAllStringSubmatch(leading.FindString(cells[4]), -1) {
+				kinds[m[1]] = zone.Sheet
+			}
 		case strings.Contains(answer, "страница"):
 			for _, m := range models {
 				kind := zone.ShellPage
@@ -172,7 +176,7 @@ func TestSheetsAreTheSheetsOfC5(t *testing.T) {
 // sees a sheet zone forgot as well as one it invented.
 func allSheets() []any {
 	return []any{
-		view.PublishSheet{}, view.MailSheet{}, view.MailAttachSheet{}, view.MailLinkSheet{}, view.MoveSheet{}, view.CopiesSheet{},
+		view.PublishSheet{}, view.MailSheet{}, view.MailAttachSheet{}, view.MailLinkSheet{}, view.MailPreviewSheet{}, view.MailCloseSheet{}, view.MailSentSheet{}, view.MoveSheet{}, view.CopiesSheet{},
 		view.AskSheet{}, view.RecordDeleteSheet{},
 		view.RewriteSheet{}, view.ExportSheet{}, view.NewSheet{}, view.FileOpSheet{},
 		view.FilePickerSheet{}, view.CollectionNewSheet{}, view.CollectionRenameSheet{},

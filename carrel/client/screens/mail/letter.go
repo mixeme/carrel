@@ -58,7 +58,8 @@ const LetterTitle = letterTitle
 //     address after it muted, the address its hint; one typed by hand its
 //     address — each the cross takes off; the line «Name or address» after
 //     them, its suggestions where the model says, its Enter sending the
-//     form with op=add; the line under it (how many, that all see all).
+//     form with op=add; the line under it (how many, that all see all),
+//     why the letter did not go first in alarm (s-mail-17).
 //   - Subject, the text.
 //   - «Attached» with how many and Attach, its menu what can be attached,
 //     each sending the form to its own address, a rule before the files;
@@ -66,14 +67,9 @@ const LetterTitle = letterTitle
 //     «attached» or «as a link» on, a link's terms and Change…, the cross
 //     —; the line of why some go as links, in the accent.
 //   - The foot: Send with Ctrl+Enter — the text takes Enter —, Preview,
-//     how it is signed, Cancel with Esc pushed.
+//     how it is signed, Cancel with Esc pushed, sending the form: with text
+//     the server asks first (s-mail-15).
 func Letter(p *view.MailSheet) w.Sheet {
-	var cancel view.Action
-	for _, a := range p.Form.Actions {
-		if a.ID == cancelID {
-			cancel = a
-		}
-	}
 	var body []w.SheetPart
 	for _, set := range p.Form.Sets {
 		for _, r := range set.Rows {
@@ -91,6 +87,7 @@ func Letter(p *view.MailSheet) w.Sheet {
 	body = append(body, attachments(p))
 
 	var foot []w.SheetFootPart
+	var cancel w.Button
 	for _, a := range p.Form.Actions {
 		switch a.ID {
 		case sendID:
@@ -104,15 +101,18 @@ func Letter(p *view.MailSheet) w.Sheet {
 			b := bind.Submit(a)
 			b.To = a.Href
 			foot = append(foot, b)
+		case cancelID:
+			cancel = bind.Submit(a)
+			cancel.To = a.Href
 		}
 	}
 	if len(p.ReplyNote) > 0 {
 		foot = append(foot, w.Dim{Parts: bind.Inlines(p.ReplyNote), Size: w.Dim11_5, Variant: w.DimWrap})
 	}
-	foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(cancel, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+	foot = append(foot, w.Line{Items: []w.LinePart{cancel, w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
 	return w.Sheet{
 		ID: letterID, Icon: mailIcon, Title: letterTitle,
-		Head:   []w.SheetHeadPart{w.Tag{Label: fromWord + string(p.From), On: true, Place: w.Pushed}, w.Close{Label: closeWord, Href: cancel.Href}},
+		Head:   []w.SheetHeadPart{w.Tag{Label: fromWord + string(p.From), On: true, Place: w.Pushed}, w.Close{Label: closeWord, Href: p.Back}},
 		Body:   body,
 		Foot:   foot,
 		Width:  w.SheetWidth680,
@@ -142,7 +142,10 @@ func recipients(r view.FormRow) w.Field {
 			Enter: &w.TagEnter{Name: enterName, Value: enterValue, Label: enterWord, Of: letterID}}
 	}
 	f := w.Field{Label: string(r.Label), Parts: []w.FieldPart{w.Drop{Trigger: in, Menu: w.Menu{Items: []w.MenuPart{}, Width: w.MenuWidth420, Pop: w.MenuUnder}}}, Width: w.FieldW100}
-	if r.Hint != "" {
+	switch {
+	case len(r.HintRuns) > 0:
+		f.Parts = append(f.Parts, w.FieldHint{Parts: bind.Inlines(r.HintRuns)})
+	case r.Hint != "":
 		f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(r.Hint)}})
 	}
 	return f

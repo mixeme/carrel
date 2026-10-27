@@ -265,7 +265,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.MailSheet) },
-		Frames: []string{"s-mail-1"},
+		Frames: []string{"s-mail-1", "s-mail-17"},
 		Draw: func(model any) Root {
 			p := model.(*view.MailSheet)
 			return over(p.Under, mail.Letter(p))
@@ -282,6 +282,36 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return mail.LinkTitle },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MailLinkSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.MailPreviewSheet) },
+		Frames: []string{"s-mail-14"},
+		Draw: func(model any) Root {
+			p := model.(*view.MailPreviewSheet)
+			return over(p.Under, mail.Preview(p))
+		},
+		Title: func(model any) string { return mail.PreviewTitle },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MailPreviewSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.MailCloseSheet) },
+		Frames: []string{"s-mail-15"},
+		Draw: func(model any) Root {
+			p := model.(*view.MailCloseSheet)
+			return over(p.Under, mail.Close(p))
+		},
+		Title: func(model any) string { return mail.CloseTitle },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MailCloseSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.MailSentSheet) },
+		Frames: []string{"s-mail-18"},
+		Draw: func(model any) Root {
+			p := model.(*view.MailSentSheet)
+			return over(p.Under, mail.Sent(p))
+		},
+		Title: func(model any) string { return mail.LetterTitle },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MailSentSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.LoginPage) },
