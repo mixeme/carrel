@@ -112,6 +112,17 @@ func TestAttachOfSeveralFilesIsAllOrNothing(t *testing.T) {
 			t.Errorf("the record carries an attachment")
 		}
 	})
+	t.Run("the first file refused, others after it", func(t *testing.T) {
+		f := attachFixture(t, 1024, nil, "e1.ics", attachEvent("e1", "Sync-up", ""))
+		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"scan.pdf", strings.Repeat("x", 2048)}, upload{"note.txt", "small"})))
+		if got := noticeBodies(page.Notices); !strings.Contains(got, "scan.pdf could not be attached, so none of the files was.") {
+			t.Errorf("the notice does not say the files after it were not attached either: %+v", page.Notices)
+		}
+		if strings.Contains(body(t, f, "e1.ics"), "ATTACH") {
+			t.Errorf("the record carries an attachment")
+		}
+	})
 	t.Run("a later file refused", func(t *testing.T) {
 		srv := davtest.New(t)
 		srv.RefuseUnsizedPUT = true

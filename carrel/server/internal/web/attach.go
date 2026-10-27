@@ -488,8 +488,14 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 		}
 		if notice != nil {
 			takeBack(ctx, placed)
+			// The files before it were taken and are not written either, nor
+			// are those after it (Б6).
+			if n == 0 {
+				if more, err := nextFile(up); err == nil && more != nil {
+					n++
+				}
+			}
 			if n > 0 {
-				// The files before it were taken and are not written either.
 				notice.Body = text(name + " could not be attached, so none of the files was. " + string(notice.Body))
 			}
 			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))

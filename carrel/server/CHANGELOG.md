@@ -19,9 +19,9 @@ current mockup; fonts are in `docs/visual/fonts/`.
 
 ## v0.2.378 — 2026-10-28
 
-Three more leftovers of the audit of a record: a repeating task moved on
+Four more leftovers of the audit of a record: a repeating task moved on
 past its times changed by hand, a folder merged out of that stayed empty, a
-new form that lost its files.
+new form that lost its files, the first of several files refused.
 
 ### Fixed
 
@@ -45,6 +45,10 @@ new form that lost its files.
   kept: forms started later took their place. Attach them again, or save
   without them.» (the executor's words, as the photo's of a new card), and
   saving again saves it without them.
+- **The first of several files refused is named** (Б6): a refusal of a
+  later file said «… could not be attached, so none of the files was»; a
+  refusal of the first said only why, as if it had been alone. Now it says
+  the same when files followed it.
 
 ## v0.2.377 — 2026-10-27
 
