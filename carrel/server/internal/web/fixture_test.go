@@ -4394,8 +4394,11 @@ func TestFixtureImport(t *testing.T) {
 		app.compare(t, "app-note-import/normal.json", app.h.do(get(node(opened.Source.Folder.Nodes, "notes"), app.sess)))
 		// A zip of notes, as s-io-8 draws it: front matter, a heading in a
 		// folder, a note already here by its UID, a file that is no
-		// Markdown, an empty one.
-		archive := zipOf(t,
+		// Markdown, an empty one; the files' times as the frame dates them.
+		archive := zipAt(t, map[string]time.Time{
+			"idei/crdt.md": time.Date(2026, 8, 4, 10, 0, 0, 0, time.UTC),
+			"doroga.md":    time.Date(2026, 6, 30, 10, 0, 0, 0, time.UTC),
+		},
 			"2026-03-11-podryadchik.md", "---\r\ntitle: Встреча с подрядчиком\r\ndate: 2026-03-11\r\ncategories: работа\r\n---\r\n\r\nОбсудили смету и сроки.\r\n",
 			"idei/crdt.md", "# Что почитать про CRDT\n\nСсылки.\n",
 			"doroga.md", "---\r\ntitle: Про дорогу до дачи\r\nuid: 5c81-77aa-0d64\r\n---\r\n\r\nПоворот после моста.\r\n",

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/emersion/go-webdav/caldav"
 
@@ -17,10 +18,22 @@ import (
 // zipOf is an archive of name → body, in that order.
 func zipOf(t *testing.T, members ...string) []byte {
 	t.Helper()
+	return zipAt(t, nil, members...)
+}
+
+// zipAt is zipOf with the times of the members named in at; the others are
+// dated 4 August 2026, as an archiver dates what it packs. A member at the
+// zero time carries none — DOS date 0, as some archivers write it.
+func zipAt(t *testing.T, at map[string]time.Time, members ...string) []byte {
+	t.Helper()
 	var b bytes.Buffer
 	zw := zip.NewWriter(&b)
 	for i := 0; i+1 < len(members); i += 2 {
-		w, err := zw.Create(members[i])
+		when, ok := at[members[i]]
+		if !ok {
+			when = time.Date(2026, 8, 4, 10, 0, 0, 0, time.UTC)
+		}
+		w, err := zw.CreateHeader(&zip.FileHeader{Name: members[i], Method: zip.Deflate, Modified: when})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -86,7 +99,7 @@ func TestImportNotesFromAZip(t *testing.T) {
 	if row := previewRow(t, page.Preview, "Встреча с подрядчиком"); row[0] != "2026-03-11-podryadchik.md" || row[3] != "Ready — title, date and tags from front matter" {
 		t.Errorf("first = %q", row)
 	}
-	if row := previewRow(t, page.Preview, "Что почитать про CRDT"); row[0] != "idei/crdt.md" || row[3] != "Ready — no front matter: title from the first heading, date from the file" {
+	if row := previewRow(t, page.Preview, "Что почитать про CRDT"); row[0] != "idei/crdt.md" || row[2] != "4 August 2026" || row[3] != "Ready — no front matter: title from the first heading, date from the file" {
 		t.Errorf("in a folder = %q", row)
 	}
 	if row := previewRow(t, page.Preview, "skan.pdf"); row[3] != "Skipped: not Markdown" {

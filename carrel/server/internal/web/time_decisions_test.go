@@ -102,6 +102,40 @@ func TestAWholeDayTakesItsRemindersToTheDayBefore(t *testing.T) {
 	mustContain(t, after, "TRIGGER:-PT15M")
 }
 
+// Б28 for a task (the kinds are equal): a task whose one «All day» is ticked
+// takes its reminders closer than a day to the day before, the one counted
+// from the due date as the one counted from the start.
+func TestAWholeDayTaskTakesItsRemindersToTheDayBefore(t *testing.T) {
+	f := calendarFixture(t, nil, "t.ics", ics("BEGIN:VTODO\nUID:t\nDTSTAMP:20260101T000000Z\nSUMMARY:T\n"+
+		"DTSTART:20260112T100000Z\nDUE:20260112T180000Z\n"+
+		"BEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:Reminder\nTRIGGER;RELATED=END:-PT1H\nEND:VALARM\n"+
+		"BEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:Reminder\nTRIGGER:-P2D\nEND:VALARM\n"+
+		"END:VTODO"))
+	rec := f.path("tasks") + "/t"
+	form := formFields(decode[editedForm](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	form.Set("allday", "on")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+	after := unfolded(body(t, f, "t.ics"))
+	mustContain(t, after, "DUE;VALUE=DATE:20260112", "TRIGGER;RELATED=END:-P1D", "TRIGGER:-P2D")
+	if strings.Contains(after, "-PT1H") {
+		t.Errorf("the reminder still rings an hour before midnight:\n%s", after)
+	}
+}
+
+// Б20: an end given to another client's event that had none is written in
+// the zone of its start, as the start is — not as an instant in UTC beside
+// it.
+func TestAnEndAddedIsWrittenInTheZoneOfTheStart(t *testing.T) {
+	f := calendarFixture(t, nil, "e.ics", decisionEvent("DTSTART;TZID=Europe/Berlin:20260112T100000\nSUMMARY:Talk\n"))
+	code, page, after := shiftEdit(t, f, url.Values{"end.date": {"2026-01-12"}, "end.time": {"11:30"}})
+	if code != http.StatusSeeOther {
+		t.Fatalf("save: %d %+v", code, page.Notices)
+	}
+	mustContain(t, after, "DTSTART;TZID=Europe/Berlin:20260112T100000", "DTEND;TZID=Europe/Berlin:20260112T113000")
+}
+
 // Б23: the end of a flight is written in the zone it lands in. Another zone
 // chosen for the event moves the start to the same clock there and keeps the
 // length; the end stays in its own zone.

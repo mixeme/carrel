@@ -104,6 +104,33 @@ func TestSetAlarmsLeavesOverridesAlone(t *testing.T) {
 	}
 }
 
+// A reminder given another time counts from where it counted: one before a
+// task's due date (RELATED=END) stays before it.
+func TestAlarmAtKeepsWhatItCountsFrom(t *testing.T) {
+	doc := "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//EN\r\nBEGIN:VTODO\r\nUID:a\r\nDTSTAMP:20260101T000000Z\r\n" +
+		"DUE:20260112T180000Z\r\nSUMMARY:Duty\r\nBEGIN:VALARM\r\nACTION:EMAIL\r\nTRIGGER;RELATED=END:-PT1H\r\nDESCRIPTION:Soon\r\nEND:VALARM\r\n" +
+		"END:VTODO\r\nEND:VCALENDAR\r\n"
+	obj, err := Parse("/c/a.ics", "e1", strings.NewReader(doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+	alarms, err := Alarms(obj)
+	if err != nil || len(alarms) != 1 {
+		t.Fatalf("alarms = %+v, %v", alarms, err)
+	}
+	moved := alarms[0].At("-P1D")
+	if !moved.RelatedEnd {
+		t.Error("the moved reminder counts from the start")
+	}
+	next, err := SetAlarms(obj, []Alarm{moved})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := encoded(t, next); !strings.Contains(got, "TRIGGER;RELATED=END:-P1D") || !strings.Contains(got, "ACTION:EMAIL") {
+		t.Errorf("encoded:\n%s", got)
+	}
+}
+
 // A reminder is known by what it does and when, not by how a server spells
 // it or what it adds of its own (Б1 of the audit of 11.10.2026).
 func TestMissingAlarms(t *testing.T) {

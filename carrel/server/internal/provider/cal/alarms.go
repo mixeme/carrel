@@ -46,11 +46,12 @@ func NewAlarm(trigger string) Alarm {
 	return Alarm{Trigger: trigger, Description: "Reminder", comp: c}
 }
 
-// At is the reminder at another time, counted from the start: what it does
-// — its action, its sound, its text, whom it writes to — stays (Б28 of the
-// audit of 11.10.2026: a reminder whose time was changed came back as a
-// plain display one). That it was acknowledged does not: it was, at the
-// time it had.
+// At is the reminder at another time, counted from where it was — the start,
+// or the end with RELATED=END (a task's due date): what it does — its
+// action, its sound, its text, whom it writes to — stays (Б28 of the audit
+// of 11.10.2026: a reminder whose time was changed came back as a plain
+// display one). That it was acknowledged does not: it was, at the time it
+// had. A duration given to an absolute reminder counts from the start.
 func (a Alarm) At(trigger string) Alarm {
 	if a.comp == nil {
 		return NewAlarm(trigger)
@@ -63,8 +64,12 @@ func (a Alarm) At(trigger string) Alarm {
 	}
 	trig := ical.NewProp(ical.PropTrigger)
 	trig.Value = trigger
+	end := a.RelatedEnd && !a.Absolute
+	if end {
+		trig.Params.Set(ical.ParamRelated, "END")
+	}
 	c.Props.Set(trig)
-	return Alarm{Trigger: trigger, Description: a.Description, comp: c}
+	return Alarm{Trigger: trigger, RelatedEnd: end, Description: a.Description, comp: c}
 }
 
 // Alarms reads the VALARM set of the main component.

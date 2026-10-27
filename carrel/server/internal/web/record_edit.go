@@ -1482,14 +1482,23 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	}
 	var startAt, endAt, dueAt time.Time
 
-	if c.spec.kind == view.KindEvent && len(props["DTSTART"]) > 0 && triple(want["start"])[2] == "on" && triple(have["start"])[2] != "on" {
-		// An event that becomes a whole day starts at midnight, and «15
-		// minutes before» would ring the night before: a reminder closer
-		// than a day becomes «1 day before» (the owner's decision of
-		// 12.10.2026, Б28). One a day away or more, and one at a set moment,
-		// stay; what the reminder does stays with it (cal.Alarm.At). The
-		// rows are changed before they are read, so the form afterwards
-		// shows what was written (S-7.3).
+	becameDay := false
+	switch c.spec.kind {
+	case view.KindEvent:
+		becameDay = len(props["DTSTART"]) > 0 && triple(want["start"])[2] == "on" && triple(have["start"])[2] != "on"
+	case view.KindTask:
+		_, boxed := want[taskDayBox]
+		becameDay = (len(props["DTSTART"]) > 0 || len(props["DUE"]) > 0) && boxed && first(want[taskDayBox]) == "on" && taskDayOf(have) != "on"
+	}
+	if becameDay {
+		// An event or a task that becomes a whole day starts — or is due —
+		// at midnight, and «15 minutes before» would ring the night before:
+		// a reminder closer than a day becomes «1 day before» (the owner's
+		// decision of 12.10.2026, Б28). One a day away or more, and one at a
+		// set moment, stay; what the reminder does, and what it counts
+		// from, stay with it (cal.Alarm.At). The rows are changed before
+		// they are read, so the form afterwards shows what was written
+		// (S-7.3).
 		for i, v := range want["reminder"] {
 			if d, ok := cal.NewAlarm(v).Offset(); ok && v != "" && d > -24*time.Hour {
 				want["reminder"][i] = "-P1D"
@@ -1752,6 +1761,13 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				// is written the way the end was (Б23 of the audit of
 				// 11.10.2026).
 				written = ""
+			}
+			if written == "" && len(props[f.prop]) == 0 && !allDay && held != "" {
+				// A time the record did not have — the end of another
+				// client's event, a task's due — is written in the zone of
+				// the record's start, as the start is, not as an instant in
+				// UTC beside it (Б20 of the audit of 11.10.2026).
+				written = held
 			}
 			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, clock, written)
 			if (f.name == "start" || ch.zoneYear == 0) && ch.zone != nil {

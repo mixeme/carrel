@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"time"
 )
 
 // A zip of Markdown files is the notes' other file (s-io-8): every .md in
@@ -83,8 +84,13 @@ func (s *Server) readZipNotes(c *collectionCtx, name string, body []byte) (*impo
 			continue
 		}
 		// A file without front matter is dated by its own time in the
-		// archive, as a file of a folder is (s-io-4).
-		d.takeMarkdown(c, label, text, zf.Modified)
+		// archive, as a file of a folder is (s-io-4). DOS date 0 is no time:
+		// read as one it is 30 November 1979.
+		stamp := zf.Modified
+		if stamp.Before(time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC)) {
+			stamp = time.Time{}
+		}
+		d.takeMarkdown(c, label, text, stamp)
 	}
 	if markdown == 0 {
 		// Read, and nothing in it to take (s-io-18).

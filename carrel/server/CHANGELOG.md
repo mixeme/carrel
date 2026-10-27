@@ -17,6 +17,38 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.377 — 2026-10-27
+
+Four leftovers of the audit of a record (11.10.2026): a task's reminders
+and «All day», the end added to another client's event, a changed reminder
+counted from the due date, a note whose file has no time.
+
+### Fixed
+
+- **A task becomes a whole day** (Б28; the owner's decision of 12.10.2026,
+  the kinds equal): its reminders closer than a day become «1 day before»,
+  as an event's do — the one counted from the due date as the one counted
+  from the start.
+- **A reminder given another time keeps what it counts from**: one counted
+  from a task's due date or an event's end (`TRIGGER;RELATED=END`) was
+  written counted from the start once its time was changed in the form.
+- **An end added to another client's event** (Б20), or a due date added to
+  a task with a start, is written in the zone of the start
+  (`DTEND;TZID=…`), not as an instant in UTC beside it.
+- **A note whose file has no time** (Б35): a member of a `.zip` with DOS
+  date 0 was dated 30 November 1979, and a `.md` sent by the browser — which
+  sends no file's time — was dated by the machine's clock while the preview
+  said «date from the file». Both are dated the day of the import by the
+  server's clock, and the preview says «no front matter: title from the
+  first heading; the file has no date — dated today» (the executor's words,
+  not yet approved).
+
+### For consumers
+
+Nothing to change: the words are in the preview's `Result` cells. The
+fixture `app-note-import/preview` dates its archive's notes as s-io-8 does
+(4 August, 30 June 2026).
+
 ## v0.2.376 — 2026-10-27
 
 A task just marked done stays under Open in the list of one collection too,

@@ -918,7 +918,9 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 	d := &importDraft{Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, Source: name, Size: int64(len(body))}
 	if c.spec.kind == view.KindNote && isMarkdown(name) {
 		d.Format = "Markdown"
-		obj, err := cal.ParseNote(name, body, time.Now())
+		// A browser does not send the file's time: dated the day of the
+		// import (Б35).
+		obj, err := cal.ParseNote(name, body, c.now())
 		if err != nil {
 			return nil, err
 		}
@@ -927,7 +929,7 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 		}
 		// Where its title and date come from, as a file of a set says it
 		// (Им12; s-io-8).
-		d.Records[len(d.Records)-1].Ready = noteReady(body)
+		d.Records[len(d.Records)-1].Ready = noteReady(body, false)
 		return d, nil
 	}
 	if c.card != nil {
@@ -1040,8 +1042,11 @@ func (d *importDraft) takeMarkdown(c *collectionCtx, label string, body []byte, 
 		d.Skipped = append(d.Skipped, importSkip{What: label, Reason: emptyMarkdown, Failed: true})
 		return
 	}
-	if stamp.IsZero() {
-		stamp = time.Now()
+	// A file that carries no time is dated the day of the import, and the
+	// preview says so (Б35 of the audit of 11.10.2026).
+	dated := !stamp.IsZero()
+	if !dated {
+		stamp = c.now()
 	}
 	obj, err := cal.ParseNote(path.Base(label), body, stamp)
 	if err != nil {
@@ -1053,13 +1058,17 @@ func (d *importDraft) takeMarkdown(c *collectionCtx, label string, body []byte, 
 		return
 	}
 	// Where the note's title and date come from (Им12; s-io-8).
-	d.Records[len(d.Records)-1].Ready = noteReady(body)
+	d.Records[len(d.Records)-1].Ready = noteReady(body, dated)
 }
 
-// noteReady says where a Markdown note's title and date come from (s-io-8).
-func noteReady(body []byte) string {
-	if cal.HasNoteHeader(body) {
+// noteReady says where a Markdown note's title and date come from (s-io-8);
+// dated is whether its file carried a time.
+func noteReady(body []byte, dated bool) string {
+	switch {
+	case cal.HasNoteHeader(body):
 		return "title, date and tags from front matter"
+	case !dated:
+		return "no front matter: title from the first heading; the file has no date — dated today"
 	}
 	return "no front matter: title from the first heading, date from the file"
 }

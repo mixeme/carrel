@@ -141,7 +141,7 @@
           "cells": [
             "idei/crdt.md",
             "Что почитать про CRDT",
-            "30 November 1979",
+            "4 August 2026",
             "Ready — no front matter: title from the first heading, date from the file"
           ],
           "result": "ready"
@@ -150,7 +150,7 @@
           "cells": [
             "doroga.md",
             "Про дорогу до дачи",
-            "30 November 1979",
+            "30 June 2026",
             "Already here — skipped"
           ],
           "result": "skipped"
@@ -366,7 +366,7 @@
       "text": "заметки-2026.zip"
     },
     {
-      "text": " · 958 B · 5 files"
+      "text": " · 1 KB · 5 files"
     }
   ],
   "title": "Import notes",
