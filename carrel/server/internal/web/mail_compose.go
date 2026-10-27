@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/textproto"
 	"net/url"
 	"slices"
 	"strconv"
@@ -50,6 +51,10 @@ type mailDraft struct {
 	// Typed is what stands in «Name or address» and is no address yet: kept
 	// with its suggestions until one is chosen.
 	Typed string
+	// Refused are those the relay would not take when the letter went, with
+	// its words (s-mail-18): the letter is kept for «Send again to the
+	// refused», and is gone once anything else is opened.
+	Refused []cmail.Refusal
 }
 
 // knownRecipient is who an address is, as a suggestion said it.
@@ -83,6 +88,9 @@ type mailPart struct {
 	// what the visitor sees. Nil — the letter's own: thirty days, what the
 	// sheet gives untouched.
 	Terms url.Values
+	// Token is the link made when the letter went: sent again to the
+	// refused, it carries the same one.
+	Token string
 }
 
 // attachKind is one line of the attach menu, in rail order.
@@ -171,6 +179,20 @@ func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := loadMailDraft(sess)
+	if len(d.Refused) > 0 {
+		// The letter went to some (s-mail-18): «Send again to the refused»
+		// writes it to them; opened any other way, it is a new letter.
+		if r.URL.Query().Get("to") == "refused" {
+			d.To = nil
+			for _, rf := range d.Refused {
+				d.To = append(d.To, rf.Address)
+			}
+			d.Refused = nil
+		} else {
+			d = &mailDraft{Back: d.Back}
+		}
+		saveMailDraft(sess, d)
+	}
 	if back := r.URL.Query().Get("back"); back != "" {
 		// Opened from a page (С21): the letter stands over it and goes back
 		// to it.
@@ -179,11 +201,7 @@ func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
 			saveMailDraft(sess, d)
 		}
 	}
-	note := ""
-	if n, err := strconv.Atoi(r.URL.Query().Get("sent")); err == nil && n > 0 {
-		note = fmt.Sprintf("The letter went to %s.", plural(n, "recipient"))
-	}
-	s.writeMailSheet(w, r, s.mailSheet(r, sess, d, note))
+	s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "", ""))
 }
 
 // postMailCompose keeps what was typed and then does the op: attach opens
@@ -203,8 +221,9 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 	d := loadMailDraft(sess)
 	op := r.FormValue("op")
 	if op == "discard" {
-		saveMailDraft(sess, &mailDraft{Back: d.Back})
-		s.redirect(w, r, "/app/mail/compose")
+		// «Close and lose the text» (s-mail-15): Carrel keeps no drafts.
+		saveMailDraft(sess, &mailDraft{})
+		s.redirect(w, r, mailBack(d))
 		return
 	}
 	// What was typed goes with every press and is kept (s-mail-1): the
@@ -224,12 +243,12 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 			if a, found := s.typedRecipient(sess, d, typed); found {
 				d.To, d.Typed = splitRecipients(append(d.To, a)), ""
 				saveMailDraft(sess, d)
-				s.writeMailSheet(w, r, s.mailSheet(r, sess, d, ""))
+				s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "", ""))
 				return
 			}
 		}
 		saveMailDraft(sess, d)
-		s.writeMailSheet(w, r, s.mailSheet(r, sess, d, ""))
+		s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "", ""))
 		return
 	case "attach":
 		saveMailDraft(sess, d)
@@ -260,7 +279,7 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 				terms[k] = v
 			}
 		}
-		d.Parts[i].Terms = terms
+		d.Parts[i].Terms, d.Parts[i].Token = terms, ""
 		saveMailDraft(sess, d)
 		s.redirect(w, r, "/app/mail/compose")
 		return
@@ -269,7 +288,18 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 			d.Parts = append(d.Parts[:i], d.Parts[i+1:]...)
 			d.Parts = s.reckonLinks(d.Parts)
 		}
-	case "", "send":
+	case "close":
+		// Cancel sends the form (s-mail-1, -14): nothing typed, the letter
+		// closes and is forgotten; typed, it asks first (s-mail-15).
+		if strings.TrimSpace(d.Body) == "" {
+			saveMailDraft(sess, &mailDraft{})
+			s.redirect(w, r, mailBack(d))
+			return
+		}
+		saveMailDraft(sess, d)
+		s.writeMailSheet(w, r, s.mailCloseSheet(r, sess, d))
+		return
+	case "preview", "", "send":
 		// Send is the form's own button, no op (s-mail-1).
 		if d.Typed != "" {
 			// A line typed and not yet a recipient: added, as Enter would.
@@ -279,20 +309,46 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 		}
 		saveMailDraft(sess, d)
 		if d.Typed != "" {
-			s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "Choose who «"+d.Typed+"» is, or type an address."))
+			s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "Choose who «"+d.Typed+"» is, or type an address.", ""))
 			return
 		}
-		n, err := s.sendLetter(r, sess, d)
-		if err != nil {
-			s.writeMailSheet(w, r, s.mailSheet(r, sess, d, err.Error()))
+		if op == "preview" {
+			s.writeMailSheet(w, r, s.mailPreviewSheet(r, sess, d))
 			return
 		}
-		saveMailDraft(sess, &mailDraft{Back: d.Back})
-		s.redirect(w, r, "/app/mail/compose?sent="+strconv.Itoa(n))
+		taken, refused, err := s.sendLetter(r, sess, d)
+		switch {
+		case err != nil:
+			// It did not go (s-mail-17): the letter as it was, why first
+			// under To.
+			saveMailDraft(sess, d)
+			s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "", err.Error()))
+		case len(refused) > 0:
+			// It went to some (s-mail-18): the letter is kept for those it
+			// did not reach.
+			d.Refused = refused
+			saveMailDraft(sess, d)
+			s.writeMailSheet(w, r, s.mailSentSheet(r, sess, d, taken))
+		default:
+			// It went (s-mail-16): the sheet closes, the screen under it
+			// says so once.
+			saveMailDraft(sess, &mailDraft{})
+			sayOnNextPage(sess, fmt.Sprintf("The letter went to %s.", plural(len(taken), "recipient")))
+			s.redirect(w, r, mailBack(d))
+		}
 		return
 	}
 	saveMailDraft(sess, d)
-	s.writeMailSheet(w, r, s.mailSheet(r, sess, d, ""))
+	s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "", ""))
+}
+
+// mailBack is where the letter closes to: the page it was opened over, the
+// contacts without one (s-mail-1).
+func mailBack(d *mailDraft) string {
+	if d.Back == "" {
+		return "/app/contacts"
+	}
+	return d.Back
 }
 
 // typedRecipient is the address a line typed in «Name or address» names
@@ -351,8 +407,9 @@ func splitRecipients(values []string) []string {
 
 // mailSheet is the letter as it will go, one form (s-mail-1): who it is from
 // and where replies go, the recipients, what goes as a file and what as a
-// link. note is said first under the recipients: what the last press did.
-func (s *Server) mailSheet(r *http.Request, sess *session.Session, d *mailDraft, note string) view.MailSheet {
+// link. note is said first under the recipients: what the last press did;
+// failed — why the letter did not go, said there as an alarm (s-mail-17).
+func (s *Server) mailSheet(r *http.Request, sess *session.Session, d *mailDraft, note, failed string) view.MailSheet {
 	u := s.letterUser(sess)
 	if u == nil {
 		return view.MailSheet{}
@@ -388,13 +445,18 @@ func (s *Server) mailSheet(r *http.Request, sess *session.Session, d *mailDraft,
 	if len(to.Options) > 0 {
 		to.Value = text(to.Options[0].Value)
 	}
-	// Under To, how many and that all see all (s-mail-1); what the last
-	// press did, first.
-	hint := fmt.Sprintf("%d of %d recipients. Everyone sees the whole list.", len(d.To), s.mailPolicy().Recipients)
+	// Under To, how many at most and that all see all (s-mail-1); what the
+	// last press did, first; why the letter did not go, first in alarm
+	// (s-mail-17).
+	hint := fmt.Sprintf("Up to %d recipients. Each sees the others' addresses.", s.mailPolicy().Recipients)
 	if note != "" {
 		hint = sentence(note) + " " + hint
 	}
 	to.Hint = text(hint)
+	if failed != "" {
+		to.Hint = text(sentence(failed) + " " + hint)
+		to.HintRuns = view.Runs{{Text: text(sentence(failed)), Mark: view.RunDanger}, {Text: text(" " + hint)}}
+	}
 	sheet.Form = s.plainForm("/app/mail/send", "POST", csrfField(sess), to,
 		view.FormRow{Name: "subject", Label: "Subject", Kind: view.InputText, Value: text(d.Subject)},
 		view.FormRow{Name: "text", Label: "Text", Kind: view.InputArea, Value: text(d.Body)})
@@ -447,18 +509,125 @@ func (s *Server) mailSheet(r *http.Request, sess *session.Session, d *mailDraft,
 	case left == 0:
 		send.Enabled, send.Reason = false, text(user.ErrLetterLimit.Error())
 	}
-	// Cancel goes back where the letter was opened from (s-mail-1: the
-	// book «Контакты»); the letter waits as a draft.
-	back := d.Back
-	if back == "" {
-		back = "/app/contacts"
-	}
 	sheet.Form.Actions = []view.Action{send,
-		// Preview keeps what was typed and shows the letter again; what it
-		// shows besides is the owner's question (note 105 p. 7 of Typecase).
+		// Preview keeps what was typed and shows the letter as the
+		// recipients get it (s-mail-14).
 		{ID: "mail.preview", Label: "Preview", Method: "POST", Enabled: true, Submits: true, Href: submit(url.Values{"op": {"preview"}})},
-		{ID: "mail.discard", Label: "Discard", Method: "POST", Enabled: true, Danger: true, Submits: true, Href: submit(url.Values{"op": {"discard"}})},
-		{ID: "mail.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route(back)},
+		// Cancel sends what was typed (s-mail-1): with text, the sheet asks
+		// before it closes (s-mail-15).
+		{ID: "mail.cancel", Label: "Cancel", Method: "POST", Enabled: true, Submits: true, Href: submit(url.Values{"op": {"close"}})},
+	}
+	sheet.Back = s.route(mailBack(d))
+	sheet.Under = s.underOf(r, d.Back, "/app/contacts")
+	return sheet
+}
+
+// mailPreviewSheet is the letter as the recipients get it (s-mail-14): the
+// headers with the names, the text with the signature, the files, the links
+// — not made yet, so said by where they will be — and the line a letter
+// without an address to answer closes with.
+func (s *Server) mailPreviewSheet(r *http.Request, sess *session.Session, d *mailDraft) view.MailPreviewSheet {
+	u := s.letterUser(sess)
+	if u == nil {
+		return view.MailPreviewSheet{}
+	}
+	ls := s.senderOf(u)
+	address := func(a string) view.Run { return view.Run{Text: text("<" + a + ">"), Mark: view.RunMono} }
+	sheet := view.MailPreviewSheet{
+		From:    view.Runs{{Text: text(ls.FromName), Mark: view.RunStrong}, {Text: " "}, address(ls.Address)},
+		Subject: text(d.Subject),
+	}
+	if ls.ReplyTo != "" {
+		sheet.ReplyTo = view.Runs{{Text: text(ls.Name + " ")}, address(ls.ReplyTo)}
+	} else {
+		sheet.NoReply = text(s.noReplyLine(r))
+	}
+	for i, a := range d.To {
+		if i > 0 {
+			sheet.To = append(sheet.To, view.Run{Text: ", "})
+		}
+		if k, ok := d.Known[strings.ToLower(a)]; ok && k.Name != "" {
+			sheet.To = append(sheet.To, view.Run{Text: text(k.Name + " ")}, address(a))
+		} else {
+			sheet.To = append(sheet.To, view.Run{Text: text(a)})
+		}
+	}
+	parts := s.reckonLinks(slices.Clone(d.Parts))
+	where := strings.TrimPrefix(strings.TrimPrefix(s.absURL(r, "/p/"), "https://"), "http://")
+	for _, p := range parts {
+		if !p.AsLink {
+			sheet.Files = append(sheet.Files, view.MailPreviewFile{Name: text(p.Name), Kind: p.Kind})
+			continue
+		}
+		token := p.Token
+		if token == "" {
+			token = "…"
+		}
+		sheet.Links = append(sheet.Links, view.MailPreviewLink{Title: text(linkTitle(p)), Address: text(where + token)})
+	}
+	sheet.Text = text(strings.TrimSuffix(letterText(d.Body, ls.Name), "\n"))
+	sheet.Form = s.plainForm("/app/mail/send", "POST", csrfField(sess))
+	sheet.Form.Actions = []view.Action{
+		{ID: "mail.send", Label: "Send", Icon: "i-mail", Method: "POST", Primary: true, Enabled: true, Submits: true, Href: s.route("/app/mail/send")},
+		{ID: "mail.edit", Label: "Edit", Method: "GET", Enabled: true, Href: s.route("/app/mail/compose")},
+		{ID: "mail.cancel", Label: "Cancel", Method: "POST", Enabled: true, Submits: true, Href: s.postQuery("/app/mail/send", url.Values{"op": {"close"}})},
+	}
+	sheet.Under = s.underOf(r, d.Back, "/app/contacts")
+	return sheet
+}
+
+// mailCloseSheet asks before a letter with text closes (s-mail-15): Carrel
+// keeps no drafts, so closing loses the text.
+func (s *Server) mailCloseSheet(r *http.Request, sess *session.Session, d *mailDraft) view.MailCloseSheet {
+	sheet := view.MailCloseSheet{
+		Warning: view.Runs{{Text: "Carrel keeps no drafts: "}, {Text: "closing loses the text", Mark: view.RunStrong}, {Text: "."}},
+		Form:    s.plainForm("/app/mail/send?op=discard", "POST", csrfField(sess)),
+	}
+	if u := s.letterUser(sess); u != nil {
+		sheet.From = text(s.senderOf(u).Address)
+	}
+	sheet.Form.Actions = []view.Action{
+		{ID: "mail.discard", Label: "Close and lose the text", Method: "POST", Danger: true, Enabled: true, Href: s.postQuery("/app/mail/send", url.Values{"op": {"discard"}})},
+		{ID: "mail.keep", Label: "Keep writing", Method: "GET", Primary: true, Enabled: true, Href: s.route("/app/mail/compose")},
+	}
+	sheet.Under = s.underOf(r, d.Back, "/app/contacts")
+	return sheet
+}
+
+// mailSentSheet is a letter that went to some (s-mail-18): a row a
+// recipient, sent or refused with the relay's words, and the letter again
+// to the refused.
+func (s *Server) mailSentSheet(r *http.Request, sess *session.Session, d *mailDraft, taken []string) view.MailSentSheet {
+	sheet := view.MailSentSheet{Notice: "The letter went, but not to everyone. Sending again goes only to the refused."}
+	if u := s.letterUser(sess); u != nil {
+		sheet.From = text(s.senderOf(u).Address)
+	}
+	row := func(a string) view.MailSentRow {
+		out := view.MailSentRow{Address: text(a)}
+		if k, ok := d.Known[strings.ToLower(a)]; ok {
+			out.Name, out.Colour = text(k.Name), view.Colour(k.Colour)
+		}
+		return out
+	}
+	for _, a := range d.To {
+		if slices.ContainsFunc(taken, func(t string) bool { return strings.EqualFold(t, a) }) {
+			rw := row(a)
+			rw.Said = "sent"
+			sheet.Rows = append(sheet.Rows, rw)
+			continue
+		}
+		for _, rf := range d.Refused {
+			if strings.EqualFold(rf.Address, a) {
+				rw := row(a)
+				rw.Said, rw.Refused = text("refused: «"+rf.Reply+"»"), true
+				sheet.Rows = append(sheet.Rows, rw)
+			}
+		}
+	}
+	sheet.Actions = []view.Action{
+		{ID: "mail.again", Label: "Send again to the refused", Method: "GET", Primary: true, Enabled: true,
+			Href: s.postQuery("/app/mail/compose", url.Values{"to": {"refused"}})},
+		{ID: "mail.close", Label: "Close", Method: "GET", Enabled: true, Href: s.route(mailBack(d))},
 	}
 	sheet.Under = s.underOf(r, d.Back, "/app/contacts")
 	return sheet
@@ -695,27 +864,27 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 }
 
 // sendLetter checks the letter against the ceilings, reads what goes as
-// files, makes the links, and hands it to the relay. It returns the number
-// of recipients.
-func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft) (int, error) {
+// files, and hands it to the relay recipient by recipient (s-mail-18). It
+// returns those the relay took and those it refused; the error is what the
+// sheet says first under To when the letter did not go (s-mail-17).
+func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft) ([]string, []cmail.Refusal, error) {
 	ctx := r.Context()
 	u := s.letterUser(sess)
 	if u == nil {
-		return 0, errors.New("no account")
+		return nil, nil, errors.New("no account")
 	}
 	to, err := cmail.Addresses(d.To)
 	switch {
 	case err != nil:
-		return 0, errors.New("A recipient is not an address: " + strings.TrimPrefix(err.Error(), "mail: "))
+		return nil, nil, errors.New("A recipient is not an address: " + strings.TrimPrefix(err.Error(), "mail: "))
 	case len(to) == 0:
-		return 0, errors.New("Add a recipient.")
+		return nil, nil, errors.New("Add a recipient.")
 	case len(to) > s.mailPolicy().Recipients:
-		return 0, fmt.Errorf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients)
+		return nil, nil, fmt.Errorf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients)
 	}
 	d.Parts = s.reckonLinks(d.Parts)
 
 	var files []cmail.Attachment
-	var links []string
 	kinds := map[string]int{}
 	var total int64
 	for _, p := range d.Parts {
@@ -724,10 +893,10 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		}
 		data, err := s.partContent(ctx, sess, p)
 		if err != nil {
-			return 0, fmt.Errorf("«%s» could not be read: %s. Remove it or try again.", p.Title, sentence(err.Error()))
+			return nil, nil, fmt.Errorf("«%s» could not be read: %s. Remove it or try again.", p.Title, sentence(err.Error()))
 		}
 		if int64(len(data)) > s.mailPolicy().Attach || total+int64(len(data)) > s.mailPolicy().Letter {
-			return 0, fmt.Errorf("«%s» has grown since it was attached and no longer fits the letter. Attach it again: it will go as a link.", p.Title)
+			return nil, nil, fmt.Errorf("«%s» has grown since it was attached and no longer fits the letter. Attach it again: it will go as a link.", p.Title)
 		}
 		total += int64(len(data))
 		files = append(files, cmail.Attachment{Name: p.Name, Type: p.Media, Data: data})
@@ -735,7 +904,7 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 	}
 
 	if err := s.users.ReserveLetter(u.ID, s.mailPolicy().PerDay); err != nil {
-		return 0, err
+		return nil, nil, err
 	}
 	sent := false
 	defer func() {
@@ -743,24 +912,44 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 			s.users.ReleaseLetter(u.ID)
 		}
 	}()
-	// Links last, after everything that can refuse: a letter that does not
-	// go leaves no link behind it, save the ones already asked for below.
-	for _, p := range d.Parts {
-		if !p.AsLink {
-			continue
+	ls := s.senderOf(u)
+	// The links are made once the relay has taken someone: a letter that
+	// does not go leaves no link behind it (s-mail-17), save the ones
+	// already asked for when one cannot be made. Sent again to the refused,
+	// the letter carries the links it made the first time.
+	letter := func() ([]byte, error) {
+		var links []string
+		for i := range d.Parts {
+			p := &d.Parts[i]
+			if !p.AsLink {
+				continue
+			}
+			if p.Token == "" {
+				token, err := s.partLink(sess, *p)
+				if err != nil {
+					return nil, fmt.Errorf("The link to «%s» could not be made. Remove it or try again.", p.Title)
+				}
+				p.Token = token
+			}
+			links = append(links, linkTitle(*p)+" — "+s.absURL(r, "/p/"+p.Token))
+			kinds[string(p.Kind)+" link"]++
 		}
-		token, err := s.partLink(sess, p)
-		if err != nil {
-			return 0, fmt.Errorf("The link to «%s» could not be made. Remove it or try again.", p.Title)
-		}
-		links = append(links, p.Title+" — "+s.absURL(r, "/p/"+token))
-		kinds[string(p.Kind)+" link"]++
+		return s.writeLetter(r, ls, to, d.Subject, d.Body, links, files)
 	}
-
-	if err := s.relayLetter(r, s.senderOf(u), to, d.Subject, d.Body, links, files); err != nil {
-		return 0, err
+	sendCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+	out, err := cmail.SendEach(sendCtx, s.relay(), to, letter)
+	if err != nil {
+		return nil, out.Refused, relayRefused(err)
 	}
+	s.markSent()
 	sent = true
+	var taken []string
+	for _, a := range to {
+		if !slices.ContainsFunc(out.Refused, func(rf cmail.Refusal) bool { return rf.Address == a }) {
+			taken = append(taken, a)
+		}
+	}
 	var attached []string
 	for _, k := range attachKinds {
 		for _, suffix := range []string{"", " link"} {
@@ -770,8 +959,28 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 			}
 		}
 	}
-	s.users.LetterSent(u.ID, to, strings.Join(attached, ", "))
-	return len(to), nil
+	s.users.LetterSent(u.ID, taken, strings.Join(attached, ", "))
+	return taken, out.Refused, nil
+}
+
+// relayRefused is a letter that did not go as the sheet says it (s-mail-17):
+// the relay's reply in its words; what the letter could not be written for,
+// as it is.
+func relayRefused(err error) error {
+	var tp *textproto.Error
+	if !errors.As(err, &tp) {
+		return err
+	}
+	return errors.New("The letter did not go: the relay answered «" + cmail.Reply(err) + "».")
+}
+
+// linkTitle is a part that goes as a link as the letter names it before the
+// link (s-mail-14): its title, and a folder what it holds.
+func linkTitle(p mailPart) string {
+	if p.Folder && p.Detail != "" {
+		return p.Title + ", " + p.Detail
+	}
+	return p.Title
 }
 
 // letterText is what the person wrote and their name under «-- » (RFC 3676;
@@ -787,11 +996,10 @@ func (s *Server) noReplyLine(r *http.Request) string {
 		". Do not reply to it: the sender's address is not confirmed, and a reply would reach nobody."
 }
 
-// relayLetter writes a letter and hands it to the relay: what the person
-// wrote, the links each on a line of its own, the signature, and — without
-// an address to answer — a line after it that says a reply reaches nobody
-// (s-mail-8).
-func (s *Server) relayLetter(r *http.Request, ls letterSender, to []string, subject, typed string, links []string, files []cmail.Attachment) error {
+// writeLetter writes a letter as it goes: what the person wrote, the links
+// each on a line of its own, the signature, and — without an address to
+// answer — a line after it that says a reply reaches nobody (s-mail-8).
+func (s *Server) writeLetter(r *http.Request, ls letterSender, to []string, subject, typed string, links []string, files []cmail.Attachment) ([]byte, error) {
 	if len(links) > 0 {
 		// Before the signature: a mail program greys what follows «-- » and
 		// drops it from a reply.
@@ -806,7 +1014,17 @@ func (s *Server) relayLetter(r *http.Request, ls letterSender, to []string, subj
 		Subject: subject, Text: body, Attachments: files,
 	}, time.Now())
 	if err != nil {
-		return errors.New("The letter could not be written: " + strings.TrimPrefix(err.Error(), "mail: "))
+		return nil, errors.New("The letter could not be written: " + strings.TrimPrefix(err.Error(), "mail: "))
+	}
+	return data, nil
+}
+
+// relayLetter writes a letter and hands it to the relay whole: one
+// recipient refused, it goes to nobody.
+func (s *Server) relayLetter(r *http.Request, ls letterSender, to []string, subject, typed string, links []string, files []cmail.Attachment) error {
+	data, err := s.writeLetter(r, ls, to, subject, typed, links, files)
+	if err != nil {
+		return err
 	}
 	sendCtx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()

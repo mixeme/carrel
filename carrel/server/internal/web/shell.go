@@ -63,8 +63,18 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 				Body:  text("An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars. This is not backup."),
 			}}
 		}
+		if said := sess.Draft(session.DraftPageNotice); said != nil {
+			sess.SetDraft(session.DraftPageNotice, nil)
+			sh.Notices = append(sh.Notices, view.Notice{Role: view.NoticeAccent, Body: text(string(said))})
+		}
 	}
 	return sh
+}
+
+// sayOnNextPage is a line the next page shows once, over its content: what
+// a sheet that closed did (s-mail-16).
+func sayOnNextPage(sess *session.Session, said string) {
+	sess.SetDraft(session.DraftPageNotice, []byte(said))
 }
 
 // aboutAction is the rail's last line: the name, and the build behind it when

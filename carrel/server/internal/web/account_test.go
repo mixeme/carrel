@@ -114,9 +114,9 @@ func TestLetterSaysWhereRepliesGo(t *testing.T) {
 	if got := saidRuns(sheet.ReplyNote); got != "Signed ⟨strong:Боб⟩ · replies go to bob@example.org" {
 		t.Errorf("signature = %q, the frame %q", got, framePieces(foot[1]))
 	}
-	// Under To, how many and that all see all — no ceilings: the frame draws
-	// none there (s-mail-1, С18).
-	if got := letterHint(sheet); !strings.HasSuffix(got, " recipients. Everyone sees the whole list.") || strings.Contains(got, "left today") {
+	// Under To, how many at most and that all see all — no letters of the
+	// day: the frame draws none there (s-mail-1, С18; note 140 p. 5).
+	if got := letterHint(sheet); !strings.HasPrefix(got, "Up to ") || !strings.HasSuffix(got, " recipients. Each sees the others' addresses.") || strings.Contains(got, "left today") {
 		t.Errorf("the line under To = %q", got)
 	}
 }

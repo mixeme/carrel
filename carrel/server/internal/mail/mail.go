@@ -245,7 +245,7 @@ func Send(ctx context.Context, relay Relay, to []string, data []byte) (string, e
 	if !relay.Configured() {
 		return "", errors.New("mail: SMTP is not configured")
 	}
-	out, err := submit(ctx, relaySubmission(relay), to, data, false)
+	out, err := submit(ctx, relaySubmission(relay), to, func() ([]byte, error) { return data, nil }, false)
 	return out.Reply, err
 }
 
@@ -264,12 +264,13 @@ type Refusal struct {
 // SendEach hands a person's letter to the relay recipient by recipient: one
 // refused is noted with the relay's reply and the letter goes to the rest
 // (s-mail-18). Nobody taken, it does not go: the error is the relay's reply
-// to the last.
-func SendEach(ctx context.Context, relay Relay, to []string, data []byte) (Outcome, error) {
+// to the last. The letter is written once someone is taken: what it makes
+// on the way — links — is not made for a letter that does not go (s-mail-17).
+func SendEach(ctx context.Context, relay Relay, to []string, letter func() ([]byte, error)) (Outcome, error) {
 	if !relay.Configured() {
 		return Outcome{}, errors.New("mail: SMTP is not configured")
 	}
-	return submit(ctx, relaySubmission(relay), to, data, true)
+	return submit(ctx, relaySubmission(relay), to, letter, true)
 }
 
 func relaySubmission(relay Relay) submission {
@@ -306,7 +307,7 @@ type submission struct {
 
 // submit sends the letter over one session; each — a recipient refused is
 // noted, not the end of it.
-func submit(ctx context.Context, sub submission, to []string, data []byte, each bool) (out Outcome, err error) {
+func submit(ctx context.Context, sub submission, to []string, letter func() ([]byte, error), each bool) (out Outcome, err error) {
 	addr := net.JoinHostPort(sub.host, strconv.Itoa(sub.port))
 	d := net.Dialer{Timeout: 15 * time.Second}
 	var conn net.Conn
@@ -364,6 +365,12 @@ func submit(ctx context.Context, sub submission, to []string, data []byte, each 
 	}
 	if taken == 0 {
 		return out, last
+	}
+	data, err := letter()
+	if err != nil {
+		_ = c.Reset()
+		_ = c.Quit()
+		return Outcome{}, err
 	}
 	w, err := c.Data()
 	if err != nil {

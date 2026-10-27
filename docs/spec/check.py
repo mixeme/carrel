@@ -230,6 +230,11 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-mail-attach": "/app/mail/attach",
     "app-mail-compose": "/app/mail/compose",
     "app-mail-link": "/app/mail/link",
+    # Ответы отправки письма (записки Typecase 137, 139, 140): просмотр и
+    # вопрос перед закрытием — фрагменты без адреса, итог — часть partly.
+    "app-mail-preview": "/app/mail/send",
+    "app-mail-close": "/app/mail/send",
+    "app-mail-sent": "/app/mail/send",
     "app-search": "/app/search",
     "app-files": "/app/files",
     # Папка: data-screen кадра s-files-1 — маршрут C-5 с {path…} (Typecase
@@ -309,6 +314,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 SHEETS = {"app-search-suggest", "app-contact-move", "app-quick", "app-export", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose", "app-mail-link", "app-mail-attach",
+          "app-mail-preview", "app-mail-close", "app-mail-sent",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
           "app-settings-escrow-deposit", "app-settings-escrow-withdraw", "app-record-delete",
           "admin-reset", "admin-delete", "app-settings-backup-trigger", "app-settings-connections-disconnect",
@@ -621,6 +627,14 @@ STATE_FRAME = {
     # «Send this link» (записка 105): лист над Published links, кадр без
     # data-screen.
     "app-mail-link/normal": "s-mail-4",
+    # После Send и около него (записки Typecase 137, 139, 140): просмотр,
+    # вопрос перед закрытием, отказ релея, итог «ушло не всем». Строки
+    # страницы под закрывшимся письмом (s-mail-16) фикстурой нет: рейл кадра
+    # не из набора (to-typecase.md, задача 241).
+    "app-mail-preview/normal": "s-mail-14",
+    "app-mail-close/normal": "s-mail-15",
+    "app-mail-compose/refused": "s-mail-17",
+    "app-mail-sent/normal": "s-mail-18",
     # Листы вложения (пакет 4 скана publish-mail, С30): у каждого кадра
     # data-part, канонического нет; normal — лист контакта, контакт выбран.
     "app-mail-attach/normal": "s-mail-12",

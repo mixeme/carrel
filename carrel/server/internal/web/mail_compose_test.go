@@ -75,6 +75,22 @@ func letterHint(sheet view.MailSheet) string {
 	return ""
 }
 
+// letterToValues are the addresses of the recipients, as the form sends them.
+func letterToValues(sheet view.MailSheet) []string {
+	var out []string
+	for _, o := range letterTo(sheet) {
+		out = append(out, o.Value)
+	}
+	return out
+}
+
+func letterHintRuns(sheet view.MailSheet) view.Runs {
+	if r := formRow(sheet.Form, "to"); r != nil {
+		return r.HintRuns
+	}
+	return nil
+}
+
 // parts are the attachments of a letter by file name.
 func parts(t *testing.T, l mailtest.Letter) (string, map[string]string) {
 	t.Helper()
@@ -153,8 +169,16 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 		t.Fatal("a link was made before the letter went")
 	}
 	rec = f.h.do(postForm(actionHref(t, sheet.Form.Actions, "mail.send"), f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Секретная тема"}, "text": {"Секретный текст"}}))
-	if rec.Code != 303 || !strings.Contains(rec.Header().Get("Location"), "sent=1") {
-		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	if rec.Code != 303 || rec.Header().Get("Location") != "/app/contacts" {
+		t.Fatalf("send: %d %s %s", rec.Code, rec.Header().Get("Location"), rec.Body)
+	}
+	// The sheet closed to the screen under it, which says once that the
+	// letter went (s-mail-16).
+	if page := f.h.do(get("/app/contacts", f.sess)); !strings.Contains(page.Body.String(), "The letter went to 1 recipient.") {
+		t.Error("the screen under the letter does not say it went")
+	}
+	if page := f.h.do(get("/app/contacts", f.sess)); strings.Contains(page.Body.String(), "The letter went to") {
+		t.Error("the line that the letter went stays past the next page")
 	}
 
 	letters := relay.Letters()
@@ -215,8 +239,11 @@ func TestLetterCeilings(t *testing.T) {
 		t.Errorf("three recipients: %q", letterHint(sheet))
 	}
 	relay.Refuse = "nobody@example.org"
-	if sheet := send("nobody@example.org"); !strings.Contains(letterHint(sheet), "did not take") {
-		t.Errorf("refused: %q", letterHint(sheet))
+	// Refused, the letter stays as it was, the relay's words first under To
+	// in alarm (s-mail-17).
+	if sheet := send("nobody@example.org"); !strings.HasPrefix(letterHint(sheet), "The letter did not go: the relay answered «550 no such mailbox».") ||
+		len(letterHintRuns(sheet)) != 2 || letterHintRuns(sheet)[0].Mark != view.RunDanger {
+		t.Errorf("refused: %q %+v", letterHint(sheet), letterHintRuns(sheet))
 	}
 	if sheet := send("a@example.org"); letterHint(sheet) != "" {
 		t.Fatalf("the refused letter was counted: %q", letterHint(sheet))
@@ -428,5 +455,108 @@ func TestLetterLinksGiveWhatThePublishSheetGives(t *testing.T) {
 	}
 	if got := links[0].Target; strings.Join(got.Shows, ",") != "time,title" || !got.NoDownload {
 		t.Errorf("the calendar's link = %+v, want the time and the title, no .ics — as the sheet stands", got)
+	}
+}
+
+// Preview is the letter as the recipients get it, and makes nothing
+// (s-mail-14); Cancel without text closes the letter, with text asks first
+// (s-mail-15): Carrel keeps no drafts.
+func TestLetterPreviewAndClose(t *testing.T) {
+	f, relay := letterFixture(t)
+	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"small.txt"}})
+	attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "dir": {"share"}})
+	typed := url.Values{"to": {"ann@example.org"}, "subject": {"Тема"}, "text": {"Текст"}}
+
+	preview := decode[view.MailPreviewSheet](t, f.h.do(postForm("/app/mail/send?op=preview", f.sess, typed)))
+	if saidRuns(preview.From) != "⟨strong:owner (via Carrel)⟩ ⟨mono:<noreply@carrel.example>⟩" || saidRuns(preview.To) != "ann@example.org" || preview.Subject != "Тема" {
+		t.Errorf("headers: from %q to %q subject %q", saidRuns(preview.From), saidRuns(preview.To), preview.Subject)
+	}
+	if preview.Text != "Текст\n\n-- \nowner" || len(preview.ReplyTo) != 0 || !strings.Contains(string(preview.NoReply), "Do not reply") {
+		t.Errorf("text %q reply %+v no reply %q", preview.Text, preview.ReplyTo, preview.NoReply)
+	}
+	if len(preview.Files) != 1 || preview.Files[0].Name != "small.txt" || len(preview.Links) != 1 ||
+		!strings.HasPrefix(string(preview.Links[0].Title), "share, ") || preview.Links[0].Address != "example.com/p/…" {
+		t.Errorf("files %+v links %+v", preview.Files, preview.Links)
+	}
+	if len(f.h.users.PublishedLinks(f.sess.AccountID())) != 0 || len(relay.Letters()) != 0 {
+		t.Fatal("Preview made a link or sent the letter")
+	}
+
+	closed := decode[view.MailCloseSheet](t, f.h.do(postForm(actionHref(t, preview.Form.Actions, "mail.cancel"), f.sess, url.Values{})))
+	if saidRuns(closed.Warning) != "Carrel keeps no drafts: ⟨strong:closing loses the text⟩." {
+		t.Errorf("warning = %q", saidRuns(closed.Warning))
+	}
+	if keep := decode[view.MailSheet](t, f.h.do(get(actionHref(t, closed.Form.Actions, "mail.keep"), f.sess))); letterValue(keep, "text") != "Текст" || len(keep.Attach) != 2 {
+		t.Errorf("Keep writing lost the letter: %+v", keep)
+	}
+	if rec := f.h.do(postForm(actionHref(t, closed.Form.Actions, "mail.discard"), f.sess, url.Values{})); rec.Code != 303 || rec.Header().Get("Location") != "/app/contacts" {
+		t.Fatalf("discard: %d %s", rec.Code, rec.Header().Get("Location"))
+	}
+	if sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess))); len(sheet.Attach) != 0 || letterValue(sheet, "subject") != "" {
+		t.Errorf("the letter stayed after it was discarded: %+v", sheet)
+	}
+
+	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"small.txt"}})
+	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
+	rec := f.h.do(postForm(actionHref(t, sheet.Form.Actions, "mail.cancel"), f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Тема"}, "text": {" "}}))
+	if rec.Code != 303 || rec.Header().Get("Location") != "/app/contacts" {
+		t.Fatalf("Cancel without text: %d %s", rec.Code, rec.Body)
+	}
+	if sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess))); len(sheet.Attach) != 0 {
+		t.Errorf("the letter stayed after Cancel: %+v", sheet)
+	}
+}
+
+// The relay refusing some (s-mail-18): the letter goes to the rest, the
+// sheet says who got it and who did not with the relay's words, and «Send
+// again to the refused» is the same letter to them, with the links it made.
+// Refusing all (s-mail-17), it makes no link.
+func TestLetterToSomeOfThem(t *testing.T) {
+	f, relay := letterFixture(t)
+	attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "dir": {"share"}})
+	relay.Refuse, relay.RefuseReply = "nobody@example.org", "550 5.1.1 Mailbox unavailable"
+
+	sent := decode[view.MailSentSheet](t, f.h.do(postForm("/app/mail/send", f.sess,
+		url.Values{"to": {"ann@example.org", "nobody@example.org"}, "subject": {"Тема"}, "text": {"Текст"}})))
+	if sent.Notice != "The letter went, but not to everyone. Sending again goes only to the refused." || len(sent.Rows) != 2 ||
+		sent.Rows[0].Said != "sent" || sent.Rows[0].Refused ||
+		sent.Rows[1].Address != "nobody@example.org" || sent.Rows[1].Said != "refused: «550 5.1.1 Mailbox unavailable»" || !sent.Rows[1].Refused {
+		t.Fatalf("sent = %+v", sent)
+	}
+	if letters := relay.Letters(); len(letters) != 1 || strings.Join(letters[0].To, ",") != "ann@example.org" {
+		t.Fatalf("letters = %+v", letters)
+	}
+	links := f.h.users.PublishedLinks(f.sess.AccountID())
+	if len(links) != 1 {
+		t.Fatalf("links = %d", len(links))
+	}
+
+	again := decode[view.MailSheet](t, f.h.do(get(actionHref(t, sent.Actions, "mail.again"), f.sess)))
+	if to := letterTo(again); len(to) != 1 || to[0].Value != "nobody@example.org" || letterValue(again, "subject") != "Тема" || len(again.Attach) != 1 {
+		t.Fatalf("again = %+v", again)
+	}
+	relay.Refuse = ""
+	if rec := f.h.do(postForm("/app/mail/send", f.sess, url.Values{"to": {"nobody@example.org"}, "subject": {"Тема"}, "text": {"Текст"}})); rec.Code != 303 {
+		t.Fatalf("again: %d %s", rec.Code, rec.Body)
+	}
+	letters := relay.Letters()
+	_, first, _ := strings.Cut(letters[0].Data, "\r\n\r\n")
+	_, second, _ := strings.Cut(letters[len(letters)-1].Data, "\r\n\r\n")
+	if len(letters) != 2 || len(f.h.users.PublishedLinks(f.sess.AccountID())) != 1 || first != second || !strings.Contains(first, "/p/") {
+		t.Errorf("sent again, the letter differs or made another link:\n%s\n%s", first, second)
+	}
+
+	// Any other way in, it is a new letter.
+	if sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess))); len(sheet.Attach) != 0 {
+		t.Errorf("the letter stayed: %+v", sheet)
+	}
+	attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "dir": {"share"}})
+	relay.Refuse = "nobody@example.org"
+	refused := decode[view.MailSheet](t, f.h.do(postForm("/app/mail/send", f.sess, url.Values{"to": {"nobody@example.org"}, "text": {"x"}})))
+	if !strings.HasPrefix(letterHint(refused), "The letter did not go") || len(refused.Attach) != 1 {
+		t.Errorf("refused = %q %+v", letterHint(refused), refused.Attach)
+	}
+	if n := len(f.h.users.PublishedLinks(f.sess.AccountID())); n != 1 {
+		t.Errorf("a letter that did not go made a link: %d", n)
 	}
 }

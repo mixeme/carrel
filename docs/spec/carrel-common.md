@@ -382,9 +382,9 @@ spec/fixtures/<screen>/<state>.json
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage`; `group=` — группа, `into=` — место оставляемой в группе (`Keep … instead`), `choice.<свойство>=` — номер варианта ответа (`MergeRow.Name`); `pick.<свойство>=` — место в группе записи, выбранной на карточке (`do=merge`), поверх ответов связанной группы; POST — ещё `v.<место>=` — версия каждой записи, показанная GET: изменившаяся с тех пор не сливается |
 | `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; `{kind}` — четыре рода и `files`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
 | `/app/publish` | GET, POST | вход | лист | `PublishSheet`; у контакта и книги (s-publish-3) форма несёт набор «What the visitor sees» — отметки `name` (стоит; снятая — гость получает одно имя, без организации и должности), `phones`, `emails`, `photo`, `note` — и `download` («Allow .vcf download and subscription»), все, кроме первой, сняты; `lives` — 7 дней, у папки (s-publish-5) — 14, у прочего 30; POST без `lives` даёт срок, на котором лист его рода стоит. POST без отметок публикует имя с организацией и без файла: снять `name` может только POST листа — тот, что несёт `lives`. У календаря, события, списка задач и задачи (s-publish-2, -19) — набор «What the visitor sees»: `time` (стоит, только для чтения), `title` (стоит; снятая — запись видна как «Busy»), `location`, `description`, `attendees`, `attachments`, `tags` (сняты); `download` («Allow .ics download and subscription»; снята, как у всякого рода — решение владельца 23.10.2026: файл и подписка — только отмеченные); у календаря целиком ещё `how` — `range` (дни `from`, `to`, оба в нём) или `whole`: дни стоят при обоих и открываются с сегодняшнего до последнего дня месяца, `whole` их выключает (`Option.Disables`) и при нём сервер их не читает; `range` без одного из дней — тот же лист и «Give both days, or choose The whole calendar.» под пустым полем; POST без отметок у календарных родов даёт время и название. Цели: `k` (род), `a`, `c`, у записи `uid`; файлы и папки — `k=files`, `f` (путь в коллекции), у папки `dir=1`. Лист стоит над страницей, откуда открыт (записка Typecase 105): коллекция — над Connections, запись — над своей страницей, файл и папка — над папкой; туда же ведут Cancel и крестик Close готового листа; `back` — иная страница. Ответ POST — тот же лист с готовой ссылкой (s-publish-13): «Send by letter» — `/app/mail/link?id=` (письмо этой ссылки), у бессрочной — «No expiry. …» (s-publish-22). `?op=revoke` (POST, поле `id` — `PublishedRow.ID`; общая форма списка, записка Typecase 110 п. 2) отзывает ссылку списка «Published links» и ведёт на `/app/files/published` |
-| `/app/mail/compose` | GET | вход | лист | `MailSheet` — письмо одной формой (s-mail-1); `back` — страница под письмом и куда ведут Cancel и крестик (иначе `/app/contacts`), письмо помнит её черновиком; `sent=N` — ответ отправки первой фразой под To. Готовая ссылка в письмо не вкладывается (решение владельца 21.10.2026): её шлёт «Send this link», `/app/mail/link` |
+| `/app/mail/compose` | GET | вход | лист | `MailSheet` — письмо одной формой (s-mail-1); `back` — страница под письмом и куда ведут Cancel и крестик (иначе `/app/contacts`), письмо помнит её черновиком; `to=refused` — «Send again to the refused» итога `s-mail-18`: то же письмо с теми же текстом, вложениями и ссылками, в To — только отвергнутые; письмо, ушедшее не всем, открытое иначе, — новое. Готовая ссылка в письмо не вкладывается (решение владельца 21.10.2026): её шлёт «Send this link», `/app/mail/link` |
 | `/app/mail/link` | GET | вход | лист | `MailLinkSheet` — «Send this link» (s-mail-4): `?id=` — ссылка человека (её Send в «Published links», «Send by letter» готовой ссылки), `back` — страница под листом, иначе «Published links»; отозванная или чужая ссылка, экземпляр без почты — 404. Письмо, которое пишется, ждёт черновиком и не меняется |
-| `/app/mail/send` | POST | вход | редирект, лист | `MailLinkSheet` — форма письма. С `id` — письмо одной ссылки: поля `to` (адреса через запятую), `line` («A line from you»); тема — название ссылки, как в списке; уходит та же ссылка, а не новая, и считается в письма дня; ответ — переход на `back` (иначе `/app/files/published`) с `sent=N`, отказ — тот же лист с причиной у `to`; `op=link` («Copy link instead») ничего не шлёт: ответ — готовый лист этой ссылки (`PublishSheet`, s-publish-13: поле «Link» с адресом целиком, Copy, Close на `back`; записка Typecase 110 п. 5). Без `id` — форма письма (`MailSheet.Form`, пакет 3 скана publish-mail): поля `to` (выбранные, адрес каждое), `to.add` («Name or address»), `subject`, `text` едут с каждым нажатием и сохраняются черновиком; без `op` — отправка (набранное в `to.add` сначала становится получателем), ответ — редирект на `/app/mail/compose?sent=N`, отказ — лист с причиной первой фразой под To; `op=add` — Enter в `to.add` без сценария (записка Typecase 110 п. 3): адрес — в получатели, имя одного человека книг с одним адресом — его адрес, иначе лист с подсказками набранного (`Suggest`, `NotAsked`); `op=attach&what=…` — лист вложения; `op=remove&i=N` — убрать вложение; `op=change&i=N` — лист публикации над письмом с условиями ссылки (`/app/publish?…&mail=N`); `op=terms&i=N` — Apply этого листа; `op=discard` — письмо выброшено. Дни календаря сверх предела письма уходят ссылкой на эти дни (решение владельца 21.10.2026) |
+| `/app/mail/send` | POST | вход | редирект, лист | `MailLinkSheet`, `MailSheet`, `MailPreviewSheet`, `MailCloseSheet`, `MailSentSheet` — форма письма. С `id` — письмо одной ссылки: поля `to` (адреса через запятую), `line` («A line from you»); тема — название ссылки, как в списке; уходит та же ссылка, а не новая, и считается в письма дня; ответ — переход на `back` (иначе `/app/files/published`) с `sent=N`, отказ — тот же лист с причиной у `to`; `op=link` («Copy link instead») ничего не шлёт: ответ — готовый лист этой ссылки (`PublishSheet`, s-publish-13: поле «Link» с адресом целиком, Copy, Close на `back`; записка Typecase 110 п. 5). Без `id` — форма письма (`MailSheet.Form`, пакет 3 скана publish-mail): поля `to` (выбранные, адрес каждое), `to.add` («Name or address»), `subject`, `text` едут с каждым нажатием и сохраняются черновиком; без `op` — отправка (набранное в `to.add` сначала становится получателем) адресат за адресатом (записка Typecase 140): релей принял всех — редирект на `back` письма, и экран под ним один раз говорит «The letter went to N recipients.» (`Notices`, `s-mail-16`); не принял никого или письмо не ушло — лист письма как был, причина словами релея первой фразой под To тревогой (`HintRuns`, `s-mail-17`), ссылки вложений не делаются; отверг часть на RCPT TO — лист итога `MailSentSheet` (`s-mail-18`): строка на адресата, «sent» или «refused: ‹слова релея›», «Send again to the refused» (`/app/mail/compose?to=refused`) и Close на `back`; `op=preview` — `MailPreviewSheet`, письмо глазами получателя (`s-mail-14`): ничего не делает и не шлёт; `op=close` — Cancel письма и просмотра (записка Typecase 139): без текста — редирект на `back`, письмо забыто, с текстом — `MailCloseSheet` «Close the letter?» (`s-mail-15`); `op=add` — Enter в `to.add` без сценария (записка Typecase 110 п. 3): адрес — в получатели, имя одного человека книг с одним адресом — его адрес, иначе лист с подсказками набранного (`Suggest`, `NotAsked`); `op=attach&what=…` — лист вложения; `op=remove&i=N` — убрать вложение; `op=change&i=N` — лист публикации над письмом с условиями ссылки (`/app/publish?…&mail=N`); `op=terms&i=N` — Apply этого листа; `op=discard` — «Close and lose the text»: письмо выброшено, редирект на `back`. Дни календаря сверх предела письма уходят ссылкой на эти дни (решение владельца 21.10.2026) |
 | `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` — лист вложения на месте письма (s-mail-5, -6, -10, -12, -13; пакет 4 скана publish-mail): `what` — note, contact, event, task, calendar, book, file, folder; `a`, `c` — коллекция; у записи — `uid`, без коллекции — поиск во всех своих коллекциях рода («All …»), `all=1` — запись выбрана среди всех (отметка «All» держится), `q` — набранное (своя GET-форма `Search`, записка Typecase 110 п. 1); у файла и папки — `dir` (открытая папка от корня хранилища) и `path` (выбранный файл); у календаря — `span` (whole или dates), `from`, `to`; у заметки — `format` (md или ics). POST — Attach: вложить выбранное (из адреса и полей формы листа) и вернуться к письму (`/app/mail/compose`); не вышло — тот же лист, Attach выключен с причиной |
 | `/app/password` | GET, POST | вход | страница | `PasswordPage` |
 
@@ -2456,12 +2456,15 @@ type MailSheet struct {
     // InputSelect с Multiple: выбранные метками, Value — адрес, Label — имя,
     // Meta — адрес после имени, Colour — метка книги, Typed — набранный
     // рукой (один адрес); Add — `to.add` «Name or address» с подсказками
-    // Suggest (`/app/mail/suggest`); Hint — «2 of 10 recipients. Everyone
-    // sees the whole list.», ответ отправки и её отказ — первой фразой там
-    // же; Subject — `subject`; текст — `text` (InputArea). Кнопки формы —
-    // Send (основная, без op), Discard, Cancel — ссылка на back. Курсор — в
-    // поле To, когда лист открыт
+    // Suggest (`/app/mail/suggest`); Hint — «Up to 10 recipients. Each sees
+    // the others' addresses.», что сделало последнее нажатие — первой
+    // фразой там же; письмо не ушло — HintRuns: причина словами релея
+    // тревогой, за ней та же строка (s-mail-17); Subject — `subject`; текст
+    // — `text` (InputArea). Кнопки формы — Send (основная, без op, Ctrl+Enter),
+    // Preview (`?op=preview`), Cancel — отправка формы `?op=close` (Esc).
+    // Курсор — в поле To, когда лист открыт
     Form       Form
+    Back       string // куда ведёт крестик: страница под письмом
     Suggest    []Recipient // без сценариев: адреса людей по набранному в to.add, которое не адрес (op=add)
     From       Text   // с какого адреса уйдёт — видно до отправки: шапка «from mix@carrel.example» (s-mail-1)
     FromName   Text   // имя, каким его увидит получатель: «Михаил Енученко», через общий релей — «… (via Carrel)»
@@ -2490,6 +2493,43 @@ type MailAttachRow struct {
     Change *Action
     Remove Action
 }
+
+// «Preview · as the recipients get it» (s-mail-14; записка Typecase 137):
+// ответ `op=preview`, письмо, каким его получат. Черновик у сервера: форма
+// несёт только csrf. From, ReplyTo, To — заголовки кусками: имя (у From
+// жирным) и адрес в угловых скобках моноширинно; ReplyTo пуст — заголовка
+// нет, и NoReply — строка, которой письмо закончится. Text — текст с
+// подписью после строки «-- » (RFC 3676), как он уйдёт. Links — что уйдёт
+// ссылкой: ссылки делаются, когда письмо уходит, и адрес — где она будет
+// («carrel.example/p/…»). Кнопки — Send (основная, Enter), Edit — ссылка
+// на письмо с набранным, Cancel — `?op=close` (Esc).
+type MailPreviewSheet struct {
+    From, ReplyTo, To Runs
+    Subject, Text     Text
+    Files             []MailPreviewFile
+    Links             []MailPreviewLink
+    NoReply           Text
+    Form              Form
+    Under             *Under
+}
+type MailPreviewFile struct { Name Text; Kind Kind }     // имя файла, каким он уйдёт, и род — по нему значок
+type MailPreviewLink struct { Title Text; Address Text } // как его назовёт письмо, и где будет ссылка
+
+// «Close the letter?» (s-mail-15; записка Typecase 139): ответ `op=close`
+// письма с набранным текстом. Warning — «Carrel keeps no drafts: **closing
+// loses the text**.»; From — адрес в шапке. Form — POST `?op=discard`:
+// «Close and lose the text» (тревожная) и «Keep writing» (основная, ссылка
+// на письмо, Esc).
+type MailCloseSheet struct { From Text; Warning Runs; Form Form; Under *Under }
+
+// Итог письма, которое ушло не всем (s-mail-18; записка Typecase 140):
+// Notice — плашка «The letter went, but not to everyone. Sending again goes
+// only to the refused.»; строка на адресата — имя и метка, если книга его
+// знает, адрес, Said — «sent» или «refused: «‹слова релея›»» (Refused —
+// тревогой). Actions — «Send again to the refused» (основная, Enter) и
+// Close на back (Esc).
+type MailSentSheet struct { From Text; Notice Text; Rows []MailSentRow; Actions []Action; Under *Under }
+type MailSentRow struct { Name, Address Text; Colour Colour; Said Text; Refused bool }
 
 // «Send this link» (s-mail-4; решение владельца 21.10.2026): письмо одной
 // выданной ссылки, отдельно от письма, которое пишется, — готовая ссылка в

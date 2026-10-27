@@ -916,12 +916,16 @@ type MailSheet struct {
 	// скана publish-mail): POST /app/mail/send; строки — To (to: выбранные
 	// метками, InputSelect с Multiple, значение — адрес, Label — имя, Meta —
 	// адрес после имени, Colour — метка книги, Typed — набранное рукой; Add
-	// — строка to.add «Name or address» с подсказками Suggest; Hint — «2 of
-	// 10 recipients. Everyone sees the whole list.», ответ после отправки и
-	// её отказ — первой фразой там же), Subject (subject), текст (text);
-	// кнопки — Send (основная, без op), Discard, Cancel — ссылка туда,
-	// откуда письмо открыто
+	// — строка to.add «Name or address» с подсказками Suggest; Hint — «Up to
+	// 10 recipients. Each sees the others' addresses.», что сделало
+	// последнее нажатие — первой фразой там же; письмо не ушло — HintRuns:
+	// причина словами релея тревогой первой фразой, за ней обычная строка,
+	// s-mail-17), Subject (subject), текст (text); кнопки — Send (основная,
+	// без op), Preview (?op=preview), Cancel — отправка формы ?op=close:
+	// без текста лист закрывается, с текстом — MailCloseSheet (s-mail-15)
 	Form Form `json:"form"`
+	// Back — куда ведёт крестик: страница, откуда письмо открыто
+	Back string `json:"back"`
 	// Suggest, NotAsked — без сценариев: что нашлось по набранному в to.add,
 	// которое не адрес (op=add), строка на адрес; книги, которые не
 	// ответили, названы прямо
@@ -950,6 +954,81 @@ type MailSheet struct {
 	// «Контакты»); nil у фрагмента
 	Under *Under `json:"under"`
 }
+
+// MailPreviewSheet — «Preview · as the recipients get it» (s-mail-14): ответ
+// Preview листа письма (POST /app/mail/send?op=preview), письмо, каким его
+// получат. Черновик у сервера: форма несёт только csrf.
+type MailPreviewSheet struct {
+	// From, ReplyTo, To — заголовки кусками: имя (у From жирным) и адрес в
+	// угловых скобках моноширинно, адресаты через запятую; набранный рукой
+	// адресат — один адрес. ReplyTo пуст — заголовка нет, и письмо скажет
+	// это строкой NoReply
+	From    Runs `json:"from"`
+	ReplyTo Runs `json:"replyTo"`
+	To      Runs `json:"to"`
+	Subject Text `json:"subject"`
+	// Text — текст с подписью после строки «-- », как он уйдёт
+	Text  Text              `json:"text"`
+	Files []MailPreviewFile `json:"files"`
+	// Links — что уйдёт ссылкой, строка на ссылку; адреса ещё нет —
+	// ссылки делаются, когда письмо уходит, — и Address говорит, где она
+	// будет: «carrel.example/p/…»
+	Links   []MailPreviewLink `json:"links"`
+	NoReply Text              `json:"noReply,omitempty"`
+	// Form — POST /app/mail/send: Send (основная), Edit — ссылка на лист
+	// письма с набранным, Cancel — ссылка туда, откуда письмо открыто
+	Form  Form   `json:"form"`
+	Under *Under `json:"under"`
+}
+
+// MailPreviewFile — вложение письма в просмотре: имя файла, каким оно
+// уйдёт, и вид — по нему значок.
+type MailPreviewFile struct {
+	Name Text `json:"name"`
+	Kind Kind `json:"kind"`
+}
+
+// MailPreviewLink — то, что уйдёт ссылкой: название, как в письме, и адрес.
+type MailPreviewLink struct {
+	Title   Text `json:"title"`
+	Address Text `json:"address"`
+}
+
+// MailCloseSheet — «Close the letter?» (s-mail-15): ответ Cancel письма с
+// набранным текстом. Черновиков Carrel не держит: закрыть — потерять текст.
+type MailCloseSheet struct {
+	From    Text `json:"from"`    // с какого адреса письмо, в шапке
+	Warning Runs `json:"warning"` // «Carrel keeps no drafts: **closing loses the text**.»
+	// Form — POST /app/mail/send?op=discard: «Close and lose the text»
+	// (тревожная, отправляет форму) и «Keep writing» (основная, ссылка на
+	// лист письма, Esc)
+	Form  Form   `json:"form"`
+	Under *Under `json:"under"`
+}
+
+// MailSentSheet — итог письма, которое ушло не всем (s-mail-18): релей
+// отверг часть адресов на RCPT TO.
+type MailSentSheet struct {
+	From   Text          `json:"from"`
+	Notice Text          `json:"notice"` // плашка тревоги: ушло не всем, и что сделает повтор
+	Rows   []MailSentRow `json:"rows"`
+	// Actions — «Send again to the refused» (основная, ссылка на письмо с
+	// теми же текстом и вложениями и отвергнутыми в To) и Close — ссылка
+	// туда, откуда письмо открыто
+	Actions []Action `json:"actions"`
+	Under   *Under   `json:"under"`
+}
+
+// MailSentRow — адресат в итоге: имя, если книга его знает, адрес, метка
+// книги и что с ним стало — «sent» или «refused: ‹слова релея›» (Refused).
+type MailSentRow struct {
+	Name    Text   `json:"name"`
+	Address Text   `json:"address"`
+	Colour  Colour `json:"colour,omitempty"`
+	Said    Text   `json:"said"`
+	Refused bool   `json:"refused"`
+}
+
 type Recipient struct {
 	Address Text   `json:"address"`
 	Label   Text   `json:"label"`

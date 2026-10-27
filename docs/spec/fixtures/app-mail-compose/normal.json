@@ -165,6 +165,7 @@
       "title": "carrel · 1 folder"
     }
   ],
+  "back": "/app/contacts?task=t-task",
   "form": {
     "action": "/app/mail/send",
     "actions": [
@@ -192,21 +193,13 @@
       },
       {
         "csrf": "csrf",
-        "danger": true,
         "enabled": true,
-        "href": "/app/mail/send?op=discard",
-        "id": "mail.discard",
-        "label": "Discard",
+        "href": "/app/mail/send?op=close",
+        "id": "mail.cancel",
+        "label": "Cancel",
         "method": "POST",
         "submits": true,
         "target": "sheet"
-      },
-      {
-        "enabled": true,
-        "href": "/app/contacts?task=t-task",
-        "id": "mail.cancel",
-        "label": "Cancel",
-        "method": "GET"
       }
     ],
     "errors": [],
@@ -245,7 +238,7 @@
             },
             "error": "",
             "extra": null,
-            "hint": "2 of 20 recipients. Everyone sees the whole list.",
+            "hint": "Up to 20 recipients. Each sees the others' addresses.",
             "kind": "select",
             "label": "To",
             "multiple": true,

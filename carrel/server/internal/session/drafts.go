@@ -55,6 +55,9 @@ const (
 	// (s-backup-18): the report's step shows it until another archive is
 	// opened.
 	DraftRestoreReport
+	// DraftPageNotice is a line the next page says once (s-mail-16: «The
+	// letter went to 2 recipients.» over the screen the letter closed to).
+	DraftPageNotice
 	numDraftSlots
 )
 

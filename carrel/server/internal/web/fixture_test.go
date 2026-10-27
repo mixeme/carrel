@@ -29,6 +29,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/internal/dupes"
+	"carrel.dev/carrel/server/internal/mail/mailtest"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
@@ -3702,6 +3703,42 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		attach(url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel/attachments"}, "path": {"carrel/attachments/смета-подрядчик.pdf"}})
 		attach(url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel"}})
 		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
+
+		typed := url.Values{"to": recipients(), "subject": {"Договор подряда и смета"}, "text": {"Пётр, ниже — договор и смета, которые мы обсуждали."}}
+		// The letter as the recipients get it (s-mail-14), and Cancel of a
+		// letter with text (s-mail-15).
+		app.compare(t, "app-mail-preview/normal.json", app.h.do(postForm("/app/mail/send?op=preview", app.sess, typed)))
+		app.compare(t, "app-mail-close/normal.json", app.h.do(postForm("/app/mail/send?op=close", app.sess, typed)))
+
+		// The relay of the set, in memory, as the instance has it: the
+		// letter goes from the person's login.
+		relay := mailtest.New(t)
+		if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+			st.Settings.SMTP.Host, st.Settings.SMTP.Port = relay.Host, relay.Port
+			return nil, nil
+		}); err != nil {
+			t.Fatal(err)
+		}
+		// The relay takes no letter now (s-mail-17): the letter as it was,
+		// its words first under To.
+		relay.Defer = "451 4.7.0 Try again later"
+		app.compare(t, "app-mail-compose/refused.json", app.h.do(postForm("/app/mail/send", app.sess, typed)))
+		// It refuses one of the two (s-mail-18).
+		relay.Defer, relay.Refuse, relay.RefuseReply = "", "a.belov@example.org", "550 5.1.1 Mailbox unavailable"
+		sent := app.h.do(postForm("/app/mail/send", app.sess, typed))
+		app.compare(t, "app-mail-sent/normal.json", sent)
+		// Sent again to him, it goes: the letter closes to the book, which
+		// says so once (s-mail-16). No fixture: the frame's rail is not the
+		// set's (to-typecase.md, task 241).
+		relay.Refuse = ""
+		again := decode[view.MailSheet](t, app.h.do(get(actionHref(t, decode[view.MailSentSheet](t, sent).Actions, "mail.again"), app.sess)))
+		if rec := app.h.do(postForm("/app/mail/send", app.sess, url.Values{"to": letterToValues(again), "subject": {letterValue(again, "subject")}, "text": {letterValue(again, "text")}})); rec.Code != 303 {
+			t.Fatalf("sent again: %d %s", rec.Code, rec.Body.String())
+		}
+		page := decode[view.ContactsListPage](t, app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess)))
+		if len(page.Notices) != 1 || page.Notices[0].Role != view.NoticeAccent || page.Notices[0].Body != "The letter went to 1 recipient." {
+			t.Errorf("notices = %+v", page.Notices)
+		}
 	})
 	t.Run("app-mail-attach", func(t *testing.T) {
 		// The attach sheets (С30): each frame its own state, a sheet of what

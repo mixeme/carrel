@@ -141,19 +141,27 @@ func TestSendEach(t *testing.T) {
 	s.Refuse, s.RefuseReply = "b@example.org", "550 5.1.1 Mailbox unavailable"
 	r := relay(s)
 	to := []string{"a@example.org", "b@example.org"}
-	data, _ := cmail.Build(r, cmail.Message{To: to, Subject: "x", Text: "x"}, time.Now())
-	out, err := cmail.SendEach(context.Background(), r, to, data)
+	written := 0
+	letter := func() ([]byte, error) {
+		written++
+		return cmail.Build(r, cmail.Message{To: to, Subject: "x", Text: "x"}, time.Now())
+	}
+	out, err := cmail.SendEach(context.Background(), r, to, letter)
 	if err != nil || len(out.Refused) != 1 || out.Refused[0] != (cmail.Refusal{Address: "b@example.org", Reply: "550 5.1.1 Mailbox unavailable"}) {
 		t.Fatalf("outcome %+v, %v", out, err)
 	}
 	if got := s.Letters(); len(got) != 1 || len(got[0].To) != 1 || got[0].To[0] != "a@example.org" {
 		t.Errorf("letters = %+v", got)
 	}
-	if out, err := cmail.SendEach(context.Background(), r, []string{"b@example.org"}, data); err == nil || cmail.Reply(err) != "550 5.1.1 Mailbox unavailable" || len(out.Refused) != 1 {
+	if out, err := cmail.SendEach(context.Background(), r, []string{"b@example.org"}, letter); err == nil || cmail.Reply(err) != "550 5.1.1 Mailbox unavailable" || len(out.Refused) != 1 {
 		t.Errorf("all refused: %+v, %v", out, err)
 	}
+	if written != 1 {
+		t.Errorf("the letter was written %d times: nobody taken, it is not written", written)
+	}
+	data, _ := letter()
 	s.Defer = "451 4.7.0 Try again later"
-	if _, err := cmail.SendEach(context.Background(), r, to, data); err == nil || cmail.Reply(err) != "451 4.7.0 Try again later" {
+	if _, err := cmail.SendEach(context.Background(), r, to, func() ([]byte, error) { return data, nil }); err == nil || cmail.Reply(err) != "451 4.7.0 Try again later" {
 		t.Errorf("deferred: %v", err)
 	}
 	if n := len(s.Letters()); n != 1 {

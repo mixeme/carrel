@@ -104,7 +104,7 @@ func TestInstanceSettingsAreEdited(t *testing.T) {
 		t.Fatalf("limits: %d %s", rec.Code, rec.Body)
 	}
 	sheet := decode[view.MailSheet](t, h.do(get("/app/mail/compose", alice)))
-	if !strings.HasPrefix(letterHint(sheet), "0 of 5 recipients.") {
+	if !strings.HasPrefix(letterHint(sheet), "Up to 5 recipients.") {
 		t.Errorf("the line under To = %q", letterHint(sheet))
 	}
 	if h.users.Settings().Name != "Контора" {
