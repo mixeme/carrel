@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.375 — 2026-10-27
+
+The days of a series a server did not keep are said as days outside the
+edit too (Typecase's Р-60, states-36).
+
+### Changed
+
+- **What a write lost, outside the edit**: a move of a record or of a
+  collection, a copy with a UID of its own, a merge, an import and a
+  rewrite of an address name the days of a series a server dropped as
+  «one day of the series», «two days of the series» — the count the
+  edit's message gives — and no longer as `EXDATE` and `RECURRENCE-ID`.
+  Other properties are named as before: «The server of Team did not keep
+  VALARM, one day of the series.».
+
+### For consumers
+
+Nothing to change: the words are in `Notice.Body`, `Notice.Details`, the
+import report's `Losts` and its rows, as before.
+
 ## v0.2.374 — 2026-10-27
 
 Typecase's notes 137, 139 and 140 (Typecase `2c6b5c8`): a letter's
