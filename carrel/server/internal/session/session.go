@@ -43,7 +43,7 @@ type Session struct {
 	transfers  []Transfer
 	unlockAt   time.Time
 	readings   map[string]Reading               // by connection and collection path (S-22)
-	ticks      map[string]time.Time             // tasks marked done, by collection and UID (ticks.go)
+	ticks      map[string]tick                  // tasks marked done, by collection and UID (ticks.go)
 	refusals   map[string]bool                  // what a server refused in a collection (refusals.go)
 	checks     map[string]*view.DiagnosticTrace // last check of each connection (C-6)
 	agent      string                           // the browser, as the account page names it

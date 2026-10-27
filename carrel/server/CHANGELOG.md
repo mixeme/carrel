@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.376 — 2026-10-27
+
+The full tick of a task just marked done in the combined list takes the
+mark off again (Р-42).
+
+### Fixed
+
+- **Mark not done on a task just marked done**: in the list answered from
+  the poll, the row of a task just marked done kept the version read before
+  the mark in its tick and its menu, so Mark not done, and Delete, went to
+  the conflict page. Both carry the version the mark wrote now; the mark
+  taken off, the row is open again, its tick marking it done.
+
+### For consumers
+
+Nothing to change: `TaskRow.Tick.Href` and the row menu carry the newer
+`etag=` as before.
+
 ## v0.2.375 — 2026-10-27
 
 The days of a series a server did not keep are said as days outside the

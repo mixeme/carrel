@@ -3702,7 +3702,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		}
 	}
 	sent.ETag = etag
-	err = c.update(r.Context(), sent)
+	wrote, err := c.updated(r.Context(), sent)
 	if err != nil {
 		s.takeBack(r.Context(), c, made)
 	}
@@ -3727,9 +3727,19 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	}
 	// A task marked done stays where it was in a list answered from what
 	// the session read before (Р-42): kept, until the collection is read
-	// again.
-	if markDone && c.spec.kind == view.KindTask && !wasDone && taskDone(sent) {
-		c.sess.NoteTicked(c.conn.ID, c.col.Path, uid, s.now())
+	// again; the mark taken off, it is open there again.
+	if markDone && c.spec.kind == view.KindTask {
+		switch {
+		case !wasDone && taskDone(sent):
+			if wrote == "" {
+				if got, err := c.find(r.Context(), uid); err == nil {
+					wrote = got.ETag
+				}
+			}
+			c.sess.NoteTicked(c.conn.ID, c.col.Path, uid, wrote, s.now())
+		case !taskDone(sent):
+			c.sess.ForgetTicked(c.conn.ID, c.col.Path, uid)
+		}
 	}
 	// A task that became done closes its open subtasks with it (the owner's
 	// decision of 12.10.2026, А9 of the audit of 11.10.2026): nobody is

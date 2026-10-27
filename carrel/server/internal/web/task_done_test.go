@@ -124,3 +124,40 @@ func TestATaskJustMarkedDoneStaysWhereItStood(t *testing.T) {
 		t.Errorf("a list read anew still shows Slides among the open: %+v", fresh.Groups)
 	}
 }
+
+// Р-42: the full tick of a task just marked done takes the mark off again —
+// it carries the version the mark wrote, not the one the poll read, so it is
+// written and not sent to the conflict —, and the row is open once more.
+func TestTheTickTakesTheMarkOffAgain(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nEND:VTODO"))
+	tickAll(t, f.h, f.sess)
+	page := combined(t, f.h, f.sess, "/app/tasks", tasksPoll)
+	slides := func(p view.TasksPage) view.TaskRow {
+		t.Helper()
+		for _, g := range p.Groups {
+			for _, r := range g.Rows {
+				if string(r.Summary) == "Slides" && r.Tick != nil {
+					return r
+				}
+			}
+		}
+		t.Fatalf("no Slides with a tick: %+v", p.Groups)
+		return view.TaskRow{}
+	}
+	if resp := f.h.do(postHref(f, slides(page).Tick.Href)); resp.Code != 303 {
+		t.Fatalf("Mark done: %d %s", resp.Code, resp.Body.String())
+	}
+	again := decode[view.TasksPage](t, f.h.do(get("/app/tasks?task="+page.Poll.TaskID, f.sess)))
+	resp := f.h.do(postHref(f, slides(again).Tick.Href))
+	if resp.Code != 303 || strings.HasSuffix(resp.Header().Get("Location"), "/conflict") {
+		t.Fatalf("Mark not done: %d → %q, want it written", resp.Code, resp.Header().Get("Location"))
+	}
+	back := slides(decode[view.TasksPage](t, f.h.do(get("/app/tasks?task="+page.Poll.TaskID, f.sess))))
+	if back.Done || back.Tick.Label != "Mark done" {
+		t.Errorf("Slides after the mark taken off = %+v, want it open, its tick marking it done", back)
+	}
+	if got := body(t, f, "t1.ics"); strings.Contains(got, "STATUS:COMPLETED") {
+		t.Errorf("the server still holds Slides done:\n%s", got)
+	}
+}

@@ -320,13 +320,17 @@ func (c *collectionCtx) fetch(ctx context.Context, path string) (*model.Object, 
 }
 
 func (c *collectionCtx) update(ctx context.Context, obj *model.Object) error {
-	var err error
-	if c.card != nil {
-		_, err = c.card.Update(ctx, obj)
-	} else {
-		_, err = c.cal.Update(ctx, obj)
-	}
+	_, err := c.updated(ctx, obj)
 	return err
+}
+
+// updated is update with the version the server gave the record — "" when
+// it gave none.
+func (c *collectionCtx) updated(ctx context.Context, obj *model.Object) (string, error) {
+	if c.card != nil {
+		return c.card.Update(ctx, obj)
+	}
+	return c.cal.Update(ctx, obj)
 }
 
 func (c *collectionCtx) create(ctx context.Context, path string, obj *model.Object) error {
@@ -1782,7 +1786,13 @@ func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, item
 		o := it.obj
 		uid := cal.UID(o)
 		isDone := taskDone(o)
-		ticked := !isDone && sess != nil && sess.TickedSinceRead(it.from.conn.ID, it.from.col.Path, uid)
+		var ticked bool
+		etag := o.ETag
+		if !isDone && sess != nil {
+			if wrote, ok := sess.TickedSinceRead(it.from.conn.ID, it.from.col.Path, uid); ok {
+				ticked, etag = true, wrote
+			}
+		}
 		if isDone {
 			done++
 		} else {
@@ -1814,7 +1824,7 @@ func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, item
 				row.Stamp = sourcesCount(it)
 			}
 		}
-		row.Menu = s.recordOps(it.from, recordKinds[segment], uid, o.ETag).rowMenu()
+		row.Menu = s.recordOps(it.from, recordKinds[segment], uid, etag).rowMenu()
 		if !it.from.col.ReadOnly && !it.from.conn.Feed {
 			// The box of the row is its own control, not an item of the
 			// menu (components-3).
@@ -1822,7 +1832,7 @@ func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, item
 			if mark {
 				from = "all"
 			}
-			tick := s.doneAction(it.from.recordPath(segment, uid)+"/edit", o.ETag, isDone || ticked, from)
+			tick := s.doneAction(it.from.recordPath(segment, uid)+"/edit", etag, isDone || ticked, from)
 			if len(it.also) > 0 && !isDone && !ticked {
 				// One row for every copy: its tick asks which copy is done
 				// (s-tasks-16).
