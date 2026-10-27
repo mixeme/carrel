@@ -40,20 +40,6 @@
       "label": "SEQUENCE",
       "mono": true,
       "value": "1"
-    },
-    {
-      "from": null,
-      "href": "",
-      "label": "X-APPLE-SORT-ORDER",
-      "mono": true,
-      "value": "712"
-    },
-    {
-      "from": null,
-      "href": "",
-      "label": "X-OC-HIDESUBTASKS",
-      "mono": true,
-      "value": "0"
     }
   ],
   "form": {
@@ -676,7 +662,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "дом"
           },
           {
             "add": null,
@@ -711,7 +697,7 @@
             },
             "error": "",
             "extra": null,
-            "hint": "A record that is not loaded here: its UID.",
+            "hint": "",
             "kind": "select",
             "label": "Related to",
             "mono": true,
@@ -719,9 +705,88 @@
             "name": "related",
             "options": [
               {
-                "label": "1d55-90fe-3c27",
+                "colour": "#3f6e8c",
+                "label": "Дописать раздел про кэш",
+                "meta": "task · 14 Aug",
+                "selected": false,
+                "value": "bb21-0fa8-3d66"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Собрать чемодан",
+                "meta": "task · 12 Aug",
+                "selected": false,
+                "value": "aa11-2d09-5f84"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Забрать документы",
+                "meta": "event · 11 Aug",
                 "selected": true,
                 "value": "1d55-90fe-3c27"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Ревью архитектуры",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "9c27-0e5d-4412"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Созвон с подрядчиком",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "7ae3-1c48-55b0"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Синк-ап по релизу",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "8f1c-4a02-b7d3"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "2f04-8b71-e39a"
+              },
+              {
+                "colour": "#8c6239",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "5e90-33c1-a8d2"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Ответить подрядчику по смете",
+                "meta": "task · 8 Aug",
+                "selected": false,
+                "value": "bb20-4c17-8a52"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Согласовать обложку",
+                "meta": "task · 4 Aug",
+                "selected": false,
+                "value": "bb22-6e1a-0c44"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Продлить страховку",
+                "meta": "task",
+                "selected": false,
+                "value": "aa12-9e44-c703"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Прочитать договор аренды",
+                "meta": "task",
+                "selected": false,
+                "value": "aa13-5b2e-71c0"
               },
               {
                 "hint": "By UID: a record that is not among the loaded ones.",
@@ -906,7 +971,8 @@
     "days": null,
     "note": "Other clients will not see them either:",
     "properties": [
-      "CATEGORIES"
+      "X-APPLE-SORT-ORDER",
+      "X-OC-HIDESUBTASKS"
     ],
     "title": "The change was saved, but the server did not keep these properties."
   },
@@ -948,7 +1014,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/dela",
@@ -960,7 +1026,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",
@@ -979,10 +1045,10 @@
     "ticks": null
   },
   "source": {
-    "changed": "",
+    "changed": "10 August 2026, 17:04",
     "colour": "#4a6b52",
     "compared": "changed on server just now",
-    "lastRead": "",
+    "lastRead": "2 min ago",
     "objects": null,
     "path": "/alice/calendars/dela/aa10-77bc-0e31.ics",
     "readOnly": false,
@@ -1076,7 +1142,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

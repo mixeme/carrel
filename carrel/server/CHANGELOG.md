@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.380 — 2026-10-28
+
+The loss fixtures of an event and a task taken as their frames draw them
+(U-5.5 row 35 of the client).
+
+### For consumers
+
+Nothing in the running server. `app-task-edit/loss` is the state of
+states-24: the server dropped `X-APPLE-SORT-ORDER` and `X-OC-HIDESUBTASKS`
+(was `CATEGORIES`), so Tags keeps «дом». `app-task-edit/loss`,
+`app-event-edit/loss` and `loss-days` are taken after the calendar and the
+list were read, as their forms are opened in the frames: related records by
+their names, the rail with its numbers, Source with its last read. The
+frame states-24 lags behind s-tasks-3 in two places — Typecase task 244.
+
 ## v0.2.379 — 2026-10-28
 
 The full form of a new note as s-notes-30 draws it (U-5.5 row 42 of the

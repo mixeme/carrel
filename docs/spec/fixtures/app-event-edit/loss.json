@@ -3280,6 +3280,41 @@
                 "value": "5c81-77aa-0d64"
               },
               {
+                "colour": "#4a6b52",
+                "label": "Забрать документы",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "1d55-90fe-3c27"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Ревью архитектуры",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "9c27-0e5d-4412"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Созвон с подрядчиком",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "7ae3-1c48-55b0"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "2f04-8b71-e39a"
+              },
+              {
+                "colour": "#8c6239",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "5e90-33c1-a8d2"
+              },
+              {
                 "hint": "By UID: a record that is not among the loaded ones.",
                 "label": "By UID…",
                 "selected": false,
@@ -3519,7 +3554,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",
@@ -3531,7 +3566,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/rabota",
@@ -3565,7 +3600,7 @@
     "changed": "",
     "colour": "#4a6b52",
     "compared": "changed on server just now",
-    "lastRead": "",
+    "lastRead": "2 min ago",
     "objects": null,
     "path": "/alice/calendars/lichnyj/8f1c-4a02-b7d3.ics",
     "readOnly": false,
@@ -3654,7 +3689,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

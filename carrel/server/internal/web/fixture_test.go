@@ -4137,7 +4137,7 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 		prep                    func(t *testing.T, app *mockupApp) // what the record holds beyond the set
 	}{
 		{"app-event-edit", "calendar", "lichnyj", "8f1c-4a02-b7d3", []string{"CATEGORIES", "ORGANIZER"}, "", nil},
-		{"app-task-edit", "tasks", "dela", "aa10-77bc-0e31", []string{"CATEGORIES"}, "", nil},
+		{"app-task-edit", "tasks", "dela", "aa10-77bc-0e31", []string{"X-APPLE-SORT-ORDER", "X-OC-HIDESUBTASKS"}, "", nil},
 		// The days of a series the server did not keep, said as days
 		// (states-36, from-typecase note 62): the meeting of 24 August left
 		// out, the one of 31 August moved to 1 September, 15:00.
@@ -4151,6 +4151,13 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 			app := newMockupApp(t)
 			if one.prep != nil {
 				one.prep(t, app)
+			}
+			// The form was opened from the list, as in its frame: the names
+			// of the related records and the numbers of the rail are known
+			// (the task is related to an event).
+			openList(t, app, "/app/calendar")
+			if one.segment != "calendar" {
+				openList(t, app, "/app/"+one.segment)
 			}
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
 			form := formFields(decode[struct {
