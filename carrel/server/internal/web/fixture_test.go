@@ -3705,9 +3705,14 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
 
 		typed := url.Values{"to": recipients(), "subject": {"Договор подряда и смета"}, "text": {"Пётр, ниже — договор и смета, которые мы обсуждали."}}
-		// The letter as the recipients get it (s-mail-14), and Cancel of a
+		// The letter as the recipients get it (s-mail-14): its links one
+		// to a line, so a second folder for the while; and Cancel of a
 		// letter with text (s-mail-15).
+		attach(url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel/attachments"}})
 		app.compare(t, "app-mail-preview/normal.json", app.h.do(postForm("/app/mail/send?op=preview", app.sess, typed)))
+		if rec := app.h.do(postForm("/app/mail/send?op=remove&i=4", app.sess, typed)); rec.Code != 200 {
+			t.Fatalf("remove the second folder: %d %s", rec.Code, rec.Body.String())
+		}
 		app.compare(t, "app-mail-close/normal.json", app.h.do(postForm("/app/mail/send?op=close", app.sess, typed)))
 
 		// The relay of the set, in memory, as the instance has it: the
