@@ -328,6 +328,58 @@ func TestNoteEditNotebookMoves(t *testing.T) {
 	}
 }
 
+// s-notes-30 (U-5.5 #42): a new note chooses its notebook as one that exists
+// does — the one it was started in chosen, a read-only one closed — and the
+// caret stands in its title; saved with another notebook, it is made there.
+func TestANewNoteChoosesItsNotebook(t *testing.T) {
+	f := newNoteShelf(t)
+	list := f.path("notes")
+	_ = f.h.do(get(list, f.sess))
+	p := decode[view.NotePage](t, f.h.do(get(list+"/new", f.sess)))
+	var row view.FormRow
+	for _, r := range p.Doc.Fields {
+		if r.Name == "notebook" {
+			row = r
+		}
+	}
+	if row.Label != "Notebook" || row.Value != text(list) {
+		t.Fatalf("Notebook of a new note = %+v, fields %+v", row, p.Doc.Fields)
+	}
+	var diary string
+	for _, o := range row.Options {
+		if strings.HasSuffix(string(o.Label), " · Diary") {
+			diary = o.Value
+		}
+		if strings.HasSuffix(string(o.Label), " · Shared") && !o.Disabled {
+			t.Errorf("a read-only notebook can be chosen: %+v", o)
+		}
+	}
+	for _, r := range p.Doc.Form.Sets[0].Rows {
+		if r.Focus != (r.Name == "summary") {
+			t.Errorf("the caret: %s focus=%v, want it in the title alone", r.Name, r.Focus)
+		}
+	}
+
+	form := url.Values{"summary": {"Into the diary"}, "description": {"Text"}, "notebook": {diary}}
+	u, _ := url.Parse(actionHref(t, p.Doc.Bar, "record.save"))
+	for k, v := range u.Query() {
+		form[k] = v
+	}
+	resp := f.h.do(postForm(u.EscapedPath(), f.sess, form))
+	if resp.Code != 303 || !strings.HasPrefix(resp.Header().Get("Location"), f.notebook(f.diary)+"/") {
+		t.Fatalf("save into Diary: %d %s", resp.Code, resp.Header().Get("Location"))
+	}
+	found := false
+	for _, p := range f.srv.Paths(f.diary) {
+		if obj, _, _ := f.srv.Object(p); strings.Contains(obj, "SUMMARY:Into the diary") {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("the note is not in Diary")
+	}
+}
+
 // shelfSave posts a note's edit with the fields it shows, set over them.
 func shelfSave(t *testing.T, f noteShelf, p view.NotePage, set url.Values) *httptest.ResponseRecorder {
 	t.Helper()

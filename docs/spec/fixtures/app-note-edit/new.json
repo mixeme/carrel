@@ -62,6 +62,40 @@
         "error": "",
         "extra": null,
         "hint": "",
+        "kind": "select",
+        "label": "Notebook",
+        "name": "notebook",
+        "options": [
+          {
+            "colour": "#4a6b52",
+            "label": "nextcloud · Записи",
+            "selected": true,
+            "value": "/app/notes/a-nc-home/zapisi"
+          },
+          {
+            "colour": "#6b4e7a",
+            "label": "nextcloud · Дневник",
+            "selected": false,
+            "value": "/app/notes/a-nc-home/dnevnik"
+          },
+          {
+            "colour": "#3f6e8c",
+            "disabled": true,
+            "label": "nextcloud · Общие с семьёй",
+            "reason": "Read-only",
+            "selected": false,
+            "value": "/app/notes/a-nc-home/zapiski-obshchie"
+          }
+        ],
+        "readOnly": false,
+        "required": false,
+        "value": "/app/notes/a-nc-home/zapisi"
+      },
+      {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
         "kind": "date",
         "label": "Date",
         "mono": true,
@@ -333,6 +367,7 @@
               "add": null,
               "error": "",
               "extra": null,
+              "focus": true,
               "hint": "",
               "kind": "text",
               "label": "Title",
@@ -346,7 +381,6 @@
               "add": null,
               "error": "",
               "extra": null,
-              "focus": true,
               "hint": "",
               "kind": "area",
               "label": "Body",

@@ -2924,10 +2924,13 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 		page.Doc.Bar = append(page.Doc.Bar, a)
 	}
 	exists := st.obj != nil && !st.isNew
-	if exists {
+	if exists || (st.isNew && c.cal != nil) {
 		// Where the note lies is chosen here too: saving into another
-		// notebook moves it there (S-18).
-		page.Doc.Fields = append(page.Doc.Fields, s.notebookRow(c, st.notebook))
+		// notebook moves it there (S-18); a new one is made there
+		// (s-notes-30).
+		row := s.notebookRow(c, st.notebook)
+		row.Error = text(st.errors["notebook"])
+		page.Doc.Fields = append(page.Doc.Fields, row)
 	}
 	// The document is the form (НД1, U-8): its hidden rows — the token and
 	// the version —, the title and the text by the names the server reads.
@@ -3027,7 +3030,13 @@ func (s *Server) cancelAction(c *collectionCtx, st editState) view.Action {
 }
 
 func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
-	return s.recordFormOf(c, st, editFields[c.spec.kind])
+	form := s.recordFormOf(c, st, editFields[c.spec.kind])
+	if c.spec.kind == view.KindNote && st.isNew && len(st.errors) == 0 {
+		// A new note's full page starts at its title (s-notes-30); the
+		// quick sheet's at its text (s-notes-5).
+		form = focused(form, "summary")
+	}
+	return form
 }
 
 // recordFormOf draws the fields it is given. The quick sheet draws a few of
@@ -4805,10 +4814,11 @@ func withExceptions(loss *model.Loss, sent, got *model.Object) *model.Loss {
 	return loss
 }
 
-// newNotebook is the List or the Calendar a new event's or task's form chose
-// (s-tasks-14, s-agenda-15); empty is the one it was opened in.
+// newNotebook is the List, the Calendar or the Notebook a new record's form
+// chose (s-tasks-14, s-agenda-15, s-notes-30); empty is the one it was
+// opened in.
 func newNotebook(c *collectionCtx, r *http.Request) string {
-	if c.cal == nil || c.spec.kind == view.KindNote {
+	if c.cal == nil {
 		return ""
 	}
 	return strings.TrimSpace(r.FormValue("notebook"))

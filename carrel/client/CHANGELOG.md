@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.6 — 2026-10-28
+
+Server `v0.2.379`, Typecase `2c6b5c8`. The full form of a new note matches
+its frame s-notes-30: U-5.5 row 42 closed.
+
+### Changed
+
+- **A new note's page**: Notebook in its bar and the caret in its title, as
+  the server sends them now; the screen no longer waits on
+  `app-note-edit/new`.
+
 ## v0.11.5 — 2026-10-27
 
 Server `v0.2.376`, Typecase `2c6b5c8`. The list of one collection of tasks

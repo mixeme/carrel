@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.379 — 2026-10-28
+
+The full form of a new note as s-notes-30 draws it (U-5.5 row 42 of the
+client).
+
+### Added
+
+- **A new note chooses its notebook**: its page carries Notebook among
+  `NoteDoc.Fields`, as a note's edit does — the notebook it was started in
+  chosen, one that cannot be written closed with its reason —, and Save
+  makes the note in the one chosen (`notebook`, as a new event's Calendar
+  and a new task's List).
+
+### Changed
+
+- **The caret of a new note's page stands in its title** (s-notes-30); the
+  quick sheet's stays in the text (s-notes-5), and so does an edit's
+  (s-notes-20).
+
+### For consumers
+
+`app-note-edit/new` holds the Notebook row and `focus` on `summary`.
+
 ## v0.2.378 — 2026-10-28
 
 Four more leftovers of the audit of a record: a repeating task moved on
