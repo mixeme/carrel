@@ -976,7 +976,8 @@ type MailPreviewSheet struct {
 	Links   []MailPreviewLink `json:"links"`
 	NoReply Text              `json:"noReply,omitempty"`
 	// Form — POST /app/mail/send: Send (основная), Edit — ссылка на лист
-	// письма с набранным, Cancel — ссылка туда, откуда письмо открыто
+	// письма с набранным, Cancel — отправка формы ?op=close, как у листа
+	// письма
 	Form  Form   `json:"form"`
 	Under *Under `json:"under"`
 }
