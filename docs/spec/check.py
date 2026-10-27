@@ -320,34 +320,13 @@ SHEETS = {"app-search-suggest", "app-contact-move", "app-quick", "app-export", "
           "admin-reset", "admin-delete", "app-settings-backup-trigger", "app-settings-connections-disconnect",
           "app-settings-davloom-scope", "app-settings-davloom-tree"}
 
-FRAME_TODO = {
-    # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
-    # задача 77): строки больше нет.
-    # Рейл предпросмотра событий (s-io-6) без «Дни рождения» — снятой
-    # отметкой коллекции; кадр карточки того же календаря (s-agenda-2) её
-    # рисует, и фикстуры карточки с ним сходятся (Им19).
-    "app-event-import: коллекции рейла":
-        "задача Typecase 199 п. 1 (to-typecase.md): s-io-6 не рисует «Дни рождения», s-agenda-2 рисует",
-}
+FRAME_TODO = {}
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
 # записка в from-typecase.md или долг сервера в plan/client.md. Закрылось на
 # сервере — строка уходит. Ключ — как у FRAME_TODO: «каталог: что
 # расходится», без состояния; держит проверки 8 и 9.
-SERVER_TODO = {
-    # «Tick every book» (states-7) основная с сервера v0.2.118 (долг C19).
-    # Рейл дубликатов — все источники четырёх родов плоским списком, у
-    # каждого — сколько его записей сравнено (Typecase 7512157, задача 136,
-    # ДбЖ4; s-dup-1, -2); сервер шлёт рейл контактов.
-    "app-duplicates: коллекции рейла":
-        "записка 38 (from-typecase.md), ДбЖ4 — круг сервера по дубликатам (plan/server.md)",
-    "app-duplicates-merge: коллекции рейла":
-        "записка 38 (from-typecase.md), ДбЖ4 — круг сервера по дубликатам (plan/server.md)",
-    # Набор держит три коллекции и вторую ленту, которых кадры не рисуют
-    # (лента — источник с сервера v0.2.285, Дб3).
-    "app-duplicates-merge-event: коллекции рейла":
-        "данные набора против s-dup-4 (scans/duplicates.md, Дб3)",
-}
+SERVER_TODO = {}
 
 # Состояние, которое рисует свой кадр маршрута — часть (data-part), а не
 # кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1. Шаги страниц
@@ -848,6 +827,7 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
             drift.append("%s: навигация: кадр %s, фикстура %s"
                          % (where, [n[0] for n in fn], [n[0] for n in xn]))
 known, red = [], []
+held = set()  # строки FRAME_TODO и SERVER_TODO, которым нашлось расхождение
 for d in drift:
     # Ключ — «каталог: что расходится», без состояния: кадр неверен для
     # экрана, а не для одного из его состояний.
@@ -856,6 +836,7 @@ for d in drift:
         hit = [k for k in todo if flat.startswith(k)]
         if hit:
             known.append("ждёт %s: %s — %s" % (who, hit[0], todo[hit[0]]))
+            held.add(hit[0])
             break
     else:
         red.append(d)
@@ -967,6 +948,7 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
             flat = "%s: «%s» (%s)" % (d, lab, a.get("id"))
             if flat in SERVER_TODO:
                 known9.append("ждёт сервер: %s — %s" % (flat, SERVER_TODO[flat]))
+                held.add(flat)
                 marks.pop()
     for r in rows:
         lab = " ".join(str(r.get("label") or "").split())
@@ -980,6 +962,13 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
 check("9. основная кнопка и моноширинное поле — как в кадре", sorted(set(marks)))
 for k in sorted(set(known9)):
     print("         " + k)
+
+# 9b. Исключение проверок 8 и 9, которому расхождения не нашлось, уходит:
+# закрылось — строка уходит, а не лежит разрешением, которое никто не видит.
+check("9b. строки FRAME_TODO и SERVER_TODO держат расхождение",
+      sorted("%s: %s" % (name, k)
+             for name, todo in (("FRAME_TODO", FRAME_TODO), ("SERVER_TODO", SERVER_TODO))
+             for k in todo if k not in held))
 
 print()
 print("ИТОГ: %d красных проверок" % len(fails))
