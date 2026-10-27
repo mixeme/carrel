@@ -54,8 +54,10 @@ func TestRadicaleBaikalMove(t *testing.T) {
 	to := catalogEntry(t, blob, bai.bookA)
 	src := "/app/contacts/" + radID + "/" + url.PathEscape(from.Path) + "/" + url.PathEscape(uid)
 	sheet := liveDecode[view.MoveSheet](t, "contact sheet", app.get(src+"/move?"+url.Values{"to": {baiID}, "into": {to.Path}}.Encode()))
-	if !strings.Contains(runsText(sheet.Warning), "another account") {
-		t.Errorf("a move to another account must say so before it starts: %+v", sheet)
+	// What a move does is in its name (Р-77): a contact moved to another
+	// account keeps its UID and nobody hears of it — nothing to warn of.
+	if len(sheet.Warning) > 0 {
+		t.Errorf("a contact's move to another account warned: %q", sheet.Warning)
 	}
 	loc := redirected(t, "contact to Baikal", app.post(liveAction(t, sheet.Actions, "record.move.confirm"), url.Values{}))
 	if want := "/app/contacts/" + baiID + "/" + url.PathEscape(to.Path) + "/" + url.PathEscape(uid); loc != want {

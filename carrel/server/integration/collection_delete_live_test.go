@@ -72,8 +72,9 @@ func runCollectionDelete(t *testing.T, endpoint, user, pass string) {
 
 	t.Run("calendar", func(t *testing.T) {
 		sheet := liveDeleteSheet(t, app, connID, cal.Path)
-		if w := runsText(sheet.Warning); !strings.Contains(w, "all 2 records") {
-			t.Errorf("warning = %q", w)
+		// How much goes is said by the download, not the warning (Р-77).
+		if n := string(sheet.ExportNote); !strings.HasPrefix(n, "2 ") || !strings.HasSuffix(n, ", one file, straight to you") {
+			t.Errorf("export note = %q", n)
 		}
 		if sheet.Export == nil || string(sheet.Export.Label) != "Download .ics first" {
 			t.Fatalf("export = %+v", sheet.Export)
@@ -92,8 +93,8 @@ func runCollectionDelete(t *testing.T, endpoint, user, pass string) {
 
 	t.Run("contacts", func(t *testing.T) {
 		sheet := liveDeleteSheet(t, app, connID, book.Path)
-		if w := runsText(sheet.Warning); !strings.Contains(w, "address book and all 1 contact in it") {
-			t.Errorf("warning = %q", w)
+		if n := string(sheet.ExportNote); n != "1 contact, one file, straight to you" {
+			t.Errorf("export note = %q", n)
 		}
 		if sheet.Export == nil || string(sheet.Export.Label) != "Download .vcf first" {
 			t.Fatalf("export = %+v", sheet.Export)
