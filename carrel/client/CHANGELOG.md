@@ -4,6 +4,43 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.4 — 2026-10-27
+
+Server `v0.2.374`, Typecase `2c6b5c8`. Typecase's notes 137–140: **a
+letter's preview**, the sheets' keys (Р-81), the question before a
+letter's text is lost, what Send ends with.
+
+### Added
+
+- **Preview** (s-mail-14): one card — From, Reply-To, To, Subject in their
+  slots, a name and the address in muted mono; the text with the
+  signature; the files as tags with their icons; the links a line each,
+  the address in the accent. Send with Enter, Edit, Cancel with Esc.
+- **«Close the letter?»** (s-mail-15): «Close and lose the text» without
+  a key, «Keep writing» with Esc pushed.
+- **The letter that went to some** (s-mail-18): the alarm, a line a
+  recipient — the book's mark, the name, the address muted, «sent» strong
+  or the relay's words in alarm —, «Send again to the refused» with Enter,
+  Close with Esc.
+- The relay's refusal on the letter's sheet (s-mail-17): the first
+  sentence under To in alarm (`HintRuns`).
+
+### Changed
+
+- **The sheets' keys** (Р-81, note 138): the primary button has its key —
+  Enter, Ctrl+Enter on a sheet with a text (a letter's Send, a quick
+  note's Save); a button that deletes has none. Cancel stands at the end
+  of the foot with Esc, in a pushed line: the foot has no `Push` any more.
+- **The letter's Cancel** sends its form (`op=close`); the head's cross
+  goes to `MailSheet.Back`. No Discard.
+- `zone` reads a route's sheets as the list the row of C-5 opens with
+  (`/app/mail/send` answers five).
+
+### Not yet
+
+- **«Sending…»** on Send while the letter goes (note 140): the library's
+  button has no such state — Typecase task 242.
+
 ## v0.11.3 — 2026-10-27
 
 Server `v0.2.373`, Typecase `fb5a005`. Tests only; nothing drawn changes.

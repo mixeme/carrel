@@ -17,6 +17,56 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.374 — 2026-10-27
+
+Typecase's notes 137, 139 and 140 (Typecase `2c6b5c8`): a letter's
+preview, Cancel that asks before the text is lost, what the person sees
+after Send.
+
+### Added
+
+- **Preview** (s-mail-14): `POST /app/mail/send?op=preview` answers
+  `MailPreviewSheet` — the letter as the recipients get it: From (the name
+  strong, the address muted mono), Reply-To with the person's name or the
+  line of a letter nobody can answer (`NoReply`), To, Subject, the text
+  with the signature, the files (`MailPreviewFile`) and what goes as a
+  link (`MailPreviewLink`, «example.com/p/…» — links are made when the
+  letter goes). Send, Edit (`/app/mail/compose`), Cancel (`op=close`).
+  Nothing is sent or made.
+- **«Close the letter?»** (s-mail-15): `op=close` is the letter's Cancel
+  and the preview's. Nothing typed — a redirect to `back`, the letter
+  forgotten; typed — `MailCloseSheet` with «Close and lose the text»
+  (`op=discard`: the letter thrown away, a redirect to `back`) and «Keep
+  writing» (`/app/mail/compose`, Esc).
+- **What Send ends with** (s-mail-16…-18): the letter goes recipient by
+  recipient. All taken — a redirect to `back`, and the page there says
+  once «The letter went to N recipients.» (`Notices`, accent). None taken
+  or the letter did not go — the letter's sheet as it was, the relay's
+  words the first sentence under To in alarm (`HintRuns`); no link is
+  made. Some refused at RCPT TO — `MailSentSheet` (`MailSentRow`: «sent»
+  or «refused: ‹the relay's words›»), «Send again to the refused»
+  (`/app/mail/compose?to=refused`: the same letter, only the refused in
+  To) and Close to `back`. A letter that went to some, opened any other
+  way, is a new one.
+- **`MailSheet.Back`**: where the head's cross leads.
+- **Reply-To carries the person's name**, as From does; the signature
+  stands after a line «-- » (RFC 3676), links before it — in the preview
+  and in the letter that goes.
+
+### Changed
+
+- **The letter's buttons**: Send, Preview (`op=preview`), Cancel — a
+  submit of the form to `op=close`. No Discard.
+- **The line under To** is «Up to 10 recipients. Each sees the others'
+  addresses.».
+
+### For consumers
+
+Draw `MailPreviewSheet`, `MailCloseSheet` and `MailSentSheet` as sheets of
+`/app/mail/send`; the letter's Cancel sends its form, its cross goes to
+`MailSheet.Back`; the To row's `HintRuns`, when present, stand in place of
+its `Hint`.
+
 ## v0.2.373 — 2026-10-26
 
 Typecase's note 135 (Typecase `fb5a005`): the words of the passing screens
