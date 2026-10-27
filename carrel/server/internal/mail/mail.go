@@ -245,10 +245,38 @@ func Send(ctx context.Context, relay Relay, to []string, data []byte) (string, e
 	if !relay.Configured() {
 		return "", errors.New("mail: SMTP is not configured")
 	}
-	return submit(ctx, submission{
+	out, err := submit(ctx, relaySubmission(relay), to, data, false)
+	return out.Reply, err
+}
+
+// Outcome is how a letter to several went: what the relay last said, and
+// those it refused at RCPT TO, each with its reply.
+type Outcome struct {
+	Reply   string
+	Refused []Refusal
+}
+
+// Refusal is one recipient the relay would not take, and its words.
+type Refusal struct {
+	Address, Reply string
+}
+
+// SendEach hands a person's letter to the relay recipient by recipient: one
+// refused is noted with the relay's reply and the letter goes to the rest
+// (s-mail-18). Nobody taken, it does not go: the error is the relay's reply
+// to the last.
+func SendEach(ctx context.Context, relay Relay, to []string, data []byte) (Outcome, error) {
+	if !relay.Configured() {
+		return Outcome{}, errors.New("mail: SMTP is not configured")
+	}
+	return submit(ctx, relaySubmission(relay), to, data, true)
+}
+
+func relaySubmission(relay Relay) submission {
+	return submission{
 		host: relay.Host, port: relay.Port, security: relay.Security,
 		username: relay.Username, password: relay.Password, envelope: relay.From,
-	}, to, data)
+	}
 }
 
 // Reply is what the relay answered to a letter that did not go, as the
@@ -276,11 +304,12 @@ type submission struct {
 	envelope           string
 }
 
-func submit(ctx context.Context, sub submission, to []string, data []byte) (string, error) {
+// submit sends the letter over one session; each — a recipient refused is
+// noted, not the end of it.
+func submit(ctx context.Context, sub submission, to []string, data []byte, each bool) (out Outcome, err error) {
 	addr := net.JoinHostPort(sub.host, strconv.Itoa(sub.port))
 	d := net.Dialer{Timeout: 15 * time.Second}
 	var conn net.Conn
-	var err error
 	tlsConf := &tls.Config{ServerName: sub.host, MinVersion: tls.VersionTLS12}
 	if sub.security == TLS {
 		conn, err = (&tls.Dialer{NetDialer: &d, Config: tlsConf}).DialContext(ctx, "tcp", addr)
@@ -288,7 +317,7 @@ func submit(ctx context.Context, sub submission, to []string, data []byte) (stri
 		conn, err = d.DialContext(ctx, "tcp", addr)
 	}
 	if err != nil {
-		return "", err
+		return Outcome{}, err
 	}
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
@@ -298,43 +327,55 @@ func submit(ctx context.Context, sub submission, to []string, data []byte) (stri
 	c, err := smtp.NewClient(conn, sub.host)
 	if err != nil {
 		conn.Close()
-		return "", err
+		return Outcome{}, err
 	}
 	defer c.Close()
 	if err := c.Hello(domainOf(sub.envelope)); err != nil {
-		return "", err
+		return Outcome{}, err
 	}
 	if sub.security == StartTLS {
 		if ok, _ := c.Extension("STARTTLS"); !ok {
-			return "", errors.New("mail: the relay does not offer STARTTLS")
+			return Outcome{}, errors.New("mail: the relay does not offer STARTTLS")
 		}
 		if err := c.StartTLS(tlsConf); err != nil {
-			return "", err
+			return Outcome{}, err
 		}
 	}
 	if sub.username != "" {
 		if err := c.Auth(smtp.PlainAuth("", sub.username, sub.password, sub.host)); err != nil {
-			return "", err
+			return Outcome{}, err
 		}
 	}
 	if err := c.Mail(sub.envelope); err != nil {
-		return "", err
+		return Outcome{}, err
 	}
+	taken := 0
+	var last error
 	for _, rcpt := range to {
 		if err := c.Rcpt(rcpt); err != nil {
-			return "", err
+			if !each {
+				return Outcome{}, err
+			}
+			out.Refused = append(out.Refused, Refusal{Address: rcpt, Reply: Reply(err)})
+			last = err
+			continue
 		}
+		taken++
+	}
+	if taken == 0 {
+		return out, last
 	}
 	w, err := c.Data()
 	if err != nil {
-		return "", err
+		return Outcome{}, err
 	}
 	if _, err := w.Write(data); err != nil {
-		return "", err
+		return Outcome{}, err
 	}
 	if err := w.Close(); err != nil {
-		return "", err
+		return Outcome{}, err
 	}
 	_ = c.Quit()
-	return fmt.Sprintf("250 accepted for %d recipient(s)", len(to)), nil
+	out.Reply = fmt.Sprintf("250 accepted for %d recipient(s)", taken)
+	return out, nil
 }

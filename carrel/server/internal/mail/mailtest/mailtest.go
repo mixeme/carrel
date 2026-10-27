@@ -25,8 +25,13 @@ type Letter struct {
 type Server struct {
 	Host string
 	Port int
-	// Refuse makes RCPT of this address fail with 550.
-	Refuse string
+	// Refuse makes RCPT of this address fail with RefuseReply, by default
+	// «550 no such mailbox».
+	Refuse      string
+	RefuseReply string
+	// Defer, when set, is the reply to every MAIL: the relay takes no
+	// letter now («451 4.7.0 Try again later»).
+	Defer string
 	// NeedAuth makes MAIL fail with 530 until AUTH PLAIN with this user.
 	NeedAuth string
 
@@ -96,12 +101,20 @@ func (s *Server) session(c net.Conn) {
 				say("530 authentication required")
 				continue
 			}
+			if s.Defer != "" {
+				say(s.Defer)
+				continue
+			}
 			cur.From = strings.Trim(strings.Fields(strings.TrimPrefix(line[5:], "FROM:"))[0], "<>")
 			say("250 ok")
 		case "RCPT":
 			to := strings.Trim(strings.TrimPrefix(line[5:], "TO:"), "<> ")
 			if s.Refuse != "" && to == s.Refuse {
-				say("550 no such mailbox")
+				reply := s.RefuseReply
+				if reply == "" {
+					reply = "550 no such mailbox"
+				}
+				say(reply)
 				continue
 			}
 			cur.To = append(cur.To, to)

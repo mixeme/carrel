@@ -133,6 +133,34 @@ func TestRelayRefusals(t *testing.T) {
 	}
 }
 
+// A person's letter goes to those the relay takes (s-mail-18): one refused
+// at RCPT TO is named with the relay's words; nobody taken, or the relay
+// taking no letter now, is an error with its reply (s-mail-17).
+func TestSendEach(t *testing.T) {
+	s := mailtest.New(t)
+	s.Refuse, s.RefuseReply = "b@example.org", "550 5.1.1 Mailbox unavailable"
+	r := relay(s)
+	to := []string{"a@example.org", "b@example.org"}
+	data, _ := cmail.Build(r, cmail.Message{To: to, Subject: "x", Text: "x"}, time.Now())
+	out, err := cmail.SendEach(context.Background(), r, to, data)
+	if err != nil || len(out.Refused) != 1 || out.Refused[0] != (cmail.Refusal{Address: "b@example.org", Reply: "550 5.1.1 Mailbox unavailable"}) {
+		t.Fatalf("outcome %+v, %v", out, err)
+	}
+	if got := s.Letters(); len(got) != 1 || len(got[0].To) != 1 || got[0].To[0] != "a@example.org" {
+		t.Errorf("letters = %+v", got)
+	}
+	if out, err := cmail.SendEach(context.Background(), r, []string{"b@example.org"}, data); err == nil || cmail.Reply(err) != "550 5.1.1 Mailbox unavailable" || len(out.Refused) != 1 {
+		t.Errorf("all refused: %+v, %v", out, err)
+	}
+	s.Defer = "451 4.7.0 Try again later"
+	if _, err := cmail.SendEach(context.Background(), r, to, data); err == nil || cmail.Reply(err) != "451 4.7.0 Try again later" {
+		t.Errorf("deferred: %v", err)
+	}
+	if n := len(s.Letters()); n != 1 {
+		t.Errorf("letters = %d after the refusals", n)
+	}
+}
+
 // A relay on port 465 that takes the connection and never answers the TLS
 // handshake: Send gives up when the caller's context does, not after a
 // dialer's own quarter of a minute. The page that sends a letter waits on it.
