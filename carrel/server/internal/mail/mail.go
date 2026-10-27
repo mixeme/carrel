@@ -67,7 +67,7 @@ type Attachment struct {
 // Message is a letter before it is written.
 type Message struct {
 	To      []string
-	ReplyTo string // a confirmed address, or empty
+	ReplyTo string // a confirmed address, or empty; it goes with Sender's name
 	// Sender is the person's name for the From line: "Ann (via Carrel)".
 	// Empty for the instance's own letters.
 	Sender string
@@ -183,7 +183,13 @@ func write(from mail.Address, m Message, now time.Time) ([]byte, error) {
 		if err != nil || len(rt) != 1 {
 			return nil, errors.New("mail: the reply address is not an address")
 		}
-		header("Reply-To", rt[0])
+		// The person's name, as From carries it: the reply goes to them, not
+		// to a bare address (s-mail-7).
+		name, err := clean(m.Sender)
+		if err != nil {
+			return nil, err
+		}
+		header("Reply-To", (&mail.Address{Name: name, Address: rt[0]}).String())
 	}
 	header("Subject", mime.QEncoding.Encode("utf-8", subject))
 	header("Date", now.Format(time.RFC1123Z))

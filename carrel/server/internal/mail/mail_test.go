@@ -43,7 +43,9 @@ func TestBuildAndSend(t *testing.T) {
 		t.Fatal(err)
 	}
 	from, _ := mail.ParseAddress(msg.Header.Get("From"))
-	if from.Address != "noreply@carrel.example" || from.Name != "Mix (via Carrel)" || msg.Header.Get("Reply-To") != "mix@example.org" {
+	// The reply goes to the person, named as in From (s-mail-7).
+	rt, _ := mail.ParseAddress(msg.Header.Get("Reply-To"))
+	if from.Address != "noreply@carrel.example" || from.Name != "Mix (via Carrel)" || rt == nil || rt.Address != "mix@example.org" || rt.Name != "Mix" {
 		t.Errorf("From %q Reply-To %q", msg.Header.Get("From"), msg.Header.Get("Reply-To"))
 	}
 	subject, _ := new(mime.WordDecoder).DecodeHeader(msg.Header.Get("Subject"))
@@ -65,7 +67,8 @@ func TestFromLogin(t *testing.T) {
 	}
 	msg, _ := mail.ReadMessage(strings.NewReader(string(data)))
 	from, err := mail.ParseAddress(msg.Header.Get("From"))
-	if err != nil || from.Address != "mix@carrel.example" || from.Name != "Михаил Енученко" || msg.Header.Get("Reply-To") != "mix@example.org" {
+	rt, _ := mail.ParseAddress(msg.Header.Get("Reply-To"))
+	if err != nil || from.Address != "mix@carrel.example" || from.Name != "Михаил Енученко" || rt == nil || rt.Address != "mix@example.org" || rt.Name != "Михаил Енученко" {
 		t.Errorf("From %q Reply-To %q", msg.Header.Get("From"), msg.Header.Get("Reply-To"))
 	}
 	if _, err := cmail.Send(context.Background(), r, []string{"ann@example.org"}, data); err != nil {

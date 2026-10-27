@@ -168,6 +168,13 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 	if strings.Count(body, "http://example.com/p/") != 2 || !strings.Contains(body, "owner") || !strings.Contains(body, "Do not reply") {
 		t.Errorf("body:\n%s", body)
 	}
+	// The name under «-- » (s-mail-7): the links before it, a mail program
+	// greying what follows; the line that nobody hears a reply after it
+	// (s-mail-8), with no second «-- ».
+	text, sig, _ := strings.Cut(strings.ReplaceAll(body, "\r\n", "\n"), "\n-- \n")
+	if !strings.HasPrefix(sig, "owner\n") || strings.Count(text, "http://example.com/p/") != 2 || !strings.Contains(sig, "Do not reply") || strings.Contains(sig, "-- ") {
+		t.Errorf("text:\n%s\nsignature:\n%s", text, sig)
+	}
 	if n := len(f.h.users.PublishedLinks(f.sess.AccountID())); n != 2 {
 		t.Errorf("links = %d", n)
 	}

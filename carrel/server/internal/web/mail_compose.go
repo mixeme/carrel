@@ -774,17 +774,32 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 	return len(to), nil
 }
 
+// letterText is what the person wrote and their name under «-- » (RFC 3676;
+// s-mail-7): the letter's text as it goes and as Preview shows it.
+func letterText(typed, name string) string {
+	return strings.TrimRight(strings.ReplaceAll(typed, "\r\n", "\n"), "\n") + "\n\n-- \n" + name + "\n"
+}
+
+// noReplyLine closes a letter without an address to answer (s-mail-8): a
+// reply would reach nobody, and the letter says so after the signature.
+func (s *Server) noReplyLine(r *http.Request) string {
+	return "This letter was sent from Carrel at " + s.publicOrigin(r) +
+		". Do not reply to it: the sender's address is not confirmed, and a reply would reach nobody."
+}
+
 // relayLetter writes a letter and hands it to the relay: what the person
-// wrote, signed with their name, the links each on a line of its own, and —
-// without an address to answer — a foot that says a reply reaches nobody.
+// wrote, the links each on a line of its own, the signature, and — without
+// an address to answer — a line after it that says a reply reaches nobody
+// (s-mail-8).
 func (s *Server) relayLetter(r *http.Request, ls letterSender, to []string, subject, typed string, links []string, files []cmail.Attachment) error {
-	body := strings.TrimRight(strings.ReplaceAll(typed, "\r\n", "\n"), "\n") + "\n\n" + ls.Name + "\n"
 	if len(links) > 0 {
-		body += "\n" + strings.Join(links, "\n") + "\n"
+		// Before the signature: a mail program greys what follows «-- » and
+		// drops it from a reply.
+		typed = strings.TrimRight(strings.ReplaceAll(typed, "\r\n", "\n"), "\n") + "\n\n" + strings.Join(links, "\n")
 	}
+	body := letterText(typed, ls.Name)
 	if ls.ReplyTo == "" {
-		body += "\n-- \nThis letter was sent from Carrel at " + s.publicOrigin(r) +
-			". Do not reply to it: the sender's address is not confirmed, and a reply would reach nobody.\n"
+		body += "\n" + s.noReplyLine(r) + "\n"
 	}
 	data, err := cmail.Build(s.relay(), cmail.Message{
 		To: to, ReplyTo: ls.ReplyTo, Sender: ls.Name, FromLogin: ls.FromLogin,
