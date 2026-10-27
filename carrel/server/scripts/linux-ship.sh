@@ -8,8 +8,8 @@
 # the image's build context want them, and the script that runs the gates:
 #
 #   carrel/    this repository at HEAD (git archive: what is committed, and
-#              the credentials never — they live outside the checkout,
-#              in myenv/carrel/)
+#              dev/ never — it is not in git; nor the credentials, which
+#              live outside the checkout, in myenv/carrel/)
 #   typecase/  the neighbouring clone of Typecase at the commit the client's
 #              plan records («Typecase сборки» in docs/plan/client.md)
 #   run.sh     the gates of this commit: scripts/linux-gates.sh from
