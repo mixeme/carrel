@@ -41,6 +41,7 @@
             "add": null,
             "error": "",
             "extra": null,
+            "focus": true,
             "hint": "",
             "kind": "text",
             "label": "Login",
@@ -48,8 +49,7 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "",
-            "focus": true
+            "value": ""
           },
           {
             "add": null,
@@ -75,7 +75,13 @@
     }
   ],
   "notices": [],
-  "title": "Sign in to carrel.example",
-  "register": null,
-  "tagline": "Calendars, contacts, tasks, notes and files — one place."
+  "register": {
+    "enabled": true,
+    "href": "/register",
+    "id": "login.register",
+    "label": "Create an account",
+    "method": "GET"
+  },
+  "tagline": "Calendars, contacts, tasks, notes and files — one place.",
+  "title": "Sign in to carrel.example"
 }

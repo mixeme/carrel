@@ -75,7 +75,13 @@
     }
   ],
   "notices": [],
-  "register": null,
+  "register": {
+    "enabled": true,
+    "href": "/register",
+    "id": "login.register",
+    "label": "Create an account",
+    "method": "GET"
+  },
   "tagline": "Calendars, contacts, tasks, notes and files — one place.",
   "title": "Sign in to carrel.example"
 }

@@ -318,10 +318,6 @@ var All = []Screen{
 		Frames: []string{"s-auth-1", "s-auth-13"},
 		Draw:   func(model any) Root { return login.Screen(model.(*view.LoginPage)) },
 		Title:  func(model any) string { return string(model.(*view.LoginPage).Title) },
-		Waits: []Wait{
-			{Row: 17, Fixture: "login/normal"},  // ждёт библиотеку: U-5.5 #17
-			{Row: 17, Fixture: "login/refused"}, // ждёт библиотеку: U-5.5 #17
-		},
 	},
 	{
 		Model:  func() any { return new(view.AboutPage) },

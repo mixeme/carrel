@@ -2501,6 +2501,9 @@ func TestFixtureAccountStates(t *testing.T) {
 func TestFixtureOutsideTheShell(t *testing.T) {
 	app := newMockupApp(t)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// The instance of the frames lets people register (s-auth-1, -13 draw
+	// «Create an account»).
+	openRegistration(t, app.h)
 	for _, one := range []struct{ dir, route string }{
 		{"login", "/login"},
 		{"forgot", "/forgot"},

@@ -39,6 +39,9 @@ client).
 ### For consumers
 
 `app-note-edit/new` holds the Notebook row and `focus` on `summary`.
+`login/normal` and `login/refused` are taken with registration open, as
+s-auth-1 and -13 draw the instance: `register` is «Create an account»
+(U-5.5 row 17, debt C18).
 
 ## v0.2.378 — 2026-10-28
 

@@ -355,7 +355,6 @@ Carrel не знает; всё, что ей нужно, приходит зна�
 
 | # | Экран | Кадр | Чего нет | Задача Typecase | Решение |
 |---|---|---|---|---|---|
-| 17 | `login/normal`, `login/refused` (`LoginPage`) | s-auth-1, s-auth-13 | кадры рисуют открытую регистрацию («Create an account»), фикстуры — экземпляр с закрытой (`Register` пуст) | сервер, долг C18 | владелец 01.10.2026 |
 | 20 | `app-contact/normal`, `app-contact/outcome` (`ContactPage`), `app-contact-timeline/normal` (`ContactTimelinePage`) | s-contacts-6, s-contacts-16, s-contacts-7 | набор фикстур беднее кадров: Анна ни с кем не связана (`Books`, `Linked`), в хронологии одна запись против трёх и двух месяцев, один адрес почты; у хронологии нет обновления (`TopBar.Refresh`) | сервер, долг C20 | владелец 01.10.2026 |
 | 21 | `app-contact-edit/normal`, `app-contact-edit/no-photo`, `app-contact-edit/loss`, `app-contact-new/normal` (`ContactEditPage`) | s-contacts-3, s-contacts-4, states-12, s-contacts-27 | у Анны в наборе нет адреса; отчёт о потерях — одной строкой без жирной первой фразы; у новой карточки нет пустой строки почты и свёрнутой рубрики «Show 6 empty fields» (данные Анны во всех правках — одни, задача 81) | сервер, долг C21 | владелец 01.10.2026 |
 | 22 | `ContactTimelinePage`: близнец Columns в «⋯» полосы | s-contacts-7 | «⋯» хронологии — с меню (задача 112, Typecase `ac658b0`), и в нём близнец Columns (s-contacts-14) — пункт, которому некуда вести и нечего слать: меню-форма столбцов (`Columns`, POST) в пункт не встаёт | кандидат Typecase: близнец меню-формы в «⋯» полосы | владелец 01.10.2026 |

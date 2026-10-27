@@ -7,13 +7,17 @@ entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/clien
 ## v0.11.6 — 2026-10-28
 
 Server `v0.2.379`, Typecase `2c6b5c8`. The full form of a new note matches
-its frame s-notes-30: U-5.5 row 42 closed.
+its frame s-notes-30, the sign-in its frames s-auth-1 and -13: U-5.5 rows
+42 and 17 closed.
 
 ### Changed
 
 - **A new note's page**: Notebook in its bar and the caret in its title, as
   the server sends them now; the screen no longer waits on
   `app-note-edit/new`.
+- **The sign-in** no longer waits on `login/normal` and `login/refused`:
+  the fixtures come from an instance with registration open, as the frames
+  draw it («Create an account»).
 
 ## v0.11.5 — 2026-10-27
 
