@@ -1769,11 +1769,11 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 			return
 		}
 		if loss := writeLoss(dest.conn.ID, m.obj, got, nil, true); loss != nil && len(loss.Properties) > 0 {
-			written.Lines[m.row].Cells[2] = text(string(written.Lines[m.row].Cells[2]) + ". The server did not keep " + strings.Join(loss.Properties, ", "))
+			written.Lines[m.row].Cells[2] = text(string(written.Lines[m.row].Cells[2]) + ". The server did not keep " + lossSaid(loss))
 			// «Not kept by the server» of the report (s-io-9; Typecase's
 			// note 111 p. 8): the record and what it lost.
 			report.Lost++
-			report.Losts = append(report.Losts, text(m.title+" · "+strings.Join(loss.Properties, ", ")))
+			report.Losts = append(report.Losts, text(m.title+" · "+lossSaid(loss)))
 			lossy++
 		}
 	}

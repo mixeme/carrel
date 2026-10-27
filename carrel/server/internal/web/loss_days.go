@@ -29,6 +29,18 @@ func lossProperties(loss *model.Loss) []string {
 	})
 }
 
+// lossSaid is what a report outside the edit — a move, a merge, an import,
+// a rewrite of an address — says a write lost, in one line: the properties,
+// and the days of a series counted as the edit's message counts them («two
+// days of the series»), not EXDATE and RECURRENCE-ID.
+func lossSaid(loss *model.Loss) string {
+	said := slices.Clone(lossProperties(loss))
+	if n := len(loss.Days); n > 0 {
+		said = append(said, countWords(n, "day")+" of the series")
+	}
+	return strings.Join(said, ", ")
+}
+
 // lostDaysNotice is the message of the days of a series a server did not
 // keep (LossReport.Days); nil when it kept them all. also: the report says
 // lost properties before it, and this message follows on from that one.

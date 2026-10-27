@@ -851,7 +851,7 @@ func (s *Server) applyRewrite(ctx context.Context, sess *session.Session, p *rew
 		out.written++
 		if got, err := src.cal.Get(ctx, rec.Path); err == nil {
 			if loss := writeLoss(src.conn.ID, sent, got, sess.Losses(), false); loss != nil {
-				out.lost = append(out.lost, name+" · "+rec.Where+": "+strings.Join(loss.Properties, ", "))
+				out.lost = append(out.lost, name+" · "+rec.Where+": "+lossSaid(loss))
 			}
 		}
 	}

@@ -580,7 +580,7 @@ func (m *collectionMove) readBack(ctx context.Context, sent []transferred) ([]vi
 			continue
 		}
 		if loss := writeLoss(m.dest.ID, t.sent, back, m.sess.Losses(), false); loss != nil {
-			lost = append(lost, text(who+" · "+strings.Join(loss.Properties, ", ")))
+			lost = append(lost, text(who+" · "+lossSaid(loss)))
 		}
 	}
 	// In one order whatever order the server listed them in.
