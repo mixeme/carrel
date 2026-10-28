@@ -172,7 +172,9 @@ func connectDialog(p *view.ConnectionsPage) w.Dialog {
 	// A refusal and its trace come before the fields (s-profile-24); the
 	// trace of Test only, after them.
 	for _, n := range p.Notices {
-		items = append(items, bind.Notice(n, w.MsgFlushSides))
+		m := bind.Notice(n, w.MsgFlushSides)
+		m.Column = true
+		items = append(items, m)
 		if d := bind.NoticeDiag(n); d != nil {
 			items = append(items, d.Diag)
 		}

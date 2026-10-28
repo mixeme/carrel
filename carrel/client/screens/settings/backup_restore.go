@@ -124,7 +124,7 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 				f := w.Field{Parts: []w.FieldPart{pw}, Width: w.FieldLG}
 				if row.Hint != "" {
 					// The hint is the field's (s-backup-7, Typecase's note 97).
-					f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(row.Hint)}, Variant: w.HintColumn})
+					f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(row.Hint)}})
 				}
 				fields.Wide, fields.Top = false, false
 				fields.Items = append(fields.Items, f)
@@ -141,9 +141,10 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 				in := bind.Input(row)
 				in.Variant = w.InputFill
 				fields.Items = append(fields.Items, w.Field{Label: string(row.Label), Width: sourceWidths[row.Name],
-					Parts: append([]w.FieldPart{w.Line{Items: []w.LinePart{in, bind.Button(*row.Extra, "")}, Gap: w.LineGap8}}, bind.Column(bind.Hint(row))...)})
+					Parts: append([]w.FieldPart{w.Line{Items: []w.LinePart{in, bind.Button(*row.Extra, "")}, Gap: w.LineGap8}}, bind.Hint(row)...)})
 			default:
-				fields.Items = append(fields.Items, bind.ColumnField(row, sourceWidths[row.Name]))
+				// In the card: its hints are not the page's column (s-backup-16).
+				fields.Items = append(fields.Items, bind.Field(row, sourceWidths[row.Name]))
 			}
 		}
 		if len(fields.Items) > 0 {

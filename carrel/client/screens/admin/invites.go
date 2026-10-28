@@ -51,7 +51,10 @@ func card(c view.AddUserCard) []w.CardPart {
 		parts = append(parts, w.CardText{Kind: w.CardLede, Parts: []w.CardTextPart{w.Text(c.Lede)}})
 	}
 	if c.Warning != nil {
-		parts = append(parts, bind.Msg(*c.Warning, w.MsgFlushBottom12))
+		// In the column although in a card (s-admin-1, Typecase's note 141).
+		m := bind.Msg(*c.Warning, w.MsgFlushBottom12)
+		m.Column = true
+		parts = append(parts, m)
 	}
 	return parts
 }

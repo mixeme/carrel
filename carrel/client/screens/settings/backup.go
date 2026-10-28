@@ -308,11 +308,10 @@ func jobSet(set view.FieldSet) []w.FormPart {
 			items = append(items, signinField(r, set.Rows))
 		case r.Kind == view.InputNumber && r.Name == "signin":
 		case r.Kind == view.InputPassword:
-			in := bind.Input(r)
-			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{in}, Width: w.FieldLG})
-			if r.Hint != "" {
-				items = append(items, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(r.Hint)}, Tone: w.MsgAlert, Space: w.MsgFlushTop2, Place: w.Grown})
-			}
+			// «Separate from the sign-in password.» is the field's hint, no
+			// more an alarm of its own (s-backup-2, -19; Typecase's note 141
+			// p. 3).
+			items = append(items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{bind.Input(r)}, bind.Column(bind.Hint(r))...), Width: w.FieldLG})
 		case r.Extra != nil:
 			in := bind.Input(r)
 			in.Variant = w.InputFill

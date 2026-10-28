@@ -364,12 +364,22 @@ func Column(parts []w.FieldPart) []w.FieldPart {
 }
 
 // ColumnMsgs keeps the messages among a settings page's parts in its reading
-// column, as its hints (Msg.Column; Typecase's note 141).
+// column, as its hints (Msg.Column; Typecase's note 141): a message alone and
+// each of a band of notices (Notices).
 func ColumnMsgs(parts []w.MainPart) []w.MainPart {
 	for i, p := range parts {
-		if m, ok := p.(w.Msg); ok {
-			m.Column = true
-			parts[i] = m
+		switch v := p.(type) {
+		case w.Msg:
+			v.Column = true
+			parts[i] = v
+		case w.Notices:
+			for j, n := range v.Items {
+				if m, ok := n.(w.Msg); ok {
+					m.Column = true
+					v.Items[j] = m
+				}
+			}
+			parts[i] = v
 		}
 	}
 	return parts
