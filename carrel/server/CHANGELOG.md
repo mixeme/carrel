@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.385 — 2026-10-28
+
+### Fixed
+
+- **A timeline gathered before the addresses were rewritten** still counts
+  what it found: the records it holds name the old addresses, and the card
+  matched them by the new ones alone — «Timeline 0» on the outcome
+  (s-contacts-16). A kept timeline now matches by the card's addresses and
+  by those it was gathered by; the bar still says the card's.
+
+### For consumers
+
+`app-contact/outcome` is taken with Anna's timeline gathered before the
+rewrite: its inset holds her records.
+
 ## v0.2.384 — 2026-10-28
 
 ### Fixed

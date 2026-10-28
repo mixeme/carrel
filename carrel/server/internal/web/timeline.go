@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -59,6 +60,19 @@ type timelinePerson struct {
 	first  string          // the first address of the card, for New event
 	// addresses are the card's addresses in its order, as the bar says them
 	addresses []string
+}
+
+// and is the person as the card says them now, with the addresses a kept
+// timeline was gathered by (was): what was found by an address the card no
+// longer holds — rewritten since (s-contacts-16) — is theirs all the same.
+// The addresses said on the bar stay the card's.
+func (p timelinePerson) and(was timelinePerson) timelinePerson {
+	out := p
+	out.emails = maps.Clone(p.emails)
+	for e := range was.emails {
+		out.emails[e] = true
+	}
+	return out
 }
 
 // has says whether an address is this person's.
@@ -653,7 +667,7 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 	owner := timelineOwner(task)
 	page.Poll = s.pollBar(tf, blob, snap, owner)
 	page.Top.Refresh = s.pollRefresh(tf, snap, owner.again, tf.now)
-	rows := s.timelineRows(tf, blob, snap, person)
+	rows := s.timelineRows(tf, blob, snap, person.and(task.person))
 	counts := map[view.Kind]int{}
 	for _, r := range rows {
 		counts[r.row.Kind]++
@@ -705,7 +719,7 @@ func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) 
 		return nil, nil
 	}
 	var out []view.TimelineRow
-	rows := s.timelineRows(c.tf, s.catalogOf(c.sess), task.Snapshot(), personOf(uid, obj))
+	rows := s.timelineRows(c.tf, s.catalogOf(c.sess), task.Snapshot(), personOf(uid, obj).and(task.person))
 	for _, r := range rows {
 		if len(out) == timelineInsetRows {
 			break

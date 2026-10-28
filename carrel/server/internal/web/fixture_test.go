@@ -1380,6 +1380,11 @@ func TestFixtureContactRewrite(t *testing.T) {
 	mockupAnnaMeetings(t, app)
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+	// Her timeline was gathered before the addresses changed, as on her
+	// card (s-contacts-6): the outcome still counts what it found, by the
+	// old addresses (s-contacts-16).
+	tl := decode[view.ContactTimelinePage](t, app.h.do(get(rec+"/timeline", app.sess)))
+	waitPoll(t, app.h, app.sess, tl.Poll.TaskID, func(b view.PollBar) bool { return !b.Running })
 	form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
 	form.Set("email.0", "a.kovaleva@slovo.example")
 	form.Set("email.1", "anna@home.example")

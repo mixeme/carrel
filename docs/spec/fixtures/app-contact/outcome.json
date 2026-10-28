@@ -350,8 +350,39 @@
     "uid": ""
   },
   "subtitle": "Издательство «Слово» · Выпускающий редактор",
-  "timeline": [],
-  "timelineCount": null,
+  "timeline": [
+    {
+      "colour": "#3f6e8c",
+      "from": null,
+      "href": "/app/calendar/a-nc-home/rabota/cc02",
+      "kind": "event",
+      "stamp": "nextcloud · Работа",
+      "title": "Юбилей отдела",
+      "when": "5 Sep",
+      "why": "attendee · accepted"
+    },
+    {
+      "colour": "#3f6e8c",
+      "from": null,
+      "href": "/app/calendar/a-nc-home/rabota/aa03",
+      "kind": "event",
+      "stamp": "nextcloud · Работа",
+      "title": "Планирование Q4",
+      "when": "2 Sep",
+      "why": "attendee · accepted"
+    },
+    {
+      "colour": "#9a9280",
+      "from": null,
+      "href": "/app/calendar/a-baikal/obshchij/bb02",
+      "kind": "event",
+      "stamp": "baikal · Общий",
+      "title": "Демо для заказчика",
+      "when": "21 Aug",
+      "why": "attendee · accepted"
+    }
+  ],
+  "timelineCount": 11,
   "title": "Анна Ковалёва",
   "top": {
     "lock": null,
