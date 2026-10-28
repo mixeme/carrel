@@ -1072,6 +1072,9 @@ const mockupStamp = "10 August 2026, 17:04"
 // shape, mockupDay.
 var numLike = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$`)
 
+// tookLike is a duration as tookText writes it: «0 ms», «4.2 s».
+var tookLike = regexp.MustCompile(`^(\d+ ms|\d+\.\d s)$`)
+
 func steadyStamps(v any) {
 	switch t := v.(type) {
 	case map[string]any:
@@ -1081,6 +1084,15 @@ func steadyStamps(v any) {
 			// stamp of the run (the client's scan ФД5).
 			if _, link := t["opens"]; link && k == "lastSeen" {
 				continue
+			}
+			// How long a feed's last read took is the run's machine: «0 ms»
+			// on a quiet one, «0.1 s» under the gates' load (28.10.2026). It
+			// is of the run, as a stamp is, and the set writes the quiet one.
+			if s, ok := x.(string); ok && k == "took" && tookLike.MatchString(s) {
+				if _, feed := t["checked"]; feed {
+					t[k] = "0 ms"
+					continue
+				}
 			}
 			if s, ok := x.(string); ok && runStamps[k] && dateLike.MatchString(s) {
 				t[k] = mockupStamp
