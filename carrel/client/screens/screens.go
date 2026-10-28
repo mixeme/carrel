@@ -423,9 +423,6 @@ var All = []Screen{
 			}
 			return nil // nothing on paper is pressed
 		},
-		Waits: []Wait{
-			{Row: 20, Fixture: "app-contact/outcome"}, // ждёт библиотеку: U-5.5 #20
-		},
 	},
 	{
 		Model:  func() any { return new(view.ContactTimelinePage) },
