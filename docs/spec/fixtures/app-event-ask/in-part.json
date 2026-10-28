@@ -200,14 +200,14 @@
               "text": "09:00 – 10:00"
             },
             {
-              "text": ", Monday 5 January"
+              "text": ", Monday, 5 January"
             }
           ],
           "value": ""
         },
         {
           "badge": {
-            "label": "until 2026-01-19",
+            "label": "until 19 January",
             "role": "neutral"
           },
           "from": null,

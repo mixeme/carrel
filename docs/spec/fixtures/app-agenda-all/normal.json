@@ -1131,14 +1131,14 @@
             "text": "10:00 – 11:00"
           },
           {
-            "text": ", Monday 10 August"
+            "text": ", Monday, 10 August"
           }
         ],
         "value": ""
       },
       {
         "badge": {
-          "label": "until 2026-12-28",
+          "label": "until 28 December",
           "role": "neutral"
         },
         "from": null,

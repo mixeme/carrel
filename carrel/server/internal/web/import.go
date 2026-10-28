@@ -1116,9 +1116,12 @@ func readyNote(c *collectionCtx, obj *model.Object, untitled bool) string {
 				}
 			}
 		}
-		props := obj.Props()
-		if z := zoneOf(props[zoneProp(props)]); z != "" && z != c.tf.tz.String() {
-			parts = append(parts, "time zone kept as sent")
+		// The row's When is the person's clock; the event's own, with its
+		// zone, is what was kept (s-io-6; Typecase's note 142 p. 4).
+		if tm, err := cal.TimingOf(obj, c.tf.tz); err == nil {
+			if at, _ := c.tf.keptAt(tm); at != "" {
+				parts = append(parts, "kept as sent: "+at)
+			}
 		}
 	case view.KindTask:
 		if p := percentOf(obj); p != nil && *p > 0 && *p < 100 {
@@ -1212,7 +1215,12 @@ func (c *collectionCtx) detailOf(k view.Kind, obj *model.Object) string {
 		return firstValue(obj, "EMAIL")
 	case view.KindEvent:
 		if t, err := cal.TimingOf(obj, c.tf.tz); err == nil {
-			return c.whenOf(t)
+			// An event a list of tasks skips is named by its day alone, as
+			// that list's frame draws it (s-io-7).
+			if c.spec.kind != view.KindEvent {
+				return c.whenOf(t)
+			}
+			return c.eventWhen(t, cal.RawRRULE(obj))
 		}
 	case view.KindTask:
 		if t, err := cal.DueOf(obj, c.tf.tz); err == nil {
@@ -1234,6 +1242,49 @@ func (c *collectionCtx) whenOf(t cal.Timing) string {
 		return c.tf.date(t.Start)
 	}
 	return c.tf.date(t.Start) + ", " + c.tf.clock(t.Start)
+}
+
+// eventWhen is the When of an event in the preview, in the card's full form
+// (Typecase's note 142): «17 August 2026, 08:00» by the person's clock; a
+// day and the days of one — «4 May 2026 · all day», «13 – 26 July 2026 · all
+// day», the last day before DTEND —; a series from its first start, the
+// weekday before it, and its rule in the words of the series question —
+// «Monday, 10 August 2026, 09:00 · weekly until 28 December».
+func (c *collectionCtx) eventWhen(t cal.Timing, rule string) string {
+	if t.Start.IsZero() {
+		return ""
+	}
+	start := t.Start.In(c.tf.tz)
+	var when string
+	switch {
+	case t.AllDay:
+		when = c.tf.date(start)
+		if !t.End.IsZero() {
+			if last := t.End.In(c.tf.tz).AddDate(0, 0, -1); last.After(start) {
+				when = allDayRange(start, last)
+			}
+		}
+		when += " · all day"
+	default:
+		when = c.tf.date(start) + ", " + c.tf.clock(start)
+	}
+	if rule == "" {
+		return when
+	}
+	return start.Format("Monday") + ", " + when + " · " + seriesPace(rule) + seriesEnd(c.tf, rule, t.Start)
+}
+
+// allDayRange is two days of one event, the month and the year once where they
+// are the same: «13 – 26 July 2026», «30 June – 2 July 2026», «28 December
+// 2026 – 2 January 2027».
+func allDayRange(first, last time.Time) string {
+	switch {
+	case first.Year() != last.Year():
+		return first.Format("2 January 2006") + " – " + last.Format("2 January 2006")
+	case first.Month() != last.Month():
+		return first.Format("2 January") + " – " + last.Format("2 January 2006")
+	}
+	return first.Format("2") + " – " + last.Format("2 January 2006")
 }
 
 // titleOf is what one record is called in the preview and the report.

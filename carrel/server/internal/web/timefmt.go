@@ -398,8 +398,8 @@ func (f timeFmt) recurrence(raw string, start time.Time) string {
 
 // repeats is the row Repeats of an event's fields (s-agenda-1, s-agenda-2):
 // the rule in short words — «Weekly on Mon» —, and its end as a badge,
-// «until 2026-12-28» (the last day it can start on, ruleUntil), «5 times»,
-// «once»; no badge for a series without an end.
+// «until 28 December» (the last day it can start on, ruleUntil; untilDay),
+// «5 times», «once»; no badge for a series without an end.
 func (f timeFmt) repeats(raw string, start time.Time) (string, view.Badge) {
 	words, ok := f.ruleWords(raw, true)
 	if !ok {
@@ -415,7 +415,7 @@ func (f timeFmt) repeats(raw string, start time.Time) (string, view.Badge) {
 		end = fmt.Sprintf("%d times", opt.Count)
 	}
 	if day, ok := ruleUntil(raw, start, f.tz); ok {
-		end = "until " + day.Format("2006-01-02")
+		end = "until " + f.untilDay(day)
 	}
 	if end == "" {
 		return words, view.Badge{}
@@ -503,16 +503,17 @@ func shortWeekday(phrase string) string {
 }
 
 // whenRuns is the When of an event as the frames write it (s-agenda-1,
-// s-agenda-2): the clock monospaced, then the day — «‹10:00 – 11:00›, Monday
-// 10 August»; the year only when it is not this year's. A day is «all day,
-// Monday 10 August».
+// s-agenda-2): the clock monospaced, then the day — «‹10:00 – 11:00›, Monday,
+// 10 August», the weekday parted by a comma (the owner, 28.10; Typecase's
+// note 142 p. 5); the year only when it is not this year's. A day is «all
+// day, Monday, 10 August».
 func (f timeFmt) whenRuns(tm cal.Timing) view.Runs {
 	day := func(t time.Time) string {
 		t = t.In(f.tz)
 		if t.Year() == f.now.In(f.tz).Year() {
-			return t.Format("Monday 2 January")
+			return t.Format("Monday, 2 January")
 		}
-		return t.Format("Monday 2 January 2006")
+		return t.Format("Monday, 2 January 2006")
 	}
 	mono := func(s string) view.Run { return view.Run{Text: text(s), Mark: view.RunMono} }
 	plain := func(s string) view.Run { return view.Run{Text: text(s)} }
@@ -541,17 +542,42 @@ func (f timeFmt) whenRuns(tm cal.Timing) view.Runs {
 // (s-agenda-1, s-agenda-2): «created 12:00 Asia/Yekaterinburg», the start's
 // clock there. None for the instance zone, a day or a floating time.
 func (f timeFmt) createdIn(tm cal.Timing) view.Badge {
+	at, ok := f.keptAt(tm)
+	switch {
+	case at == "":
+		return view.Badge{}
+	case !ok:
+		return view.Badge{Label: text("created in " + at), Role: view.BadgeNeutral}
+	}
+	return view.Badge{Label: text("created " + at), Role: view.BadgeNeutral}
+}
+
+// keptAt is the start of a time made in another zone by that zone's clock,
+// «10:00 Asia/Yekaterinburg» — the card's badge (createdIn), the import's
+// «kept as sent» (s-io-6). "" for the instance zone, a day or a floating
+// time; only the zone, and ok false, for a zone this server does not know.
+func (f timeFmt) keptAt(tm cal.Timing) (string, bool) {
 	zone := f.zone(tm.Zone)
 	if zone == "" || tm.AllDay {
-		return view.Badge{}
+		return "", true
 	}
 	loc, err := time.LoadLocation(zone)
 	if err != nil {
-		return view.Badge{Label: text("created in " + zone), Role: view.BadgeNeutral}
+		return zone, false
 	}
 	layout := "15:04"
 	if f.h12 {
 		layout = "3:04 PM"
 	}
-	return view.Badge{Label: text("created " + tm.Start.In(loc).Format(layout) + " " + zone), Role: view.BadgeNeutral}
+	return tm.Start.In(loc).Format(layout) + " " + zone, true
+}
+
+// untilDay is the last day of a series in words, as its end is said (s-agenda-2,
+// s-io-6, the series question): «28 December», the year only when it is not
+// this year's — «18 January 2027» (Typecase's note 142 p. 5).
+func (f timeFmt) untilDay(t time.Time) string {
+	if t.Year() == f.now.In(f.tz).Year() {
+		return t.Format("2 January")
+	}
+	return t.Format("2 January 2006")
 }

@@ -4350,7 +4350,7 @@ func TestFixtureImport(t *testing.T) {
 		cal := app.listPath(t, "calendar", "lichnyj")
 		const ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-standup\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Планёрка\r\nDTSTART;TZID=Europe/Moscow:20260810T090000\r\nDTEND;TZID=Europe/Moscow:20260810T093000\r\nRRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z\r\nEND:VEVENT\r\n" +
-			"BEGIN:VEVENT\r\nUID:e7a1-otpusk\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отпуск\r\nDTSTART;VALUE=DATE:20260713\r\nDTEND;VALUE=DATE:20260728\r\nEND:VEVENT\r\n" +
+			"BEGIN:VEVENT\r\nUID:e7a1-otpusk\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отпуск\r\nDTSTART;VALUE=DATE:20260713\r\nDTEND;VALUE=DATE:20260727\r\nEND:VEVENT\r\n" +
 			// A day that is not, written as no client writes it (note 115,
 			// s-io-6): its DTSTART on line 23.
 			"BEGIN:VEVENT\r\nUID:e7a1-fevral\r\nDTSTAMP:20260801T000000Z\r\nDTEND;VALUE=DATE:20260301\r\nDTSTART;VALUE=DATE:2026-02-30\r\nEND:VEVENT\r\n" +

@@ -141,7 +141,7 @@ func seriesChange(tf timeFmt, was seriesBefore, sent *model.Object) view.AskLine
 	case was.rule != "" && withoutEnd(raw) == withoutEnd(was.rule):
 		line.Text = "The series no longer ends"
 		if until, ok := ruleUntil(raw, start, tf.tz); ok {
-			line.Text = text("The series ends on " + until.Format("2 January"))
+			line.Text = text("The series ends on " + tf.untilDay(until))
 		} else if n := parseRule(raw).get("COUNT"); n != "" {
 			line.Text = text("The series ends after " + n + " times")
 		}
@@ -178,7 +178,7 @@ func seriesPace(raw string) string {
 // times», "" for none.
 func seriesEnd(tf timeFmt, raw string, start time.Time) string {
 	if until, ok := ruleUntil(raw, start, tf.tz); ok {
-		return " until " + until.Format("2 January")
+		return " until " + tf.untilDay(until)
 	}
 	if n := parseRule(raw).get("COUNT"); n != "" {
 		return ", " + n + " times"

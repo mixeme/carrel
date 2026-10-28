@@ -29,10 +29,20 @@ func mockupFrame(t *testing.T, id string) string {
 	}
 	end := strings.Index(mock[at+1:], `<div class="frame"`)
 	if end < 0 {
-		return mock[at:]
+		return columnless.Replace(mock[at:])
 	}
-	return mock[at : at+1+end]
+	return columnless.Replace(mock[at : at+1+end])
 }
+
+// columnless takes out of a frame the classes that keep a settings page in
+// its reading column of 580 px (Typecase's note 141, Р-82): they say how
+// wide, not what — the frames are read here for their words — and a class
+// more would part a hint or a message from the patterns that read it.
+var columnless = strings.NewReplacer(
+	` tc-field__hint--max580`, ``,
+	` tc-msg--max580`, ``,
+	` tc-field--w580`, ``,
+)
 
 // C-10, from-typecase note 14: the colours a collection sheet offers are the
 // swatches the mockup draws in «Rename and colour» (s-profile-7), in their

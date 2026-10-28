@@ -47,12 +47,12 @@ func TestEventByItsFrames(t *testing.T) {
 	}
 	when := fieldOf(page.Fields, "When")
 	if when == nil || when.Value != "" || len(when.Runs) != 2 ||
-		when.Runs[0] != (view.Run{Text: "10:00 – 11:00", Mark: view.RunMono}) || when.Runs[1].Text != ", Monday 10 August" ||
+		when.Runs[0] != (view.Run{Text: "10:00 – 11:00", Mark: view.RunMono}) || when.Runs[1].Text != ", Monday, 10 August" ||
 		when.Badge.Label != "created 12:00 Asia/Yekaterinburg" {
 		t.Errorf("When = %+v", when)
 	}
 	repeats := fieldOf(page.Fields, "Repeats")
-	if repeats == nil || repeats.Value != "Weekly on Mon" || repeats.Badge.Label != "until 2026-12-28" {
+	if repeats == nil || repeats.Value != "Weekly on Mon" || repeats.Badge.Label != "until 28 December" {
 		t.Errorf("Repeats = %+v", repeats)
 	}
 	// Both reminders in one line, as the frame says them (Typecase's note

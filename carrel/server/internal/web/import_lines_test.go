@@ -58,7 +58,7 @@ func TestImportLinesAreTheFrames(t *testing.T) {
 		"BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260101T000000Z\nSUMMARY:Встреча\nDTSTART;TZID=Asia/Yekaterinburg:20260817T100000\nDTEND;TZID=Asia/Yekaterinburg:20260817T110000\nEND:VEVENT\n" +
 		"END:VCALENDAR\n"
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cal.ics", []byte(events))))
-	if page.Title != "Import events" || len(page.Preview) != 1 || page.Preview[0].Lines[0].Cells[3] != "Ready — time zone kept as sent" {
+	if page.Title != "Import events" || len(page.Preview) != 1 || page.Preview[0].Lines[0].Cells[3] != "Ready — kept as sent: 10:00 Asia/Yekaterinburg" {
 		t.Errorf("title %q, preview %+v", page.Title, page.Preview)
 	}
 }

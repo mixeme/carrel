@@ -96,7 +96,7 @@ func TestAccountWeekStartAndClock(t *testing.T) {
 	}
 	// The clock of the person's twelve hours, the day after it (s-agenda-2);
 	// the year only when it is not this year's.
-	if !strings.HasPrefix(when, "10:00 AM – 10:30 AM, Monday 12 January") {
+	if !strings.HasPrefix(when, "10:00 AM – 10:30 AM, Monday, 12 January") {
 		t.Errorf("When = %q", when)
 	}
 

@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.382 — 2026-10-28
+
+Dates as Typecase's note 142 writes them (Им11 closed; mockup `31a97a0`).
+
+### Changed
+
+- **The import preview's When** is the card's full form, not a date and a
+  clock: a series from its first start with the weekday and its rule in the
+  words of the series question — «Monday, 10 August 2026, 09:00 · weekly
+  until 28 December» —, a day «4 May 2026 · all day», the days of one «13 –
+  26 July 2026 · all day» (the last before DTEND). An event a list of tasks
+  skips keeps its day alone (s-io-7).
+- **An event kept in its own zone** says its clock there: «Ready — kept as
+  sent: 10:00 Asia/Yekaterinburg»; the row's When is the person's.
+- **A comma after the weekday** — «Monday, 10 August» — in an event's When
+  (the owner, 28.10).
+- **A series ends in words**: the badge of Repeats «until 28 December», the
+  year only when it is not this year's — «until 18 January 2027» —, and so
+  in the series question.
+
+### For consumers
+
+`app-event-import/preview`, `app-task-import/preview`, the event cards
+(`app-event`, `app-event-linked`, `app-agenda-all`, `app-publish/event`,
+`p-token/event`, `app-record-delete`) and `app-event-ask/in-part` changed
+their words. The frames are read without the classes of the settings'
+column of 580 px (note 141): they say how wide, not what.
+
 ## v0.2.381 — 2026-10-28
 
 A person's card and timeline as s-contacts-6, -7 and -16 draw them, and a

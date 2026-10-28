@@ -315,7 +315,7 @@ func TestEventPageRelatedRemindersAttendees(t *testing.T) {
 		t.Errorf("recurrence = %+v", ev.Recurrence)
 	}
 	if len(ev.Fields) == 0 || len(ev.Fields[0].Runs) != 2 || ev.Fields[0].Runs[0].Text != "10:00 – 11:00" ||
-		!strings.HasPrefix(string(ev.Fields[0].Runs[1].Text), ", Thursday 15 January") {
+		!strings.HasPrefix(string(ev.Fields[0].Runs[1].Text), ", Thursday, 15 January") {
 		t.Errorf("fields = %+v", ev.Fields)
 	}
 
