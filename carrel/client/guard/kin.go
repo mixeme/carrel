@@ -284,11 +284,13 @@ var draftFunc = regexp.MustCompile(`(?m)^func (\w+)\(\) interface\{ Render\(\) s
 
 // Drafts prints the -self draft of each frame with Typecase's frame2go — the
 // tool of the client module (go.mod), run with the module of Typecase as
-// its root — builds the drafts as they are printed, and returns their
-// skeletons by frame. module is the client module's directory. The drafts are
-// built in a directory of guard/testdata made for the call and removed after
-// it: testdata is never built by ./..., and a draft is not a package of the
-// client.
+// its root, once for all the frames: -out writes each draft as
+// <dir>/<frame>/draft.go (Typecase's note 147; a call a frame took some
+// three seconds each) — builds the drafts as they are printed, and returns
+// their skeletons by frame. module is the client module's directory. The
+// drafts are built in a directory of guard/testdata made for the call and
+// removed after it: testdata is never built by ./..., and a draft is not a
+// package of the client.
 func Drafts(module string, frames []string) (map[string]*Node, error) {
 	if len(frames) == 0 {
 		return map[string]*Node{}, nil
@@ -304,24 +306,26 @@ func Drafts(module string, frames []string) (map[string]*Node, error) {
 	}
 	defer os.RemoveAll(dir)
 	base := "carrel.dev/carrel/client/guard/testdata/" + filepath.Base(dir)
+	// The tool runs in module: the directory is told it whole.
+	whole, err := filepath.Abs(dir)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := goOut(module, append([]string{"tool", "frame2go", "-self", "-root", root, "-out", whole}, frames...)...); err != nil {
+		return nil, err
+	}
 	var imports, calls strings.Builder
 	for i, frame := range frames {
-		src, err := goOut(module, "tool", "frame2go", "-self", "-root", root, frame)
+		src, err := os.ReadFile(filepath.Join(dir, frame, "draft.go"))
 		if err != nil {
 			return nil, err
 		}
-		m := draftFunc.FindStringSubmatch(src)
+		m := draftFunc.FindSubmatch(src)
 		if m == nil {
 			return nil, fmt.Errorf("the draft of %s declares no screen function:\n%s", frame, src)
 		}
 		pkg := fmt.Sprintf("d%d", i)
-		if err := os.MkdirAll(filepath.Join(dir, pkg), 0o755); err != nil {
-			return nil, err
-		}
-		if err := os.WriteFile(filepath.Join(dir, pkg, "draft.go"), []byte(src), 0o644); err != nil {
-			return nil, err
-		}
-		fmt.Fprintf(&imports, "\t%s %q\n", pkg, base+"/"+pkg)
+		fmt.Fprintf(&imports, "\t%s %q\n", pkg, base+"/"+frame)
 		fmt.Fprintf(&calls, "\t\t%q: guard.Skeleton(%s.%s()),\n", frame, pkg, m[1])
 	}
 	probe := "package main\n\nimport (\n\t\"encoding/json\"\n\t\"os\"\n\n\t\"carrel.dev/carrel/client/guard\"\n" + imports.String() +
