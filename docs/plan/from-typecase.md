@@ -4790,6 +4790,20 @@ Typecase, который она описывает, — `31a97a0`** (569 кад�
    «baikal · Офис», подзаголовок «312 записей · 2 отмечено». Фикстура строки
    «The letter went to N recipients.» ложится на `s-mail-16` по этому рейлу.
 
+Записка 145 от 28.10.2026 (Typecase `ef1c8fc`; задача 240). **Последний коммит
+Typecase, который она описывает, — `ef1c8fc`** (569 кадров). **240 закрыта.**
+
+145. **Строка архива при удалении — тем же коротким складом во всех трёх
+   случаях** (`s-profile-9`, подпись):
+   - архив есть — «Last archived ‹2026-08-14›; a restore makes a **new**
+     calendar at a new address.» (в кадре теперь «calendar», как пишет
+     сервер; у папки хранилища — «folder»);
+   - архива нет — «No backup job copies it: there is no archive to restore
+     it from.»;
+   - задание есть, но ни одно не закончилось целым — «A backup job copies
+     it, but none has finished whole yet: there is no archive to restore it
+     from.».
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
