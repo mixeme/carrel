@@ -440,15 +440,15 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	case partErr != nil || part == nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
 			Role: view.NoticeAlert, Title: "No file was chosen", Body: "Choose the file to attach and send the form again.",
 		}))
 		return
 	case !sameVersion(etag, obj.ETag):
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, changedNotice(nothing)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, changedNotice(nothing)))
 		return
 	}
 	sent := obj
@@ -478,7 +478,7 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 				}
 				if err != nil {
 					takeBack(ctx, placed)
-					s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+					s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
 						Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the files again.",
 					}))
 					return
@@ -498,7 +498,7 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 			if n > 0 {
 				notice.Body = text(name + " could not be attached, so none of the files was. " + string(notice.Body))
 			}
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, *notice))
 			return
 		}
 	}
@@ -568,27 +568,27 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	case !chosen || dir || src.col.Feed || len(src.segs) == 0:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notChosen))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, notChosen))
 		return
 	case !sameVersion(etag, obj.ETag):
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, changedNotice("nothing was attached")))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, changedNotice("nothing was attached")))
 		return
 	}
 	p, err := src.path(src.segs, false)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notChosen))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, notChosen))
 		return
 	}
 	failed := func(method string, err error) {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.fileFailure(src, "Nothing was attached", method, p, err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.fileFailure(src, "Nothing was attached", method, p, err)))
 	}
 	e, err := src.files.Stat(ctx, p)
 	switch {
 	case file.NotFound(err):
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
 			Role: view.NoticeAlert, Title: "Nothing was attached: the file is no longer there.",
 			Body: "It was moved or deleted after the tree was read. Choose it again.",
 		}))
@@ -597,7 +597,7 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 		failed("PROPFIND", err)
 		return
 	case e.Dir:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notChosen))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, notChosen))
 		return
 	}
 	name := src.segs[len(src.segs)-1]
@@ -629,7 +629,7 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, etag, back string, sent *model.Object, placed []*placedFile, notice *view.Notice) {
 	ctx := r.Context()
 	if notice != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, *notice))
 		return
 	}
 	sent.ETag = etag
@@ -642,7 +642,7 @@ func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collec
 		if current, ferr := c.find(ctx, uid); ferr == nil {
 			obj = current
 		}
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, n))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, n))
 		return
 	}
 	s.finishWrite(w, r, c, uid, sent, back)
@@ -839,10 +839,10 @@ func (s *Server) postDetach(w http.ResponseWriter, r *http.Request, c *collectio
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	case !sameVersion(etag, obj.ETag):
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, changedNotice("nothing was removed")))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, changedNotice("nothing was removed")))
 		return
 	}
 	ops, err := cal.Detach(obj, n)
@@ -857,11 +857,11 @@ func (s *Server) postDetach(w http.ResponseWriter, r *http.Request, c *collectio
 	}
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, changedNotice("nothing was removed")))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, changedNotice("nothing was removed")))
 	case err != nil:
 		notice := s.writeFailure(c, "PUT", obj.Path, err)
 		notice.Body = "Nothing was removed."
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notice))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, notice))
 	default:
 		s.finishWrite(w, r, c, uid, sent, back)
 	}
@@ -938,7 +938,7 @@ func (s *Server) sendInlineAttachment(w http.ResponseWriter, r *http.Request, se
 		case notFoundErr(err):
 			continue
 		case err != nil:
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 			return
 		}
 		a, data, err := cal.AttachmentData(obj, n)

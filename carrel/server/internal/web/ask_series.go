@@ -401,12 +401,12 @@ func (s *Server) postApart(w http.ResponseWriter, r *http.Request, c *collection
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	}
 	all, err := cal.LeftWithoutDay(obj, c.tf.tz)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, readNotice(obj.Path, err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, readNotice(obj.Path, err)))
 		return
 	}
 	r.FormValue("day") // parses the form
@@ -433,7 +433,7 @@ func (s *Server) postApart(w http.ResponseWriter, r *http.Request, c *collection
 		}
 		if err != nil {
 			s.takeBack(ctx, c, made)
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.writeFailure(c, "PUT", obj.Path, err)))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.writeFailure(c, "PUT", obj.Path, err)))
 			return
 		}
 		sent.ETag = ""

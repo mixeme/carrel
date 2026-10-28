@@ -379,7 +379,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/timeline", err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/timeline", err)))
 		return
 	}
 	tz := s.tz()

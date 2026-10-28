@@ -312,7 +312,7 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 		s.redirect(w, r, c.listPath())
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	}
 	s.moveRecord(w, r, c, dest, uid, obj, copying, nothing)
@@ -324,21 +324,21 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object, copying bool, nothing string) {
 	ctx := r.Context()
 	if reason := recordMoveBlock(c, dest, copying); reason != "" {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{Role: view.NoticeAlert, Title: text(nothing), Body: text(reason)}))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{Role: view.NoticeAlert, Title: text(nothing), Body: text(reason)}))
 		return
 	}
 	// A collection holds one resource per UID (RFC 4791 §5.3.2, RFC 6352
 	// §6.3.2); asking first says so instead of a bare refusal.
 	switch _, err := dest.find(ctx, uid); {
 	case err == nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
 			Role: view.NoticeAlert, Title: text(nothing),
 			Body:    text(collectionLabel(dest.col) + " already holds a " + c.spec.noun + " with this UID: the same record, or a copy made earlier."),
 			Actions: []view.Action{s.openThere(dest, uid, "Open it there")},
 		}))
 		return
 	case !notFoundErr(err):
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.unavailableNotice(dest, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.unavailableNotice(dest, c.recordPath(uid), err)))
 		return
 	}
 	if !copying && dest.conn.ID == c.conn.ID {
@@ -403,7 +403,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 		}
 	}
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, moveFailure(dest, nothing, "PUT", dst, err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, moveFailure(dest, nothing, "PUT", dst, err)))
 		return
 	}
 	if fresh != "" {
@@ -437,7 +437,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 	}
 	if err != nil {
 		dest.noteWrite(dst, sent)
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.keptNotice(dest, uid, "Copied, and the original kept",
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.keptNotice(dest, uid, "Copied, and the original kept",
 			"The copy could not be read back to check it, so the "+c.spec.noun+" was not deleted here. Both are there now.")))
 		return
 	}
@@ -445,7 +445,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 	// An identity the server chose is not a loss: the UID was Carrel's to
 	// give, never the person's (S-7.1).
 	if loss := writeLoss(dest.conn.ID, sent, got, c.sess.Losses(), landed != uid); loss != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.keptNotice(dest, landed, "Copied, and the original kept",
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.keptNotice(dest, landed, "Copied, and the original kept",
 			"The server of "+collectionLabel(dest.col)+" did not keep "+lossSaid(loss)+
 				". The original stays here, so nothing is lost; delete it yourself if the copy is enough.")))
 		return
@@ -454,13 +454,13 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):
 		cur, _ := c.find(ctx, uid)
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, cur, s.keptNotice(dest, landed, "Copied, but the original changed, so it stays",
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, cur, s.keptNotice(dest, landed, "Copied, but the original changed, so it stays",
 			"The "+c.spec.noun+" changed here after Carrel read it. The copy holds the version from before; both are there now.")))
 	case err != nil:
 		n := s.keptNotice(dest, landed, "Copied, but the original could not be deleted",
 			"Both are there now. Delete the original yourself once the server lets you.")
 		n.Details = moveFailure(c, "", "DELETE", obj.Path, err).Details
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, n))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, n))
 	case landed != uid:
 		// Moved, under an identity the other server gave it. What pointed at
 		// the old one is pointed at the new, the way a SoGo move is mended
@@ -479,7 +479,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 		if lines := rep.lines(); len(lines) > 0 {
 			n.Details = &view.Diagnostic{Summary: "Linked records", Lines: lines}
 		}
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, n))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, n))
 	default:
 		c.noteWrite(obj.Path, nil)
 		s.followLinks(c.sess, placeOf(c, uid), dest, uid)
@@ -517,7 +517,7 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 		if noMoveHere(err) {
 			return false
 		}
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, moveFailure(c, nothing, "MOVE", obj.Path+" → "+dst, err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, moveFailure(c, nothing, "MOVE", obj.Path+" → "+dst, err)))
 		return true
 	}
 	c.noteWrite(obj.Path, nil)
@@ -544,14 +544,14 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 				if lines := rep.lines(); len(lines) > 0 {
 					n.Details = &view.Diagnostic{Summary: "Linked records", Lines: lines}
 				}
-				s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, n))
+				s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, n))
 				return true
 			}
 		}
 		// Where it went under which UID is not known: its links cannot
 		// follow it (Б41).
 		s.linksGone(c.sess, placeOf(c, uid))
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, view.Notice{
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: "Moved, but the server gave it another identity",
 			Body: text("The " + c.spec.noun + " is in " + collectionLabel(dest.col) + " with everything it held, but that server " +
@@ -656,7 +656,7 @@ func (s *Server) copiedWithOwnUID(w http.ResponseWriter, r *http.Request, c, des
 			body += " That server did not keep " + lossSaid(loss) + " in the copy; the original still holds it."
 		}
 	}
-	s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+	s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
 		Role: view.NoticeAlert, Title: "Copied, with a UID of its own", Body: text(body),
 		Actions: []view.Action{s.openThere(dest, fresh, "Open it there")},
 	}))

@@ -220,6 +220,18 @@ func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, o
 	return page
 }
 
+// cardAnswer is the card an action on a record answers with: the card as it
+// is opened (withLinked — its other copies, «linked», Edit through the
+// copies), the action's notices over it. A record that could not be read
+// (nil) has nothing to link: its page carries the notice alone.
+func (s *Server) cardAnswer(r *http.Request, c *collectionCtx, uid string, obj *model.Object, notices ...view.Notice) any {
+	page := s.recordPage(c, uid, obj, notices...)
+	if obj == nil {
+		return page
+	}
+	return s.withLinked(r.Context(), c, uid, obj, page)
+}
+
 // withNotice is notices with n after them, when there is one.
 func withNotice(notices []view.Notice, n *view.Notice) []view.Notice {
 	if n == nil {

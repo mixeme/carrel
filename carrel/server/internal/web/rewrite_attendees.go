@@ -722,11 +722,11 @@ func (s *Server) postContactRewrite(w http.ResponseWriter, r *http.Request) {
 	s.users.Journal(c.sess.AccountID(), "contact.rewrite", fmt.Sprintf("%d of %d", out.written, p.count(answer)))
 	card, err := c.find(r.Context(), p.UID)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, p.UID, nil, out.notice(p, answer)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, p.UID, nil, out.notice(p, answer)))
 		return
 	}
 	// The card as it is opened, its other copies with it (s-contacts-16).
-	s.writePage(w, r, http.StatusOK, s.withLinked(r.Context(), c, p.UID, card, s.recordPage(c, p.UID, card, out.notice(p, answer))))
+	s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, p.UID, card, out.notice(p, answer)))
 }
 
 // rewriteOutcome is what answering the sheet did.

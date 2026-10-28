@@ -689,7 +689,7 @@ func (s *Server) photoCard(w http.ResponseWriter, r *http.Request, c *collection
 		s.notFound(w, r)
 		return nil, false
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
 		return nil, false
 	case photoOf(obj) == linkedPhoto:
 		s.notFound(w, r)
@@ -704,7 +704,7 @@ func (s *Server) photoCard(w http.ResponseWriter, r *http.Request, c *collection
 func (s *Server) photoEditPage(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, t cardTyping, notices ...view.Notice) {
 	vals, alarms, err := s.currentValues(c, obj)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, append(notices, readNotice(obj.Path, err))...))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, append(notices, readNotice(obj.Path, err))...))
 		return
 	}
 	s.rememberBody(c, obj)
@@ -720,7 +720,7 @@ func (s *Server) photoEditAfter(w http.ResponseWriter, r *http.Request, c *colle
 	obj, err := c.find(r.Context(), uid)
 	if err != nil {
 		keepCardTyping(c, uid, t)
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, notice, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, notice, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
 		return
 	}
 	s.photoEditPage(w, r, c, uid, obj, t, notice)

@@ -3532,12 +3532,12 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
 		return
 	}
 	vals, alarms, err := s.currentValues(c, obj)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, readNotice(obj.Path, err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, readNotice(obj.Path, err)))
 		return
 	}
 	s.rememberBody(c, obj)
@@ -3629,7 +3629,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	}
 	have, alarms, err := s.currentValues(c, obj)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, readNotice(obj.Path, err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, readNotice(obj.Path, err)))
 		return
 	}
 	st.obj, st.alarms = obj, alarms
@@ -3807,7 +3807,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 			} else {
 				c.noteWrite(got.Path, got)
 			}
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, got, *left))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, got, *left))
 			return
 		}
 	}
@@ -3940,7 +3940,7 @@ func (s *Server) saveAndMove(w http.ResponseWriter, r *http.Request, c *collecti
 	if err != nil {
 		sent.ETag = ""
 		c.noteWrite(sent.Path, sent)
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, view.Notice{Role: view.NoticeAlert, Title: notMoved,
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, view.Notice{Role: view.NoticeAlert, Title: notMoved,
 			Body: text("The " + c.spec.noun + " could not be read back after saving, so it stayed where it was. Move it from its menu.")}))
 		return
 	}
@@ -4671,7 +4671,7 @@ func (s *Server) finishCreate(w http.ResponseWriter, r *http.Request, c *collect
 		}
 		switch {
 		case made == "" || made == uid:
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.namelessNotice(c)))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.namelessNotice(c)))
 			return
 		default:
 			// The server keeps it under a name of its own too, so the address
@@ -4720,10 +4720,10 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 		s.redirect(w, r, c.listPath())
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	case etag == "":
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
 			Role: view.NoticeAlert, Title: "Nothing was deleted", Body: "The request did not say which version to delete.",
 		}))
 		return
@@ -4738,7 +4738,7 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 	} else {
 		self, err := s.deleteChosen(r.Context(), r, c, uid, obj)
 		if err != nil {
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
 			return
 		}
 		if !self {
@@ -4750,13 +4750,13 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 	err = c.remove(r.Context(), obj.Path, etag)
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: "Changed elsewhere, so nothing was deleted",
 			Body:  "This record changed after you opened it. Check the current version below and delete again if you still mean to.",
 		}))
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
 	default:
 		c.noteWrite(obj.Path, nil)
 		// Its links open nothing now (Б41).

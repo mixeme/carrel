@@ -310,7 +310,7 @@ func (s *Server) getKindCopies(w http.ResponseWriter, r *http.Request, kind stri
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/copies", err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/copies", err)))
 		return
 	}
 	sheet, ok := s.copiesSheet(r.Context(), c, uid, obj, false, "")
@@ -348,7 +348,7 @@ func (s *Server) getTaskDone(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/done", err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/done", err)))
 		return
 	}
 	from := r.URL.Query().Get("from")
@@ -384,7 +384,7 @@ func (s *Server) postTaskDone(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/done", err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/done", err)))
 		return
 	}
 	r.FormValue(copyField) // parses the form
@@ -422,16 +422,16 @@ func (s *Server) postTaskDone(w http.ResponseWriter, r *http.Request) {
 		got := obj
 		if mc != c {
 			if got, err = mc.find(r.Context(), muid); err != nil {
-				s.writePage(w, r, http.StatusOK, s.recordPage(mc, muid, nil, s.unavailableNotice(mc, mc.recordPath(muid), err)))
+				s.writePage(w, r, http.StatusOK, s.cardAnswer(r, mc, muid, nil, s.unavailableNotice(mc, mc.recordPath(muid), err)))
 				return
 			}
 		}
 		if _, err := s.markTaskDone(r.Context(), mc, got); err != nil {
-			s.writePage(w, r, http.StatusOK, s.recordPage(mc, muid, got, s.writeFailure(mc, "PUT", got.Path, err)))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, mc, muid, got, s.writeFailure(mc, "PUT", got.Path, err)))
 			return
 		}
 		if left := s.closeSubtasks(r.Context(), mc, muid); left != nil {
-			s.writePage(w, r, http.StatusOK, s.recordPage(mc, muid, nil, *left))
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, mc, muid, nil, *left))
 			return
 		}
 	}

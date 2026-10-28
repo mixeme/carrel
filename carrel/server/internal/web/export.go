@@ -370,7 +370,7 @@ func (s *Server) exportRecord(w http.ResponseWriter, r *http.Request, c *collect
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	}
 	f := exportFormats[c.spec.kind]

@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.384 — 2026-10-28
+
+### Fixed
+
+- **An action on a record answers with the card as it is opened**: a refused
+  attachment, move, delete, edit, series answer and the rest came back as
+  the card without its other copies — no «The same person in other books»,
+  no «linked», Edit not through the copies. One answer (`cardAnswer`) now
+  gives every one of them what a GET gives, the notice over it. The outcome
+  of rewriting addresses was the first (v0.2.381).
+
 ## v0.2.383 — 2026-10-28
 
 The archive line of a collection's deletion in one short shape (Typecase's

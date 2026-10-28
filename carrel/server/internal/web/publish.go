@@ -428,7 +428,7 @@ func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.listPath(), err)))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.listPath(), err)))
 		return
 	}
 	sheet := s.publishSheet(sess, c, uid, title, r.FormValue("how"))

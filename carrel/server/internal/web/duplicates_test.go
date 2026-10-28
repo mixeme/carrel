@@ -702,6 +702,37 @@ func TestLinkedCardIsItsCopy(t *testing.T) {
 	}
 }
 
+// An action that answers with the card answers with the card as it is
+// opened: a delete that said no version comes back as the linked card, its
+// other book with it and «linked» where the copies differ, the notice over
+// it — not a card that forgot the group.
+func TestActionAnswersWithTheLinkedCard(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	g := onlyGroup(t, f.page(t))
+	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, url.Values{"choice.FN": {pick}})))
+
+	rec := f.record(f.id, peopleBook, "ada-here")
+	opened := decode[view.ContactPage](t, f.h.do(get(rec, f.sess)))
+	answer := decode[view.ContactPage](t, f.h.do(postForm(rec+"/delete", f.sess, url.Values{})))
+	if len(answer.Shell.Notices) == 0 || answer.Shell.Notices[0].Title != "Nothing was deleted" {
+		t.Fatalf("notices = %+v", answer.Shell.Notices)
+	}
+	if len(answer.Books) != 1 || answer.Books[0].Href != opened.Books[0].Href {
+		t.Errorf("the answer's books = %+v, the card's %+v", answer.Books, opened.Books)
+	}
+	badges := func(p view.ContactPage) (out []string) {
+		for _, fl := range p.Fields {
+			out = append(out, string(fl.Label)+":"+string(fl.Badge.Label))
+		}
+		return out
+	}
+	if !equalStrings(badges(answer), badges(opened)) {
+		t.Errorf("the answer's badges = %q, the card's %q", badges(answer), badges(opened))
+	}
+}
+
 // The same card for the calendar kinds: a linked event names the other
 // calendar; the place both hold otherwise carries «linked» (s-agenda-2), and
 // a description only the other holds is not shown — it is the other copy's.
