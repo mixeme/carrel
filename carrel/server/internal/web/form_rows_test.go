@@ -161,11 +161,11 @@ func TestRemoveIsOnEveryRow(t *testing.T) {
 			want[m[1]] = n
 		}
 	}
-	if want["Phone numbers"] != 2 || want["Email addresses"] != 1 || want["Addresses"] != 1 || len(want) != 3 {
+	if want["Phone numbers"] != 2 || want["Email addresses"] != 2 || want["Addresses"] != 1 || len(want) != 3 {
 		t.Fatalf("s-contacts-3 Remove buttons = %v: read it again", want)
 	}
 	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\n"+
-		"TEL;TYPE=cell:+1 555 0100\nTEL;TYPE=work;PREF=1:+1 555 0101\nEMAIL;TYPE=work:ada@example.org\n"+
+		"TEL;TYPE=cell:+1 555 0100\nTEL;TYPE=work;PREF=1:+1 555 0101\nEMAIL;TYPE=work:ada@example.org\nEMAIL;TYPE=home:ada@home.example\n"+
 		"ADR;TYPE=home:;;1 Main St;London;;N1;UK\nEND:VCARD\n")
 	edit := f.path("contacts") + "/ada/edit"
 	page := decode[view.ContactEditPage](t, f.h.do(get(edit, f.sess)))
@@ -183,10 +183,10 @@ func TestRemoveIsOnEveryRow(t *testing.T) {
 			}
 		}
 	}
-	if len(got) != len(want) || got["Phone numbers"] != 2 || got["Email addresses"] != 1 || got["Addresses"] != 1 {
+	if len(got) != len(want) || got["Phone numbers"] != 2 || got["Email addresses"] != 2 || got["Addresses"] != 1 {
 		t.Errorf("Remove per rubric = %v, the frame %v", got, want)
 	}
-	if !equalStrings(removes, []string{"tel.0", "tel.1", "email.0", "adr.0"}) {
+	if !equalStrings(removes, []string{"tel.0", "tel.1", "email.0", "email.1", "adr.0"}) {
 		t.Errorf("Remove rows = %q", removes)
 	}
 

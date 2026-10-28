@@ -52,7 +52,7 @@ func TestCollectionDeleteSheetSaysWhatGoes(t *testing.T) {
 	if sheet.References == nil || len(sheet.References) != 0 {
 		t.Errorf("references = %#v, want an empty list", sheet.References)
 	}
-	if !strings.Contains(plainText(sheet.Archive), "new calendar at a new address") {
+	if plainText(sheet.Archive) != "No backup job copies it: there is no archive to restore it from." {
 		t.Errorf("archive = %q", sheet.Archive)
 	}
 	if c := sheet.Actions[0]; c.ID != "collection.delete.confirm" || c.Method != "POST" || !c.Danger {
@@ -293,10 +293,12 @@ func TestCollectionDeleteSheetCaptionCases(t *testing.T) {
 	for _, m := range regexp.MustCompile(`«((?:[^«»]|«[^«»]*»)*)»`).FindAllStringSubmatch(cases, -1) {
 		said = append(said, frameText(m[1]))
 	}
-	if len(said) != 4 || !strings.HasSuffix(said[1], "…") || !strings.Contains(said[3], "«…»") {
+	// The first is the line with an archive, «Last archived …; …», which the
+	// frame draws (Typecase's note 145).
+	if len(said) != 5 || !strings.HasPrefix(said[0], "Last archived") || !strings.Contains(said[4], "«…»") {
 		t.Fatalf("s-profile-9 caption cases = %q: read it again", said)
 	}
-	noArchive, notWhole, oneDevice, writesHere := said[0], strings.TrimSuffix(said[1], "…"), said[2], said[3]
+	noArchive, notWhole, oneDevice, writesHere := said[1], said[2], said[3], said[4]
 
 	f := calendarFixture(t, nil, "standup.ics", workSeries)
 	sheet := func() view.CollectionDeleteSheet {

@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.383 — 2026-10-28
+
+The archive line of a collection's deletion in one short shape (Typecase's
+note 145, s-profile-9; mockup `43a0fc8`).
+
+### Changed
+
+- **Three cases, one shape**: «Last archived ‹2026-08-14›; a restore makes
+  a **new** calendar at a new address.» — the collection's noun, «address
+  book», «folder», not «collection» —; «No backup job copies it: there is no
+  archive to restore it from.»; «A backup job copies it, but none has
+  finished whole yet: there is no archive to restore it from.».
+
+### For consumers
+
+`app-collections-delete/normal` says «calendar».
+
 ## v0.2.382 — 2026-10-28
 
 Dates as Typecase's note 142 writes them (Им11 closed; mockup `31a97a0`).

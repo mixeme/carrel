@@ -304,16 +304,15 @@ func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connect
 	return refs
 }
 
-// collectionArchive is the archive line (s-profile-9, s-profile-19): when a
-// backup job of Carrel last made a whole archive of the collection, and that
-// a restore brings it back into a new one, not to this address.
+// collectionArchive is the archive line (s-profile-9, s-profile-19), in one
+// short shape for its three cases (Typecase's note 145): when a backup job of
+// Carrel last made a whole archive of the collection and that a restore makes
+// a new one — «calendar», «address book», «folder» — at a new address; that a
+// job copies it and none has finished whole yet; that no job copies it.
+// Either of the last two has no archive to restore it from.
 //
 // The day is monospaced and «new» bold, as the frames mark them.
 func (s *Server) collectionArchive(sess *session.Session, conn sealed.Connection, col sealed.Collection) view.Runs {
-	what, into := "records", "collection"
-	if col.Has(view.KindFile) {
-		what, into = "files", "folder"
-	}
 	var last time.Time
 	copied := false
 	runs := s.users.BackupRuns(sess.AccountID())
@@ -326,17 +325,11 @@ func (s *Server) collectionArchive(sess *session.Session, conn sealed.Connection
 			last = at
 		}
 	}
-	// The other cases are said as the caption of s-profile-9 says them.
-	restore := []view.Run{plainRun("Restoring brings the " + what + " back into a "), strongRun("new"), plainRun(" " + into + " — not into this one, and not to this address.")}
 	switch {
 	case !last.IsZero():
-		return join("Last archived ", monoRun(last.In(s.timeFor(sess).tz).Format("2006-01-02")), "; a restore makes a ", strongRun("new"), " "+into+" at a new address.")
+		return join("Last archived ", monoRun(last.In(s.timeFor(sess).tz).Format("2006-01-02")), "; a restore makes a ", strongRun("new"), " "+collectionNoun(col)+" at a new address.")
 	case copied:
-		return join("A backup job copies it, but none has finished whole yet, so there is no archive of it here. ", restore)
+		return line("A backup job copies it, but none has finished whole yet: there is no archive to restore it from.")
 	}
-	if col.Has(view.KindFile) {
-		return line("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the files back into a new folder at a new address — not into this one.")
-	}
-	return line("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new " +
-		collectionNoun(col) + " at a new address — not into this one, and not to this address.")
+	return line("No backup job copies it: there is no archive to restore it from.")
 }
