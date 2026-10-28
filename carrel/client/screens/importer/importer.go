@@ -319,7 +319,7 @@ func preview(p *view.ImportPage) []w.DialogPart {
 		out = append(out, stats)
 	}
 	for _, t := range p.Preview {
-		out = append(out, table(t))
+		out = append(out, table(t, p.Kind))
 	}
 	if len(p.Source.Note) > 0 {
 		out = append(out, w.Msg{Parts: msgParts(p.Source.Note), Space: w.MsgFlushSides})
@@ -327,10 +327,11 @@ func preview(p *view.ImportPage) []w.DialogPart {
 	return out
 }
 
-// table is the preview's table: the source and the identity monospaced, the
-// result last — a record that failed in alarm, one left out by the kind
-// dusty —, a missing value «—» dusty.
-func table(t view.ImportTable) w.Table {
+// table is the preview's table: the source, a contact's identity and a
+// missing value monospaced — a time or a day in the card's words is not
+// (Typecase's note 142) —, the result last — a record that failed in alarm, one left out by
+// the kind dusty —, a missing value «—» dusty.
+func table(t view.ImportTable, k view.Kind) w.Table {
 	out := w.Table{}
 	for i, c := range t.Columns {
 		col := w.TableCol{Label: string(c)}
@@ -355,9 +356,9 @@ func table(t view.ImportTable) w.Table {
 					cell.Parts = append(cell.Parts, w.Badge{Label: string(l.Component)})
 				}
 			case 2:
-				cell.Mono = true
+				cell.Mono = k == view.KindContact
 				if c == "" || c == dash {
-					cell.Parts, cell.Tone = []w.CellPart{w.Text(dash)}, w.CellDusty
+					cell.Parts, cell.Tone, cell.Mono = []w.CellPart{w.Text(dash)}, w.CellDusty, true
 				}
 			case 3:
 				switch {

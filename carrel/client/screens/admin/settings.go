@@ -20,7 +20,7 @@ const (
 // settingsWidths are the widths the frame gives the fields, by their names
 // (s-admin-3).
 var settingsWidths = map[string]w.FieldWidth{
-	"inviteTTL": w.FieldXS, "idle": w.FieldXS, "session": w.FieldXS, "name": w.FieldMD, publicURLID: w.FieldLG,
+	"inviteTTL": w.FieldXS, "idle": w.FieldXS, "session": w.FieldXS, "name": w.FieldMD, publicURLID: w.FieldW580,
 	"host": w.FieldLG, "port": w.FieldXS, "security": w.FieldSM, "username": w.FieldMD, "password": w.FieldMD,
 	"from": w.FieldMD, "fromName": w.FieldMD,
 	"attach": w.FieldXS, "letter": w.FieldXS, "recipients": w.FieldXS, "perDay": w.FieldXS,
@@ -62,7 +62,7 @@ func Settings(p *view.AdminSettingsPage) w.Shell {
 		f.Items = append(f.Items, fs)
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	return shell(p.Top, p.Rail, append(main, f))
 }
 
@@ -83,19 +83,19 @@ func rubric(set view.FieldSet) w.Rubric {
 func settingsField(p *view.AdminSettingsPage, r view.FormRow) w.Field {
 	switch {
 	case r.Kind == view.InputCheck:
-		return w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Hint(r)...), OwnLine: true, Place: w.Grown}
+		return w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Column(bind.Hint(r))...), OwnLine: true, Place: w.Grown}
 	case r.Kind == view.InputRadio:
 		seg := w.Seg{Name: r.Name, Variant: w.SegStart}
 		for _, o := range r.Options {
 			seg.Options = append(seg.Options, w.SegOption{Label: string(o.Label), On: o.Selected, Value: o.Value})
 		}
-		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{seg}, bind.Hint(r)...), Place: w.Grown}
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{seg}, bind.Column(bind.Hint(r))...), Place: w.Grown}
 	case r.Name == publicURLID:
 		// Read only, set with the instance's environment: shown, not sent
 		// for a change.
 		in := bind.Input(r)
 		in.Disabled, in.ReadOnly = false, true
-		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{in}, bind.Hint(r)...), Width: settingsWidths[r.Name]}
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{in}, bind.Column(bind.Hint(r))...), Width: settingsWidths[r.Name]}
 	case r.Name == "to":
 		in := bind.Input(r)
 		in.Variant = w.InputFill
@@ -105,9 +105,9 @@ func settingsField(p *view.AdminSettingsPage, r view.FormRow) w.Field {
 				line.Items = append(line.Items, bind.Button(a, ""))
 			}
 		}
-		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{line}, bind.Hint(r)...), Width: settingsWidths[r.Name]}
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{line}, bind.Column(bind.Hint(r))...), Width: settingsWidths[r.Name]}
 	}
-	return bind.Field(r, settingsWidths[r.Name])
+	return bind.ColumnField(r, settingsWidths[r.Name])
 }
 
 // testMsg is the relay's answer to the test (MailTestResult): taken — «Sent.»
@@ -115,9 +115,9 @@ func settingsField(p *view.AdminSettingsPage, r view.FormRow) w.Field {
 // (s-admin-33).
 func testMsg(t view.MailTestResult) w.Msg {
 	if t.OK {
-		return w.Msg{Parts: []w.MsgPart{w.Strong(testSent), w.Text(testAnswer), w.Mono{Text: string(t.Reply)}, w.Text(testEnd)}, Space: w.MsgFlush}
+		return w.Msg{Column: true, Parts: []w.MsgPart{w.Strong(testSent), w.Text(testAnswer), w.Mono{Text: string(t.Reply)}, w.Text(testEnd)}, Space: w.MsgFlush}
 	}
-	return w.Msg{Parts: []w.MsgPart{w.Text(t.Reply)}, Tone: w.MsgAlert, Space: w.MsgFlush}
+	return w.Msg{Column: true, Parts: []w.MsgPart{w.Text(t.Reply)}, Tone: w.MsgAlert, Space: w.MsgFlush}
 }
 
 // SettingsForms are the forms of the page's actions that post with none of

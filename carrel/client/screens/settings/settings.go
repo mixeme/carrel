@@ -66,12 +66,13 @@ func segField(r view.FormRow) w.Field {
 	for _, o := range r.Options {
 		seg.Options = append(seg.Options, w.SegOption{Label: string(o.Label), On: o.Selected, Value: o.Value})
 	}
-	return w.Field{Parts: append([]w.FieldPart{seg}, bind.Hint(r)...)}
+	return w.Field{Parts: append([]w.FieldPart{seg}, bind.Column(bind.Hint(r))...)}
 }
 
-// hintField is what a group of fields means, on a line of its own.
+// hintField is what a group of fields means, on a line of its own, in the
+// page's reading column (Typecase's note 141).
 func hintField(t view.Text) w.Field {
-	return w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(t)}}}, Place: w.Grown}
+	return w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(t)}, Variant: w.HintColumn}}, Place: w.Grown}
 }
 
 // forms are the forms of a settings page's actions that post with none of

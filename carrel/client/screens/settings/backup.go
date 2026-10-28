@@ -61,7 +61,7 @@ func Backup(p *view.BackupPage) w.Shell {
 	}
 	h.Acts = &w.Acts{Items: acts}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	if len(p.Jobs) == 0 {
 		parts := as[w.EmptyPart](bind.Inlines(p.Empty))
 		if len(p.EmptyNote) > 0 {
@@ -263,7 +263,7 @@ func jobPage(p *view.BackupPage) []w.MainPart {
 	}
 	h.Acts = &w.Acts{Items: acts}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	form := bind.Form(p.Add, jobFormID)
 	for _, set := range p.Add.Sets {
 		form.Items = append(form.Items, jobSet(set)...)
@@ -294,14 +294,14 @@ func jobSet(set view.FieldSet) []w.FormPart {
 			f.OwnLine, f.Place = true, w.Grown
 			items = append(items, f)
 			if len(r.HintRuns) > 0 {
-				after = append(after, w.Msg{Parts: bind.MsgParts(r.HintRuns), Space: w.MsgFlushTop4, Place: w.Grown})
+				after = append(after, w.Msg{Column: true, Parts: bind.MsgParts(r.HintRuns), Space: w.MsgFlushTop4, Place: w.Grown})
 			}
 		case r.Kind == view.InputSelect:
 			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{destPick(r)}, Width: w.FieldLG})
 		case r.Kind == view.InputCheck && r.Name == "on":
 			items = append(items, w.Field{Parts: []w.FieldPart{bind.Check(r)}})
 		case r.Kind == view.InputCheck && r.Hint != "":
-			items = append(items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Hint(r)...), OwnLine: true, Place: w.Grown})
+			items = append(items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Column(bind.Hint(r))...), OwnLine: true, Place: w.Grown})
 		case r.Kind == view.InputCheck:
 			// «On sign-in, if the last copy is older than» and its days on
 			// one line (s-backup-2).
@@ -311,7 +311,7 @@ func jobSet(set view.FieldSet) []w.FormPart {
 			in := bind.Input(r)
 			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{in}, Width: w.FieldLG})
 			if r.Hint != "" {
-				items = append(items, w.Msg{Parts: []w.MsgPart{w.Text(r.Hint)}, Tone: w.MsgAlert, Space: w.MsgFlushTop2, Place: w.Grown})
+				items = append(items, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(r.Hint)}, Tone: w.MsgAlert, Space: w.MsgFlushTop2, Place: w.Grown})
 			}
 		case r.Extra != nil:
 			in := bind.Input(r)
@@ -328,7 +328,7 @@ func jobSet(set view.FieldSet) []w.FormPart {
 		}
 	}
 	if len(set.HintRuns) > 0 {
-		after = append(after, w.Msg{Parts: bind.MsgParts(set.HintRuns), Space: w.MsgFlushTop4, Place: w.Grown})
+		after = append(after, w.Msg{Column: true, Parts: bind.MsgParts(set.HintRuns), Space: w.MsgFlushTop4, Place: w.Grown})
 	}
 	items = append(items, after...)
 	if set.Legend == "" {

@@ -53,7 +53,7 @@ func Users(p *view.AdminUsersPage) w.Shell {
 		h.Acts = &w.Acts{Items: acts}
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	main = append(main, usersBar(p.Bar), usersTable(p))
 	return shell(p.Top, p.Rail, main)
 }

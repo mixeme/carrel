@@ -73,6 +73,7 @@ func Preview(p *view.MailPreviewSheet) w.Sheet {
 			if a.Href != p.Form.Action {
 				b.To = a.Href
 			}
+			b.Busy = sending
 			foot = append(foot, b, w.Kbd{Keys: enterKey})
 		case editID:
 			foot = append(foot, bind.Button(a, ""))

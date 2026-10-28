@@ -55,7 +55,7 @@ func Devices(p *view.DevicesPage) w.Shell {
 	}
 	h.Acts = &w.Acts{Items: []w.ActsPart{seg}}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	switch p.Tab {
 	case view.TabApple:
 		main = append(main, appleForm(p, generate))
@@ -65,10 +65,10 @@ func Devices(p *view.DevicesPage) w.Shell {
 		main = append(main, addressTable(p.Accounts))
 		switch {
 		case len(p.UnlockNote) > 0:
-			main = append(main, w.Msg{Icon: "shield", Parts: msgParts(p.UnlockNote)})
+			main = append(main, w.Msg{Column: true, Icon: "shield", Parts: msgParts(p.UnlockNote)})
 		case p.Warning.Body != "" || len(p.Warning.Runs) > 0:
 			m := bind.Msg(p.Warning, w.MsgSpacePage)
-			m.Icon = "shield"
+			m.Icon, m.Column = "shield", true
 			main = append(main, m)
 		}
 	}
@@ -116,7 +116,7 @@ func accountList(accounts []view.DeviceAccount) w.List {
 // shieldMsg is the warning of a tab: what the profile or the codes hold.
 func shieldMsg(n view.Notice) w.Msg {
 	m := bind.Msg(n, w.MsgFlush)
-	m.Icon = "shield"
+	m.Icon, m.Column = "shield", true
 	return m
 }
 
@@ -170,7 +170,7 @@ func androidForm(p *view.DevicesPage) w.Form {
 		bind.Msg(p.Warning, w.MsgFlush),
 	}}
 	if m, ok := wide.Items[1].(w.Msg); ok {
-		m.Icon = "shield"
+		m.Icon, m.Column = "shield", true
 		wide.Items[1] = m
 	}
 	side := w.FormColumn{}

@@ -62,7 +62,7 @@ func Account(p *view.AccountPage) w.Shell {
 	}
 	f.Items = append(f.Items, pass, sessionsSet(p), escrowSet(p.Escrow))
 	main := []w.MainPart{head(p.Title, p.Subtitle)}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	main = append(main, f)
 	for _, a := range p.Danger {
 		main = append(main, w.Danger{Button: bind.Button(a, bind.TickID(a)), Note: string(p.DangerNote)})
@@ -87,7 +87,7 @@ func profileField(p *view.AccountPage, r view.FormRow, fs *w.FieldSet) w.Field {
 		}
 		line.Items = append(line.Items, b)
 	}
-	width := w.FieldLG
+	width := w.FieldW580
 	if a := p.Email.Send; r.Kind == view.InputEmail && a != nil {
 		b := bind.Button(*a, "")
 		if a.Enabled {
@@ -96,7 +96,7 @@ func profileField(p *view.AccountPage, r view.FormRow, fs *w.FieldSet) w.Field {
 		line.Items = append(line.Items, b)
 		width = w.FieldXL
 	}
-	parts := append([]w.FieldPart{line}, bind.Hint(r)...)
+	parts := append([]w.FieldPart{line}, bind.Column(bind.Hint(r))...)
 	return w.Field{Label: string(r.Label), Parts: parts, Width: width}
 }
 

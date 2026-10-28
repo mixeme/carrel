@@ -24,16 +24,16 @@ const (
 // one line (account-14).
 func Escrow(p *view.EscrowPage) w.Shell {
 	st := p.Status
-	main := bind.Notices(p.Notices, w.MsgSpacePage)
+	main := bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))
 	switch {
 	case !st.Active:
 		main = append([]w.MainPart{head(p.Title, p.Subtitle)}, main...)
-		main = append(main, w.Msg{Parts: []w.MsgPart{w.Text(st.Note)}})
+		main = append(main, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(st.Note)}})
 	case !st.Covered:
 		main = append([]w.MainPart{head(p.Title, p.Subtitle)}, main...)
 		set := w.FieldSet{Rubric: w.Rubric{Text: string(p.Rubric)}, Variant: w.FieldSetLead}
 		if st.Note != "" {
-			set.Items = append(set.Items, w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(st.Note)}}}, Place: w.Grown})
+			set.Items = append(set.Items, w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(st.Note)}, Variant: w.HintColumn}}, Place: w.Grown})
 		}
 		for _, a := range st.Actions {
 			set.Items = append(set.Items, w.Field{Parts: []w.FieldPart{bind.Button(a, "")}})
@@ -50,7 +50,7 @@ func depositedDialog(p *view.EscrowPage) w.Dialog {
 	st := p.Status
 	d := w.Dialog{Variant: w.Dialog560, Items: []w.DialogPart{head(p.Title, p.Subtitle)}}
 	if st.Note != "" {
-		d.Items = append(d.Items, w.Msg{Parts: []w.MsgPart{w.Text(st.Note)}, Tone: w.MsgAlert, Space: w.MsgFlushSides})
+		d.Items = append(d.Items, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(st.Note)}, Tone: w.MsgAlert, Space: w.MsgFlushSides})
 	}
 	fields := w.Fields{Variant: w.FieldsBleed, Items: []w.FieldsItem{
 		{Term: depositedTerm, Value: []w.ValuePart{w.Text(st.Deposited)}, Face: w.ValueMono},
@@ -70,7 +70,7 @@ func depositedDialog(p *view.EscrowPage) w.Dialog {
 		cp.Icon = bind.Icon(l.Copy.Icon)
 		f := w.Field{Label: historyLabel, Parts: []w.FieldPart{w.Line{Items: []w.LinePart{in, cp}, Gap: w.LineGap6}}, Width: w.FieldFull}
 		if l.Note != "" {
-			f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(l.Note)}})
+			f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(l.Note)}, Variant: w.HintColumn})
 		}
 		d.Items = append(d.Items, f)
 	}

@@ -32,10 +32,10 @@ func Escrow(p *view.AdminEscrowPage) w.Shell {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	if p.Warning.Body != "" {
 		m := bind.Msg(p.Warning, w.MsgSpacePage)
-		m.Icon = "shield"
+		m.Icon, m.Column = "shield", true
 		main = append(main, m)
 	}
 	if !p.Enabled {
@@ -46,7 +46,9 @@ func Escrow(p *view.AdminEscrowPage) w.Shell {
 		return shell(p.Top, p.Rail, append(main, f))
 	}
 	if r := p.Result; r != nil {
-		main = append(main, bind.Msg(view.Notice{Runs: r.Message}, w.MsgSpacePage), recoveredCard(*r))
+		m := bind.Msg(view.Notice{Runs: r.Message}, w.MsgSpacePage)
+		m.Column = true
+		main = append(main, m, recoveredCard(*r))
 	}
 	sets := w.Form{}
 	for i, f := range []view.Form{p.Form, p.Master, p.Recover} {
@@ -86,7 +88,7 @@ func escrowFields(f view.Form) []w.Field {
 		}
 		in := r
 		in.Hint = ""
-		out = append(out, bind.Field(in, escrowWidths[r.Name]))
+		out = append(out, bind.ColumnField(in, escrowWidths[r.Name]))
 		if r.Hint != "" {
 			hints = append(hints, hintField(r.Hint))
 		}
@@ -104,7 +106,7 @@ func escrowFields(f view.Form) []w.Field {
 
 // hintField is what a field means, on a line of its own.
 func hintField(t view.Text) w.Field {
-	return w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(t)}}}, Place: w.Grown}
+	return w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(t)}, Variant: w.HintColumn}}, Place: w.Grown}
 }
 
 // recoveredCard is the password a recovery gave, shown once (s-admin-30):

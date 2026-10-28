@@ -350,6 +350,31 @@ func Hint(r view.FormRow) []w.FieldPart {
 	return nil
 }
 
+// Column keeps the lines under a field in the reading column of a settings
+// page, 580 px at most (HintColumn: the owner's Р-82, Typecase's note 141); a
+// reason in the danger's tone stays as it is.
+func Column(parts []w.FieldPart) []w.FieldPart {
+	for i, p := range parts {
+		if h, ok := p.(w.FieldHint); ok && h.Variant == w.HintPlain {
+			h.Variant = w.HintColumn
+			parts[i] = h
+		}
+	}
+	return parts
+}
+
+// ColumnMsgs keeps the messages among a settings page's parts in its reading
+// column, as its hints (Msg.Column; Typecase's note 141).
+func ColumnMsgs(parts []w.MainPart) []w.MainPart {
+	for i, p := range parts {
+		if m, ok := p.(w.Msg); ok {
+			m.Column = true
+			parts[i] = m
+		}
+	}
+	return parts
+}
+
 // Field is a row of a form as a field: its label, the muted part after it
 // (LabelAside: «(optional)»), its control (Control) and the line under it
 // (Hint). The width is the frame's, from the screen's draft.
@@ -358,6 +383,14 @@ func Field(r view.FormRow, width w.FieldWidth) w.Field {
 	if r.LabelAside != "" {
 		f.LabelAside = w.Dim{Parts: []w.Inline{w.Text(r.LabelAside)}}
 	}
+	return f
+}
+
+// ColumnField is Field on a settings page, its line under it in the page's
+// reading column (Column).
+func ColumnField(r view.FormRow, width w.FieldWidth) w.Field {
+	f := Field(r, width)
+	f.Parts = Column(f.Parts)
 	return f
 }
 

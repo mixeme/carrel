@@ -15,7 +15,7 @@ const attachmentsID = "attachments"
 const nowPath = "now.path"
 
 // attachmentsWidths are the widths the frame gives the fields.
-var attachmentsWidths = map[string]w.FieldWidth{"collection": w.FieldMD, "folder": w.FieldLG, "name": w.FieldLG}
+var attachmentsWidths = map[string]w.FieldWidth{"collection": w.FieldMD, "folder": w.FieldW580, "name": w.FieldW580}
 
 // Attachments is /app/settings/attachments (AttachmentsPage,
 // attachments-1): what stays in the record and what goes to the folder,
@@ -55,18 +55,18 @@ func Attachments(p *view.AttachmentsPage) w.Shell {
 					}
 				}
 				terms.Items = append(terms.Items, it)
-				if h := bind.Hint(r); len(h) > 0 {
+				if h := bind.Column(bind.Hint(r)); len(h) > 0 {
 					hints = append(hints, w.Field{Parts: h, Place: w.Grown})
 				}
 			case r.Kind == view.InputCheck:
-				fs.Items = append(fs.Items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Hint(r)...), Gap: 7, OwnLine: true, Place: w.Grown})
+				fs.Items = append(fs.Items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Column(bind.Hint(r))...), Gap: 7, OwnLine: true, Place: w.Grown})
 			case r.Extra != nil:
 				in := bind.Input(r)
 				in.Variant = w.InputFill
 				line := w.Line{Items: []w.LinePart{in, bind.Button(*r.Extra, "")}, Gap: w.LineGap8}
-				fs.Items = append(fs.Items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{line}, bind.Hint(r)...), Width: attachmentsWidths[r.Name]})
+				fs.Items = append(fs.Items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{line}, bind.Column(bind.Hint(r))...), Width: attachmentsWidths[r.Name]})
 			default:
-				fs.Items = append(fs.Items, bind.Field(r, attachmentsWidths[r.Name]))
+				fs.Items = append(fs.Items, bind.ColumnField(r, attachmentsWidths[r.Name]))
 			}
 		}
 		if len(terms.Items) > 0 {
@@ -81,10 +81,10 @@ func Attachments(p *view.AttachmentsPage) w.Shell {
 		f.Items = append(f.Items, fs)
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	main = append(main, f)
 	if p.Note != "" {
-		main = append(main, w.Msg{Parts: []w.MsgPart{w.Text(p.Note)}})
+		main = append(main, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(p.Note)}})
 	}
 	return shell(p.Top, p.Rail, main)
 }

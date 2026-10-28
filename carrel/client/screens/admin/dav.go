@@ -34,7 +34,7 @@ func Dav(p *view.AdminDavPage) w.Shell {
 	}
 	f := bind.Form(p.Form, davID)
 	for _, r := range bind.Rows(p.Form) {
-		f.Items = append(f.Items, bind.Field(r, davWidths[r.Name]))
+		f.Items = append(f.Items, bind.ColumnField(r, davWidths[r.Name]))
 	}
 	var full *view.Action
 	for _, a := range p.Actions {
@@ -45,18 +45,18 @@ func Dav(p *view.AdminDavPage) w.Shell {
 		f.Items = append(f.Items, w.Field{Parts: []w.FieldPart{submit(a, p.Form)}})
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	main = append(main, f)
 	if t := p.Trace; t != nil {
 		if t.Stopped != "" {
-			main = append(main, w.Msg{Parts: []w.MsgPart{w.Strong(t.Stopped)}, Tone: w.MsgAlert})
+			main = append(main, w.Msg{Column: true, Parts: []w.MsgPart{w.Strong(t.Stopped)}, Tone: w.MsgAlert})
 		}
 		main = append(main, w.MainDiag{Diag: trace(t.Steps)})
 	}
 	if p.Agree != nil {
 		c := bind.Check(*p.Agree)
 		c.Value, c.Of = "on", davID
-		second := w.Form{Items: []w.FormPart{w.Field{Parts: append([]w.FieldPart{c}, bind.Hint(*p.Agree)...), Width: w.FieldFull}}}
+		second := w.Form{Items: []w.FormPart{w.Field{Parts: append([]w.FieldPart{c}, bind.Column(bind.Hint(*p.Agree))...), Width: w.FieldFull}}}
 		if full != nil {
 			b := bind.SubmitForm(*full, davID)
 			// It writes to the server: in the danger's colour, not filled

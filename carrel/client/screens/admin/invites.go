@@ -28,7 +28,7 @@ func Invites(p *view.AdminInvitesPage) w.Shell {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	main = append(main, w.MainCards{Cards: []w.Card{inviteCard(p.Invite), temporaryCard(p.Temporary), selfRegCard(p.SelfReg)}})
 	if len(p.Rows) > 0 {
 		main = append(main, w.ListGroup{Title: w.Rubric{Text: pending, Form: w.RubricInline}, Count: &w.Num{Value: len(p.Rows)}}, invitesTable(p.Rows))

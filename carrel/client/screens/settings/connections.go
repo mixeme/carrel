@@ -91,7 +91,7 @@ func Connections(p *view.ConnectionsPage) w.Shell {
 		return shell(p.Top, p.Rail, []w.MainPart{connectDialog(p)})
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, ConnectionsNotices(p))...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, ConnectionsNotices(p)))...)
 	if len(p.Empty) > 0 {
 		// Nothing connected yet (s-profile-25).
 		main = append(main, w.Empty{Parts: as[w.EmptyPart](bind.Inlines(p.Empty))})
@@ -99,7 +99,7 @@ func Connections(p *view.ConnectionsPage) w.Shell {
 		main = append(main, res)
 	}
 	if len(p.Note) > 0 {
-		main = append(main, w.Msg{Parts: msgParts(p.Note)})
+		main = append(main, w.Msg{Column: true, Parts: msgParts(p.Note)})
 	}
 	sh := shell(p.Top, p.Rail, main)
 	if p.Add != nil {
@@ -144,7 +144,7 @@ func connectDialog(p *view.ConnectionsPage) w.Dialog {
 	rows := bind.Rows(f)
 	for i := 0; i < len(rows); i++ {
 		r := rows[i]
-		fl := bind.Field(r, connectWidths[r.Name])
+		fl := bind.ColumnField(r, connectWidths[r.Name])
 		if r.Kind == view.InputRadio {
 			// What becomes of the published links (s-profile-22, -23): a
 			// radio an answer, how many use the connection, and why it came
@@ -154,7 +154,7 @@ func connectDialog(p *view.ConnectionsPage) w.Dialog {
 				fl.Parts = append(fl.Parts, w.Check{Name: r.Name, Value: o.Value, Radio: true, On: o.Selected, Parts: []w.CheckPart{w.Text(o.Label)}})
 			}
 			if r.Hint != "" {
-				fl.Parts = append(fl.Parts, w.FieldHint{Parts: []w.Inline{w.Text(r.Hint)}})
+				fl.Parts = append(fl.Parts, w.FieldHint{Parts: []w.Inline{w.Text(r.Hint)}, Variant: w.HintColumn})
 			}
 			if r.Error != "" {
 				fl.Parts = append(fl.Parts, w.FieldHint{Parts: []w.Inline{w.Text(r.Error)}, Variant: w.HintDanger})
@@ -501,7 +501,7 @@ func feedPanel(p *view.ConnectionsPage) *w.Side {
 			}
 			in := bind.Input(r)
 			in.Variant = w.Input11_5
-			form.Items = append(form.Items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{in}, bind.Hint(r)...), Width: w.FieldW100})
+			form.Items = append(form.Items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{in}, bind.Column(bind.Hint(r))...), Width: w.FieldW100})
 			for _, a := range f.Actions {
 				if a.ID == feedCheckID {
 					b := bind.Button(a, "")
@@ -530,18 +530,18 @@ func feedPanel(p *view.ConnectionsPage) *w.Side {
 			if r.ValueAside != "" {
 				parts = append(parts, w.Dim{Parts: []w.Inline{w.Text(r.ValueAside)}, Size: w.Dim11})
 			}
-			form.Items = append(form.Items, w.Field{Label: string(r.Label), Parts: append(parts, bind.Hint(r)...), Width: w.FieldW100})
+			form.Items = append(form.Items, w.Field{Label: string(r.Label), Parts: append(parts, bind.Column(bind.Hint(r))...), Width: w.FieldW100})
 		case r.Kind == view.InputCheck:
-			form.Items = append(form.Items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Hint(r)...), Width: w.FieldW100, OwnLine: true})
+			form.Items = append(form.Items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Column(bind.Hint(r))...), Width: w.FieldW100, OwnLine: true})
 		case r.Multiple && r.ReadOnly:
 			// What the feed carries: shown, not chosen.
 			tags := w.TagInput{}
 			for _, o := range r.Options {
 				tags.Parts = append(tags.Parts, w.Tag{Label: string(o.Label)})
 			}
-			form.Items = append(form.Items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{tags}, bind.Hint(r)...), Width: w.FieldW100})
+			form.Items = append(form.Items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{tags}, bind.Column(bind.Hint(r))...), Width: w.FieldW100})
 		default:
-			form.Items = append(form.Items, bind.Field(r, w.FieldW100))
+			form.Items = append(form.Items, bind.ColumnField(r, w.FieldW100))
 		}
 	}
 	side := &w.Side{Items: []w.SidePart{
@@ -550,7 +550,7 @@ func feedPanel(p *view.ConnectionsPage) *w.Side {
 		form,
 	}}
 	if p.AddNote != "" {
-		side.Items = append(side.Items, w.Msg{Parts: []w.MsgPart{w.Text(p.AddNote)}, Tone: w.MsgAlert, Space: w.MsgInset20})
+		side.Items = append(side.Items, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(p.AddNote)}, Tone: w.MsgAlert, Space: w.MsgInset20})
 	}
 	foot := w.FormFoot{}
 	for _, a := range f.Actions {

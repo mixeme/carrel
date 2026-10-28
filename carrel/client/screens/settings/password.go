@@ -18,6 +18,7 @@ func Password(p *view.PasswordPage) w.Shell {
 	d := w.Dialog{Variant: w.Dialog520, Items: []w.DialogPart{w.Head{Title: &w.HeadTitle{Text: string(p.Title)}}}}
 	if p.Warning.Body != "" || len(p.Warning.Runs) > 0 {
 		m := bind.Msg(p.Warning, w.MsgFlushSides)
+		m.Column = true
 		d.Items = append(d.Items, m)
 	}
 	form := bind.Form(p.Form, passwordFormID)
@@ -37,7 +38,7 @@ func Password(p *view.PasswordPage) w.Shell {
 		foot.Items = append(foot.Items, bind.Button(*b, ""))
 	}
 	d.Items = append(d.Items, foot)
-	main := append(bind.Notices(p.Notices, w.MsgSpacePage), d)
+	main := append(bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage)), d)
 	if len(p.Rail.Nav) == 0 && len(p.Rail.Sections) == 0 {
 		// The forced change: no rail — nothing further before it
 		// (account-17).

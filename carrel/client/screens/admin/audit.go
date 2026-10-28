@@ -52,7 +52,7 @@ func Audit(p *view.AdminAuditPage) w.Shell {
 		h.Acts = &w.Acts{Items: acts}
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	main = append(main, auditBar(p), auditTable(p))
 	return shell(p.Top, p.Rail, main)
 }

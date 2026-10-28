@@ -61,7 +61,7 @@ func Appearance(p *view.AppearancePage) w.Shell {
 		f.Items = append(f.Items, fs)
 	}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	return shell(p.Top, p.Rail, append(main, f))
 }
 

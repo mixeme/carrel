@@ -48,7 +48,7 @@ var sourceWidths = map[string]w.FieldWidth{"file": w.FieldFull, "store": w.Field
 // of it goes where (s-backup-8).
 func restoreMain(p *view.BackupPage) []w.MainPart {
 	r := p.Restore
-	main := bind.Notices(p.Notices, w.MsgSpacePage)
+	main := bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))
 	if rep := r.Report; rep != nil {
 		return append(main, reportDialog(rep))
 	}
@@ -99,7 +99,7 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 	}
 	f := w.Field{Label: whereArchive, Parts: []w.FieldPart{from}, OwnLine: true}
 	if r.FromHint != "" {
-		f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(r.FromHint)}})
+		f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(r.FromHint)}, Variant: w.HintColumn})
 	}
 	d.Items = append(d.Items, f)
 	// A card a set (s-backup-7, -15, -17): the source's, its name its
@@ -110,7 +110,7 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 		}
 		card := w.Card{Items: []w.CardPart{w.Rubric{Text: string(set.Legend)}}}
 		if len(r.Refusal) > 0 && set.Legend != archivePw {
-			card.Items = append(card.Items, w.Msg{Parts: bind.MsgParts(r.Refusal), Tone: w.MsgAlert, Space: w.MsgFlushBottom12})
+			card.Items = append(card.Items, w.Msg{Column: true, Parts: bind.MsgParts(r.Refusal), Tone: w.MsgAlert, Space: w.MsgFlushBottom12})
 		}
 		fields := w.CardFields{Wide: true, Top: true}
 		for _, row := range set.Rows {
@@ -124,7 +124,7 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 				f := w.Field{Parts: []w.FieldPart{pw}, Width: w.FieldLG}
 				if row.Hint != "" {
 					// The hint is the field's (s-backup-7, Typecase's note 97).
-					f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(row.Hint)}})
+					f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(row.Hint)}, Variant: w.HintColumn})
 				}
 				fields.Wide, fields.Top = false, false
 				fields.Items = append(fields.Items, f)
@@ -141,9 +141,9 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 				in := bind.Input(row)
 				in.Variant = w.InputFill
 				fields.Items = append(fields.Items, w.Field{Label: string(row.Label), Width: sourceWidths[row.Name],
-					Parts: append([]w.FieldPart{w.Line{Items: []w.LinePart{in, bind.Button(*row.Extra, "")}, Gap: w.LineGap8}}, bind.Hint(row)...)})
+					Parts: append([]w.FieldPart{w.Line{Items: []w.LinePart{in, bind.Button(*row.Extra, "")}, Gap: w.LineGap8}}, bind.Column(bind.Hint(row))...)})
 			default:
-				fields.Items = append(fields.Items, bind.Field(row, sourceWidths[row.Name]))
+				fields.Items = append(fields.Items, bind.ColumnField(row, sourceWidths[row.Name]))
 			}
 		}
 		if len(fields.Items) > 0 {
@@ -246,13 +246,13 @@ func matchDialog(r view.RestoreBlock, m *view.RestoreMatch) w.Dialog {
 		}
 		parts := []w.FieldPart{seg}
 		if e.Hint != "" {
-			parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(e.Hint)}})
+			parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(e.Hint)}, Variant: w.HintColumn})
 		}
 		d.Items = append(d.Items, w.Field{Label: string(e.Note), Parts: parts, OwnLine: true})
 	}
 	d.Items = append(d.Items, bar, matchTable(m))
 	if len(r.Note) > 0 {
-		d.Items = append(d.Items, w.Msg{Parts: bind.MsgParts(r.Note), Tone: w.MsgAlert, Space: w.MsgFlushSides})
+		d.Items = append(d.Items, w.Msg{Column: true, Parts: bind.MsgParts(r.Note), Tone: w.MsgAlert, Space: w.MsgFlushSides})
 	}
 	return d
 }

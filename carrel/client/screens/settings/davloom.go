@@ -53,7 +53,7 @@ var treeIcons = map[view.Text]w.Icon{"principal/": "con", "cal/": "cal", "card/"
 // none yet (s-davloom-6). Add device is a dialog in place of it
 // (s-davloom-2), and the password issued another, shown once (s-davloom-3).
 func Davloom(p *view.DavloomPage) w.Shell {
-	main := bind.Notices(p.Notices, w.MsgSpacePage)
+	main := bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))
 	if d := p.Dialog; d != nil {
 		return shell(p.Top, p.Rail, append(main, deviceDialog(d)))
 	}
@@ -82,12 +82,12 @@ func Davloom(p *view.DavloomPage) w.Shell {
 		}
 		f := w.Field{Label: addressLabel, Parts: []w.FieldPart{line}, Width: w.FieldMax640Fill460}
 		if p.AddressHint != "" {
-			f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(p.AddressHint)}})
+			f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(p.AddressHint)}, Variant: w.HintColumn})
 		}
 		main = append(main, w.Form{Items: []w.FormPart{f}, Variant: w.FormBottom12})
 	}
 	if len(p.Note) > 0 {
-		main = append(main, w.Msg{Parts: bind.MsgParts(p.Note), Tone: w.MsgAccent})
+		main = append(main, w.Msg{Column: true, Parts: bind.MsgParts(p.Note), Tone: w.MsgAccent})
 	}
 	switch {
 	case len(p.Devices) > 0:
@@ -230,7 +230,7 @@ func deviceDialog(d *view.DeviceDialog) w.Dialog {
 	}
 	dl.Items = append(dl.Items, form)
 	if d.Warning != "" {
-		dl.Items = append(dl.Items, w.Msg{Parts: []w.MsgPart{w.Text(d.Warning)}, Tone: w.MsgAlert, Space: w.MsgFlushSides})
+		dl.Items = append(dl.Items, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(d.Warning)}, Tone: w.MsgAlert, Space: w.MsgFlushSides})
 	}
 	foot := w.FormFoot{Variant: w.FormFootFlush}
 	for _, a := range d.Form.Actions {
@@ -270,7 +270,7 @@ func deviceSet(set view.FieldSet) []w.FormPart {
 			f.Label, f.Width = string(r.Label), w.FieldW100
 			out = append(out, f)
 		default:
-			f := bind.Field(r, w.FieldW100)
+			f := bind.ColumnField(r, w.FieldW100)
 			if r.ReadOnly && r.Name == "address" {
 				if in, ok := f.Parts[0].(w.Input); ok {
 					in.Variant = w.Input11

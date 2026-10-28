@@ -44,13 +44,13 @@ func Install(p *view.AdminInstallPage) w.Shell {
 	}
 	h.Acts = &w.Acts{Items: acts}
 	main := []w.MainPart{h}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	if len(p.Rows) > 0 {
 		main = append(main, tally(p.Rows, p.Took), checksTable(p.Rows))
 	}
 	main = append(main, bind.PostForm(p.Form, installID))
 	if p.Note != "" {
-		main = append(main, w.Msg{Parts: []w.MsgPart{w.Text(p.Note)}})
+		main = append(main, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(p.Note)}})
 	}
 	return shell(p.Top, p.Rail, main)
 }

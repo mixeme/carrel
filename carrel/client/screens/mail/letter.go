@@ -23,6 +23,7 @@ const (
 	escKey      = "Esc"
 	enterKey    = "Enter"
 	ctrlEnter   = "Ctrl+Enter"
+	sending     = "Sending…"
 	clipIcon    = "clip"
 	enterWord   = "Add"
 	enterName   = "op"
@@ -96,6 +97,7 @@ func Letter(p *view.MailSheet) w.Sheet {
 				b.To = a.Href
 			}
 			b.Key = ctrlEnter // U-7: Send a letter
+			b.Busy = sending
 			foot = append(foot, b, w.Kbd{Keys: ctrlEnter})
 		case previewID:
 			b := bind.Submit(a)
