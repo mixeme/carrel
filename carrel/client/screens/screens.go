@@ -526,9 +526,6 @@ var All = []Screen{
 		Draw:   func(model any) Root { return taskedit.Screen(model.(*view.TaskEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.TaskEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return taskedit.Forms(model.(*view.TaskEditPage)) },
-		Waits: []Wait{
-			{Row: 35, Fixture: "app-task-edit/loss"}, // ждёт библиотеку: U-5.5 #35 (задача Typecase 244)
-		},
 	},
 	{
 		Model:  func() any { return new(view.NotesPage) },
