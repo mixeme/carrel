@@ -650,7 +650,9 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 	snap := task.Snapshot()
 	blob := s.catalogOf(c.sess)
 	page.Rail = s.timelineRail(c, &snap, card+"/timeline")
-	page.Poll = s.pollBar(tf, blob, snap, timelineOwner(task))
+	owner := timelineOwner(task)
+	page.Poll = s.pollBar(tf, blob, snap, owner)
+	page.Top.Refresh = s.pollRefresh(tf, snap, owner.again, tf.now)
 	rows := s.timelineRows(tf, blob, snap, person)
 	counts := map[view.Kind]int{}
 	for _, r := range rows {

@@ -979,12 +979,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?again=1",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

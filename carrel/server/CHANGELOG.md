@@ -17,6 +17,39 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.381 — 2026-10-28
+
+A person's card and timeline as s-contacts-6, -7 and -16 draw them, and a
+new contact's empty address of mail (U-5.5 rows 20 and 21 of the client).
+
+### Added
+
+- **A person's timeline has Refresh** in the top bar (s-contacts-7), as a
+  combined list has: it asks the servers again, not while the poll runs,
+  and says when they last answered.
+- **A new contact starts with one empty address of mail** («work») beside
+  its empty phone (s-contacts-27).
+
+### Fixed
+
+- **«linked» only where another copy holds the field otherwise**: a field
+  one copy alone holds — an address, the birthday, the note — carried the
+  badge, while the rows of the other copies said nothing of it. A phone or
+  an address of mail another copy lacks still carries it (Typecase's note
+  123 p. 12).
+- **The card after rewriting addresses shows the person's other copies**:
+  the outcome of the rewrite (s-contacts-16) was the card without «The same
+  person in other books», the badges and Edit through the copies.
+
+### For consumers
+
+`app-contact-timeline/normal` holds `top.refresh` (`poll.again`).
+`app-contact/normal`, `print`, `app-publish/normal` and
+`app-record-copies/normal` lose the badge on Address, Birthday and Note.
+`app-contact/outcome` is taken with one meeting refused by its organiser's
+server: an alert, «Rewritten in 10 of 11 records.» and why.
+`app-contact-new/normal` holds `email.0`.
+
 ## v0.2.380 — 2026-10-28
 
 The loss fixtures of an event and a task taken as their frames draw them

@@ -424,7 +424,6 @@ var All = []Screen{
 			return nil // nothing on paper is pressed
 		},
 		Waits: []Wait{
-			{Row: 20, Fixture: "app-contact/normal"},  // ждёт библиотеку: U-5.5 #20
 			{Row: 20, Fixture: "app-contact/outcome"}, // ждёт библиотеку: U-5.5 #20
 		},
 	},
@@ -436,7 +435,6 @@ var All = []Screen{
 		Forms:  func(model any) []widget.PostForm { return timeline.Forms(model.(*view.ContactTimelinePage)) },
 		Waits: []Wait{
 			{Row: 22, Control: ".Items(Bar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #22
-			{Row: 20, Fixture: "app-contact-timeline/normal"},                        // ждёт библиотеку: U-5.5 #20
 		},
 	},
 	{

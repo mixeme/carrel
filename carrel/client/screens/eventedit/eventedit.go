@@ -164,13 +164,7 @@ func Screen(p *view.EventEditPage) w.Shell {
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
-	main := []w.MainPart{h}
-	// No line of Save on the report of a loss: its frames draw none
-	// (states-17, -36, as states-12 of a contact; the loss frames of a task
-	// and a note draw one — Typecase's task 161).
-	if p.Loss == nil {
-		main = append(main, w.Runbar{Progress: id, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}})
-	}
+	main := []w.MainPart{h, w.Runbar{Progress: id, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
 		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2)...)

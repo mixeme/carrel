@@ -160,10 +160,7 @@ func Screen(p *view.ContactEditPage) w.Shell {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
 	main := []w.MainPart{h}
-	// No line of Save on the report of a loss: its frame draws none
-	// (states-12, as states-17 and -36 of an event; the loss frames of a
-	// task and a note draw one — Typecase's task 161).
-	if p.UID != "" && p.Loss == nil {
+	if p.UID != "" {
 		main = append(main, w.Runbar{Progress: formID, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}})
 	}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)

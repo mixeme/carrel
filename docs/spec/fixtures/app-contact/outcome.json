@@ -2,12 +2,13 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/copies",
       "icon": "i-pencil",
       "id": "record.edit",
       "label": "Edit",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     {
       "csrf": "csrf",
@@ -44,7 +45,24 @@
     "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e35",
     "initials": "АК"
   },
-  "books": [],
+  "books": [
+    {
+      "colour": "#a05a2c",
+      "from": null,
+      "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
+      "label": "nextcloud · Архив",
+      "mono": false,
+      "value": "Phone, email differ"
+    },
+    {
+      "colour": "#6b4e7a",
+      "from": null,
+      "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
+      "label": "radicale · vps · Команда",
+      "mono": false,
+      "value": "Phone, email differ"
+    }
+  ],
   "details": null,
   "fields": [
     {
@@ -55,6 +73,10 @@
       "value": "+7 912 445-10-88"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "from": null,
       "href": "tel:+74951204500",
       "label": "Phone · work",
@@ -62,6 +84,10 @@
       "value": "+7 495 120-45-00"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "from": null,
       "href": "mailto:a.kovaleva@slovo.example",
       "label": "Email · work",
@@ -69,6 +95,10 @@
       "value": "a.kovaleva@slovo.example"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "from": null,
       "href": "mailto:anna@home.example",
       "label": "Email · home",
@@ -76,6 +106,10 @@
       "value": "anna@home.example"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "from": null,
       "href": "mailto:anna.kovaleva@slovo.example",
       "label": "Email · second",
@@ -210,10 +244,10 @@
   "notices": [
     {
       "actions": [],
-      "body": "",
+      "body": "«Ретро спринта» was refused: its organiser’s server does not take changes to attendees.",
       "details": null,
-      "role": "info",
-      "title": "Rewritten in 11 records."
+      "role": "alert",
+      "title": "Rewritten in 10 of 11 records."
     }
   ],
   "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e35",

@@ -372,6 +372,61 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "select",
+            "label": "Label",
+            "name": "email.0.type",
+            "options": [
+              {
+                "label": "work",
+                "selected": true,
+                "value": "work"
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "work"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Address",
+            "name": "email.0",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "remove",
+            "label": "Remove",
+            "name": "remove",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "email.0"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "add",
             "label": "Add email",
             "name": "add",

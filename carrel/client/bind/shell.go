@@ -680,7 +680,12 @@ func FieldsItem(f view.Field, lead string) w.FieldsItem {
 	if f.Aside != "" && lead != "" {
 		it.Value = append(it.Value, w.Dim{Parts: []w.Inline{w.Text(lead + string(f.Aside))}})
 	}
-	if f.Badge.Label != "" {
+	switch {
+	case f.Badge.Label != "" && f.Href != "":
+		// Outside the link: «+7 495 120-45-00» goes to tel:, «linked» does
+		// not (s-contacts-6).
+		it.After = append(it.After, Badge(f.Badge))
+	case f.Badge.Label != "":
 		if n := len(it.Value); n > 0 {
 			if t, ok := it.Value[n-1].(w.Text); ok {
 				it.Value[n-1] = t + " "

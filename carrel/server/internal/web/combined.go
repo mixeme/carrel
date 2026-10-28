@@ -300,17 +300,25 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 		st.seen, owner.seen = &seen, &seen
 		*st.poll = s.pollBar(tf, blob, snap, owner)
 		s.indexAnswered(sess, blob, spec, snap)
-		refresh := view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: s.route(again), Method: "GET", Enabled: !snap.Running}
-		if snap.Running {
-			refresh.Reason = "The poll is still running."
-		}
-		st.shell.Top.Refresh = view.Refresh{Action: refresh, Running: snap.Running}
-		if !snap.Running {
-			st.shell.Top.Refresh.Answered = tf.formatWhen(snap.Finished, true, now)
-		}
+		st.shell.Top.Refresh = s.pollRefresh(tf, snap, again, now)
 	}
 	st.shell.Rail = s.kindRail(sess, blob, spec, st.snap, "/app/"+spec.segment)
 	return st, nil
+}
+
+// pollRefresh is the top bar's circle of a page a poll answers — a combined
+// list, a person's timeline (s-contacts-7): it asks the servers again
+// (again), not while the poll runs, and says when they last answered.
+func (s *Server) pollRefresh(tf timeFmt, snap fanout.Snapshot, again string, now time.Time) view.Refresh {
+	refresh := view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: s.route(again), Method: "GET", Enabled: !snap.Running}
+	if snap.Running {
+		refresh.Reason = "The poll is still running."
+	}
+	out := view.Refresh{Action: refresh, Running: snap.Running}
+	if !snap.Running {
+		out.Answered = tf.formatWhen(snap.Finished, true, now)
+	}
+	return out
 }
 
 // combinedPage is /app/{kind}: the rows of the kind from every answered

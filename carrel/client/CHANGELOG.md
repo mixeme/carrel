@@ -4,6 +4,23 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.7 — 2026-10-28
+
+Server `v0.2.381`, Typecase `2c6b5c8`. A person's card and timeline match
+their frames s-contacts-6 and -7; the reports of a loss have their line of
+Save.
+
+### Changed
+
+- **The edit of a contact and of an event, on the report of a loss**: the
+  line of Save stands under the head, as on every edit — states-12, -17
+  and -36 draw it now.
+- **A person's card and timeline** no longer wait on `app-contact/normal`
+  and `app-contact-timeline/normal`: the timeline has its Refresh, and only
+  the fields another copy holds differently are «linked».
+- **The task's report of a loss** waits for its frame (Typecase's task 244),
+  not for the server.
+
 ## v0.11.6 — 2026-10-28
 
 Server `v0.2.379`, Typecase `2c6b5c8`. The full form of a new note matches

@@ -227,8 +227,10 @@ func (q question) optionOf(key string) int {
 // markAsked gives the badge «linked» to the fields of a copy's card where a
 // choice is made (s-contacts-6: Phone · work, Email · second; s-agenda-2,
 // s-tasks-2): a single value asked about, a value of many that not every
-// copy holds, the tags when they were asked about. A field with a badge of
-// its own (the zone it was made in, the end of a series) keeps it.
+// copy holds, the tags when they were asked about. A field only one copy
+// holds has none — the address, the birthday, the note of s-contacts-6 —,
+// as the rows of the others say nothing of it (differing). A field with a
+// badge of its own (the zone it was made in, the end of a series) keeps it.
 func markAsked(fields []view.Field, qs []question) []view.Field {
 	out := append([]view.Field(nil), fields...)
 	for i, f := range out {
@@ -236,12 +238,29 @@ func markAsked(fields []view.Field, qs []question) []view.Field {
 			continue
 		}
 		q, key, ok := questionOf(f, qs)
-		if !ok || (q.many() && q.prop() != "CATEGORIES" && q.optionOf(key) < 0) {
+		if !ok || (q.many() && q.prop() != "CATEGORIES" && q.optionOf(key) < 0) || heldOnce(q) {
 			continue
 		}
 		out[i].Badge = linkedMark
 	}
 	return out
+}
+
+// heldOnce is a question whose property one value alone stands for among the
+// copies that hold it, the others holding none: no copy holds it otherwise.
+// A phone or an address of mail another copy lacks is a difference all the
+// same (note 123 p. 12).
+func heldOnce(q question) bool {
+	if p := q.prop(); p == "TEL" || p == "EMAIL" {
+		return false
+	}
+	held := 0
+	for _, o := range q.opts {
+		if !o.none {
+			held++
+		}
+	}
+	return held < 2
 }
 
 // markFrom names, after each value of the linked record that was a choice,

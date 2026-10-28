@@ -1380,6 +1380,10 @@ func TestFixtureContactRewrite(t *testing.T) {
 	got := app.h.do(get(sheet, app.sess))
 	app.compare(t, "app-contact-rewrite/normal.json", got)
 	confirm := decode[view.RewriteSheet](t, got).Actions[0]
+	// The server of a meeting organised by another refuses the change, as
+	// in the frame's outcome (s-contacts-16): the card says what was not
+	// rewritten.
+	app.servers["nextcloud"].RefuseAt("PUT", davtest.CalendarHome+"rabota/aa02.ics", http.StatusForbidden, "")
 	app.compare(t, "app-contact/outcome.json", app.h.do(postForm(confirm.Href, app.sess, url.Values{})))
 }
 
