@@ -51,9 +51,8 @@ func card(c view.AddUserCard) []w.CardPart {
 		parts = append(parts, w.CardText{Kind: w.CardLede, Parts: []w.CardTextPart{w.Text(c.Lede)}})
 	}
 	if c.Warning != nil {
-		// In the column although in a card (s-admin-1, Typecase's note 141).
+		// A message inside a card keeps the card's width (Typecase's note 148).
 		m := bind.Msg(*c.Warning, w.MsgFlushBottom12)
-		m.Column = true
 		parts = append(parts, m)
 	}
 	return parts

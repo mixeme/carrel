@@ -110,7 +110,7 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 		}
 		card := w.Card{Items: []w.CardPart{w.Rubric{Text: string(set.Legend)}}}
 		if len(r.Refusal) > 0 && set.Legend != archivePw {
-			card.Items = append(card.Items, w.Msg{Column: true, Parts: bind.MsgParts(r.Refusal), Tone: w.MsgAlert, Space: w.MsgFlushBottom12})
+			card.Items = append(card.Items, w.Msg{Parts: bind.MsgParts(r.Refusal), Tone: w.MsgAlert, Space: w.MsgFlushBottom12})
 		}
 		fields := w.CardFields{Wide: true, Top: true}
 		for _, row := range set.Rows {
