@@ -320,7 +320,7 @@ func jobSet(set view.FieldSet) []w.FormPart {
 		case r.Kind == view.InputNumber:
 			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Input(r)}, Width: w.FieldXS})
 			if len(r.HintRuns) > 0 {
-				items = append(items, w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: bind.Inlines(r.HintRuns)}}, Place: w.Grown})
+				items = append(items, w.Field{Parts: []w.FieldPart{w.FieldHint{Parts: bind.Inlines(r.HintRuns), Variant: w.HintColumn}}, Place: w.Grown})
 			}
 		default:
 			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Input(r)}, Width: w.FieldLG})
