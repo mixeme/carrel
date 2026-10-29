@@ -152,13 +152,27 @@ func TestGoogleEventInTheExistingCalendar(t *testing.T) {
 	// its event in the owner's calendar: the cleanup below is set up only
 	// after the redirect. The form names the record it holds.
 	made := app.post(events+"/new", form)
+	loc := ""
 	if made.Code != http.StatusSeeOther {
 		var page view.EventEditPage
 		if json.Unmarshal(made.Body.Bytes(), &page) == nil && page.UID != "" {
 			removeLater(t, client, cal.Path+page.UID+".ics")
+			wire, _ := rawBody(ctx, t, client, cal.Path+page.UID+".ics")
+			// SV-25: Google replaces the default reminder's message. Since
+			// v0.2.386 this real loss is reported instead of redirected away.
+			if made.Code != http.StatusOK || page.Loss == nil || len(page.Loss.Properties) != 1 || page.Loss.Properties[0] != "VALARM" {
+				t.Fatalf("new event: expected only the reminder loss, status %d, loss %+v", made.Code, page.Loss)
+			}
+			mustHave(t, "rewritten reminder", wire, "DESCRIPTION:This is an event reminder", "ACTION:DISPLAY")
+			if strings.Contains(wire, "DESCRIPTION:Reminder\r\n") {
+				t.Fatal("reported loss although the reminder message survived")
+			}
+			loc = events + "/" + url.PathEscape(page.UID)
 		}
 	}
-	loc := redirected(t, "new event", made)
+	if loc == "" {
+		loc = redirected(t, "new event", made)
+	}
 	uid, _ := url.PathUnescape(loc[strings.LastIndex(loc, "/")+1:])
 	// Google keeps both the UID and the resource name of an event (SV-25
 	// notes that only a card is renamed).
@@ -166,6 +180,9 @@ func TestGoogleEventInTheExistingCalendar(t *testing.T) {
 	removeLater(t, client, file)
 	got, _ := rawBody(ctx, t, client, file)
 	mustHave(t, "new event", got, "UID:"+uid, "SUMMARY:"+summary, "20310311")
+	if made.Code == http.StatusSeeOther && !strings.Contains(got, "DESCRIPTION:Reminder\r\n") {
+		t.Fatal("the reminder message was lost without a loss report")
+	}
 	// Only an attendee of the event itself would be invited. Google writes
 	// two reminders of its own into every event (SV-25), and the e-mail one
 	// carries an ATTENDEE — the calendar's owner, whom the reminder is for —
