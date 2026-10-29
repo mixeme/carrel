@@ -4,6 +4,11 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.10 — 2026-10-29
+
+- A full-width note uses the space freed by hiding its side column.
+- The note under its publication sheet carries the same working controls.
+
 ## v0.11.9 — 2026-10-29
 
 - Notes show literal Markdown with Source and return with Rendered. Width

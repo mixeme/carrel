@@ -295,6 +295,9 @@ func read(p *view.NotePage) []w.MainPart {
 	}
 	secs = append(secs, column(p)...)
 	layout := w.DocLayout{View: layoutOf(p.Look), Items: []w.DocLayoutPart{doc}}
+	if p.Doc.HideSide && p.Look.Wide {
+		layout.View = w.DocViewFocus
+	}
 	if !p.Doc.HideSide {
 		layout.Items = append(layout.Items, w.Docmeta{Sections: secs, Danger: danger(p.Meta.Actions)})
 	}
