@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.12 — 2026-10-29
+
+- The contact photo controls keep the frame's line wrapper with one
+  button too. The contact sample now carries its street, city, postcode
+  and country in separate ADR components, matching the edit frames.
+- Screens provide the upload size field name to the binding layer.
+
 ## v0.11.11 — 2026-10-29
 
 - Contact photos and event/task attachments wait for Save, with a local

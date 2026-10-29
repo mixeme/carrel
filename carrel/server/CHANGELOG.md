@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.389 — 2026-10-29
+
+### Fixed
+
+- Multipart Save also works when no file was selected. Large attachments
+  use the final record title, date and monthly folder even when the file
+  comes before those fields; abandoned placements are removed.
+- Crop opens the replacement photo selected in the form, without writing
+  it before the photo is confirmed.
+
 ## v0.2.388 — 2026-10-29
 
 ### Added
