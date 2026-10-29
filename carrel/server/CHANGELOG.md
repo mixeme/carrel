@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.386 — 2026-10-29
+
+### Fixed
+
+- **A reminder read back after a write is compared whole**: its message,
+  recipients, sound, repetitions and unknown properties, as well as its
+  action and trigger. Reminders sharing a trigger are matched one to one.
+- **An occurrence changed apart is compared by its own fields and
+  reminders**, not just its RECURRENCE-ID. Equal instants written in UTC
+  and changes to server stamps or a server-issued UID are not losses.
+- **A move of a record or collection keeps the original** when the
+  destination loses any of those contents. The existing loss report names
+  the reminder or the day of the affected occurrence.
+
 ## v0.2.385 — 2026-10-28
 
 ### Fixed
