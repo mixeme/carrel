@@ -648,11 +648,26 @@ func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		}
 		s.photoUpload(w, r, c, uid, t)
 	case "crop":
+		t := typing()
+		if tooLarge {
+			if obj, ok := s.photoCard(w, r, c, uid); ok {
+				s.photoEditPage(w, r, c, uid, obj, t, s.photoRefusal(photo.ErrTooLarge))
+			}
+			return
+		}
 		if framed(r) {
 			s.photoSave(w, r, c, uid, false)
 			return
 		}
-		s.photoCrop(w, r, c, uid, typing())
+		// Replace waits for Save. If Crop brought that selection with the
+		// edit, frame it rather than reopening the card's old photograph.
+		if r.MultipartForm != nil {
+			if files := r.MultipartForm.File["photo"]; len(files) > 0 && files[0].Filename != "" {
+				s.photoUpload(w, r, c, uid, t)
+				return
+			}
+		}
+		s.photoCrop(w, r, c, uid, t)
 	case "frame":
 		d, ok := loadFrame(c, uid)
 		if !ok {
