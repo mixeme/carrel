@@ -58,6 +58,14 @@ func (p *Provider) Search(ctx context.Context, collection, text string) ([]*mode
 		q.Matches = append(q.Matches, dav.CardMatch{Prop: name, Text: text})
 	}
 	objs, fetched, err := p.query(ctx, collection, q)
+	var partial *PartialRead
+	if errors.As(err, &partial) {
+		// A fallback read has no server-side filter, even when incomplete.
+		if fetched {
+			objs = siftCards(objs, text)
+		}
+		return objs, err
+	}
 	if err != nil {
 		return objs, err
 	}
@@ -74,6 +82,8 @@ func (p *Provider) Search(ctx context.Context, collection, text string) ([]*mode
 				if kept := siftCards(all, text); len(kept) > 0 {
 					return kept, ErrServerMissed
 				}
+			} else if errors.As(err, &partial) {
+				return siftCards(all, text), err
 			}
 		}
 		return objs, nil
@@ -124,13 +134,17 @@ func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.
 	objs, _, err := p.query(ctx, collection, dav.CardQuery{
 		Matches: []dav.CardMatch{{Prop: vcard.FieldUID, Text: uid}},
 	})
-	if err != nil {
+	var partial *PartialRead
+	if err != nil && !errors.As(err, &partial) {
 		return nil, err
 	}
 	for _, o := range objs {
 		if UID(o) == uid {
 			return o, nil
 		}
+	}
+	if err != nil {
+		return nil, err
 	}
 	return nil, ErrNotFound
 }
@@ -190,7 +204,16 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		}
 	}
 	out := make([]*model.Object, 0, len(aos))
+	var bad []Unreadable
 	for _, ao := range aos {
+		if ao.DecodeError != nil || ao.Card == nil {
+			err := ao.DecodeError
+			if err == nil {
+				err = errors.New("the resource contains no vCard")
+			}
+			bad = append(bad, Unreadable{Path: ao.Path, Err: err})
+			continue
+		}
 		var lines []string
 		if blocks := cardBlocks([]byte(ao.Data)); len(blocks) > 0 {
 			lines = blocks[0]
@@ -198,6 +221,9 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		obj := model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(ao.Card, lines))
 		obj.Modified = ao.ModTime
 		out = append(out, obj)
+	}
+	if len(bad) != 0 {
+		return out, fetched, &PartialRead{Records: bad}
 	}
 	return out, fetched, nil
 }

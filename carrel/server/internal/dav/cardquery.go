@@ -57,6 +57,8 @@ type CardGetter interface {
 type CardObject struct {
 	carddav.AddressObject
 	Data string
+	// DecodeError belongs to this resource, not to the REPORT as a whole.
+	DecodeError error
 }
 
 // CardQuerier sends an addressbook-query whose address-data names a version,
@@ -113,11 +115,8 @@ func (c cardReports) cardReport(ctx context.Context, addressBook string, body []
 		if err != nil {
 			return nil, fmt.Errorf("dav: %s: %w", ao.Path, err)
 		}
-		card, err := vcard.NewDecoder(strings.NewReader(text)).Decode()
-		if err != nil {
-			return nil, fmt.Errorf("dav: %s: %w", ao.Path, err)
-		}
-		ao.Card, ao.Data = card, text
+		ao.Data = text
+		ao.Card, ao.DecodeError = vcard.NewDecoder(strings.NewReader(text)).Decode()
 		out = append(out, ao)
 	}
 	return out, nil
