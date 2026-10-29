@@ -465,7 +465,7 @@
           "many": true,
           "name": "choice.ADR",
           "options": [
-            "Москва, Тверская 12, стр. 3 · Контакты"
+            "Тверская 12, стр. 3, Москва, 123001, Россия · Контакты"
           ],
           "property": "Address · work",
           "union": false,

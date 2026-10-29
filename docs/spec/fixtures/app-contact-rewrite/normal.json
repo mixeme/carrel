@@ -1081,7 +1081,7 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": "Москва, Тверская 12, стр. 3"
+                "value": "Тверская 12, стр. 3"
               },
               {
                 "add": null,
@@ -1094,7 +1094,7 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": ""
+                "value": "Москва"
               },
               {
                 "add": null,
@@ -1121,7 +1121,7 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": ""
+                "value": "123001"
               },
               {
                 "add": null,
@@ -1134,7 +1134,7 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": ""
+                "value": "Россия"
               },
               {
                 "add": null,
