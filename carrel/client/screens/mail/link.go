@@ -88,6 +88,7 @@ func LinkSheet(p *view.MailLinkSheet) w.Sheet {
 		switch a.ID {
 		case sendID:
 			b := bind.Submit(a)
+			b.Busy = sending
 			if a.Href != p.Form.Action {
 				b.To = a.Href
 			}
