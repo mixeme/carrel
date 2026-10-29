@@ -1,0 +1,550 @@
+{
+  "details": null,
+  "doc": {
+    "bar": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/copies",
+        "icon": "i-pencil",
+        "id": "record.edit",
+        "label": "Edit",
+        "method": "GET",
+        "primary": true,
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "hint": "Export Markdown",
+        "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
+        "icon": "i-export",
+        "id": "note.export",
+        "label": ".md",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F5c81-77aa-0d64\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+        "icon": "i-mail",
+        "id": "record.send",
+        "label": "Send",
+        "method": "POST",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?print=1",
+        "icon": "i-print",
+        "id": "record.print",
+        "label": "Print",
+        "method": "GET"
+      }
+    ],
+    "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.",
+    "controls": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?view=reading\u0026width=full",
+        "id": "note.source",
+        "label": "Rendered",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?view=source\u0026width=full",
+        "id": "note.width.full",
+        "label": "Full width",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?view=source\u0026width=read",
+        "id": "note.width.read",
+        "label": "Reading width",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?side=0\u0026view=source\u0026width=full",
+        "id": "note.side",
+        "label": "Hide the side column",
+        "method": "GET"
+      }
+    ],
+    "dirty": false,
+    "fields": [],
+    "foreign": [],
+    "form": null,
+    "mode": "reading",
+    "readOnly": false,
+    "rendered": [
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Договорились заморозить ветку в среду."
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "Что делаем"
+      },
+      {
+        "checked": false,
+        "children": [
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "task",
+            "level": 0,
+            "text": "проверить changelog"
+          },
+          {
+            "checked": true,
+            "children": [],
+            "href": "",
+            "kind": "task",
+            "level": 0,
+            "text": "попросить у Артёма скриншоты"
+          }
+        ],
+        "href": "",
+        "kind": "list",
+        "level": 0,
+        "text": ""
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг."
+      }
+    ],
+    "source": true,
+    "title": "Заметка со встречи 10.08"
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": true
+  },
+  "loss": null,
+  "meta": {
+    "actions": [
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026op=attach",
+            "icon": "i-upload",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e27\u0026for=attach\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "GET",
+            "target": "sheet"
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e27\u0026op=attach",
+        "icon": "i-clip",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST"
+      },
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e27",
+        "icon": "i-trash",
+        "id": "record.delete",
+        "label": "Delete note",
+        "method": "POST",
+        "target": "sheet"
+      }
+    ],
+    "attach": [
+      {
+        "actions": [],
+        "from": null,
+        "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
+        "inline": true,
+        "name": "2026-08-10-sync-board.png",
+        "size": "412 KB",
+        "state": "ok",
+        "type": "image/png"
+      },
+      {
+        "actions": [],
+        "from": null,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
+        "inline": false,
+        "name": "запись-встречи.m4a",
+        "place": "Documents / carrel",
+        "size": "24 MB",
+        "state": "ok",
+        "type": "audio/mp4"
+      }
+    ],
+    "attendees": [],
+    "date": "10 August 2026, 11:05",
+    "link": null,
+    "linked": [
+      {
+        "colour": "#6b4e7a",
+        "from": null,
+        "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
+        "label": "nextcloud · Дневник",
+        "mono": false,
+        "value": "Text, tags differ"
+      }
+    ],
+    "menu": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
+        "icon": "i-move",
+        "id": "record.move",
+        "label": "Move",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
+        "icon": "i-dup",
+        "id": "record.copy",
+        "label": "Copy",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64\u0026as=ics",
+        "icon": "i-export",
+        "id": "record.export",
+        "label": "Export .ics",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+        "icon": "i-link",
+        "id": "publish",
+        "label": "Publish a link",
+        "method": "GET",
+        "target": "sheet"
+      }
+    ],
+    "related": [
+      {
+        "colour": "",
+        "from": null,
+        "href": "",
+        "kind": "event",
+        "stamp": "",
+        "title": "Синк-ап по релизу",
+        "when": "10 Aug",
+        "why": "Related to · in another collection"
+      },
+      {
+        "colour": "",
+        "from": null,
+        "href": "",
+        "kind": "task",
+        "stamp": "",
+        "title": "Дописать раздел про кэш",
+        "when": "14 Aug",
+        "why": "Related to · in another collection"
+      }
+    ],
+    "tags": [
+      {
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
+        "label": "встречи",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+        "label": "релиз",
+        "on": false
+      }
+    ],
+    "tagsBadge": {
+      "label": "linked",
+      "role": "linked"
+    },
+    "tagsFrom": null
+  },
+  "notices": [],
+  "print": {
+    "foot": "Carrel · note · captured 2026-08-10 17:06",
+    "heading": "Заметка со встречи 10.08",
+    "range": "nextcloud · Записи",
+    "sources": "nextcloud · Записи · 10 August 2026, 11:05",
+    "taken": "10 August 2026, 17:06",
+    "title": "Заметка со встречи 10.08"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "icon": "i-note",
+        "id": "nav.neighbour",
+        "label": "Заметка со встречи 10.08",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+        "icon": "i-note",
+        "id": "nav.neighbour",
+        "label": "Что почитать про CRDT",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "label": "Записи",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapiski-obshchie",
+            "label": "Общие с семьёй",
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#4a6b52",
+    "compared": "",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "path": "",
+    "readOnly": false,
+    "stamp": "nextcloud · Записи",
+    "uid": "5c81-77aa-0d64"
+  },
+  "textFrom": null,
+  "title": "Заметка со встречи 10.08",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "uid": "5c81-77aa-0d64"
+}

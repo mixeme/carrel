@@ -533,7 +533,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },
-		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30", "s-notes-32", "print-5"},
+		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30", "s-notes-32", "s-notes-27", "print-5"},
 		Draw: func(model any) Root {
 			if p := model.(*view.NotePage); p.Print.Paper {
 				return note.Paper(p)
@@ -550,8 +550,6 @@ var All = []Screen{
 		Waits: []Wait{
 			{Row: 36, Control: ".Title(Rubric).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
 			{Row: 36, Control: ".Items(Docbar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
-			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Button)"},                 // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Seg)"},                    // ждёт библиотеку: U-5.5 #41
 		},
 	},
 	{

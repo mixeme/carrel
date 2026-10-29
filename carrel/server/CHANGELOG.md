@@ -17,6 +17,14 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.387 — 2026-10-29
+
+### Added
+
+- Note reading controls carry GET addresses for Markdown source, width and
+  the side column. Each link preserves the other choices without changing
+  saved browser preferences. Source is the original Markdown text.
+
 ## v0.2.386 — 2026-10-29
 
 ### Fixed

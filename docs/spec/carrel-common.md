@@ -1679,6 +1679,9 @@ type NotePage struct {
 }
 
 type NoteDoc struct { // колонка текста страницы заметки: чтение или правка
+    Source   bool     // ?view=source: Body показывается исходным Markdown (s-notes-27)
+    HideSide bool     // ?side=0: боковая колонка скрыта; ?side=1 возвращает её
+    Controls []Action // чтение: note.source, note.width.full, note.width.read, note.side; GET, On — выбранное; ссылки сохраняют остальные параметры. ?width=full/read меняет ширину этого просмотра (также принимается reading), без записи настроек; пусто в правке и у связанной записи
     Mode     NoteMode // C-8
     Title    Text
     Body     Text     // исходный текст, не HTML; в правке курсор — в нём (s-notes-20)

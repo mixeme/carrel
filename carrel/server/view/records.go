@@ -368,7 +368,10 @@ type NotePage struct {
 
 // NoteDoc — фрагмент: чтение или правка.
 type NoteDoc struct {
-	Mode     NoteMode `json:"mode"` // C-8
+	Source   bool     `json:"source,omitempty"`   // show Body as literal Markdown
+	HideSide bool     `json:"hideSide,omitempty"` // hide the metadata column
+	Controls []Action `json:"controls,omitempty"` // source, full width, reading width, side column
+	Mode     NoteMode `json:"mode"`               // C-8
 	Title    Text     `json:"title"`
 	Body     Text     `json:"body"`     // исходный текст, не HTML
 	Rendered []Block  `json:"rendered"` // разобранный Markdown, C-6.9

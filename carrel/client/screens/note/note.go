@@ -183,21 +183,34 @@ func read(p *view.NotePage) []w.MainPart {
 			form = formSend
 		}
 		b := bind.Button(a, form)
-		b.Tertiary = a.ID == printID
+		b.Tertiary = a.ID == printID && !p.Doc.Source
 		acts = append(acts, b)
 	}
-	// ждёт библиотеку: U-5.5 #41 — the client's Source, width and side
-	// column do nothing without a script (Typecase's task 104)
 	// Source is its icon, the word its hint; the width is of the third rank:
 	// on a phone it means nothing (note 69 of Typecase).
 	// A linked record's head has Edit and «⋯» alone (s-notes-32): its text
 	// is no one copy's source.
 	if !p.LinkedRecord {
-		acts = append(acts,
-			w.Button{Icon: "code", Title: source},
-			widthSeg(p.Look, true),
-			w.Button{Icon: "panel", Title: hideColumn},
-		)
+		seg := widthSeg(p.Look, true)
+		var sourceButton, sideButton w.Button
+		for _, a := range p.Doc.Controls {
+			switch a.ID {
+			case "note.source":
+				sourceButton = bind.Button(a, "")
+				if !p.Doc.Source {
+					sourceButton.Label, sourceButton.Icon, sourceButton.Title = "", "code", string(a.Label)
+				}
+			case "note.side":
+				sideButton = bind.Button(a, "")
+				sideButton.Label, sideButton.Icon, sideButton.Title = "", "panel", string(a.Label)
+			case "note.width.full":
+				seg.Options[0].Href, seg.Options[0].On = a.Href, a.On
+				seg.Target = bind.Live(a.Target)
+			case "note.width.read":
+				seg.Options[1].Href, seg.Options[1].On = a.Href, a.On
+			}
+		}
+		acts = append(acts, sourceButton, seg, sideButton)
 	}
 	more := w.Button{Icon: "dots", Title: "More"}
 	if p.LinkedRecord {
@@ -224,6 +237,10 @@ func read(p *view.NotePage) []w.MainPart {
 	main := []w.MainPart{w.Head{Meta: &w.HeadSub{Parts: meta}, Acts: &w.Acts{Items: acts}, Pad: w.HeadRule}}
 	main = append(main, notices(p)...)
 	doc := w.Doc{Items: append([]w.DocPart{w.DocTitle{Text: string(p.Doc.Title)}}, bind.DocText(p.Doc.Rendered, faces)...)}
+	if p.Doc.Source {
+		doc.Text = true
+		doc.Items = []w.DocPart{w.DocTitle{Text: string(p.Doc.Title)}, w.DocCode{Text: string(p.Doc.Body), Wrap: true}}
+	}
 	var secs []w.DocmetaSec
 	if len(p.Meta.Tags) > 0 {
 		var tags []w.LinePart
@@ -277,7 +294,11 @@ func read(p *view.NotePage) []w.MainPart {
 		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Attendees"}, Items: []w.DocmetaPart{refs}})
 	}
 	secs = append(secs, column(p)...)
-	return append(main, w.DocLayout{View: layoutOf(p.Look), Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: secs, Danger: danger(p.Meta.Actions)}}})
+	layout := w.DocLayout{View: layoutOf(p.Look), Items: []w.DocLayoutPart{doc}}
+	if !p.Doc.HideSide {
+		layout.Items = append(layout.Items, w.Docmeta{Sections: secs, Danger: danger(p.Meta.Actions)})
+	}
+	return append(main, layout)
 }
 
 // notices are the notices over the text and what the server did not keep of

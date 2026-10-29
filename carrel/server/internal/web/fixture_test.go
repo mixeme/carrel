@@ -1899,6 +1899,8 @@ func TestFixtureNoteCard(t *testing.T) {
 	// s-notes-2 draws the full width the person chose (Typecase's note 79).
 	app.compare(t, "app-note/normal.json", app.h.do(wideNotes(get(rec, app.sess))))
 	app.compare(t, "app-note/print.json", app.h.do(get(onPaper(rec), app.sess))) // print-5
+	source := rec + "?view=source"
+	app.compare(t, "app-note/source.json", app.h.do(wideNotes(get(source, app.sess))))
 }
 
 // wideNotes is a request of a browser that chose «Open notes in full width»

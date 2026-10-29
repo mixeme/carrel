@@ -37,12 +37,61 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetDetails, s.recordDetails(c, uid, obj), nil)
 	default:
 		page := s.withLinked(r.Context(), c, uid, obj, s.recordPage(c, uid, obj))
+		if p, ok := page.(view.NotePage); ok {
+			s.noteReadingControls(r, &p)
+			page = p
+		}
 		// «Show 3» without scripts: the card with the kept properties open.
 		if p, ok := page.(view.ContactPage); ok && r.URL.Query().Get("foreign") == "1" {
 			p.ForeignShow = nil
 			page = p
 		}
 		s.writePage(w, r, http.StatusOK, page)
+	}
+}
+
+// noteReadingControls keeps presentation choices in links, so they also work
+// without scripts. These choices never change the note or saved preferences.
+func (s *Server) noteReadingControls(r *http.Request, p *view.NotePage) {
+	q := r.URL.Query()
+	p.Look = lookOf(r)
+	p.Doc.Source = q.Get("view") == "source"
+	p.Doc.HideSide = q.Get("side") == "0"
+	switch q.Get("width") {
+	case "full":
+		p.Look.Wide = true
+	case "read", "reading":
+		p.Look.Wide = false
+	}
+	link := func(id, label, key, value string, on bool) view.Action {
+		values := url.Values{}
+		if p.Doc.Source {
+			values.Set("view", "source")
+		}
+		if p.Doc.HideSide {
+			values.Set("side", "0")
+		}
+		if p.Look.Wide {
+			values.Set("width", "full")
+		} else {
+			values.Set("width", "read")
+		}
+		values.Set(key, value)
+		return view.Action{ID: id, Label: text(label), Href: s.postQuery(r.URL.EscapedPath(), values), Method: "GET", Enabled: true, On: on}
+	}
+	mode, label := "source", "Source"
+	if p.Doc.Source {
+		mode, label = "reading", "Rendered"
+	}
+	side, sideLabel := "0", "Hide the side column"
+	if p.Doc.HideSide {
+		side, sideLabel = "1", "Show the side column"
+	}
+	p.Doc.Controls = []view.Action{
+		link("note.source", label, "view", mode, p.Doc.Source),
+		link("note.width.full", "Full width", "width", "full", p.Look.Wide),
+		link("note.width.read", "Reading width", "width", "read", !p.Look.Wide),
+		link("note.side", sideLabel, "side", side, p.Doc.HideSide),
 	}
 }
 

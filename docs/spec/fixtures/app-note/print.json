@@ -41,6 +41,37 @@
       }
     ],
     "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.",
+    "controls": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?view=source\u0026width=read",
+        "id": "note.source",
+        "label": "Source",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?width=full",
+        "id": "note.width.full",
+        "label": "Full width",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?width=read",
+        "id": "note.width.read",
+        "label": "Reading width",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?side=0\u0026width=read",
+        "id": "note.side",
+        "label": "Hide the side column",
+        "method": "GET"
+      }
+    ],
     "dirty": false,
     "fields": [],
     "foreign": [],

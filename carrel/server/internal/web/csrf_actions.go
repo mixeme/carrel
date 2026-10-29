@@ -141,6 +141,9 @@ func stampValue(v reflect.Value, token stamper) reflect.Value {
 // (Appearance, appearance-1): the page and the screen under a sheet alike.
 // stampView has already made the value its own, so it is changed in place.
 func stampLook(body any, look view.Look) any {
+	if p, ok := body.(view.NotePage); ok && len(p.Doc.Controls) > 0 {
+		look.Wide = p.Look.Wide
+	}
 	if body == nil {
 		return body
 	}
