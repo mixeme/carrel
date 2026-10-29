@@ -31,6 +31,7 @@ func TestAMoveThatLosesPartOfTheRecordKeepsTheOriginal(t *testing.T) {
 		names string // what the notice names
 	}{
 		{"a reminder", "TRIGGER", "VALARM"},
+		{"a reminder's message", "DESCRIPTION", "VALARM"},
 		// The days of a series as days (Р-60, states-36), not by the
 		// property the server lost.
 		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "one day of the series"},
@@ -64,6 +65,7 @@ func TestAMoveThatLosesPartOfTheRecordKeepsTheOriginal(t *testing.T) {
 func TestACollectionMoveThatLosesPartOfARecordKeepsBoth(t *testing.T) {
 	for _, tc := range []struct{ name, drop, names string }{
 		{"a reminder", "TRIGGER", "VALARM"},
+		{"a reminder's message", "DESCRIPTION", "VALARM"},
 		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "one day of the series"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

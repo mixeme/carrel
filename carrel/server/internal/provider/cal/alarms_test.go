@@ -154,7 +154,7 @@ func TestMissingAlarms(t *testing.T) {
 	}{
 		{"kept as sent", quarter + hour, 0},
 		{"kept in another spelling, with the server's own marks",
-			"BEGIN:VALARM\nUID:x-1\nACTION:display\nTRIGGER;VALUE=DURATION:-PT900S\nX-MOZ-LASTACK:20260101T000000Z\nEND:VALARM\n" + hour, 0},
+			"BEGIN:VALARM\nUID:x-1\nACTION:display\nTRIGGER;VALUE=DURATION:-PT900S\nDESCRIPTION:Soon\nX-MOZ-LASTACK:20260101T000000Z\nEND:VALARM\n" + hour, 0},
 		{"one gone", hour, 1},
 		{"both gone", "", 2},
 		{"the trigger gone", "BEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:Soon\nEND:VALARM\n" + hour, 1},

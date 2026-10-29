@@ -154,28 +154,61 @@ func alarmKey(a Alarm) string {
 	return action + "\x00" + from + "\x00" + when
 }
 
-// MissingAlarms counts the reminders of sent that got — the record as its
-// server keeps it after the write — no longer has, each as often as it
-// stands. A record that cannot be read for its reminders has none.
+// MissingAlarms counts reminders not kept whole, each as often as it stands.
+// The action and trigger are compared semantically; the rest includes the
+// message, recipients, sound, repetition and properties from other clients.
 func MissingAlarms(sent, got *model.Object) int {
 	want, err := Alarms(sent)
 	if err != nil {
 		return 0
 	}
 	have, _ := Alarms(got)
-	left := map[string]int{}
-	for _, a := range have {
-		left[alarmKey(a)]++
+	// One received alarm can account for one sent alarm only. Find a full
+	// matching rather than taking the first fit: a server may add properties
+	// to one of several alarms with the same action and trigger.
+	edges := make([][]int, len(want))
+	for i, a := range want {
+		for j, b := range have {
+			if alarmKey(a) == alarmKey(b) && model.CompareAfterPut("", alarmContents(a), alarmContents(b), nil) == nil {
+				edges[i] = append(edges[i], j)
+			}
+		}
+	}
+	owner := make([]int, len(have))
+	for i := range owner {
+		owner[i] = -1
+	}
+	var match func(int, []bool) bool
+	match = func(i int, seen []bool) bool {
+		for _, j := range edges[i] {
+			if seen[j] {
+				continue
+			}
+			seen[j] = true
+			if owner[j] < 0 || match(owner[j], seen) {
+				owner[j] = i
+				return true
+			}
+		}
+		return false
 	}
 	missing := 0
-	for _, a := range want {
-		if k := alarmKey(a); left[k] > 0 {
-			left[k]--
-		} else {
+	for i := range want {
+		if !match(i, make([]bool, len(have))) {
 			missing++
 		}
 	}
 	return missing
+}
+
+func alarmContents(a Alarm) *model.Object {
+	props := propsToRaw(a.comp.Props, nil)
+	// The first two are compared by alarmKey. Identity and acknowledgement
+	// belong to the server; model.CompareAfterPut also ignores its stamps.
+	for _, name := range []string{"ACTION", "TRIGGER", "UID", "ACKNOWLEDGED"} {
+		delete(props, name)
+	}
+	return model.NewObject("", "", props)
 }
 
 // AlarmLoss adds «VALARM» to the list of what a server did not keep when a
