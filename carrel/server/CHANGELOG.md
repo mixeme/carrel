@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.390 — 2026-10-30
+
+### Fixed
+
+- One unreadable vCard in a CardDAV response no longer hides the other
+  contacts. Lists and searches identify the broken resource and keep the
+  healthy results, including multiget fallbacks; healthy contacts still
+  open by UID. Incomplete address books are not cached as complete reads.
+- Exporting the readable cards requires an explicit “Export without them”
+  choice. Backups mark such a book incomplete and name the omitted records,
+  preserving the previous complete copies.
+
 ## v0.2.389 — 2026-10-29
 
 ### Fixed
