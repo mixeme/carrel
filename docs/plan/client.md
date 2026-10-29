@@ -31,7 +31,7 @@ Google и SV-25: Google заменяет текст напоминания, Carr
   набор красен только на прежнем `TestPagesHoldTheirNames` — Typecase 247
   (`dev/client-note-controls.log`). Кадры, родство, контракт зелёные.
 - Внешний набор с отдельным завершением остальных сервисов и повтором
-  Google: 69 PASS, 57 SKIP, 1 FAIL — `TestNextcloudSearch`, таймаут
+  Google и двух Radicale/Baikal: 71 PASS, 55 SKIP, 1 FAIL — `TestNextcloudSearch`, таймаут
   источника. Общий запуск достиг 45 минут на `TestNextcloudImportExport`.
   Без завершённого результата также `TestNextcloudCollectionDelete`,
   `TestNextcloudVCard4Edit`, `TestNextcloudPhoto`, `TestNextcloudFiles`,
@@ -40,12 +40,21 @@ Google и SV-25: Google заменяет текст напоминания, Carr
   Логи: `dev/live-note-controls.log`, `dev/live-note-controls-rest.log`,
   `dev/google-reminder-note-controls-fixed.log`. Полностью зелёным внешний
   набор не считается; остаток Nextcloud прогонять отдельно.
-  Из 57 Windows-пропусков: 53 теста пяти DAV-стендов покрыты Linux;
-  `TestRadicaleBaikalMove` и `TestRadicaleBaikalCollectionMove` не
-  выполнялись (Windows без Radicale, Linux без доступа Baikal); ещё два —
-  выключенные диагностические отчёты `TestLiveDiscoveryReport` и
-  `TestMemorySeriesReport`. Две временные коллекции S-19 прерванного
-  процесса очищены (`dev/cleanup-note-controls.log`).
+  Из первоначальных 57 Windows-пропусков: 53 теста пяти DAV-стендов
+  покрыты Linux; `TestRadicaleBaikalMove` и
+  `TestRadicaleBaikalCollectionMove` теперь прошли с Windows через
+  SSH-туннель к временному Radicale на Linux. Коммит `bf9d327a` исправляет
+  устаревшее ожидание редиректа в тесте коллекции по C-5.6; проверки
+  содержимого и удаления оригинала сохранены. Лог —
+  `dev/live-note-controls-cross-fixed.log`. Оставшиеся два пропуска —
+  диагностические отчёты `TestLiveDiscoveryReport` и
+  `TestMemorySeriesReport`: они снимают картину без проверок ожидаемого
+  результата и включаются вручную флагами. Отчёт обнаружения Baikal
+  отдельно использован для поиска оставшейся тестовой коллекции.
+  Две коллекции S-19 Nextcloud и коллекция первого упавшего Baikal-теста
+  очищены; временный Radicale, его том и SSH-туннель убраны.
+  Логи очистки: `dev/cleanup-note-controls.log`,
+  `dev/cleanup-cross-and-google.log`. Фоновых прогонов не осталось.
 
 Продолжать в `.claude/worktrees/n141/carrel`, ветка `wip/notes-141-144`.
 Следующий независимый шаг — #43 (multipart Save). Typecase 247/248 и
