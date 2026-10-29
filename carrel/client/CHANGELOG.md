@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.11 — 2026-10-29
+
+- Contact photos and event/task attachments wait for Save, with a local
+  photo preview and pending attachment rows. They work without scripts
+  through the same multipart form; the separate Upload is removed.
+- Contact frame exception U-5.5 #21 is removed. Notes still use their
+  separate upload until Typecase 249 supports multipart Doc forms whose
+  file fields stand outside the document; U-5.5 #43 remains for notes.
+
 ## v0.11.10 — 2026-10-29
 
 - A full-width note uses the space freed by hiding its side column.

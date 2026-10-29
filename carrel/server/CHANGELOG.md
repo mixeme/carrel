@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.388 — 2026-10-29
+
+### Added
+
+- Record Save accepts multipart fields with a contact photo or calendar
+  attachments. Files alone also count as an edit. Photo normalization and
+  conditional record writes are unchanged; large files stream to the
+  attachment folder and are removed if the save is refused.
+- Forms returned after an error and conflict pages explicitly ask to
+  select files again. A series decision must be completed before adding
+  files in the same edit.
+
 ## v0.2.387 — 2026-10-29
 
 ### Added
