@@ -51,12 +51,13 @@ type editDraft struct {
 	// the edit was refused, so Mine was measured against the server's
 	// version — and holds also what only the server changed (Б43 of the
 	// audit of 11.10.2026). The conflict screen says so.
-	Unsure bool `json:"unsure,omitempty"`
+	Unsure        bool `json:"unsure,omitempty"`
+	FilesNotSaved bool `json:"filesNotSaved,omitempty"`
 }
 
 // saveDraft keeps a refused edit; opened is the version the form was opened
 // with, nil when it was no longer held (unsure).
-func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine, base formValues, opened *model.Object, notebook string, unsure bool) {
+func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine, base formValues, opened *model.Object, notebook string, unsure bool, filesNotSaved ...bool) {
 	held := formValues{}
 	var props map[string][]model.RawValue
 	if !unsure {
@@ -77,7 +78,7 @@ func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time,
 	}
 	data, err := json.Marshal(editDraft{
 		Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag, ReadAt: readAt, Mine: mine, Base: held,
-		BaseProps: props, Notebook: notebook, Unsure: unsure,
+		BaseProps: props, Notebook: notebook, Unsure: unsure, FilesNotSaved: len(filesNotSaved) > 0 && filesNotSaved[0],
 	})
 	if err == nil {
 		c.sess.SetDraft(session.DraftRejectedEdit, data)
@@ -444,6 +445,9 @@ func (s *Server) showValues(c *collectionCtx, f editField, vals []string, alarms
 }
 
 func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, theirs formValues, alarms []cal.Alarm, notices []view.Notice) view.ConflictPage {
+	if d.FilesNotSaved {
+		notices = append(notices, chooseFilesAgain)
+	}
 	now := time.Now()
 	sh := s.buildShell(c.sess, "Changed elsewhere")
 	sh.Rail = s.recordRail(c, s.listBack(c))

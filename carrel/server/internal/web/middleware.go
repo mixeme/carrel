@@ -38,7 +38,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 		// A file upload has no ceiling of Carrel's (C-12): its body is read as it
 		// arrives, and only the fields in front of the files are bounded.
 		stream := hasSess && isFileUpload(r)
-		if !stream {
+		if !stream || strings.HasPrefix(r.URL.Path, "/app/contacts/") {
 			r.Body = http.MaxBytesReader(w, r.Body, s.bodyLimit(r))
 		}
 
@@ -113,6 +113,9 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 func (s *Server) bodyLimit(r *http.Request) int64 {
 	seg := strings.Split(r.URL.EscapedPath(), "/")
 	switch {
+	case len(seg) >= 6 && seg[1] == "app" && seg[2] == "contacts" &&
+		(len(seg) == 6 && seg[5] == "new" || len(seg) == 7 && seg[6] == "edit"):
+		return s.cfg.PhotoMaxUploadBytes + conf.MaxFormBodyBytes
 	case len(seg) == 7 && seg[1] == "app" && seg[2] == "contacts" && seg[6] == "photo-preview":
 		return s.cfg.PhotoMaxUploadBytes + conf.MaxFormBodyBytes
 	}

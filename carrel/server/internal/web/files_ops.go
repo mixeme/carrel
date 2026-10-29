@@ -226,6 +226,9 @@ func isFileUpload(r *http.Request) bool {
 	}
 	seg := strings.Split(r.URL.EscapedPath(), "/")
 	switch {
+	case len(seg) >= 6 && seg[1] == "app" && r.URL.Query().Get("op") == "" &&
+		(len(seg) == 7 && seg[6] == "edit" || len(seg) == 6 && seg[5] == "new"):
+		return recordKinds[seg[2]].segment != ""
 	case len(seg) >= 7 && seg[1] == "app" && seg[2] == "files" && seg[5] == "upload":
 		return true
 	case len(seg) == 7 && seg[1] == "app" && seg[6] == "edit" && r.URL.Query().Get("op") == "attach":
@@ -588,8 +591,12 @@ func declaredSize(r *http.Request, name string) int64 {
 	if err != nil {
 		return -1
 	}
+	return declaredSizeValues(up.fields, name)
+}
+
+func declaredSizeValues(fields url.Values, name string) int64 {
 	for _, key := range []string{"size." + name, "size." + path.Base(name), "size"} {
-		if v := up.fields.Get(key); v != "" {
+		if v := fields.Get(key); v != "" {
 			if n, err := strconv.ParseInt(v, 10, 64); err == nil && n >= 0 {
 				return n
 			}

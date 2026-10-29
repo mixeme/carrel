@@ -2726,16 +2726,17 @@ func (c *collectionCtx) apply(obj *model.Object, ch change) (*model.Object, erro
 
 // editState is everything an edit page shows.
 type editState struct {
-	obj     *model.Object // the record as read; nil for a new one
-	uid     string
-	values  formValues
-	alarms  []cal.Alarm
-	errors  map[string]string
-	etag    string
-	readAt  time.Time
-	isNew   bool
-	loss    *view.LossReport
-	notices []view.Notice
+	obj         *model.Object // the record as read; nil for a new one
+	uid         string
+	values      formValues
+	alarms      []cal.Alarm
+	errors      map[string]string
+	etag        string
+	readAt      time.Time
+	isNew       bool
+	loss        *view.LossReport
+	notices     []view.Notice
+	filesChosen bool // file inputs cannot be restored when a form is answered again
 	// notebook is the Notebook a note's edit chose (s-notes-20): the list
 	// address of the notebook; empty is its own.
 	notebook string
@@ -2772,6 +2773,9 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	sh.Rail = s.recordRail(c, back)
 	sh.Top.Refresh = s.recordRefresh(c, s.editAction(c, st))
 	sh.Notices = append(sh.Notices, st.notices...)
+	if st.filesChosen {
+		sh.Notices = append(sh.Notices, chooseFilesAgain)
+	}
 	if len(st.errors) > 0 {
 		sh.Notices = append(sh.Notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "Correct the marked fields and save again."})
 	}
@@ -3572,6 +3576,20 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	uid := r.PathValue("uid")
+	upload := &formUpload{}
+	if r.URL.Query().Get("op") == "" {
+		var err error
+		upload, err = s.readFormUpload(r, c, uid)
+		defer upload.close(r.Context())
+		if err != nil {
+			code := http.StatusBadRequest
+			if tooLarge(err) {
+				code = http.StatusRequestEntityTooLarge
+			}
+			http.Error(w, http.StatusText(code), code)
+			return
+		}
+	}
 	// An attachment is a write of its own on this address (S-20). Its file is
 	// read from the body as it comes: nothing may parse the form before.
 	switch op := r.URL.Query().Get("op"); {
@@ -3601,7 +3619,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	etag := strings.TrimSpace(r.FormValue("etag"))
 	readAt := unixForm(r.FormValue("readat"))
 	want := s.submittedValues(c, r)
-	st := editState{uid: uid, values: want, etag: etag, readAt: readAt, unfold: r.URL.Query().Get("fields") == "all"}
+	st := editState{uid: uid, values: want, etag: etag, readAt: readAt, unfold: r.URL.Query().Get("fields") == "all", filesChosen: upload.chosen}
 	// A note's Notebook, an event's Calendar, a task's List other than its
 	// own: the edit is saved, then the record moves there (s-notes-20, S-18;
 	// Р19).
@@ -3609,6 +3627,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	if c.cal != nil {
 		st.notebook = strings.TrimSpace(r.FormValue("notebook"))
 		moving = st.notebook != "" && st.notebook != c.listPath()
+	}
+	if upload.notice != nil {
+		st.obj, _ = c.find(r.Context(), uid)
+		st.notices = []view.Notice{*upload.notice}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
 	}
 
 	obj, err := c.find(r.Context(), uid)
@@ -3672,7 +3696,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
-	if len(ch.ops) == 0 && !ch.alarmsChanged {
+	if len(ch.ops) == 0 && !ch.alarmsChanged && !upload.chosen {
 		if moving {
 			s.moveRecord(w, r, c, s.notebookTarget(c, st.notebook), uid, obj, false, "Nothing was moved")
 			return
@@ -3725,6 +3749,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	var kept []time.Time
 	var left []cal.Left
 	if left = leftByEdit(series, sent, c.tf.tz); len(left) > 0 {
+		if upload.chosen {
+			st.notices = []view.Notice{{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "This series needs a decision about its changed occurrences. Save that change first, then choose the files again."}}
+			st.obj, _ = c.find(r.Context(), uid)
+			s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+			return
+		}
 		answer := r.FormValue(leftField)
 		if answer != "keep" && answer != "remove" {
 			// The form is drawn again over the record read again: the one
@@ -3756,6 +3786,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 			sent = dropped
 		}
 	}
+	sent, upload.notice = s.applyFormUpload(r, c, sent, upload)
+	if upload.notice != nil {
+		st.notices = []view.Notice{*upload.notice}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
 	sent.ETag = etag
 	wrote, err := c.updated(r.Context(), sent)
 	if err != nil {
@@ -3768,7 +3804,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		// or a display name renamed elsewhere would put an N in the draft
 		// nobody typed.
 		fillNames(c.spec.kind, base, typed)
-		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), base, opened, st.notebook, !baseKnown)
+		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), base, opened, st.notebook, !baseKnown, upload.chosen)
 		s.redirect(w, r, c.recordPath(uid)+"/conflict")
 		return
 	case err != nil:
@@ -3776,6 +3812,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
+	upload.saved = true
 	back := c.recordPath(uid)
 	if markDone {
 		back = doneBack(c, uid, r.FormValue("from"))
@@ -4510,7 +4547,21 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		s.postNewAttach(w, r, c, op)
 		return
 	}
+	upload, err := s.readFormUpload(r, c, "")
+	defer upload.close(r.Context())
+	if err != nil {
+		code := http.StatusBadRequest
+		if tooLarge(err) {
+			code = http.StatusRequestEntityTooLarge
+		}
+		http.Error(w, http.StatusText(code), code)
+		return
+	}
 	want := s.submittedValues(c, r)
+	if upload.notice != nil {
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notebook: newNotebook(c, r), filesChosen: upload.chosen, notices: []view.Notice{*upload.notice}}))
+		return
+	}
 	// The UID of a contact's form with a photo chosen (photo_new.go), of a
 	// new record's form with files attached (attach_new.go).
 	var formUID string
@@ -4523,24 +4574,24 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		// «Add …» without scripts: the form back with one row more, and no
 		// record until Save (C-6.8 InputAdd).
 		addedRow(c.spec.kind, want, add)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r)}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r), filesChosen: upload.chosen}))
 		return
 	}
 	if remove := r.FormValue("remove"); remove != "" {
 		removeRow(c.spec.kind, want, remove)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r)}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r), filesChosen: upload.chosen}))
 		return
 	}
 	if c.card != nil && formUID == "" && r.FormValue("uid") != "" {
 		// The form shows a photo the session no longer holds: saving
 		// without it is the person's choice, not a silent one.
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notices: []view.Notice{lostPhotoNotice}}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notices: []view.Notice{lostPhotoNotice}, filesChosen: upload.chosen}))
 		return
 	}
 	if c.cal != nil && formUID == "" && issuedUID(r.FormValue("uid")) != "" {
 		// The same with the files of a new event, task or note (Б7 of the
 		// audit of 11.10.2026): newer forms took their place.
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notebook: newNotebook(c, r), notices: []view.Notice{lostFilesNotice}}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notebook: newNotebook(c, r), notices: []view.Notice{lostFilesNotice}, filesChosen: upload.chosen}))
 		return
 	}
 	s.createRecord(w, r, c, want, formUID)
@@ -4551,7 +4602,8 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 // a photo chosen names its UID (formUID): the card is created under it, with
 // the photo in it, and the draft goes (S-13, photo_new.go).
 func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, want formValues, formUID string) {
-	st := editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r)}
+	upload := formUploadOf(r)
+	st := editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r), filesChosen: upload.chosen}
 	uid, err := formUID, error(nil)
 	if uid == "" {
 		uid, err = model.NewUID()
@@ -4623,6 +4675,14 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 		err = applyDraft(sent, draft)
 	}
 	if err == nil {
+		sent, upload.notice = s.applyFormUpload(r, at, sent, upload)
+		if upload.notice != nil {
+			st.notices = []view.Notice{*upload.notice}
+			s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+			return
+		}
+	}
+	if err == nil {
 		sent.Path = path
 		err = at.create(r.Context(), path, sent)
 		// Refused because it is already there, on a write the guard had
@@ -4638,6 +4698,7 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
+	upload.saved = true
 	// Where a record was made is where the next one starts from, when the way
 	// in named no collection (U-6.16). A failure to remember is not a failure
 	// to save: the record is written either way.
