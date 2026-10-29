@@ -164,7 +164,7 @@ func TestGoogleEventInTheExistingCalendar(t *testing.T) {
 				t.Fatalf("new event: expected only the reminder loss, status %d, loss %+v", made.Code, page.Loss)
 			}
 			mustHave(t, "rewritten reminder", wire, "DESCRIPTION:This is an event reminder", "ACTION:DISPLAY")
-			if strings.Contains(wire, "DESCRIPTION:Reminder\r\n") {
+			if strings.Contains(wire, "DESCRIPTION:Reminder\n") {
 				t.Fatal("reported loss although the reminder message survived")
 			}
 			loc = events + "/" + url.PathEscape(page.UID)
@@ -180,7 +180,7 @@ func TestGoogleEventInTheExistingCalendar(t *testing.T) {
 	removeLater(t, client, file)
 	got, _ := rawBody(ctx, t, client, file)
 	mustHave(t, "new event", got, "UID:"+uid, "SUMMARY:"+summary, "20310311")
-	if made.Code == http.StatusSeeOther && !strings.Contains(got, "DESCRIPTION:Reminder\r\n") {
+	if made.Code == http.StatusSeeOther && !strings.Contains(got, "DESCRIPTION:Reminder\n") {
 		t.Fatal("the reminder message was lost without a loss report")
 	}
 	// Only an attendee of the event itself would be invited. Google writes

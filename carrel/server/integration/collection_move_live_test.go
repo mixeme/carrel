@@ -74,9 +74,14 @@ func TestRadicaleBaikalCollectionMove(t *testing.T) {
 	if len(sheet.Warning) == 0 || !strings.Contains(string(sheet.Subject), "Carrel S-12.3") {
 		t.Fatalf("sheet = %+v", sheet)
 	}
-	loc := redirected(t, "move calendar", app.post(liveAction(t, sheet.Actions, "collection.move.confirm"), url.Values{}))
-	newCal := livePathOf(t, loc, "/app/calendar/"+baiID+"/")
+	before := catalogPaths(t, app)
+	moved := app.post(liveAction(t, sheet.Actions, "collection.move.confirm"), url.Values{})
+	newCal := newCollection(t, app, before).Path
 	t.Cleanup(func() { _ = bClient.Delete(context.Background(), newCal, "") })
+	loc := redirected(t, "move calendar", moved)
+	if loc != "/app/settings/connections" {
+		t.Fatalf("move calendar went to %q, want Connections (C-5.6)", loc)
+	}
 	if !strings.HasPrefix(newCal, bCalHome) {
 		t.Errorf("the calendar went to %q, outside %q", newCal, bCalHome)
 	}
@@ -103,9 +108,14 @@ func TestRadicaleBaikalCollectionMove(t *testing.T) {
 	sheet = liveDecode[view.CollectionMoveSheet](t, "book sheet", app.get("/app/collections/move?"+url.Values{
 		"a": {radID}, "c": {srcBook.Path}, "to": {baiID}, "copy": {"1"},
 	}.Encode()))
-	loc = redirected(t, "copy book", app.post(liveAction(t, sheet.Actions, "collection.copy.confirm"), url.Values{}))
-	newBook := livePathOf(t, loc, "/app/contacts/"+baiID+"/")
+	before = catalogPaths(t, app)
+	copied := app.post(liveAction(t, sheet.Actions, "collection.copy.confirm"), url.Values{})
+	newBook := newCollection(t, app, before).Path
 	t.Cleanup(func() { _ = bClient.Delete(context.Background(), newBook, "") })
+	loc = redirected(t, "copy book", copied)
+	if loc != "/app/settings/connections" {
+		t.Fatalf("copy book went to %q, want Connections (C-5.6)", loc)
+	}
 	if !strings.HasPrefix(newBook, bBookHome) {
 		t.Errorf("the book went to %q, outside %q", newBook, bBookHome)
 	}
