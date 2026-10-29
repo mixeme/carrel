@@ -332,7 +332,7 @@ func column(p *view.NotePage) []w.DocmetaSec {
 		if attach != nil {
 			// ждёт библиотеку: U-5.5 #43 — the frame draws the file a field
 			// of the edit that goes with Save (FileField.List); it goes by
-			// its own form, as the contract has it, until Save takes files
+			// its own form, until Doc supports multipart for external file fields (Typecase 249)
 			b := bind.Button(*attach, "")
 			b.Menu, b.Small = true, true
 			items := append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...)
