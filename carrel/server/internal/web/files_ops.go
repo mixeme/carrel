@@ -194,6 +194,7 @@ type uploadBody struct {
 	mr     *multipart.Reader
 	next   *multipart.Part // the first file part, opened; nil when none came
 	remain int64           // what is left of a form's worth of fields (MaxFormBodyBytes)
+	done   bool            // the closing boundary has already been consumed
 }
 
 // keep reads a part that is no file into the fields, within what is left of
@@ -261,6 +262,7 @@ func readUploadFields(r *http.Request) (*uploadBody, error) {
 	for {
 		part, err := mr.NextPart()
 		if err == io.EOF {
+			up.done = true
 			return up, nil
 		}
 		if err != nil {

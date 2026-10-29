@@ -22,12 +22,30 @@ import (
 // made on Carrel's disk. Until the record is written, every new remote
 // file belongs to this request and is taken back on any refusal.
 type formUpload struct {
-	files  []attachFile
+	files  []formFile
 	photo  []byte
 	placed []*placedFile
 	chosen bool
 	saved  bool
 	notice *view.Notice
+}
+
+type formFile struct {
+	attachFile
+	placed *placedFile
+	named  string
+}
+
+// A file can precede the fields that decide its name and monthly folder.
+// Remember the naming inputs so it is placed again only when those change.
+func (s *Server) formFileName(c *collectionCtx, obj *model.Object, name string) string {
+	blob := s.catalogOf(c.sess)
+	day := attachmentDay(c, obj)
+	base := attachmentFileName(blob.AttachNames, day, attachmentTitle(c, obj), name)
+	if blob.Attachments != nil && blob.Attachments.Monthly {
+		base = day.Format("2006-01") + "/" + base
+	}
+	return base
 }
 
 type formUploadKey struct{}
@@ -111,7 +129,7 @@ func (s *Server) readFormUpload(r *http.Request, c *collectionCtx, uid string) (
 		if err != nil {
 			return u, err
 		}
-		f := attachFile{name: uploadName(part.FileName()), mediaType: http.DetectContentType(head), head: head, size: int64(len(head)), rest: bytes.NewReader(nil)}
+		f := formFile{attachFile: attachFile{name: uploadName(part.FileName()), mediaType: http.DetectContentType(head), head: head, size: int64(len(head)), rest: bytes.NewReader(nil)}}
 		if int64(len(head)) > remaining {
 			p, n := s.placeAttachment(r.Context(), c, obj, f.name, f.mediaType, io.MultiReader(bytes.NewReader(head), part), attachLimit(c.col), declaredSizeValues(up.fields, f.name))
 			if n != nil {
@@ -119,6 +137,7 @@ func (s *Server) readFormUpload(r *http.Request, c *collectionCtx, uid string) (
 				continue
 			}
 			u.placed = append(u.placed, p)
+			f.placed, f.named = p, s.formFileName(c, obj, f.name)
 			f.head, f.link, f.size = nil, p.uri, p.size
 		} else {
 			remaining -= int64(len(head))
@@ -152,13 +171,43 @@ func (s *Server) applyFormUpload(r *http.Request, c *collectionCtx, obj *model.O
 		}
 	}
 	for _, f := range u.files {
-		// Include all earlier patches when deciding the finished size.
+		// Calendar dates are read from the parsed component, so settle the
+		// ordinary patch before choosing the final month and dated name.
 		settled, err := settled(obj)
 		if err != nil {
 			n := s.writeFailure(c, "PUT", obj.Path, err)
 			return nil, &n
 		}
-		next, placed, n := s.attached(r.Context(), c, settled, f)
+		obj = settled
+		if p := f.placed; p != nil && f.named != s.formFileName(c, obj, f.name) {
+			// The final fields changed its name or month. Read only our own
+			// uploaded version and stream it to a free final name; the source
+			// is deleted conditionally. No existing destination is overwritten.
+			d, err := p.files.files.Open(r.Context(), p.path, nil)
+			if err != nil {
+				n := s.fileFailure(p.files, "Nothing was saved", "GET", p.path, err)
+				return nil, &n
+			}
+			if p.etag != "" && !sameVersion(p.etag, d.ETag) {
+				_ = d.Body.Close()
+				return nil, &view.Notice{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "The uploaded file changed in the attachment folder. Choose it again."}
+			}
+			if p.etag == "" {
+				p.etag = d.ETag
+			}
+			final, n := s.placeAttachment(r.Context(), c, obj, f.name, f.mediaType, d.Body, attachLimit(c.col), f.size)
+			_ = d.Body.Close()
+			if n != nil {
+				return nil, n
+			}
+			u.placed = append(u.placed, final)
+			if err := p.remove(r.Context()); err != nil {
+				n := s.fileFailure(p.files, "Nothing was saved", "DELETE", p.path, err)
+				return nil, &n
+			}
+			f.link = final.uri
+		}
+		next, placed, n := s.attached(r.Context(), c, obj, f.attachFile)
 		if n != nil {
 			return nil, n
 		}

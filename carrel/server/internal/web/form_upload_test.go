@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
 )
@@ -109,10 +110,8 @@ func TestFormSaveLargeAttachmentAndRollback(t *testing.T) {
 				if body(t, f, "e1.ics") != before {
 					t.Fatal("invalid form changed the record")
 				}
-				for _, path := range f.srv.Paths(attachFiles) {
-					if !strings.HasSuffix(path, "/") {
-						t.Fatalf("failed Save left a file: %s", path)
-					}
+				if names := f.srv.Names(attachFiles + "carrel/"); len(names) != 0 {
+					t.Fatalf("failed Save left files: %v", names)
 				}
 			}
 		})
@@ -189,10 +188,8 @@ func TestFormSaveRefusals(t *testing.T) {
 			if body(t, f, "e1.ics") != before {
 				t.Fatal("refused Save changed record")
 			}
-			for _, path := range f.srv.Paths(attachFiles) {
-				if !strings.HasSuffix(path, "/") {
-					t.Fatalf("refused Save left %s", path)
-				}
+			if names := f.srv.Names(attachFiles + "carrel/"); len(names) != 0 {
+				t.Fatalf("refused Save left files: %v", names)
 			}
 		})
 	}
@@ -211,4 +208,45 @@ func TestFormSaveInvalidPhotoKeepsTyping(t *testing.T) {
 	if len(f.srv.Paths(f.col)) != 0 {
 		t.Fatal("invalid photo created a card")
 	}
+}
+
+func TestFormSaveNamesLargeFilesAfterTheFinalFields(t *testing.T) {
+	for _, names := range []string{sealed.AttachNamesTitled, sealed.AttachNamesDated} {
+		t.Run(names, func(t *testing.T) {
+			f := attachFixture(t, 2048, []string{"carrel"}, "e1.ics", attachEvent("e1", "Before", ""))
+			editBlob(t, f.h, f.sess, func(b *sealed.Blob) { b.AttachNames = names; b.Attachments.Monthly = true })
+			p := eventEditAt(t, f, "e1")
+			v := formFields(p.Form)
+			v.Set("summary", "After")
+			v.Set("start.date", "2026-11-23")
+			v.Set("end.date", "2026-11-23")
+			v.Set("end.time", "11:00")
+			r := f.h.do(saveFiles(p.Form.Action, f.sess, v, "file", bytes.Repeat([]byte("x"), 3000)))
+			if r.Code != http.StatusSeeOther {
+				t.Fatalf("Save: %d %s", r.Code, r.Body.String())
+			}
+			want := attachFiles + "carrel/2026-11/2026-11-23 a.bin"
+			if names == sealed.AttachNamesTitled {
+				want = attachFiles + "carrel/2026-11/After - a.bin"
+			}
+			if data, ok := f.srv.File(want); !ok || len(data) != 3000 {
+				t.Errorf("final file missing or damaged: %s", want)
+			}
+			if left := f.srv.Names(attachFiles + "carrel/2026-08/"); len(left) != 0 {
+				t.Errorf("old placement remains: %v", left)
+			}
+		})
+	}
+}
+
+func TestFormSaveMultipartWithoutFiles(t *testing.T) {
+	f := attachFixture(t, 0, nil, "e1.ics", attachEvent("e1", "Before", ""))
+	p := eventEditAt(t, f, "e1")
+	v := formFields(p.Form)
+	v.Set("summary", "Without a file")
+	r := f.h.do(saveFiles(p.Form.Action, f.sess, v, "file"))
+	if r.Code != http.StatusSeeOther {
+		t.Fatalf("empty multipart Save: %d %s", r.Code, r.Body.String())
+	}
+	mustContain(t, body(t, f, "e1.ics"), "SUMMARY:Without a file")
 }

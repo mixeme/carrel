@@ -386,12 +386,16 @@ func changedNotice(nothing string) view.Notice {
 // no more came. A field between the files is kept: the sizes of the files
 // after it (uploadBody.keep).
 func nextFile(up *uploadBody) (*multipart.Part, error) {
+	if up.done {
+		return nil, nil
+	}
 	for {
 		part := up.next
 		up.next = nil
 		if part == nil {
 			var err error
 			if part, err = up.mr.NextPart(); err == io.EOF {
+				up.done = true
 				return nil, nil
 			} else if err != nil {
 				return nil, err
@@ -703,9 +707,10 @@ type placedFile struct {
 }
 
 // remove takes back a file no record points at.
-func (p *placedFile) remove(ctx context.Context) {
-	_ = p.files.files.Delete(context.WithoutCancel(ctx), p.path, p.etag)
+func (p *placedFile) remove(ctx context.Context) error {
+	err := p.files.files.Delete(context.WithoutCancel(ctx), p.path, p.etag)
 	forgetFolder(p.files.sess, p.files.conn.ID, path.Dir(p.path)+"/")
+	return err
 }
 
 // placeAttachment writes body to the attachment folder under a free name: the
