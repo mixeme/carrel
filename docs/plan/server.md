@@ -41,6 +41,12 @@ Google и SV-25: Google заменяет текст напоминания, Carr
   Логи: `dev/live-note-controls.log`, `dev/live-note-controls-rest.log`,
   `dev/google-reminder-note-controls-fixed.log`. Полностью зелёным внешний
   набор не считается; остаток Nextcloud прогонять отдельно.
+  Из 57 Windows-пропусков: 53 теста пяти DAV-стендов покрыты Linux;
+  `TestRadicaleBaikalMove` и `TestRadicaleBaikalCollectionMove` не
+  выполнялись (Windows без Radicale, Linux без доступа Baikal); ещё два —
+  выключенные диагностические отчёты `TestLiveDiscoveryReport` и
+  `TestMemorySeriesReport`. Две временные коллекции S-19 прерванного
+  процесса очищены (`dev/cleanup-note-controls.log`).
 
 Продолжать в `.claude/worktrees/n141/carrel`, ветка `wip/notes-141-144`.
 Следующий независимый шаг — #43 (multipart Save). Typecase 247/248 и
