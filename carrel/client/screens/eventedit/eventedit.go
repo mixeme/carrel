@@ -240,7 +240,7 @@ func Forms(p *view.EventEditPage) []w.PostForm {
 	out := append(bind.TopForms(p.Top), bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Form.Actions {
 		if a.ID == attachID {
-			out = append(out, bind.MenuForms(a.Arrow)...)
+			out = append(out, bind.EditFileForms(a.Arrow)...)
 		}
 	}
 	if d := p.Delete; d != nil && d.Method == "POST" && d.Enabled {
@@ -396,12 +396,13 @@ func attendees(f view.AttendeeField) w.FieldSet {
 func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 	var items []w.LinePart
 	if attach != nil {
-		// ждёт библиотеку: U-5.5 #43 — the frames draw the file a field of
-		// the form that goes with Save (FileField.List); it goes by its own
-		// form, as the contract has it, until Save takes files
 		b := bind.Button(*attach, "")
 		b.Menu = true
-		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}})
+		row := w.Line{Items: []w.LinePart{
+			w.Faced{Face: w.FaceLarge, Items: []w.LinePart{w.Text("{name} "), w.Dim{Parts: []w.Inline{w.Text("{size}")}}}},
+			w.Button{Label: "Remove", Kind: w.ButtonDanger, Small: true, Removes: true},
+		}, Gap: w.LineGap8}
+		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.EditFiles(attach.Arrow, "event-attachments", row), Width: w.MenuWidth212, Pop: w.MenuUnder}})
 	}
 	for _, a := range rows {
 		parts := []w.LinePart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}}}
@@ -421,7 +422,7 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 	if len(rows) == 0 {
 		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap, Empty: true})
 	}
-	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGap8, Block: true, Place: w.Grown}}}
+	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGap8, Block: true, Place: w.Grown, ID: "event-attachments"}}}
 }
 
 // railParts is the rail of return: the way back — to the card, or to the
@@ -440,10 +441,6 @@ func railParts(r view.Rail, list bool) []w.RailPart {
 	parts = append(parts, bind.Sources(r, rail)...)
 	return append(parts, bind.Foot(r, rail))
 }
-
-// upload is the screen's word (U-1.3) for the item after Attach's arrow that
-// sends the file picked on a page without a script (Typecase's task 109).
-const upload = "Upload"
 
 // sourceSet is the rubric Source of the form: where the event is and when it
 // was read, and whether it changed on its server since — the task's set.

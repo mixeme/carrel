@@ -447,12 +447,7 @@ var All = []Screen{
 		Draw:   func(model any) Root { return contactedit.Screen(model.(*view.ContactEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.ContactEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contactedit.Forms(model.(*view.ContactEditPage)) },
-		Waits: []Wait{
-			{Row: 21, Fixture: "app-contact-edit/normal"},   // ждёт библиотеку: U-5.5 #21
-			{Row: 21, Fixture: "app-contact-edit/no-photo"}, // ждёт библиотеку: U-5.5 #21
-			{Row: 21, Fixture: "app-contact-edit/loss"},     // ждёт библиотеку: U-5.5 #21
-			{Row: 21, Fixture: "app-contact-new/normal"},    // ждёт библиотеку: U-5.5 #21
-		},
+		Waits:  []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.AgendaPage) },

@@ -254,6 +254,33 @@ func MenuForms(items []view.MenuItem) []w.PostForm {
 	return out
 }
 
+// EditFiles are an editor's file pickers: they wait in the form for Save.
+// The row and list belong to the screen; From Files keeps its own action.
+func EditFiles(items []view.MenuItem, list string, row w.PickedRow) []w.MenuPart {
+	out := MenuItems(items, "")
+	for i, part := range out {
+		if m, ok := part.(w.MenuItem); ok && m.File != nil {
+			m.File.Form, m.File.To = "", ""
+			m.File.List, m.File.Size, m.File.Many = list, "size", true
+			m.Row = row
+			out[i] = m
+		}
+	}
+	return out
+}
+
+// EditFileForms leaves file selection in the editor's form. Other menu
+// actions still have their independent forms where the contract says so.
+func EditFileForms(items []view.MenuItem) []w.PostForm {
+	var out []w.PostForm
+	for _, it := range items {
+		if it.File == "" {
+			out = append(out, MenuForms([]view.MenuItem{it})...)
+		}
+	}
+	return out
+}
+
 // NavItem is a section of the rail (NavRow) as an item of the navigation:
 // its icon, its name, where it goes, and its count when it has one — a
 // section whose count is not counted has none (nil), not a zero.

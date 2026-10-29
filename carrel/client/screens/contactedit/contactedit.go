@@ -210,7 +210,7 @@ func Screen(p *view.ContactEditPage) w.Shell {
 func Forms(p *view.ContactEditPage) []w.PostForm {
 	out := append(bind.TopForms(p.Top), bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Photo.Actions {
-		if a.Method == "POST" && a.Enabled && !a.Submits {
+		if a.Method == "POST" && a.Enabled && !a.Submits && a.File == "" {
 			out = append(out, bind.ActionForm(a, a.ID))
 		}
 	}
@@ -230,19 +230,16 @@ func visible(rows []view.FormRow) []view.FormRow {
 
 // photo is the photo's field: the picture or the initials, and beside it
 // what can be done to it and what was done to it (Note). The photo's
-// buttons send the form they stand in, the typing with the file (Submits,
-// Typecase's task 122) — a new card's, and a card's own since the server's
-// v0.2.208.
+// file is chosen and previewed locally, and goes with Save. Crop and Remove
+// keep their explicit actions with the typed fields (Submits).
 func photo(b view.PhotoBlock) w.Field {
 	var side []w.FieldPart
 	var line []w.LinePart
-	// ждёт библиотеку: U-5.5 #43 — the frames draw the photo a field of the
-	// form that goes with Save (FileField.Preview); it goes by its own form,
-	// as the contract has it, until Save takes files
 	for _, a := range b.Actions {
 		btn := bind.FileButton(a, a.ID)
 		if btn.File != nil {
 			btn.File.Label, btn.File.Accept = photoLabel, photoAccept
+			btn.File.Form, btn.File.To, btn.File.Preview = "", "", "photo"
 		}
 		switch {
 		case a.Danger:
@@ -254,9 +251,6 @@ func photo(b view.PhotoBlock) w.Field {
 			side = append(side, btn)
 		default:
 			line = append(line, btn)
-			if up := bind.Upload(a, a.ID, upload); up != nil {
-				line = append(line, *up)
-			}
 		}
 	}
 	if len(line) == 1 {
@@ -267,7 +261,7 @@ func photo(b view.PhotoBlock) w.Field {
 	if b.Note != "" {
 		side = append(side, w.FieldHint{Parts: []w.Inline{w.Text(b.Note)}, Variant: w.HintNarrow})
 	}
-	ph := w.Photo{Side: side, Src: b.Href}
+	ph := w.Photo{Side: side, Src: b.Href, ID: "photo"}
 	if b.Href == "" {
 		ph.Initials = string(b.Initials)
 	}
@@ -275,13 +269,10 @@ func photo(b view.PhotoBlock) w.Field {
 }
 
 // The screen's words (U-1.3) for the photo's file: the field's name, which is
-// the file input's accessible name too, what it takes — a picture — and the
-// button that sends the file picked on a page without a script (Typecase's
-// task 109; s-contacts-3, -4).
+// the file input's accessible name too, and what it takes — a picture.
 const (
 	photoLabel  = "Photo"
 	photoAccept = "image/*"
-	upload      = "Upload"
 )
 
 // fieldSet is a rubric of the form: its lines, labels over the first only,
