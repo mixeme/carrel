@@ -198,7 +198,8 @@ func RetimeExceptions(obj *model.Object, was model.RawValue) (*model.Object, int
 
 // LostDays are the exceptions of sent that got no longer has, each by its
 // day (Typecase's Р-60, states-36): a day left out that came back, and an
-// occurrence changed apart that is gone or no longer tied to its day — with
+// occurrence changed apart that is gone, no longer tied to its day, or
+// returned with its contents lost or changed — with
 // where it had been moved, when its start was another. In the order of the
 // series.
 func LostDays(sent, got *model.Object) []model.LostDay {
@@ -211,7 +212,7 @@ func LostDays(sent, got *model.Object) []model.LostDay {
 		}
 	}
 	for at, m := range sm {
-		if _, ok := gm[at]; ok {
+		if g, ok := gm[at]; ok && occurrenceKept(m.comp, g.comp) {
 			continue
 		}
 		d := model.LostDay{At: at, Day: m.at.day, Moved: true}
@@ -229,6 +230,7 @@ func LostDays(sent, got *model.Object) []model.LostDay {
 type exception struct {
 	at, to stamp
 	moved  bool
+	comp   *ical.Component
 }
 
 // exceptionStamps are a record's exceptions by the instant each names: the
@@ -269,7 +271,7 @@ func exceptionStamps(obj *model.Object) (days, moved map[time.Time]exception) {
 			continue
 		}
 		for _, s := range stamps(rid) {
-			e := exception{at: s}
+			e := exception{at: s, comp: c}
 			if start := c.Props.Get(ical.PropDateTimeStart); start != nil {
 				if to := stamps(start); len(to) == 1 {
 					e.to, e.moved = to[0], true
@@ -303,7 +305,8 @@ func MissingExceptions(sent, got *model.Object) (days, moved int) {
 // written) by what became of the exceptions: «EXDATE» stands in it when a day
 // left out is no longer left out, and only then — the same days written in
 // UTC are the same days —, and «RECURRENCE-ID» when an occurrence changed
-// apart is gone or no longer tied to its day. The order of the rest is kept.
+// apart is gone, no longer tied to its day, or not kept whole. The order of
+// the rest is kept.
 func ExceptionLoss(lost []string, sent, got *model.Object) []string {
 	days, moved := MissingExceptions(sent, got)
 	var out []string

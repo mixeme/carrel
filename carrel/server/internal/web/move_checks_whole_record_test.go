@@ -22,7 +22,7 @@ const remindedSeries = "BEGIN:VEVENT\nUID:duty\nDTSTAMP:20260101T000000Z\nDTSTAR
 	"RRULE:FREQ=WEEKLY;COUNT=4\nSUMMARY:Duty\n" +
 	"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-PT15M\nDESCRIPTION:Duty soon\nEND:VALARM\nEND:VEVENT\n" +
 	"BEGIN:VEVENT\nUID:duty\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID:20260119T100000Z\nDTSTART:20260119T120000Z\n" +
-	"DTEND:20260119T130000Z\nSUMMARY:Duty moved\nEND:VEVENT"
+	"DTEND:20260119T130000Z\nSUMMARY:Duty moved\nLOCATION:Other office\nEND:VEVENT"
 
 func TestAMoveThatLosesPartOfTheRecordKeepsTheOriginal(t *testing.T) {
 	for _, tc := range []struct {
@@ -32,6 +32,7 @@ func TestAMoveThatLosesPartOfTheRecordKeepsTheOriginal(t *testing.T) {
 	}{
 		{"a reminder", "TRIGGER", "VALARM"},
 		{"a reminder's message", "DESCRIPTION", "VALARM"},
+		{"a moved occurrence's location", "LOCATION", "one day of the series"},
 		// The days of a series as days (Р-60, states-36), not by the
 		// property the server lost.
 		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "one day of the series"},
@@ -66,6 +67,7 @@ func TestACollectionMoveThatLosesPartOfARecordKeepsBoth(t *testing.T) {
 	for _, tc := range []struct{ name, drop, names string }{
 		{"a reminder", "TRIGGER", "VALARM"},
 		{"a reminder's message", "DESCRIPTION", "VALARM"},
+		{"a moved occurrence's location", "LOCATION", "one day of the series"},
 		{"the day of an occurrence changed by hand", "RECURRENCE-ID", "one day of the series"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

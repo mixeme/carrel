@@ -78,6 +78,10 @@ func Alarms(obj *model.Object) ([]Alarm, error) {
 	if err != nil {
 		return nil, err
 	}
+	return componentAlarms(main), nil
+}
+
+func componentAlarms(main *ical.Component) []Alarm {
 	var out []Alarm
 	for _, child := range main.Children {
 		if child.Name != ical.CompAlarm {
@@ -91,7 +95,7 @@ func Alarms(obj *model.Object) ([]Alarm, error) {
 		}
 		out = append(out, a)
 	}
-	return out, nil
+	return out
 }
 
 // SetAlarms rewrites the VALARM set of the main component and returns the
@@ -163,6 +167,10 @@ func MissingAlarms(sent, got *model.Object) int {
 		return 0
 	}
 	have, _ := Alarms(got)
+	return missingAlarms(want, have)
+}
+
+func missingAlarms(want, have []Alarm) int {
 	// One received alarm can account for one sent alarm only. Find a full
 	// matching rather than taking the first fit: a server may add properties
 	// to one of several alarms with the same action and trigger.
