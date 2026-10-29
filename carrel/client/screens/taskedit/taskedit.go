@@ -422,7 +422,7 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 			w.Faced{Face: w.FaceLarge, Items: []w.LinePart{w.Text("{name} "), w.Dim{Parts: []w.Inline{w.Text("{size}")}}}},
 			w.Button{Label: "Remove", Kind: w.ButtonDanger, Small: true, Removes: true},
 		}, Gap: w.LineGap8}
-		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.EditFiles(attach.Arrow, "task-attachments", row), Width: w.MenuWidth212, Pop: w.MenuUnder}})
+		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.EditFiles(attach.Arrow, "task-attachments", "size", row), Width: w.MenuWidth212, Pop: w.MenuUnder}})
 	}
 	for _, a := range rows {
 		parts := []w.LinePart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + sep + string(a.Size))}}}

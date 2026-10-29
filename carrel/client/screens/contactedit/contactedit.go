@@ -253,9 +253,7 @@ func photo(b view.PhotoBlock) w.Field {
 			line = append(line, btn)
 		}
 	}
-	if len(line) == 1 {
-		side = append(side, line[0].(w.Button))
-	} else if len(line) > 1 {
+	if len(line) > 0 {
 		side = append(side, w.Line{Items: line, Gap: w.LineGap6})
 	}
 	if b.Note != "" {

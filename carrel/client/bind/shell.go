@@ -256,12 +256,12 @@ func MenuForms(items []view.MenuItem) []w.PostForm {
 
 // EditFiles are an editor's file pickers: they wait in the form for Save.
 // The row and list belong to the screen; From Files keeps its own action.
-func EditFiles(items []view.MenuItem, list string, row w.PickedRow) []w.MenuPart {
+func EditFiles(items []view.MenuItem, list, size string, row w.PickedRow) []w.MenuPart {
 	out := MenuItems(items, "")
 	for i, part := range out {
 		if m, ok := part.(w.MenuItem); ok && m.File != nil {
 			m.File.Form, m.File.To = "", ""
-			m.File.List, m.File.Size, m.File.Many = list, "size", true
+			m.File.List, m.File.Size, m.File.Many = list, size, true
 			m.Row = row
 			out[i] = m
 		}
