@@ -14069,7 +14069,7 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-field tc-field--w580"><label>Display name</label>
             <span class="tc-line tc-line--gap-8">
               <input class="tc-in tc-in--fill" type="text" name="display.name" value="Михаил Енученко" aria-label="Display name"><button class="tc-btn" type="submit">Save</button></span>
-            <span class="tc-field__hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">Shown as the sender and used as the signature in letters you send. Blank means your login.</span></div>
         </form>
         <form class="tc-fset" action="/app/settings/account/email" method="post">
           <div class="tc-rubric">Email <span class="tc-badge">pending</span> <span class="tc-plain">new@example.org</span></div>
@@ -14165,7 +14165,7 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-sheet__body">
             <div class="tc-msg is-alert tc-msg--flush">An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.</div>
             <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="text" name="password" value="••••••••••" aria-label="Your Carrel password">
-              <span class="tc-field__hint tc-field__hint--max580">Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password.</span></div>
+              <span class="tc-field__hint">Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password.</span></div>
           </div>
           <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Deposit my key</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
         </form>
@@ -15632,7 +15632,7 @@ dav: HTTP 503: the server is busy</div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
-        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono is-focus" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono is-focus" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
         <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="m.yenuchenko" aria-label="Username"></div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" value="xxxxxxxxxx" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
@@ -15687,7 +15687,7 @@ well-known · ok · GET /.well-known/caldav → 301 → /dav.php/
 principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
-        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
         <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="m.yenuchenko" aria-label="Username"></div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-error" type="password" name="password" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
@@ -15738,7 +15738,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
-        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://xandikos.home.example/" aria-label="Server URL"><span class="tc-field__hint"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://xandikos.home.example/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
         <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="mix" aria-label="Username"></div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password" disabled><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" checked data-tc-disables="password"><span class="tc-tickrow__tick"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
@@ -15803,9 +15803,9 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Edit connection</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
       <form class="tc-form tc-form--padl0-padr0" id="connection" action="/app/settings/connections/nextcloud/edit" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in" type="text" name="label" value="nextcloud" aria-label="Label"></div>
-        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.example.org/remote.php/dav/" aria-label="Server URL"><span class="tc-field__hint"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.example.org/remote.php/dav/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
         <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="mix" aria-label="Username"></div>
-        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password"><span class="tc-field__hint">Leave it empty to keep the stored one.</span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
+        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password"><span class="tc-field__hint tc-field__hint--max580">Leave it empty to keep the stored one.</span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
       </form>
       <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connection">Save</button><button class="tc-btn" type="button">Cancel</button></div>
@@ -15854,11 +15854,11 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Edit connection</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
       <form class="tc-form tc-form--padl0-padr0" id="connection-links" action="/app/settings/connections/nextcloud/edit" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in" type="text" name="label" value="nextcloud" aria-label="Label"></div>
-        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.home.example/remote.php/dav/" aria-label="Server URL"><span class="tc-field__hint"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.home.example/remote.php/dav/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
         <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="mix" aria-label="Username"></div>
-        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password"><span class="tc-field__hint">Leave it empty to keep the stored one.</span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
+        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password"><span class="tc-field__hint tc-field__hint--max580">Leave it empty to keep the stored one.</span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
-        <div class="tc-field tc-field--full" data-tc-changed="server.url username"><label>Published links</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="keep"><span class="tc-tickrow__tick is-off"></span>Keep them: they open on what the connection points at now</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="revoke"><span class="tc-tickrow__tick is-off"></span>Revoke them</label><span class="tc-field__hint">1 published link uses this connection.</span></div>
+        <div class="tc-field tc-field--full" data-tc-changed="server.url username"><label>Published links</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="keep"><span class="tc-tickrow__tick is-off"></span>Keep them: they open on what the connection points at now</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="revoke"><span class="tc-tickrow__tick is-off"></span>Revoke them</label><span class="tc-field__hint tc-field__hint--max580">1 published link uses this connection.</span></div>
       </form>
       <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connection-links">Save</button><button class="tc-btn" type="button">Cancel</button></div>
     </div></div></div>
@@ -15906,11 +15906,11 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Edit connection</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
       <form class="tc-form tc-form--padl0-padr0" id="connection-links" action="/app/settings/connections/nextcloud/edit" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in" type="text" name="label" value="nextcloud" aria-label="Label"></div>
-        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.home.example/remote.php/dav/" aria-label="Server URL"><span class="tc-field__hint"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.home.example/remote.php/dav/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
         <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="mix" aria-label="Username"></div>
-        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password"><span class="tc-field__hint">Leave it empty to keep the stored one.</span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
+        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password"><span class="tc-field__hint tc-field__hint--max580">Leave it empty to keep the stored one.</span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
-        <div class="tc-field tc-field--full" data-tc-changed="server.url username"><label>Published links</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="keep"><span class="tc-tickrow__tick is-off"></span>Keep them: they open on what the connection points at now</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="revoke"><span class="tc-tickrow__tick is-off"></span>Revoke them</label><span class="tc-field__hint">1 published link uses this connection.</span><span class="tc-field__hint tc-dim--danger">Choose what becomes of them before saving.</span></div>
+        <div class="tc-field tc-field--full" data-tc-changed="server.url username"><label>Published links</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="keep"><span class="tc-tickrow__tick is-off"></span>Keep them: they open on what the connection points at now</label><label class="tc-check"><input class="tc-check__box" type="radio" name="published.links" value="revoke"><span class="tc-tickrow__tick is-off"></span>Revoke them</label><span class="tc-field__hint tc-field__hint--max580">1 published link uses this connection.</span><span class="tc-field__hint tc-dim--danger">Choose what becomes of them before saving.</span></div>
       </form>
       <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connection-links">Save</button><button class="tc-btn" type="button">Cancel</button></div>
     </div></div></div>
@@ -16130,7 +16130,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
   <div class="frame" data-frame="s-profile-31">
     <div class="frame-label"><span>Удаление · сервер отказал</span><span class="frag">фрагмент</span><i>уведомление над карточками Connections</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
-        <div class="tc-msg is-alert tc-msg--mx20"><b>Архив was not deleted.</b> nextcloud refused: this account can read here but not write. Архив is as it was.</div>
+        <div class="tc-msg is-alert tc-msg--mx20 tc-msg--max580"><b>Архив was not deleted.</b> nextcloud refused: this account can read here but not write. Архив is as it was.</div>
         <div class="tc-main__diag"><div class="tc-diag">[delete]  DELETE /remote.php/dav/addressbooks/users/mix/archive/ → 403
 &lt;d:error&gt;&lt;d:need-privileges/&gt;&lt;/d:error&gt;</div></div>
     </div>
@@ -16142,7 +16142,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
   <div class="frame" data-frame="s-profile-32">
     <div class="frame-label"><span>Перенос · записано не всё</span><span class="frag">фрагмент</span><i>уведомление над карточками Connections</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
-        <div class="tc-msg is-alert tc-msg--mx20"><b>Copied, and the original kept.</b> radicale · vps did not keep all of what was copied, so Личный on nextcloud was not deleted. Both are there now. <a class="tc-btn is-sm" href="/app/calendar/radicale/lichnyj">Open the copy</a></div>
+        <div class="tc-msg is-alert tc-msg--mx20 tc-msg--max580"><b>Copied, and the original kept.</b> radicale · vps did not keep all of what was copied, so Личный on nextcloud was not deleted. Both are there now. <a class="tc-btn is-sm" href="/app/calendar/radicale/lichnyj">Open the copy</a></div>
         <div class="tc-main__diag"><div class="tc-diag">What radicale · vps did not keep
 Синк-ап по релизу · ATTACH
 Забрать документы · not there after it was written</div></div>
@@ -16278,7 +16278,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-error is-focus" type="text" name="label" value="nextcloud" aria-label="Label"><span class="tc-field__hint tc-dim--danger">There is already a connection called “nextcloud”. Choose another label: it is how your sources are told apart.</span></div>
-        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.example.org/" aria-label="Server URL"><span class="tc-field__hint"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.example.org/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
         <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="mix.work" aria-label="Username"></div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" value="xxxxxxxxxx" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
@@ -17411,7 +17411,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <form class="tc-form" id="subscribe" action="/app/settings/connections/subscribe" method="post">
           <div class="tc-field tc-field--w100"><label>Feed address</label>
             <input class="tc-in is-mono is-focus tc-in--t11-5" type="text" name="feed.address" value="https://feeds.example/ru-holidays.ics" aria-label="Feed address">
-            <span class="tc-field__hint"><span class="tc-mono">https://</span>, <span class="tc-mono">webcal://</span> and a secret link from another Carrel are all understood.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580"><span class="tc-mono">https://</span>, <span class="tc-mono">webcal://</span> and a secret link from another Carrel are all understood.</span></div>
           <div class="tc-field is-own-line tc-field--w100"><button class="tc-btn" type="submit" formaction="/app/settings/connections/subscribe/check">Check the address</button></div>
           <div class="tc-field tc-field--w100">
             <div class="tc-diag">[fetch]   GET /ru-holidays.ics → 200 · 0.4 s · 34 KB
@@ -18544,11 +18544,11 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Add device</div><div class="tc-head__sub">An app password for one device, with its own key wrapper</div></div></div>
         <form class="tc-form tc-form--padl0-padr0" id="device" action="/app/settings/davloom/devices/new" method="post">
           <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Телефон · DAVx5" aria-label="Name">
-            <span class="tc-field__hint">For you: this is how you will know what you are revoking later.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">For you: this is how you will know what you are revoking later.</span></div>
           <div class="tc-field tc-field--w100">
             <label>What this device may do</label>
             <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="what.this.device.may.do" value="read.only">Read only</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="what.this.device.may.do" value="read.and.write" checked>Read and write</label></span>
-            <span class="tc-field__hint">Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password.</span>
+            <span class="tc-field__hint tc-field__hint--max580">Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password.</span>
           </div>
           <div class="tc-field tc-field--w100">
             <label>What the device will see <span class="tc-dim">— changed later too, without re-issuing the password</span></label>
@@ -18572,7 +18572,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </div>
           </div>
         </form>
-        <div class="tc-msg is-alert tc-msg--mr0-ml0">Shown once and stored nowhere: lost, it cannot be recovered.</div>
+        <div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580">Shown once and stored nowhere: lost, it cannot be recovered.</div>
         <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="device">Create password</button><button class="tc-btn" type="button">Cancel</button></div>
       </div></div></div>
     </div>
@@ -18628,7 +18628,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <form class="tc-form tc-form--padl0-padr0" id="device" action="/app/settings/davloom/devices/new" method="post">
           <div class="tc-field tc-field--w100"><label>Address</label><input class="tc-in is-mono tc-in--t11" type="text" name="address" value="https://carrel.example/dav/" aria-label="Address"></div>
           <div class="tc-field tc-field--w100"><label>User name</label><input class="tc-in is-mono" type="text" name="user.name" value="mix" aria-label="User name">
-            <span class="tc-field__hint">Your Carrel login; the password is the device’s, not yours.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">Your Carrel login; the password is the device’s, not yours.</span></div>
         </form>
         <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="device">Done</button></div>
       </div></div></div>
@@ -18716,7 +18716,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <input class="tc-in is-mono tc-in--t11-5-fill" type="text" value="https://carrel.example/dav/" aria-label="Address for the client">
               <button class="tc-btn is-sm" type="button">Copy</button><a class="tc-btn is-sm" href="/app/settings/davloom/tree">What the client sees</a>
             </span>
-            <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
         </div>
         <div class="tc-msg is-accent tc-msg--max580">Changing your Carrel password does <b>not</b> disconnect devices; only revoking does.</div>
         <div class="tc-list__group"><span class="tc-rubric">Devices</span></div>
@@ -19229,7 +19229,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <div class="tc-tickrow tc-tickrow--padl14"><input class="tc-tickrow__tick is-off" type="checkbox" name="src" value="sftpgo|public" aria-label="Public"><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Public</span><span class="tc-tickrow__meta">files · ro</span></div>
             </div>
           </div>
-          <div class="tc-msg tc-grow tc-msg--flush-top4">Files go as files; calendars, tasks and notes as <span class="tc-mono">.ics</span>, address books as <span class="tc-mono">.vcf</span>.</div>
+          <div class="tc-msg tc-grow tc-msg--flush-top4 tc-msg--max580">Files go as files; calendars, tasks and notes as <span class="tc-mono">.ics</span>, address books as <span class="tc-mono">.vcf</span>.</div>
         </div>
 
         <div class="tc-fset">
@@ -19242,14 +19242,14 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           <div class="tc-field tc-field--lg"><label>Collection</label><details class="tc-drop"><summary class="tc-in is-pick" title="Collection"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="nextcloud|files" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="sftpgo|documents"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>sftpgo · vps · Documents</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="sftpgo|public" disabled><span class="tc-mark" data-tc-colour="#9A9280"></span>sftpgo · vps · Public files<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <div class="tc-field tc-field--lg"><label>Folder in it</label><span class="tc-line tc-line--gap-8"><input class="tc-in is-mono tc-in--fill" type="text" name="folder" value="carrel-backup" aria-label="Folder in it"><button class="tc-btn" type="submit" formaction="/app/settings/backup?op=browse&amp;job=personal">Browse</button></span></div>
           <div class="tc-field tc-field--xs"><label>Keep copies</label><input class="tc-in is-mono" type="text" name="keep" value="8" aria-label="Keep copies"></div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint">Copies past the eighth are deleted <b>after</b> the new one has been read back and checked, not before. The file is dated and never overwritten.</span></div>
-          <div class="tc-msg tc-grow tc-msg--flush-top4"><b>Download</b> streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. <b>Both</b> does the two at once — and then the trigger has <b>two steps</b>, because the file still has to be taken.</div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Copies past the eighth are deleted <b>after</b> the new one has been read back and checked, not before. The file is dated and never overwritten.</span></div>
+          <div class="tc-msg tc-grow tc-msg--flush-top4 tc-msg--max580"><b>Download</b> streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. <b>Both</b> does the two at once — and then the trigger has <b>two steps</b>, because the file still has to be taken.</div>
         </div>
 
         <div class="tc-fset">
           <div class="tc-rubric">How the archive is closed</div>
           <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="encrypted" value="1" checked><span class="tc-tickrow__tick"></span>Encrypt the archive</label>
-            <span class="tc-field__hint">On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.</span></div>
           <div class="tc-field tc-field--lg"><label>Archive password</label><input class="tc-in is-ph" type="password" name="password" placeholder="••••••••••••" aria-label="Archive password">
             <span class="tc-field__hint tc-field__hint--max580">Separate from the sign-in password.</span></div>
         </div>
@@ -19259,7 +19259,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           <div class="tc-field tc-grow tc-field--gap8">
             <div class="tc-line tc-line--gap-7"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="signin.on" value="on" checked><span class="tc-tickrow__tick"></span>On sign-in, if the last copy is older than</label><input class="tc-in is-mono tc-in--chip" type="text" name="signin" value="7" aria-label="Days"><span class="tc-dim--t12-5">days</span></div>
           </div>
-          <div class="tc-msg tc-grow tc-msg--flush-top4"><b>Also started by</b><br>• Run now — in the job list<br>• Your own clock — <span class="tc-mono">cron</span>, GoSentry, a job in Gitea, <span class="tc-mono">curl</span>: External trigger in the job’s menu</div>
+          <div class="tc-msg tc-grow tc-msg--flush-top4 tc-msg--max580"><b>Also started by</b><br>• Run now — in the job list<br>• Your own clock — <span class="tc-mono">cron</span>, GoSentry, a job in Gitea, <span class="tc-mono">curl</span>: External trigger in the job’s menu</div>
         </div>
       </form>
       <div class="tc-danger"><button class="tc-btn is-danger-solid" type="button">Delete job</button>Archives already made stay where they are: the schedule is deleted, not the copies.</div>
@@ -19983,7 +19983,7 @@ jobs:
       <div class="tc-field is-own-line">
         <label>Where the archive is</label>
         <span class="tc-seg tc-seg--start"><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?from=job">From a job</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=server">From a server</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=file">From this computer</a></span>
-        <span class="tc-field__hint">One archive, one of three. The other two stay empty until you switch.</span>
+        <span class="tc-field__hint tc-field__hint--max580">One archive, one of three. The other two stay empty until you switch.</span>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From a job</div>
@@ -20048,7 +20048,7 @@ jobs:
       <div class="tc-field is-own-line">
         <label>Where the archive is</label>
         <span class="tc-seg tc-seg--start"><a class="tc-seg__opt" href="/app/settings/backup/restore?from=job">From a job</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=server">From a server</a><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?from=file">From this computer</a></span>
-        <span class="tc-field__hint">One archive, one of three. The other two stay empty until you switch.</span>
+        <span class="tc-field__hint tc-field__hint--max580">One archive, one of three. The other two stay empty until you switch.</span>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From this computer</div>
@@ -20116,7 +20116,7 @@ jobs:
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From this computer</div>
-        <div class="tc-msg is-alert tc-msg--flush-bot12 tc-msg--max580">The archive is larger than 16 MB. Choose a folder of your storage for it, or put it there and choose <b>From a server</b>.</div>
+        <div class="tc-msg is-alert tc-msg--flush-bot12">The archive is larger than 16 MB. Choose a folder of your storage for it, or put it there and choose <b>From a server</b>.</div>
         <div class="tc-card__fields tc-card__fields--gap10-12 tc-card__fields--top">
           <div class="tc-field tc-field--md"><label>Storage for a large archive</label><span class="tc-in is-pick"><select class="tc-in__list" name="store" aria-label="Storage for a large archive"><option value="" selected data-tc-disables="folder">None — up to 16 MB</option><option value="nextcloud|files">nextcloud · Files</option><option value="sftpgo|documents">sftpgo · vps · Documents</option></select></span></div>
           <div class="tc-field tc-field--lg"><label>Folder in it</label><input class="tc-in is-mono" type="text" name="folder" value="/carrel/restore" aria-label="Folder in it" disabled><span class="tc-field__hint">A larger archive is put here, read from there and deleted after the restore.</span></div>
@@ -20240,7 +20240,7 @@ jobs:
         <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="submit" name="op" value="restore"><svg viewBox="0 0 24 24"><use href="#i-restore"/></svg>Restore 3 collections</button></div>
       </div>
       <div class="tc-field is-own-line"><label>5 records of the archive are already here and differ</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/settings/backup/restore?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/settings/backup/restore?existing=copy">Import as copies</a></span>
-        <span class="tc-field__hint">They stay as they are here; the archive's version is not written.</span></div>
+        <span class="tc-field__hint tc-field__hint--max580">They stay as they are here; the archive's version is not written.</span></div>
       <div class="tc-bar tc-bar--sel">
         <span class="tc-bar__count">3 selected</span>
         <span class="tc-bar__sep"></span>
@@ -20266,7 +20266,7 @@ jobs:
             <td class="tc-mono is-ph tc-table__n4 tc-table__n4--dusty">—</td><td class="tc-dim">skip</td></tr>
         </tbody>
       </table>
-      <div class="tc-msg is-alert tc-msg--mr0-ml0">Restoring is an import: records made since the archive stay, nothing is deleted.</div>
+      <div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580">Restoring is an import: records made since the archive stay, nothing is deleted.</div>
     </form></div></div>
   </div>
 </div>
@@ -22580,7 +22580,7 @@ Read  2 min ago</div>
         <div class="tc-fset tc-fset--lead">
           <div class="tc-rubric">Theme</div>
           <div class="tc-field"><span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="auto" checked>Auto</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="light">Light</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="dark">Dark</label></span>
-            <span class="tc-field__hint">“Auto” follows the system. Kept in this browser — another device does not see it.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">“Auto” follows the system. Kept in this browser — another device does not see it.</span></div>
         </div>
         <div class="tc-fset">
           <div class="tc-rubric">Density</div>
@@ -23310,7 +23310,7 @@ Read  2 min ago</div>
               </div>
             </div>
             <div class="tc-sheet__foot">
-              <button class="tc-btn is-primary" type="submit"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg>Send</button><kbd class="tc-kbd">Enter</kbd>
+              <button class="tc-btn is-primary" type="submit" data-tc-busy="Sending…"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg>Send</button><kbd class="tc-kbd">Enter</kbd>
               <button class="tc-btn" type="submit" formaction="/app/mail/send?op=link">Copy link instead</button>
               <span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/files/published">Cancel</a><kbd class="tc-kbd">Esc</kbd></span>
             </div>
@@ -24080,7 +24080,7 @@ Read  2 min ago</div>
 
           <form class="tc-card" action="/admin/invites" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="user">
             <div class="tc-rubric">Temporary password <span class="tc-badge is-alert">hand to hand</span></div>
-            <div class="tc-msg is-alert tc-msg--flush-bot12 tc-msg--max580">Until the user changes this password, you can sign in as them.</div>
+            <div class="tc-msg is-alert tc-msg--flush-bot12">Until the user changes this password, you can sign in as them.</div>
             <div class="tc-card__fields tc-card__fields--gap10-12">
               <div class="tc-field tc-field--xs"><label>Role</label><span class="tc-in is-pick"><select class="tc-in__list" name="role" aria-label="Role"><option value="user" selected>User</option></select></span></div>
               <div class="tc-field tc-field--sm"><label>Login</label><input class="tc-in" type="text" name="login" value="viktor" aria-label="Login"></div>
@@ -24640,7 +24640,7 @@ password  4c1-tide-oven</div>
             <div class="tc-field tc-field--xs"><label>Session life, d</label><input class="tc-in is-mono" type="text" name="session" value="30" aria-label="Session life, d"></div>
             <div class="tc-field tc-field--md"><label>Instance name</label><input class="tc-in" type="text" name="name" value="Carrel" aria-label="Instance name"></div>
             <div class="tc-field tc-field--w580"><label>Public address</label><input class="tc-in is-mono" type="text" name="publicURL" value="https://carrel.example" aria-label="Public address" readonly>
-              <span class="tc-field__hint">Links in letters start with it. Set with CARREL_PUBLIC_URL.</span></div>
+              <span class="tc-field__hint tc-field__hint--max580">Links in letters start with it. Set with CARREL_PUBLIC_URL.</span></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Mail <span class="tc-badge is-alert">not configured</span></div>
@@ -25388,7 +25388,7 @@ password  9f2-brick-lamp</div>
             <div class="tc-field tc-grow tc-field--gap7">
               <label class="tc-check"><input class="tc-check__box" type="checkbox" name="coverNew" value="on" checked><span class="tc-tickrow__tick"></span>New accounts are covered</label>
             </div>
-            <div class="tc-field tc-grow"><span class="tc-field__hint">Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
             <div class="tc-field"><button class="tc-btn" type="submit">Save</button></div>
           </form>
           <form class="tc-fset" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="master">
