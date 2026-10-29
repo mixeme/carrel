@@ -935,27 +935,37 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	page.Bar.Compact = s.compactForm(r, c.spec.segment, c.listPath())
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, err := c.contactsAll(r.Context())
+	var partial *card.PartialRead
+	if errors.As(err, &partial) {
+		page.Notices = append(page.Notices, unreadableCardsNotice(partial))
+		err = nil
+	}
 	if err != nil {
 		page.Subtitle = text(bookSubtitle(c, 0, false))
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
-	page.Subtitle = text(bookSubtitle(c, len(objs), true))
+	total := len(objs)
+	if partial != nil {
+		total += len(partial.Records)
+	}
+	page.Subtitle = text(bookSubtitle(c, total, true))
 	items := c.listed(objs)
 	shown := filterContacts(s.foldLinked(s.catalogOf(c.sess), view.KindContact, filter.keep(view.KindContact, items)), sift)
 	by := sortOf(r, view.KindContact)
 	page.Groups = s.contactGroups(c.sess, c.tf, shown, c.spec.segment, false, by, filter)
 	countGroups(page.Groups)
 	page.Details = s.openInPanel(r, c.sess, c.listPath(), shown, page.Groups)
-	if len(objs) == 0 {
+	if total == 0 {
 		page.Empty = bookEmpty(c, page.Bar.Actions)
 	}
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindContact, by, r.URL.Query())
 	c.read = items
 	page.Rail.Tags = filter.rail(view.KindContact, items)
-	c.putIndex(indexOf(c.tf, view.KindContact, items))
-	c.noteRead(items, true)
-	total := len(objs)
+	if partial == nil {
+		c.putIndex(indexOf(c.tf, view.KindContact, items))
+	}
+	c.noteRead(items, partial == nil)
 	page.Bar.Loaded, page.Bar.Total = len(shown), &total
 	page.Print = view.Print{Title: page.Title, Range: printRange(plural(len(shown), "card"), filter.tag), Taken: c.tf.taken(c.tf.now)}
 	return page

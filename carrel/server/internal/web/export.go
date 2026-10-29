@@ -100,7 +100,8 @@ func exportWhole(c *collectionCtx, r *http.Request) bool {
 func (c *collectionCtx) exportRecords(ctx context.Context, from, to *time.Time) ([]*model.Object, []cal.Unreadable, error) {
 	if c.card != nil {
 		objs, err := c.contactsAll(ctx)
-		return objs, nil, err
+		bad, err := unreadableCards(err)
+		return objs, bad, err
 	}
 	return c.calQuery(ctx, c.spec.component, from, to)
 }
@@ -109,6 +110,9 @@ func (c *collectionCtx) exportRecords(ctx context.Context, from, to *time.Time) 
 // book, one a component for a calendar — all three, so a stray task in a
 // calendar of events is read too. A resource two REPORTs name is read once.
 func (c *collectionCtx) allRecords(ctx context.Context) ([]*model.Object, error) {
+	if c.card != nil {
+		return c.contactsAll(ctx)
+	} // no omission flow: refuse partial reads
 	out, _, err := c.allRecordsAndUnread(ctx)
 	return out, err
 }
@@ -118,7 +122,8 @@ func (c *collectionCtx) allRecords(ctx context.Context) ([]*model.Object, error)
 func (c *collectionCtx) allRecordsAndUnread(ctx context.Context) ([]*model.Object, []cal.Unreadable, error) {
 	if c.card != nil {
 		objs, err := c.contactsAll(ctx)
-		return objs, nil, err
+		bad, err := unreadableCards(err)
+		return objs, bad, err
 	}
 	var out []*model.Object
 	var unread []cal.Unreadable

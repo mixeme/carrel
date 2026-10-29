@@ -106,7 +106,8 @@ func (s *Server) backupSources(ctx context.Context, blob sealed.Blob, job sealed
 							return 0, err
 						}
 					}
-					return len(objs), nil
+					_, lacks := c.unreadKept(ctx, bad)
+					return len(objs), lacks
 				}
 				w, err := add("calendar.ics")
 				if err != nil {

@@ -1189,6 +1189,11 @@ func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fano
 		objs, err = c.card.Search(ctx, c.col.Path, q.Text)
 	}
 	var note error
+	var partial *card.PartialRead
+	if errors.As(err, &partial) {
+		note = fmt.Errorf("%w: %s", fanout.ErrIncomplete, partial.Error())
+		err = nil
+	}
 	if errors.Is(err, card.ErrServerDoesNotQuery) {
 		// The book was listed and fetched because this server has no
 		// addressbook-query at all (docs/servers.md, SV-23). The records are
