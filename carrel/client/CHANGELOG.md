@@ -4,6 +4,23 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.8 — 2026-10-29
+
+Server `v0.2.385`, Typecase `f89d10d`, notes 141–148. Frame comparisons
+and draft kinship pass. The full client suite still fails its names check:
+Typecase task 247 records the three library issues; this step is not tagged.
+
+### Changed
+
+- Settings and administration follow the 580 px column in every state,
+  including dialogs and side panels. Hints and messages inside cards and
+  sheets keep their own width. The archive password's warning is a hint.
+- Every letter's Send, including the link letter, says «Sending…» while
+  sending. Import preview dates use the frame's ordinary type.
+- Draft kinship generates all drafts in one `frame2go -self -out` call.
+- The rewritten person's card and the task's loss report match their
+  updated frames; U-5.5 rows 20 and 35 are closed, row 21 awaits only 43.
+
 ## v0.11.7 — 2026-10-28
 
 Server `v0.2.381`, Typecase `2c6b5c8`. A person's card and timeline match
