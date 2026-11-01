@@ -773,7 +773,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 5,
+              "objects": 6,
               "path": "/alice/contacts/kontakty/",
               "pick": "a-nc-home|/alice/contacts/kontakty/",
               "readOnly": false,

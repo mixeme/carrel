@@ -32,7 +32,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e27",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e28",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -42,7 +42,7 @@
   ],
   "avatar": {
     "colour": "#8c6239",
-    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e27",
+    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e28",
     "initials": "АК"
   },
   "books": [
@@ -227,7 +227,7 @@
   },
   "name": "Анна Ковалёва",
   "notices": [],
-  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e27",
+  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e28",
   "photoNote": "",
   "print": {
     "foot": "Carrel · contact · captured 2026-08-10 17:06",
@@ -285,7 +285,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",

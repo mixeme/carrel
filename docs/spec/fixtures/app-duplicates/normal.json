@@ -6,7 +6,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 33,
+    "loaded": 34,
     "range": null,
     "segments": [
       {
@@ -1458,7 +1458,7 @@
     }
   ],
   "print": {
-    "range": "33 records compared · 60 points and above",
+    "range": "34 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -1475,7 +1475,7 @@
     "foot": [],
     "nav": [
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -1539,7 +1539,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "",
@@ -1690,7 +1690,7 @@
     "tags": [],
     "ticks": null
   },
-  "subtitle": "33 records compared · 2 to look at",
+  "subtitle": "34 records compared · 2 to look at",
   "threshold": {
     "default": 60,
     "form": {

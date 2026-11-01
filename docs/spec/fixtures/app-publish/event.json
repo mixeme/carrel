@@ -259,7 +259,7 @@
               "csrf": "csrf",
               "enabled": true,
               "file": "file",
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e8\u0026op=attach",
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e9\u0026op=attach",
               "icon": "i-upload",
               "id": "attach.add",
               "label": "From this computer",
@@ -267,7 +267,7 @@
             },
             {
               "enabled": true,
-              "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e8\u0026for=attach\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+              "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e9\u0026for=attach\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
               "icon": "i-file",
               "id": "attach.files",
               "label": "From Files",
@@ -278,7 +278,7 @@
           "csrf": "csrf",
           "enabled": true,
           "file": "file",
-          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e8\u0026op=attach",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e9\u0026op=attach",
           "icon": "i-clip",
           "id": "attach.add",
           "label": "Attach",
@@ -306,7 +306,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e8",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e9",
           "icon": "i-trash",
           "id": "record.delete",
           "label": "Delete event",
@@ -328,9 +328,9 @@
       ],
       "attendees": [
         {
-          "colour": "",
+          "colour": "#4a6b52",
           "email": "mix@example.org",
-          "href": "",
+          "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6",
           "name": "Михаил Енученко",
           "status": "organiser"
         },

@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/duplicates/merge?choice.FN=1\u0026group=group\u0026into=1\u0026v.0=e5\u0026v.1=e6",
+      "href": "/app/duplicates/merge?choice.FN=1\u0026group=group\u0026into=1\u0026v.0=e5\u0026v.1=e7",
       "id": "duplicates.merge.confirm",
       "label": "Write the merge and delete the rest",
       "method": "POST"
@@ -73,7 +73,7 @@
     "foot": [],
     "nav": [
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -137,7 +137,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "",

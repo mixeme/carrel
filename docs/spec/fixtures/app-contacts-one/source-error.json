@@ -380,7 +380,7 @@
     ],
     "nav": [
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -444,7 +444,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 9,
+            "count": 10,
             "detail": "",
             "feed": false,
             "href": "/app/contacts",
@@ -463,7 +463,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 5,
+            "count": 6,
             "detail": "The server answered 503 Service Unavailable.",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",

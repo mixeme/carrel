@@ -413,7 +413,7 @@
             }
           ]
         },
-        "loaded": 6,
+        "loaded": 7,
         "range": null,
         "segments": [
           {
@@ -433,7 +433,7 @@
           }
         ],
         "selected": 0,
-        "total": 9
+        "total": 10
       },
       "details": null,
       "empty": null,
@@ -778,7 +778,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e6",
+                  "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e7",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete contact",
@@ -982,6 +982,100 @@
             }
           ],
           "rubric": "Л"
+        },
+        {
+          "count": 1,
+          "rows": [
+            {
+              "avatar": {
+                "colour": "#9a9280",
+                "href": "",
+                "initials": "МЕ"
+              },
+              "badges": [],
+              "birthday": "",
+              "changed": "1 Jun",
+              "colour": "#4a6b52",
+              "email": "mix@example.org",
+              "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6",
+              "menu": [
+                {
+                  "enabled": true,
+                  "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6",
+                  "icon": "i-con",
+                  "id": "record.open",
+                  "label": "Open",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6/edit",
+                  "icon": "i-pencil",
+                  "id": "record.edit",
+                  "label": "Edit",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6/move",
+                  "icon": "i-move",
+                  "id": "record.move",
+                  "label": "Move",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6/move?copy=1",
+                  "icon": "i-dup",
+                  "id": "record.copy",
+                  "label": "Copy",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/contacts/a-nc-home/kontakty/export?uid=0b7d-41e9-c2a6",
+                  "icon": "i-export",
+                  "id": "record.export",
+                  "label": "Export .vcf",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=0b7d-41e9-c2a6",
+                  "icon": "i-link",
+                  "id": "publish",
+                  "label": "Publish a link",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "csrf": "csrf",
+                  "danger": true,
+                  "enabled": true,
+                  "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6/delete?etag=e6",
+                  "icon": "i-trash",
+                  "id": "record.delete",
+                  "label": "Delete contact",
+                  "method": "POST",
+                  "separator": true,
+                  "target": "sheet"
+                }
+              ],
+              "name": "Михаил Енученко",
+              "on": false,
+              "org": "",
+              "phone": "",
+              "sources": [],
+              "stamp": "nextcloud · Контакты",
+              "state": "ok",
+              "tags": [],
+              "target": "details",
+              "uid": "0b7d-41e9-c2a6"
+            }
+          ],
+          "rubric": "М"
         }
       ],
       "look": {
@@ -1023,7 +1117,7 @@
         "sources": [
           {
             "colour": "#4a6b52",
-            "count": 5,
+            "count": 6,
             "fromCache": false,
             "message": "",
             "retry": null,
@@ -1052,15 +1146,15 @@
         "stream": "/app/search/progress/t-task",
         "summary": [
           {
-            "text": "Polled 3 of 3 sources · 6 cards"
+            "text": "Polled 3 of 3 sources · 7 cards"
           }
         ],
         "taskID": "t-task"
       },
       "print": {
-        "foot": "Carrel · contacts · 6 cards · captured 2026-08-10 17:06 · 3 of 3 books",
+        "foot": "Carrel · contacts · 7 cards · captured 2026-08-10 17:06 · 3 of 3 books",
         "heading": "Contacts · Combined address book",
-        "range": "3 books · 6 cards",
+        "range": "3 books · 7 cards",
         "sources": "nextcloud · Контакты, Архив · radicale · vps · Команда",
         "taken": "10 August 2026, 17:06",
         "title": "Combined address book"
@@ -1104,7 +1198,7 @@
         ],
         "nav": [
           {
-            "count": 9,
+            "count": 10,
             "enabled": true,
             "href": "/app/contacts",
             "icon": "i-con",
@@ -1168,7 +1262,7 @@
             "rows": [
               {
                 "colour": "",
-                "count": 9,
+                "count": 10,
                 "detail": "",
                 "feed": false,
                 "href": "/app/contacts",
@@ -1187,7 +1281,7 @@
             "rows": [
               {
                 "colour": "#4a6b52",
-                "count": 5,
+                "count": 6,
                 "detail": "",
                 "feed": false,
                 "href": "/app/contacts/a-nc-home/kontakty",
@@ -1305,7 +1399,7 @@
         }
       },
       "readOnly": false,
-      "subtitle": "3 of 4 books · 2 accounts · 6 cards",
+      "subtitle": "3 of 4 books · 2 accounts · 7 cards",
       "title": "Combined address book",
       "top": {
         "lock": null,

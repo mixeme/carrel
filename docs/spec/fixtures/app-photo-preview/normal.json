@@ -62,7 +62,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e27"
+            "value": "e28"
           },
           {
             "add": null,
@@ -188,7 +188,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",

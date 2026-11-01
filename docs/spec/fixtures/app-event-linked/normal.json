@@ -28,9 +28,9 @@
   ],
   "attendees": [
     {
-      "colour": "",
+      "colour": "#4a6b52",
       "email": "mix@example.org",
-      "href": "",
+      "href": "/app/contacts/a-nc-home/kontakty/0b7d-41e9-c2a6",
       "name": "Михаил Енученко",
       "status": "organiser"
     },
