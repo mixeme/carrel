@@ -28,6 +28,9 @@ current mockup; fonts are in `docs/visual/fonts/`.
   X-ALT-DESC» changed though untouched —, says nothing was sent and the form
   keeps the entry, and asks to report it with the details (the owner's words
   of 02.11.2026).
+- A task saved with Done ticked and another status chosen says under Status
+  what does not agree and the two ways out: «Done is ticked, but the status
+  is In process. Untick Done, or set the status to Completed.»
 
 ## v0.2.391 — 2026-11-01
 

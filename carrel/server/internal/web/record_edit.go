@@ -1895,8 +1895,17 @@ func doneAndStatus(have, want formValues) string {
 	}
 	switch {
 	case done != was && status != held:
+		// The box is read from the status, so only one way disagrees: Done
+		// ticked and another status chosen. What, by the status's name, and
+		// the two ways out (the owner's words of 02.11.2026).
 		if done != (status == "COMPLETED") {
-			return "A task that is done is Completed, and one that is not has another status: change Done or Status, not both ways."
+			label := status
+			for _, o := range taskStatuses {
+				if o.value == status {
+					label = o.label
+				}
+			}
+			return "Done is ticked, but the status is " + label + ". Untick Done, or set the status to Completed."
 		}
 	case done != was && done:
 		status = "COMPLETED"

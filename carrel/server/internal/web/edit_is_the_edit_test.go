@@ -194,23 +194,31 @@ func TestDoneAndStatusAreOneState(t *testing.T) {
 		t.Errorf("a cancelled task is still done:\n%s", after)
 	}
 
-	f = calendarFixture(t, nil, "t.ics", strings.Replace(task, "STATUS:COMPLETED\nCOMPLETED:20260105T100000Z\n", "", 1))
-	before := body(t, f, "t.ics")
-	form := formFields(decode[editedForm](t, f.h.do(get(f.path("tasks")+rec+"/edit", f.sess))).Form)
-	form.Set("done", "on")
-	form.Set("status", "IN-PROCESS")
-	page := decode[editedForm](t, f.h.do(postForm(f.path("tasks")+rec+"/edit", f.sess, form)))
-	said := false
-	for _, set := range page.Form.Sets {
-		for _, row := range set.Rows {
-			said = said || row.Name == "status" && row.Error != ""
+	// Under Status, what does not agree, by the status chosen, and the two
+	// ways out (the owner's words of 02.11.2026). The box is read from the
+	// status, so the other way round — Done cleared, Completed chosen — is a
+	// status the person did not change, and Done decides.
+	for _, status := range []struct{ value, label string }{{"IN-PROCESS", "In process"}, {"CANCELLED", "Cancelled"}} {
+		f = calendarFixture(t, nil, "t.ics", strings.Replace(task, "STATUS:COMPLETED\nCOMPLETED:20260105T100000Z\n", "", 1))
+		before := body(t, f, "t.ics")
+		form := formFields(decode[editedForm](t, f.h.do(get(f.path("tasks")+rec+"/edit", f.sess))).Form)
+		form.Set("done", "on")
+		form.Set("status", status.value)
+		page := decode[editedForm](t, f.h.do(postForm(f.path("tasks")+rec+"/edit", f.sess, form)))
+		said := ""
+		for _, set := range page.Form.Sets {
+			for _, row := range set.Rows {
+				if row.Name == "status" {
+					said = string(row.Error)
+				}
+			}
 		}
-	}
-	if !said {
-		t.Errorf("Done ticked and In process chosen: no reason under Status")
-	}
-	if got := body(t, f, "t.ics"); got != before {
-		t.Errorf("a save that says both ways was written:\n%s", got)
+		if want := "Done is ticked, but the status is " + status.label + ". Untick Done, or set the status to Completed."; said != want {
+			t.Errorf("under Status: %q,\nwant %q", said, want)
+		}
+		if got := body(t, f, "t.ics"); got != before {
+			t.Errorf("a save that says both ways was written:\n%s", got)
+		}
 	}
 }
 
