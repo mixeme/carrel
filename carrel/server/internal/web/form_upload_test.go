@@ -67,6 +67,42 @@ func TestFormSaveAttachments(t *testing.T) {
 	}
 }
 
+// A note's Attach stands outside its document and its file goes with Save
+// (Doc.Multipart, Typecase's note 152, task 249): the edit and the new
+// note keep the file as the event's form does.
+func TestFormSaveNoteAttachments(t *testing.T) {
+	for _, fresh := range []bool{false, true} {
+		name := "edit"
+		if fresh {
+			name = "new"
+		}
+		t.Run(name, func(t *testing.T) {
+			f := attachFixture(t, 0, nil, "n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nDESCRIPTION:Text\nEND:VJOURNAL"))
+			path := f.path("notes") + "/n1/edit"
+			if fresh {
+				path = f.path("notes") + "/new"
+			}
+			p := decode[view.NotePage](t, f.h.do(get(path, f.sess)))
+			if p.Doc.Form == nil {
+				t.Fatal("the note's edit is no form")
+			}
+			v := formFields(*p.Doc.Form)
+			v.Set("summary", "With a file")
+			r := f.h.do(saveFiles(p.Doc.Form.Action, f.sess, v, "file", []byte("board")))
+			if r.Code != http.StatusSeeOther {
+				t.Fatalf("Save: %d %s", r.Code, r.Body.String())
+			}
+			got := decode[view.NotePage](t, f.h.do(get(r.Header().Get("Location"), f.sess)))
+			if len(got.Meta.Attach) != 1 {
+				t.Fatalf("Save kept %d files, want one", len(got.Meta.Attach))
+			}
+			if !fresh {
+				mustContain(t, body(t, f, "n1.ics"), "SUMMARY:With a file", base64.StdEncoding.EncodeToString([]byte("board")))
+			}
+		})
+	}
+}
+
 func TestFormSaveFileAlone(t *testing.T) {
 	f := attachFixture(t, 0, nil, "e1.ics", attachEvent("e1", "Unchanged", ""))
 	p := eventEditAt(t, f, "e1")
