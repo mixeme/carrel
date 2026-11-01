@@ -30,7 +30,8 @@ const formSheet = "op-sheet"
 
 // The screen's words (U-1.3): the rubric of the tree and of what points at
 // what a deletion takes, the name of the choice of a server, the keys of the
-// foot, the badge of a node that cannot be chosen, the icon of a folder.
+// foot, the badge of a node that cannot be chosen, the note of the folder the
+// items are in, the icon of a folder.
 const (
 	where    = "Where to put it"
 	pointing = "What is pointing at it now"
@@ -38,6 +39,7 @@ const (
 	enter    = "Enter"
 	esc      = "Esc"
 	readOnly = "read-only"
+	here     = "the items are here"
 	folder   = "file"
 )
 
@@ -176,8 +178,9 @@ func nameLine(f view.Form) w.Line {
 // nodes is the tree of folders the sheet chooses in, depth first: each node
 // a folder by its name, its depth its indent, a radio of the sheet's field
 // (FileTree.Field) and a link to the sheet with it chosen, which the live
-// layer swaps in; one that cannot be chosen is off with its badge; the one
-// chosen on.
+// layer swaps in; one that cannot be chosen is off with its badge; the folder
+// the items are in says so, chosen or not (FileTreeNode.Here, s-files-4,
+// -11, -13); the one chosen on.
 func nodes(t view.FileTree) w.Tree {
 	out := w.Tree{}
 	indents := []w.TreeIndent{w.TreeLevel0, w.TreeLevel22, w.TreeLevel40, w.TreeLevel58}
@@ -192,6 +195,9 @@ func nodes(t view.FileTree) w.Tree {
 				row.Unavailable, row.Trail = true, w.Badge{Label: readOnly}
 			} else if n.Href != "" {
 				row.Href, row.Swap = n.Href, formSheet
+			}
+			if n.Here {
+				row.Trail = w.TreeNote{Text: here}
 			}
 			out.Rows = append(out.Rows, row)
 			if n.ID != "" && n.ID == t.Chosen {

@@ -1125,6 +1125,10 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		linkTree(sheet.Target, func(id string) string {
 			return s.postQuery(c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "to": {id}})
 		})
+		// The folder the items are in says so whichever node is chosen, in
+		// a copy as in a move (s-files-4, -11, -13, -25; the owner's
+		// decision of 31.10.2026, Typecase's note 152, task 248).
+		hereTree(sheet.Target, s.route(c.href("", c.segs, true)))
 		back := url.Values{"op": {string(op)}, "item": names}
 		if dest != nil {
 			back.Set("to", s.route(dest.href("", dest.segs, true)))
@@ -1329,6 +1333,19 @@ func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, na
 		tree.Chosen = s.route(chosen.href("", chosen.segs, true))
 	}
 	return tree
+}
+
+// hereTree marks the node of the folder the items of a move or a copy are
+// in (FileTreeNode.Here, «the items are here»), wherever it stands.
+func hereTree(tree *view.FileTree, id string) {
+	var walk func(nodes []view.FileTreeNode)
+	walk = func(nodes []view.FileTreeNode) {
+		for i := range nodes {
+			nodes[i].Here = !nodes[i].File && nodes[i].ID == id
+			walk(nodes[i].Children)
+		}
+	}
+	walk(tree.Nodes)
 }
 
 // linkTree gives every node a reader can choose the address of its sheet

@@ -2765,6 +2765,10 @@ type FileServer struct { Label Text; Href string; On bool; Reason Text }
 // created», s-notes-11); слова — экрана. Такой узел стоит первым среди
 // соседних, каково бы ни было его имя («2026-08» над «2026-07»); открытый
 // заново лист свежего узла не знает, и порядок в нём — по имени.
+// Here — у листа переноса и копии (s-files-4, -11, -13, -25): в этой папке
+// лежит то, что переносят или копируют («the items are here»), выбран узел
+// или нет (решение владельца 31.10.2026, записка Typecase 152); слова —
+// экрана. У прочих деревьев его нет.
 type FileTreeNode struct {
     ID, Label string
     Stamp     Stamp
@@ -2774,7 +2778,7 @@ type FileTreeNode struct {
     File      bool
     Size      Size
     Lands     Text
-    Attachments, Fresh bool
+    Attachments, Fresh, Here bool
     Href      string
 }
 

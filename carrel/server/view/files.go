@@ -200,6 +200,11 @@ type FileTreeNode struct {
 	// created»); слова — экрана
 	Attachments bool `json:"attachments,omitempty"`
 	Fresh       bool `json:"fresh,omitempty"`
+	// Here — в этой папке лежит то, что переносят или копируют (лист
+	// операции, s-files-4, -11, -13, -25: «the items are here»), выбран
+	// узел или нет (решение владельца 31.10.2026, записка Typecase 152);
+	// слова — экрана
+	Here bool `json:"here,omitempty"`
 	// Href — тот же лист, где выбран этот узел (GET; у листа операции —
 	// адрес op без go, с to=ID): без сценариев узел выбирает ссылкой;
 	// недоступный узел — пусто
