@@ -1981,8 +1981,8 @@ func goOn(obj *model.Object, have, want formValues, tz *time.Location) (count st
 }
 
 // doneHint says what Done does to a repeating task before it is ticked: the
-// day it moves on to, or that this is its last time. Empty for a task that
-// does not repeat or is done.
+// day it moves on to, or that this is its last time (the owner's words of
+// 02.11.2026). Empty for a task that does not repeat or is done.
 func (s *Server) doneHint(c *collectionCtx, obj *model.Object) view.Text {
 	if obj == nil || !obj.IsCalendar() || cal.RawRRULE(obj) == "" || taskDone(obj) {
 		return ""
@@ -1992,9 +1992,9 @@ func (s *Server) doneHint(c *collectionCtx, obj *model.Object) view.Text {
 	case err != nil:
 		return ""
 	case !ok:
-		return "The task repeats, and this is its last time: Done completes it."
+		return "Repeating task, last time: Done completes it."
 	}
-	return text("The task repeats. Done is this time: it moves on to " + c.tf.shortDay(next) + " and stays open.")
+	return text("Repeating task: Done marks this time and moves it on to " + c.tf.shortDay(next) + ".")
 }
 
 // fillNames is U-6.1: the display name and the two parts of N fill each

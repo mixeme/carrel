@@ -71,8 +71,9 @@ func TestTheFormOfARepeatingTaskSaysWhatDoneDoes(t *testing.T) {
 			}
 		}
 	}
-	if !strings.Contains(hint, "repeats") || !strings.Contains(hint, "19") {
-		t.Errorf("hint under Done = %q", hint)
+	// The owner's words of 02.11.2026.
+	if want := "Repeating task: Done marks this time and moves it on to 19 Jan."; hint != want {
+		t.Errorf("hint under Done = %q, want %q", hint, want)
 	}
 	form := formFields(page.Form)
 	form.Set("done", "on")

@@ -31,6 +31,9 @@ current mockup; fonts are in `docs/visual/fonts/`.
 - A task saved with Done ticked and another status chosen says under Status
   what does not agree and the two ways out: «Done is ticked, but the status
   is In process. Untick Done, or set the status to Completed.»
+- The hint under Done of a repeating task, in the form and on the card:
+  «Repeating task: Done marks this time and moves it on to 19 Jan.», on its
+  last time «Repeating task, last time: Done completes it.»
 
 ## v0.2.391 — 2026-11-01
 
