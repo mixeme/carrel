@@ -232,19 +232,11 @@ func TestASaveThatIsNotTheEditIsNotSent(t *testing.T) {
 	if got := body(t, f, "hard.vcf"); got != before {
 		t.Fatalf("the save was sent:\n%s", got)
 	}
-	var notice *view.Notice
-	for i, n := range page.Notices {
-		if n.Title == "Carrel could not save this edit" {
-			notice = &page.Notices[i]
-		}
-	}
-	if notice == nil {
-		t.Fatalf("notices = %+v", page.Notices)
-	}
-	for _, w := range []string{"Nothing was saved", "a fault in Carrel", "TITLE"} {
-		if !strings.Contains(string(notice.Body), w) {
-			t.Errorf("the notice does not say %q: %s", w, notice.Body)
-		}
+	// The owner's words of 02.11.2026: an internal error of Carrel, said so,
+	// what went wrong by the property's name, nothing sent, report it.
+	notice := faultOf(t, page.Notices)
+	if want := "Saving would have stored the field Title differently from what you entered, and would have changed the property TITLE, which you did not touch. " + faultTail; string(notice.Body) != want {
+		t.Errorf("body = %q,\nwant %q", notice.Body, want)
 	}
 	// The form keeps what was entered, and the record under it is the one
 	// the server holds: saved again without the fault, the edit goes through.
@@ -274,7 +266,29 @@ func TestASaveThatDoesNotReadBackIsNotSent(t *testing.T) {
 	if got := body(t, f, "hard.ics"); got != before {
 		t.Fatalf("the save was sent:\n%s", got)
 	}
-	if !hasNotice(page.Notices, "Carrel could not save this edit") {
-		t.Fatalf("notices = %+v", page.Notices)
+	// What went wrong by the field's name, as the form calls it.
+	notice := faultOf(t, page.Notices)
+	if !strings.HasPrefix(string(notice.Body), "Saving would have stored the field Summary differently from what you entered") ||
+		!strings.HasSuffix(string(notice.Body), faultTail) {
+		t.Errorf("body = %q", notice.Body)
 	}
+}
+
+// faultTail is what every fault notice ends with: what became of the record
+// and the entry, and what to do.
+const faultTail = "Nothing was sent; the record is unchanged and the form keeps your entry. Please report this with the details below."
+
+// faultOf is the notice of an internal error of Carrel among notices.
+func faultOf(t *testing.T, notices []view.Notice) view.Notice {
+	t.Helper()
+	for _, n := range notices {
+		if n.Title == "Internal Carrel error — the edit was not saved" {
+			if n.Role != view.NoticeAlert {
+				t.Errorf("the fault is no alarm: %+v", n)
+			}
+			return n
+		}
+	}
+	t.Fatalf("notices = %+v", notices)
+	return view.Notice{}
 }

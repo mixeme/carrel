@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.392 — 2026-11-02
+
+### Changed
+
+- The notice of a save Carrel refused to send because it would have spoiled
+  the record now says plainly that it is Carrel's internal error: «Internal
+  Carrel error — the edit was not saved». It names what went wrong — «the
+  field Location» stored differently from what was entered, «the property
+  X-ALT-DESC» changed though untouched —, says nothing was sent and the form
+  keeps the entry, and asks to report it with the details (the owner's words
+  of 02.11.2026).
+
 ## v0.2.391 — 2026-11-01
 
 Typecase notes 149–154 (Typecase `f62d129`).

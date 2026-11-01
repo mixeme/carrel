@@ -619,31 +619,46 @@ func (s *Server) applyChecked(c *collectionCtx, obj *model.Object, ch change, ha
 	return sent, fault, nil
 }
 
-// faultNotice says a save was not made and that the fault is Carrel's (the
-// owner's decision of 11.10.2026): what would not read back as entered, what
-// would change untouched, and the lines themselves for whoever reports it.
+// faultNotice says a save was not made and that the fault is Carrel's own (the
+// owner's decision of 11.10.2026; his words of 02.11.2026): the form's fields
+// that would not read back as entered, the record's properties that would
+// change untouched — the form has no field for them —, what became of the
+// record and the entry, and the lines themselves for whoever reports it.
 func faultNotice(f *editFault) view.Notice {
 	var said []string
 	if len(f.fields) > 0 {
-		said = append(said, "the record would not read back as you entered it ("+strings.Join(f.fields, ", ")+")")
+		said = append(said, "stored "+named("field", f.fields)+" differently from what you entered")
 	}
 	if len(f.props) > 0 {
-		said = append(said, "it would also change what you did not touch ("+strings.Join(f.props, ", ")+")")
+		said = append(said, "changed "+named("property", f.props)+", which you did not touch")
 	}
 	n := view.Notice{
 		Role:  view.NoticeAlert,
-		Title: "Carrel could not save this edit",
-		Body: text("Nothing was saved, and the record is as it was. This is a fault in Carrel, not in what you entered or in the server: " +
-			strings.Join(said, ", and ") + ". The form keeps what you entered."),
+		Title: "Internal Carrel error — the edit was not saved",
+		Body: text("Saving would have " + strings.Join(said, ", and would have ") +
+			". Nothing was sent; the record is unchanged and the form keeps your entry. Please report this with the details below."),
 	}
 	if len(f.lines) > 0 {
-		d := &view.Diagnostic{Summary: "What the save would have changed besides"}
+		d := &view.Diagnostic{Summary: "What the save would have changed"}
 		for _, l := range f.lines {
 			d.Lines = append(d.Lines, text(l))
 		}
 		n.Details = d
 	}
 	return n
+}
+
+// named is «the field Location», «the fields Location and Notes», «the
+// properties A, B and C».
+func named(noun string, names []string) string {
+	if len(names) == 1 {
+		return "the " + noun + " " + names[0]
+	}
+	plural := noun + "s"
+	if strings.HasSuffix(noun, "y") {
+		plural = strings.TrimSuffix(noun, "y") + "ies"
+	}
+	return "the " + plural + " " + strings.Join(names[:len(names)-1], ", ") + " and " + names[len(names)-1]
 }
 
 // sameRuleText compares two rules as the sets of parts they are.
