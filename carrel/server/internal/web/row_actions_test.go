@@ -366,7 +366,8 @@ func TestUserMenuIsTheFrame(t *testing.T) {
 	sameMenu(t, "bob", rows["bob"].Menu, "s-admin-12")
 	head := mockupFrame(t, "s-admin-2")
 	for login, role := range map[string]string{"alice": "Administrator", "bob": "User"} {
-		if string(rows[login].Role) != role || !strings.Contains(head, "<td>"+role+"</td>") {
+		// Role is the main column since Typecase's note 155 (Р-66).
+		if string(rows[login].Role) != role || !strings.Contains(head, `<td class="tc-table__main" data-tc-label="Role">`+role+"</td>") {
 			t.Errorf("%s role = %q, want %q as s-admin-2 writes it", login, rows[login].Role, role)
 		}
 	}

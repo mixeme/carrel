@@ -17,6 +17,10 @@ import (
 // по кадрам Typecase 6833ef4», ФН1…ФН4): what the frames of a folder
 // (s-files-1, states-32, -33, -34) draw that the view model did not carry.
 
+// frameMainCell is the day of a folder's row, its main column since
+// Typecase's note 155 (Р-66): what a row's card keeps on a phone.
+var frameMainCell = regexp.MustCompile(`<td class="tc-mono tc-table__main" data-tc-label="[^"]*">(\d[^<]*)</td>`)
+
 // ФН1: the line under the title counts the folder — «sftpgo · vps ·
 // ‹attachment folder› · 5 items» (s-files-1), «… · 2 items · ‹read-only›»
 // (states-34, Typecase's note 87) — and says none when the storage did not
@@ -249,7 +253,7 @@ func TestFileAndLinkTablesAreTheFrames(t *testing.T) {
 		!strings.Contains(links, `<td class="tc-mono is-2nd tc-mono--dusty">never opened</td>`) {
 		t.Fatalf("s-publish-1 draws %q and copies %q: read the frame again", cells, copied)
 	}
-	changed := regexp.MustCompile(`<td class="tc-mono">(\d[^<]*)</td>`).FindStringSubmatch(mockupFrame(t, "s-files-1"))
+	changed := frameMainCell.FindStringSubmatch(mockupFrame(t, "s-files-1"))
 	if changed == nil || !stamp.MatchString(changed[1]) {
 		t.Fatalf("s-files-1 says Changed as %q: read the frame again", changed)
 	}
@@ -428,7 +432,11 @@ func TestFilePanelSaysChangedAsTheRowDoes(t *testing.T) {
 			drawn = frameText(pair[2])
 		}
 	}
-	if !stamp.MatchString(drawn) || !strings.Contains(frame, `<td class="tc-mono">`+drawn+`</td>`) {
+	inRow := false
+	for _, m := range frameMainCell.FindAllStringSubmatch(frame, -1) {
+		inRow = inRow || m[1] == drawn
+	}
+	if !stamp.MatchString(drawn) || !inRow {
 		t.Fatalf("s-files-1 says Changed in the panel as %q: read the frame again", drawn)
 	}
 
