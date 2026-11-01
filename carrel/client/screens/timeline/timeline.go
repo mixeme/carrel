@@ -32,6 +32,9 @@ var (
 	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
 )
 
+// filter is the screen's word (U-1.3) for the filter of the bar.
+const filter = "Filter by word"
+
 // Screen draws the timeline from its view model.
 //
 //   - The shell: the top bar; the rail of sections with «Back to list» apart
@@ -41,11 +44,11 @@ var (
 //   - The head: the person's avatar, «Timeline», the name, where and who,
 //     «in 2 books» for a person in several (Linked); the actions — write a
 //     note, a new event, a new task about the person, Print.
-//   - The bar: the range of dates (a GET form, From, To, Show), the filter
-//     by kind with each count (links; on a narrow bar it folds), Columns,
-//     «⋯», «newest first».
+//   - The bar: «Filter by word» (a GET form), the range of dates (a GET
+//     form, From, To, Show), the filter by kind with each count (links; on
+//     a narrow bar it folds), Columns, «⋯», «newest first».
 //   - The poll's bar while it runs or a source did not answer: what it
-//     matched by, monospaced, the source that did not answer as an alarm.
+//     polled, the sources that did not answer as an alarm.
 //   - The months with their count, a row for each record: its mark, the
 //     day, the title, why it is here, its kind, where it lives.
 //   - The foot: from when the timeline looked (Note).
@@ -159,8 +162,16 @@ func railParts(r view.Rail) []w.RailPart {
 // bar is the bar over the timeline.
 func bar(p *view.ContactTimelinePage) w.Bar {
 	var items []w.BarPart
+	if p.Bar.FilterForm != nil {
+		// «Filter by word» first, as the agenda's (s-contacts-7; Typecase's
+		// note 154): it keeps the window and the kind.
+		f := bind.Filter(p.Bar, filter)
+		f.Variant = w.FilterH26W200
+		items = append(items, f)
+	}
 	if f := p.Range.Form; f != nil {
-		rng := w.Range{Action: f.Action}
+		// The kind and the word go with the window (Range.Hidden).
+		rng := w.Range{Action: f.Action, Hidden: bind.Hidden(*f)}
 		rows := bind.Rows(*f)
 		if len(rows) > 0 {
 			rng.From = bind.Input(rows[0])
