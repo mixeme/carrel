@@ -352,7 +352,9 @@ func table(rows []view.FileRow) w.Table {
 		{Label: colName},
 		{Label: colSize, Width: w.ColSize},
 		{Label: colType, Width: w.ColChanged, Rank: w.Rank3},
-		{Label: colChanged, Width: w.ColTime, Rank: w.Rank4},
+		// What a row's card keeps on a phone (TableCol.Main, Typecase's
+		// note 155, Р-66).
+		{Label: colChanged, Width: w.ColTime, Rank: w.Rank4, Main: true},
 		{Width: w.Col90},
 	}}
 	for _, r := range rows {

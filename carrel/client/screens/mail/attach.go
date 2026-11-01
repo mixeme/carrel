@@ -242,7 +242,9 @@ func recordList(p *view.MailAttachSheet) w.List {
 // themselves and its files off.
 func fileTable(p *view.MailAttachSheet) w.Table {
 	folder := p.What == "folder"
-	t := w.Table{Cols: []w.TableCol{{Label: colName}, {Label: colSize, Width: w.Col90}, {Label: colChanged, Width: w.Col110, Rank: w.Rank3}}}
+	// Changed is what a row's card keeps on a phone (TableCol.Main,
+	// Typecase's note 155, Р-66).
+	t := w.Table{Cols: []w.TableCol{{Label: colName}, {Label: colSize, Width: w.Col90}, {Label: colChanged, Width: w.Col110, Rank: w.Rank3, Main: true}}}
 	if folder {
 		t.Cols[0].Label = string(p.In)
 	} else {

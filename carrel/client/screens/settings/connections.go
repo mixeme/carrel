@@ -290,14 +290,15 @@ func serverCard(c view.ConnectionCard, narrow bool) w.Card {
 
 // collectionsTable is a server's collections: the tick that polls it —
 // pressed, it posts —, its mark and name, what is in it, how many, when it
-// changed on the server, and its «⋯»; one not polled faded.
+// changed on the server — what a row's card keeps on a phone (TableCol.Main,
+// Typecase's note 155, Р-66) —, and its «⋯»; one not polled faded.
 func collectionsTable(rows []view.CollectionRow, narrow bool) w.Table {
 	name := colCollection
 	if allFiles(rows) {
 		name = colFolder
 	}
 	t := w.Table{Cols: []w.TableCol{{Width: w.ColTickSmall}, {Label: name}, {Label: colWhatsIn, Rank: w.Rank3},
-		{Label: colObjects, Width: w.ColNum, Rank: w.Rank4, Secondary: narrow}, {Label: colChanged, Width: w.ColChanged}, {Width: w.ColMenu}}}
+		{Label: colObjects, Width: w.ColNum, Rank: w.Rank4, Secondary: narrow}, {Label: colChanged, Width: w.ColChanged, Main: true}, {Width: w.ColMenu}}}
 	for _, r := range rows {
 		tick := bind.Ticked(r.Tick)
 		pick := w.TableCell{Pick: &tick}

@@ -103,7 +103,9 @@ func Davloom(p *view.DavloomPage) w.Shell {
 // devicesTable is the devices (s-davloom-1): a row a device.
 func devicesTable(devices []view.ProxyDevice) w.Table {
 	t := w.Table{Variant: w.TableFit, Cols: []w.TableCol{
-		{Label: colDevice}, {Label: colScope}, {Label: colCreated, Rank: w.Rank4, Secondary: true}, {Label: colLastRequest, Secondary: true}, {Width: w.Col90},
+		// What it can see and do is what a row's card keeps on a phone
+		// (TableCol.Main, Typecase's note 155, Р-66).
+		{Label: colDevice}, {Label: colScope, Main: true}, {Label: colCreated, Rank: w.Rank4, Secondary: true}, {Label: colLastRequest, Secondary: true}, {Width: w.Col90},
 	}}
 	for _, d := range devices {
 		marks := w.Line{Gap: w.LineGap3}

@@ -20,14 +20,16 @@ const (
 
 // The list's columns (C-6.4 Columns, the ids the server names them by):
 // their place in the row, how soon each leaves as the page narrows, whether
-// it is of the second rank (s-admin-2).
+// it is of the second rank (s-admin-2), whether it is what a row's card
+// keeps on a phone — Role (TableCol.Main, Typecase's note 155, Р-66).
 var userCols = []struct {
 	id     string
 	rank   w.ColRank
 	second bool
+	main   bool
 }{
-	{"login", 0, false}, {"role", 0, false}, {"created", w.Rank3, true}, {"last-login", w.Rank4, false},
-	{"dav", 0, false}, {"sessions", 0, false}, {"escrow", 0, false}, {"address", 0, false},
+	{"login", 0, false, false}, {"role", 0, false, true}, {"created", w.Rank3, true, false}, {"last-login", w.Rank4, false, false},
+	{"dav", 0, false, false}, {"sessions", 0, false, false}, {"escrow", 0, false, false}, {"address", 0, false, false},
 }
 
 // Users is the list of people, /admin/ (AdminUsersPage, s-admin-2, -12):
@@ -99,7 +101,7 @@ func usersTable(p *view.AdminUsersPage) w.Table {
 	var order []string
 	for _, c := range userCols {
 		if label, ok := shown[c.id]; ok {
-			t.Cols = append(t.Cols, w.TableCol{Label: label, Rank: c.rank, Secondary: c.second})
+			t.Cols = append(t.Cols, w.TableCol{Label: label, Rank: c.rank, Secondary: c.second, Main: c.main})
 			order = append(order, c.id)
 		}
 	}

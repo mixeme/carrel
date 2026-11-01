@@ -553,7 +553,9 @@ func table(p *view.FilesPage) w.Table {
 		{Label: colName},
 		{Label: colSize, Width: w.ColSize, Rank: w.Rank3},
 		{Label: colType, Width: w.ColType, Rank: w.Rank4, Secondary: true},
-		{Label: colChanged, Width: w.ColTime},
+		// What a row's card keeps on a phone (TableCol.Main, Typecase's
+		// note 155, Р-66).
+		{Label: colChanged, Width: w.ColTime, Main: true},
 		{Width: w.ColNum},
 	}}
 	if n := len(p.Crumbs); n > 1 {
