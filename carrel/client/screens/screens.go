@@ -542,10 +542,7 @@ var All = []Screen{
 			}
 			return nil // nothing on paper is pressed
 		},
-		Waits: []Wait{
-			{Row: 36, Control: ".Title(Rubric).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
-			{Row: 36, Control: ".Items(Docbar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
-		},
+		Waits: []Wait{},
 	},
 	{
 		Model: func() any { return new(view.ConflictPage) },

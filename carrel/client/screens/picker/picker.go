@@ -153,7 +153,9 @@ func drop(up view.Action) w.Empty {
 		w.Faced{Face: w.FaceLarge, Items: []w.LinePart{w.Text("{name} "), w.Dim{Parts: []w.Inline{w.Text("{size}")}}}},
 		w.Button{Label: remove, Kind: w.ButtonDanger, Small: true, Place: w.Pushed, Removes: true},
 	}}
-	pick := w.FilePick{Label: choose, File: w.FileField{Form: formSheet, Name: up.File, Label: files, List: listID, Size: sizeField, Many: true}, Row: row}
+	// The field stands in the sheet, which is its form and sends multipart
+	// for it (s-notes-11): it names no form.
+	pick := w.FilePick{Label: choose, File: w.FileField{Name: up.File, Label: files, List: listID, Size: sizeField, Many: true}, Row: row}
 	return w.Empty{Variant: w.EmptyDashed, Parts: []w.EmptyPart{
 		w.Text(dropHere), pick, w.Text(" "),
 		w.Aside{Face: w.FaceSmall, Parts: []w.Inline{w.Text(taken)}}, w.Text(" "),

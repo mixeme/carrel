@@ -108,14 +108,17 @@ func Screen(p *view.NotePage) w.Shell {
 }
 
 // Forms are the forms of the actions that post with none of their own: the
-// deletion, Attach «From this computer» with its file, an attachment's
-// Remove in the edit, the notices' buttons and the menus' items that post
-// (Sign out). The edit's form is its document.
+// deletion, Attach «From this computer» with its file of a note read — in
+// the edit the file is the document's —, an attachment's Remove in the edit,
+// the notices' buttons and the menus' items that post (Sign out). The edit's
+// form is its document.
 func Forms(p *view.NotePage) []w.PostForm {
 	out := append(bind.TopForms(p.Top), bind.MenuForms(p.Meta.Menu)...)
 	out = append(out, bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Meta.Actions {
 		switch {
+		case a.ID == attachID && p.Doc.Mode == view.NoteEditing:
+			out = append(out, bind.EditFileForms(a.Arrow)...)
 		case a.ID == attachID:
 			out = append(out, bind.MenuForms(a.Arrow)...)
 		case a.Danger && a.Method == "POST" && a.Enabled:
@@ -130,7 +133,7 @@ func Forms(p *view.NotePage) []w.PostForm {
 	if p.Doc.Mode == view.NoteEditing {
 		for _, a := range p.Doc.Bar {
 			if a.ID == attachID {
-				out = append(out, bind.MenuForms(barItems(a.Arrow))...)
+				out = append(out, bind.EditFileForms(barItems(a.Arrow))...)
 			}
 		}
 		for _, a := range p.Meta.Attach {
@@ -321,38 +324,26 @@ func notices(p *view.NotePage) []w.MainPart {
 // (s-notes-30).
 func column(p *view.NotePage) []w.DocmetaSec {
 	var secs []w.DocmetaSec
-	var attach *view.Action
-	for _, a := range p.Meta.Actions {
-		if a.ID == attachID {
-			attach = &a
-		}
-	}
+	attach := columnAttach(p)
+	editing := p.Doc.Mode == view.NoteEditing
 	if attach != nil || len(p.Meta.Attach) > 0 {
 		rubric := w.Rubric{Text: "Attachments"}
 		if attach != nil {
-			// ждёт библиотеку: U-5.5 #43 — the frame draws the file a field
-			// of the edit that goes with Save (FileField.List); it goes by
-			// its own form, until Doc supports multipart for external file fields (Typecase 249)
 			b := bind.Button(*attach, "")
 			b.Menu, b.Small = true, true
+			// Read, a file goes at once by a form of its own; in the edit it
+			// is the document's and goes with Save (s-notes-20, -30).
 			items := append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...)
-			for _, it := range items {
-				// A new note's file sends the document it is typed in (Submits,
-				// FileField.To): the column stands outside it.
-				if m, ok := it.(w.MenuItem); ok && m.File != nil && m.File.To != "" {
-					m.File.Form = formOf(p)
-				}
+			if editing {
+				items = editFiles(attach.Arrow, formOf(p), listOf(p))
 			}
-			// ждёт библиотеку: U-5.5 #36 — a new note's From Files and
-			// «Upload» send the form they stand in (MenuItem.To), and the
-			// column stands outside the document
 			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: items, Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		var items []w.DocmetaPart
 		for _, a := range p.Meta.Attach {
 			at := w.DocAttach{Name: string(a.Name), Size: w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Size))}}, Href: a.Href, From: bind.From(a.From)}
 			for _, act := range a.Actions {
-				if p.Doc.Mode != view.NoteEditing {
+				if !editing {
 					break
 				}
 				r := bind.Button(act, removeID(act))
@@ -370,7 +361,11 @@ func column(p *view.NotePage) []w.DocmetaSec {
 			}
 			items = append(items, at)
 		}
-		secs = append(secs, w.DocmetaSec{Title: rubric, Items: items})
+		sec := w.DocmetaSec{Title: rubric, Items: items}
+		if editing && attach != nil {
+			sec.ID = listOf(p) // where a picked file joins (FileField.List)
+		}
+		secs = append(secs, sec)
 	}
 	if len(p.Meta.Linked) > 0 {
 		refs := w.DocRefs{}

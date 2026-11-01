@@ -70,6 +70,62 @@ func barItems(arrow []view.MenuItem) []view.MenuItem {
 	return out
 }
 
+// The lists a file picked in the edit joins (FileField.List): the column's
+// attachments, an edit's and a new note's (s-notes-20, -30).
+const (
+	listEdit = "note-attachments"
+	listNew  = "note-new-attachments"
+)
+
+// listOf is the list of the edit's picked files.
+func listOf(p *view.NotePage) string {
+	if p.Source.UID == "" {
+		return listNew
+	}
+	return listEdit
+}
+
+// picked is the row a picked file becomes in that list: its name, its size,
+// Remove (s-notes-20).
+var picked = w.DocAttach{
+	Name:   "{name}",
+	Size:   w.Dim{Parts: []w.Inline{w.Text(lead + "{size}")}},
+	Remove: &w.Button{Label: "Remove", Kind: w.ButtonDanger, Small: true, Removes: true},
+}
+
+// editFiles are the items of an Attach of the edit: «From this computer» a
+// field of the document, standing outside it, that goes with its Save
+// (FileField.Form, List; Typecase's note 152, task 249); an item that sends
+// the document to its own address — a new note's From Files — names it too
+// (MenuItem.To with Form, task 247); the rest post by forms of their own.
+func editFiles(arrow []view.MenuItem, form, list string) []w.MenuPart {
+	out := bind.EditFiles(arrow, list, "size", picked)
+	for i, part := range out {
+		m, ok := part.(w.MenuItem)
+		if !ok {
+			continue
+		}
+		switch {
+		case m.File != nil:
+			m.File.Form = form
+		case m.To != "":
+			m.Form = form
+		}
+		out[i] = m
+	}
+	return out
+}
+
+// columnAttach is the column's Attach, nil where it has none.
+func columnAttach(p *view.NotePage) *view.Action {
+	for _, a := range p.Meta.Actions {
+		if a.ID == attachID {
+			return &a
+		}
+	}
+	return nil
+}
+
 // edit is the note in its edit (s-notes-20; a new note's — s-notes-30): the
 // bar of an edit (Docbar.Edit: without a script only its Save and Cancel
 // stand, Typecase's task 104) — Save, which submits
@@ -118,24 +174,9 @@ func edit(p *view.NotePage) []w.MainPart {
 		w.Button{Icon: "link", Title: link, Tertiary: true},
 	)
 	if attach != nil {
-		// ждёт библиотеку: U-5.5 #43 — the frame draws the file a field of
-		// the edit that goes with Save (FileField.List); it goes by its own
-		// form, until Doc supports multipart for external file fields (Typecase 249)
-		arrow := barItems(attach.Arrow)
-		menu := append(bind.MenuItems(arrow, ""), bind.Uploads(arrow, upload)...)
-		for _, it := range menu {
-			// A new note's file sends the document it is typed in (Submits,
-			// FileField.To): the bar stands outside it.
-			if m, ok := it.(w.MenuItem); ok && m.File != nil && m.File.To != "" {
-				m.File.Form = formEdit
-			}
-		}
-		// ждёт библиотеку: U-5.5 #36 — a new note's From Files and «Upload»
-		// send the form they stand in (MenuItem.To), and the bar stands
-		// outside the document
 		items = append(items, w.Drop{
 			Trigger: w.Button{Folds: true, Label: string(attach.Label), Menu: true, Icon: bind.Icon(attach.Icon), Title: string(attach.Label)},
-			Menu:    w.Menu{Items: menu, Width: w.MenuWidth212, Pop: w.MenuUnder},
+			Menu:    w.Menu{Items: editFiles(barItems(attach.Arrow), formEdit, listOf(p)), Width: w.MenuWidth212, Pop: w.MenuUnder},
 		})
 	}
 	end := []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text(autoSave)}, Tertiary: true}}
@@ -151,6 +192,9 @@ func edit(p *view.NotePage) []w.MainPart {
 	main := []w.MainPart{bar, w.Runbar{Progress: formEdit, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
 	main = append(main, notices(p)...)
 	doc := bind.DocForm(p.Doc.Form, formEdit)
+	// The files Attach picks in the bar and the column stand outside the
+	// document and go with its Save (Doc.Multipart, Typecase's note 152).
+	doc.Multipart = attach != nil || columnAttach(p) != nil
 	var title, body w.Area
 	if f := p.Doc.Form; f != nil {
 		for _, r := range bind.Rows(*f) {
