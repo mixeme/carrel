@@ -339,6 +339,14 @@
             "label": "Export",
             "method": "GET",
             "target": "sheet"
+          },
+          {
+            "enabled": true,
+            "href": "/app/notes?print=1",
+            "icon": "i-print",
+            "id": "list.print",
+            "label": "Print",
+            "method": "GET"
           }
         ],
         "columns": {

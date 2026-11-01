@@ -118,7 +118,33 @@
     "compact": null,
     "drop": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter by word",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 3,
     "range": null,
     "segments": [
@@ -585,21 +611,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 13 of 14 sources · matched by "
-      },
-      {
-        "mark": "mono",
-        "text": "a.kovaleva@example.org"
-      },
-      {
-        "text": ", "
-      },
-      {
-        "mark": "mono",
-        "text": "anna.kovaleva@slovo.example"
-      },
-      {
-        "text": " and the name"
+        "text": "Polled 13 of 14 sources"
       }
     ],
     "taskID": "t-task"
