@@ -121,7 +121,15 @@ func TestContactFormIsTheFrames(t *testing.T) {
 var (
 	frameFset    = regexp.MustCompile(`(?s)<div class="tc-fset">\s*<div class="tc-rubric">([^<]*)</div>(.*?)\n\s*</div>\n`)
 	frameFsetRow = regexp.MustCompile(`(?s)<div class="tc-field[^"]*"><label>([^<]*)</label><(?:button|input) class="tc-in[^"]*"[^>]*?(?:placeholder="([^"]*)")?[^>]*>([^<]*)|<button class="tc-btn[^"]*" type="button">(.*?)</button>`)
+	// A choice of the form (Typecase's note 149: the frames are forms) is a
+	// list whose selected option is what the pick shows.
+	frameSelect = regexp.MustCompile(`(?s)<span class="tc-in is-pick"><select [^>]*>(?:<option [^>]*>[^<]*</option>)*?<option [^>]*selected>([^<]*)</option>.*?</select></span>`)
 )
+
+// framePicks writes each choice of a frame's form as the pick it shows.
+func framePicks(frame string) string {
+	return frameSelect.ReplaceAllString(frame, `<button class="tc-in is-pick" type="button">$1</button>`)
+}
 
 // The full form of a new contact (s-contacts-27, /new): the same form as an
 // edit, empty — the head «New contact» over the book, and under Phone
@@ -147,7 +155,7 @@ func TestNewContactFormIsTheFrame(t *testing.T) {
 		t.Fatal("s-contacts-27 draws no set: read the frame again")
 	}
 	var drawn []string
-	for _, m := range frameFsetRow.FindAllStringSubmatch(fset[2], -1) {
+	for _, m := range frameFsetRow.FindAllStringSubmatch(framePicks(fset[2]), -1) {
 		if m[4] != "" {
 			drawn = append(drawn, "["+frameText(m[4])+"]")
 			continue

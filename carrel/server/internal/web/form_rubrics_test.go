@@ -14,7 +14,9 @@ import (
 // labels of its fields.
 
 var (
-	frameFormPart = regexp.MustCompile(`(?s)<div class="tc-rubric">(.*?)</div>|<label>(.*?)</label>(?:\s*<button class="tc-(?:btn|check)"[^>]*>(.*?)</button>)?|<button class="tc-check"[^>]*>(.*?)</button>`)
+	// A box is a button of the frame or, since the frames are forms
+	// (Typecase's note 149), a label with its checkbox.
+	frameFormPart = regexp.MustCompile(`(?s)<div class="tc-rubric">(.*?)</div>|<label>(.*?)</label>(?:\s*(?:<button class="tc-(?:btn|check)"[^>]*>|<label class="tc-check">)(.*?)</(?:button|label)>)?|<button class="tc-check"[^>]*>(.*?)</button>|<label class="tc-check">(.*?)</label>`)
 	// An option of a switch that is a row of checkboxes (Seg.Multiple,
 	// Typecase's task 72): its value, ticked or not, its words.
 	frameSegOpt = regexp.MustCompile(`(?s)<label class="[^"]*tc-seg__opt[^"]*"><input class="tc-seg__box" type="checkbox"[^>]*value="([^"]*)"( checked)?>(.*?)</label>`)
@@ -40,14 +42,14 @@ func frameForm(t *testing.T, id string) []string {
 		switch {
 		case strings.HasPrefix(m[0], `<div`):
 			rubric = frameText(m[1])
-		case strings.HasPrefix(m[0], `<label`):
+		case strings.HasPrefix(m[0], `<label>`):
 			label := frameText(m[2])
 			if label == "" {
 				label = frameText(m[3])
 			}
 			out = append(out, rubric+" / "+label)
 		default:
-			out = append(out, rubric+" / "+frameText(m[4]))
+			out = append(out, rubric+" / "+frameText(m[4]+m[5]))
 		}
 	}
 	return out

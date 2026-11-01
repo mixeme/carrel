@@ -28,7 +28,9 @@ func selectedLabel(row *view.FormRow) string {
 // not samples.
 func TestNewEventIsTheFrame(t *testing.T) {
 	frame, _, _ := strings.Cut(mockupFrame(t, "s-agenda-15"), "<figcaption")
-	first := regexp.MustCompile(`<label>First</label><button class="tc-in is-pick" type="button">([^<]*)</button>`).FindStringSubmatch(frame)
+	// The choice is a list of the form since the frames are forms
+	// (Typecase's note 149): the option selected is what it shows.
+	first := regexp.MustCompile(`<label>First</label><span class="tc-in is-pick"><select [^>]*>(?:<option [^>]*>[^<]*</option>)*?<option [^>]*selected>([^<]*)</option>`).FindStringSubmatch(frame)
 	if first == nil || strings.Count(frame, "<label>Reminder</label>") != 0 {
 		t.Fatal("s-agenda-15 draws no one reminder First: read the frame again")
 	}

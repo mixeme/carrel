@@ -24,12 +24,20 @@ func frameAttendeeField(t *testing.T, id string) frameTagField {
 	t.Helper()
 	frame := mockupFrame(t, id)
 	var f frameTagField
-	m := regexp.MustCompile(`<span class="tc-in tc-in--tags tc-in--cols" data-tc-suggest="([^"]*)">`).FindStringSubmatch(frame)
+	field := regexp.MustCompile(`<span class="tc-in tc-in--tags tc-in--cols" data-tc-suggest="([^"]*)">`)
+	m := field.FindStringSubmatchIndex(frame)
 	if m == nil {
 		t.Fatalf("%s draws no field of attendees: read the frame again", id)
 	}
-	f.suggest = m[1]
-	for _, tag := range regexp.MustCompile(`<input( class="tc-check__box")? type="(hidden|checkbox)" name="([^"]*)" value="([^"]*)"( checked)?>`).FindAllStringSubmatch(frame, -1) {
+	f.suggest = frame[m[2]:m[3]]
+	// The tags are those of the field: since the frames are forms
+	// (Typecase's note 149) the rest of the edit has boxes and hidden rows
+	// of its own.
+	tags := frame[m[1]:]
+	if end := strings.Index(tags, `class="tc-in__add"`); end >= 0 {
+		tags = tags[:end]
+	}
+	for _, tag := range regexp.MustCompile(`<input( class="tc-check__box")? type="(hidden|checkbox)" name="([^"]*)" value="([^"]*)"( checked)?>`).FindAllStringSubmatch(tags, -1) {
 		fixed := ""
 		if tag[2] == "hidden" {
 			fixed = "fixed "
