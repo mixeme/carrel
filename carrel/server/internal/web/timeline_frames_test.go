@@ -22,8 +22,10 @@ var (
 	frameRunbar  = regexp.MustCompile(`(?s)<div class="tc-runbar">(.*?)<details class="tc-drop"><summary class="tc-btn is-sm is-danger">(\d+ failed)`)
 	frameRunMono = regexp.MustCompile(`<span class="tc-mono">([^<]*)</span>`)
 	frameTLRange = regexp.MustCompile(`(?s)<form class="tc-range" action="([^"]*)" method="(get)">(.*?)</form>`)
-	frameTLDay   = regexp.MustCompile(`<input class="tc-in[^"]*" type="date" value="[^"]*" name="([^"]*)" aria-label="([^"]*)">`)
-	frameSideDL  = regexp.MustCompile(`(?s)<div class="tc-side">.*?<dl class="tc-fields">(.*?)</dl>`)
+	// «Filter by word», the first of the bar (Typecase's note 154).
+	frameTLFilter = regexp.MustCompile(`<div class="tc-bar[^"]*">\s*<form class="tc-in[^"]*" action="([^"]*)" method="get">.*?<input class="tc-q" type="search" name="([^"]*)" placeholder="[^"]*" aria-label="([^"]*)">`)
+	frameTLDay    = regexp.MustCompile(`<input class="tc-in[^"]*" type="date" value="[^"]*" name="([^"]*)" aria-label="([^"]*)">`)
+	frameSideDL   = regexp.MustCompile(`(?s)<div class="tc-side">.*?<dl class="tc-fields">(.*?)</dl>`)
 )
 
 func TestTimelineIsTheFrame(t *testing.T) {
@@ -102,10 +104,12 @@ func TestTimelineIsTheFrame(t *testing.T) {
 		t.Errorf("timeline card «⋯» = %q,\nwant (s-contacts-7) %q", g, cardMenu)
 	}
 
-	// The run bar in pieces.
+	// The run bar says what was polled and what failed, nothing of what the
+	// records were matched by (Typecase's note 154, Р-77): the addresses are
+	// the card's, and the column «why» says why a row is here.
 	bar := frameRunbar.FindStringSubmatch(frame)
-	if bar == nil || len(frameRunMono.FindAllString(bar[1], -1)) == 0 || strings.Contains(bar[1], "tc-dim--danger") {
-		t.Fatal("s-contacts-7 draws no run bar with addresses and «N failed»: read the frame again")
+	if bar == nil || len(frameRunMono.FindAllString(bar[1], -1)) != 0 || strings.Contains(bar[1], "matched by") || strings.Contains(bar[1], "tc-dim--danger") {
+		t.Fatal("s-contacts-7 draws no run bar of «Polled … · N failed» alone: read the frame again")
 	}
 	var mono, alarm []string
 	var words strings.Builder
@@ -119,13 +123,49 @@ func TestTimelineIsTheFrame(t *testing.T) {
 		}
 	}
 	said := words.String()
-	// Both her addresses, as the frame says them (from-typecase note 117:
-	// the second is her card's in «Контакты»).
-	if strings.Join(mono, ",") != "a.kovaleva@example.org,anna.kovaleva@slovo.example" || !strings.Contains(said, " · matched by ") || !strings.Contains(said, " and the name") {
+	if len(mono) != 0 || strings.Contains(said, "matched by") || strings.Contains(said, "the name") {
 		t.Errorf("summary %q (mono %q), the frame %q", said, mono, frameText(bar[1]))
 	}
-	if len(alarm) != 0 || !strings.HasPrefix(said, "Polled ") || !strings.HasSuffix(said, " and the name") || string(page.Poll.Failed) != bar[2] {
+	if len(alarm) != 0 || !strings.HasPrefix(said, "Polled ") || string(page.Poll.Failed) != bar[2] {
 		t.Errorf("summary %q: alarm %q, failed %q; the frame «%s» and %q", said, alarm, page.Poll.Failed, frameText(bar[1]), bar[2])
+	}
+
+	// «Filter by word» first in the bar, as the agenda's (Typecase's note
+	// 154, Р-63): a GET form of its one line to the timeline.
+	fl := frameTLFilter.FindStringSubmatch(frame)
+	if fl == nil {
+		t.Fatal("s-contacts-7 draws no «Filter by word» first in its bar: read the frame again")
+	}
+	ff := page.Bar.FilterForm
+	if ff == nil || ff.Method != "GET" || screenPlace(ff.Action) != screenPlace(fl[1]) || ff.Action != card+"/timeline" {
+		t.Fatalf("filter form = %+v, the frame %q", ff, fl[1])
+	}
+	if r := rowNamed(t, *ff, fl[2]); r.Label != view.Text(fl[3]) || r.Value != "" {
+		t.Errorf("filter row = %+v, the frame %q %q", r, fl[2], fl[3])
+	}
+	// The word sifts the rows by their titles and texts; the kinds count
+	// what it kept and keep it, as the range and Clear do.
+	sifted := decode[view.ContactTimelinePage](t, app.h.do(get(card+"/timeline?filter=%D1%81%D0%B8%D0%BD%D0%BA", app.sess)))
+	all, kept := 0, 0
+	for _, g := range page.Groups {
+		all += len(g.Rows)
+	}
+	for _, g := range sifted.Groups {
+		for _, row := range g.Rows {
+			kept++
+			if !strings.Contains(strings.ToLower(string(row.Title)), "синк") {
+				t.Errorf("the word «синк» kept %q", row.Title)
+			}
+		}
+	}
+	if kept == 0 || kept >= all || sifted.Bar.Filter != "синк" || sifted.Bar.FilterForm == nil || sifted.Bar.FilterForm.Clear != card+"/timeline" {
+		t.Errorf("sifted: %d of %d rows, filter %q, form %+v", kept, all, sifted.Bar.Filter, sifted.Bar.FilterForm)
+	}
+	if seg := actionByID(sifted.Bar.Segments, "timeline.kind.event"); seg == nil || !strings.Contains(seg.Href, "filter=") {
+		t.Errorf("Events of a sifted timeline = %+v, want the word kept", seg)
+	}
+	if rf := sifted.Range.Form; rf == nil || formRowOf(*rf, "filter") == nil {
+		t.Errorf("the range of a sifted timeline sends no word: %+v", sifted.Range.Form)
 	}
 
 	// Each month says how many.

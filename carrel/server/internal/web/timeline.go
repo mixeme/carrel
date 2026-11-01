@@ -109,7 +109,7 @@ func timelineOwner(tt *timelineTask) pollOwner {
 		what:       "timeline",
 		polled:     true,
 		found:      func(n int) string { return plural(n, "record") },
-		matched:    append([]string{}, tt.person.addresses...),
+		uncounted:  true,
 	}
 }
 
@@ -425,7 +425,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	tl := s.timelinePage(r.Context(), c, obj, person, task, from, last, r.URL.Query().Get("kind"), notices)
+	tl := s.timelinePage(r.Context(), c, obj, person, task, from, last, r.URL.Query().Get("kind"), strings.TrimSpace(r.URL.Query().Get("filter")), notices)
 	// Columns (s-contacts-25): Title, Date, Kind, Source; why a record is
 	// here stands after its title always and is not a column (s-contacts-26).
 	tl.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), "timeline", card+"/timeline/columns", r.URL.Query(), false)
@@ -462,10 +462,20 @@ func (s *Server) startTimeline(sess *session.Session, person timelinePerson, fro
 	return &timelineTask{Task: ft, person: person}, nil
 }
 
-// timelineRow is one row with the time it sorts by.
+// timelineRow is one row with the time it sorts by and the text of its
+// record, which «Filter by word» reads with its title.
 type timelineRow struct {
-	row view.TimelineRow
-	at  time.Time
+	row  view.TimelineRow
+	at   time.Time
+	body string
+}
+
+// holds tells whether the row's title or its record's text holds the word,
+// whatever its case («Filter by word», s-contacts-7): a file is sifted by
+// its name.
+func (r timelineRow) holds(word string) bool {
+	needle := strings.ToLower(word)
+	return strings.Contains(strings.ToLower(string(r.row.Title)), needle) || strings.Contains(strings.ToLower(r.body), needle)
 }
 
 func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, person timelinePerson) []timelineRow {
@@ -482,6 +492,7 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 		o.conn.ID, o.col.Path = it.AccountID, it.Col
 		row := view.TimelineRow{Kind: it.Kind, Stamp: o.stamp(), Colour: catalogColour(o.col)}
 		var at time.Time
+		var body string
 		replace := -1
 		if it.Kind == view.KindFile {
 			row.Title, row.Href, row.Why = text(it.FileName), s.route(foundFileHref(it)), "name in the file name"
@@ -504,7 +515,7 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 				}
 				seen[g.ID] = place{at: pos, rank: rank}
 			}
-			row.Title, row.Why, at = text(recordTitle(it.Kind, it.Object)), text(why), when
+			row.Title, row.Why, at, body = text(recordTitle(it.Kind, it.Object)), text(why), when, cal.Description(it.Object)
 			row.Href = s.route(o.recordPath(segmentOf(it.Kind), it.UID))
 			row.Target = render.TargetDetails // its card in the panel (s-contacts-7)
 		}
@@ -512,10 +523,10 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 			row.When = text(tf.shortDay(at)) // a list's day, «10 Aug» (s-contacts-7, -26; C-10)
 		}
 		if replace >= 0 {
-			out[replace] = timelineRow{row: row, at: at}
+			out[replace] = timelineRow{row: row, at: at, body: body}
 			continue
 		}
-		out = append(out, timelineRow{row: row, at: at})
+		out = append(out, timelineRow{row: row, at: at, body: body})
 	}
 	sort.SliceStable(out, func(i, j int) bool {
 		a, b := out[i], out[j]
@@ -602,7 +613,7 @@ var timelineShows = []struct {
 	{"Notes", view.KindNote}, {"Files", view.KindFile},
 }
 
-func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, last time.Time, kind string, notices []view.Notice) view.ContactTimelinePage {
+func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, last time.Time, kind, sift string, notices []view.Notice) view.ContactTimelinePage {
 	tf := c.tf
 	card := c.recordPath(person.uid)
 	sh := s.buildShell(c.sess, person.name+" · Timeline")
@@ -636,13 +647,40 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 		page.Card.Books = s.memberRows(lc, lr)
 	}
 	here := timelineHere(card, from, last, tf.now, tf.tz)
+	// «Filter by word» first on the strip, as the agenda's (s-contacts-7;
+	// Typecase's note 154, Р-63): a GET to the timeline that keeps its
+	// window and its kind; the word stays in the kinds' links and the range.
+	var keep []view.FormRow
+	if u, err := url.Parse(here); err == nil {
+		for _, n := range []string{"from", "to"} {
+			if v := u.Query().Get(n); v != "" {
+				keep = append(keep, view.FormRow{Name: n, Kind: view.InputHidden, Value: text(v)})
+			}
+		}
+	}
+	if kind != "" {
+		keep = append(keep, view.FormRow{Name: "kind", Kind: view.InputHidden, Value: text(kind)})
+	}
+	page.Bar.Filter = text(sift)
+	page.Bar.FilterForm = s.filterForm(card+"/timeline", sift,
+		append(keep, view.FormRow{Name: "filter", Label: "Filter by word", Kind: view.InputText, Value: text(sift)})...)
+	if sift != "" {
+		here = withQuery(here, "filter", sift)
+	}
 	// The range stays on the strip (s-contacts-7, s-contacts-14): the two
 	// days of the window and Show. «Widen the range» in the note is
 	// answered with it — there is no button of that name.
-	form := s.plainForm(card+"/timeline", "GET",
-		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02")), Mono: true},
-		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(last.Format("2006-01-02")), Mono: true},
-	)
+	fields := []view.FormRow{
+		{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02")), Mono: true},
+		{Name: "to", Label: "To", Kind: view.InputDate, Value: text(last.Format("2006-01-02")), Mono: true},
+	}
+	if kind != "" {
+		fields = append(fields, view.FormRow{Name: "kind", Kind: view.InputHidden, Value: text(kind)})
+	}
+	if sift != "" {
+		fields = append(fields, view.FormRow{Name: "filter", Kind: view.InputHidden, Value: text(sift)})
+	}
+	form := s.plainForm(card+"/timeline", "GET", fields...)
 	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(card + "/timeline"), Method: "GET", Enabled: true}}
 	page.Range = view.Range{From: text(tf.date(from)), To: text(tf.date(last)), Presets: []view.Action{}, Form: &form}
 	page.Note = text("Nothing was looked for before " + tf.date(from) + ". Widen the range if you need it.")
@@ -668,6 +706,9 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 	page.Poll = s.pollBar(tf, blob, snap, owner)
 	page.Top.Refresh = s.pollRefresh(tf, snap, owner.again, tf.now)
 	rows := s.timelineRows(tf, blob, snap, person.and(task.person))
+	if sift != "" {
+		rows = slices.DeleteFunc(rows, func(r timelineRow) bool { return !r.holds(sift) })
+	}
 	counts := map[view.Kind]int{}
 	for _, r := range rows {
 		counts[r.row.Kind]++
@@ -730,28 +771,4 @@ func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) 
 	}
 	n := len(rows)
 	return out, &n
-}
-
-// matchedSummary is the bar of a person's timeline in pieces (s-contacts-7):
-// how many sources answered, and what the records were matched by — the
-// card's addresses in mono, and the name, which files are looked for by.
-// A source that did not answer is the bar's «N failed» (PollBar.Failed); one
-// stopped by hand is counted after.
-func matchedSummary(answered, total int, addresses []string, stopped int) view.Runs {
-	out := view.Runs{{Text: text(fmt.Sprintf("Polled %d of %s · matched by ", answered, plural(total, "source")))}}
-	for i, a := range addresses {
-		if i > 0 {
-			out = append(out, view.Run{Text: ", "})
-		}
-		out = append(out, view.Run{Text: text(a), Mark: view.RunMono})
-	}
-	if len(addresses) > 0 {
-		out = append(out, view.Run{Text: " and the name"})
-	} else {
-		out = append(out, view.Run{Text: "the name"})
-	}
-	if stopped > 0 {
-		out = append(out, view.Run{Text: text(fmt.Sprintf(" · %d stopped", stopped))})
-	}
-	return out
 }

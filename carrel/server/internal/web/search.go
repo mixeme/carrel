@@ -462,9 +462,10 @@ type pollOwner struct {
 	// the sources brought: the rows a list shows of them, a linked record
 	// one (the owner's decision of 09.10.2026). nil — the records brought.
 	seen *int
-	// matched are the addresses a person's timeline is looked for by: its
-	// bar says them, in mono (s-contacts-7).
-	matched []string
+	// uncounted: the bar says what was polled and nothing of what was found
+	// — a person's timeline, whose months count it (s-contacts-7; Typecase's
+	// note 154, Р-77: what the records were matched by is not said either).
+	uncounted bool
 	// timed: while the poll runs, the right of the bar says how long it
 	// has run — «0.8 s» (states-3, states-13).
 	timed bool
@@ -599,13 +600,13 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			// far. The one that ended speaks in the past, as before.
 			parts[0] = fmt.Sprintf("Polling · %d of %d answered", answered, total)
 		}
+		if owner.uncounted {
+			parts = parts[:1]
+		}
 		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
 		if snap.Running && answered+failed+stopped == 0 {
 			// Nobody has answered yet (states-3).
 			bar.Summary = line(fmt.Sprintf("Polling %s…", plural(total, "source")))
-		}
-		if owner.matched != nil {
-			bar.Summary = matchedSummary(answered, total, owner.matched, stopped)
 		}
 		if failed > 0 {
 			bar.Failed = text(fmt.Sprintf("%d failed", failed))
