@@ -96,10 +96,10 @@ kovaleva = vcard(
             (u'second', u'anna.kovaleva@slovo.example')],
     bday=u'1987-03-14', cats=[u'работа', u'издательство'],
     note=u'Пишет по вторникам, отвечает в тот же день.',
-    # Адрес — одной строкой, как его набирают (s-contacts-6, mentions-1).
-    # Три свойства, которых Carrel не знает: карточка показывает
-    # «Kept as the server sent them · Show 3».
-    extra=[u'ADR;TYPE=WORK:;;Москва\\, Тверская 12\\, стр. 3;;;;',
+    # Адрес — по полям, как его рисуют правка и карточка: улица, город,
+    # индекс, страна (s-contacts-3, -6). Три свойства, которых Carrel не
+    # знает: карточка показывает «Kept as the server sent them · Show 3».
+    extra=[u'ADR;TYPE=WORK:;;Тверская 12\\, стр. 3;Москва;;123001;Россия',
            u'X-EVOLUTION-FILE-AS:Ковалёва\\, Анна',
            u'X-ABLABEL:издательство',
            u'X-CARREL-UNKNOWN-FLAG:1'])
@@ -177,8 +177,18 @@ lebedeva_work = vcard(
     emails=[(u'WORK', u'v.lebedeva@example.org')],
     extra=[u'PHOTO;VALUE=uri:https://example.org/avatars/lebedeva.jpg'])
 
+# Владелец учётной записи — организатор событий набора (ORGANIZER
+# mix@example.org) — лежит в своей книге: кадры рисуют организатора
+# человеком книг — меткой, ссылкой на карточку, «· organiser» (s-agenda-1,
+# -2, -3). Решение владельца 01.11.2026 (U-5.5 #26, долг C23); узнавать себя
+# без карточки — отложено.
+owner = vcard(
+    uid=u'0b7d-41e9-c2a6', family=u'Енученко', given=u'Михаил',
+    rev=u'20260601T090000Z',
+    emails=[(u'HOME', u'mix@example.org')])
+
 write(u'nextcloud-home/kontakty.vcf',
-      kovaleva + smirnov + goncharov + belov_home + lebedeva_work)
+      kovaleva + smirnov + goncharov + belov_home + lebedeva_work + owner)
 write(u'nextcloud-home/arhiv.vcf', lebedeva + kovaleva_archive)
 write(u'radicale-vps/komanda.vcf', belov_team + kovaleva_team)
 

@@ -13,7 +13,8 @@ BDAY:1987-03-14
 CATEGORIES:работа,издательство
 NOTE:Пишет по вторникам\, отвечает в тот же 
  день.
-ADR;TYPE=WORK:;;Тверская 12\, стр. 3;Москва;;123001;Россия
+ADR;TYPE=WORK:;;Тверская 12\, стр. 3;Москва;;123001;Рос
+ сия
 X-EVOLUTION-FILE-AS:Ковалёва\, Анна
 X-ABLABEL:издательство
 X-CARREL-UNKNOWN-FLAG:1
@@ -57,4 +58,12 @@ TEL;TYPE=CELL:+7 905 331-09-42
 EMAIL;TYPE=WORK:v.lebedeva@example.org
 PHOTO;VALUE=uri:https://example.org/avatars/lebedeva.jpg
 REV:20260722T141000Z
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+UID:0b7d-41e9-c2a6
+N:Енученко;Михаил;;;
+FN:Михаил Енученко
+EMAIL;TYPE=HOME:mix@example.org
+REV:20260601T090000Z
 END:VCARD
