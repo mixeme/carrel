@@ -1973,7 +1973,9 @@ func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Act
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Drop = s.importDrop(c) // s-io-1 (Им3)
-	page.Bar.Actions = s.listActions(c, nil)
+	// Print after Export, as every list has it (s-notes-31; Typecase's note
+	// 154, Р-63).
+	page.Bar.Actions = append(s.listActions(c, nil), s.printAction(c.listPath()))
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	// «Filter by word» without scripts (s-notes-1): a GET to the list.
 	sift := strings.TrimSpace(r.URL.Query().Get("filter"))

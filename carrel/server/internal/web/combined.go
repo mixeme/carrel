@@ -526,7 +526,9 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Details = s.openRow(r, sess, base, spec, kept, noteRowsOn(page.Groups))
 		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(base, query, sift)
 		page.Bar.Segments = s.sortSegments(base, view.KindNote, by, r.URL.Query())
-		page.Bar.Actions = actions
+		// Print after Export, as every list has it (s-notes-1; Typecase's
+		// note 154, Р-63).
+		page.Bar.Actions = append(actions, s.printAction(base))
 		page.Bar.Drop = drop
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
