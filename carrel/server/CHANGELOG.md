@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.391 — 2026-11-01
+
+Typecase notes 149–154 (Typecase `f62d129`).
+
+### Added
+
+- A person's timeline filters by word: `ContactTimelinePage.Bar.FilterForm`
+  is a GET to the timeline under `filter`, first in its bar; it keeps the
+  window and the kind, and the kinds' links and the range keep the word.
+  The word is looked for in a record's title and text and in a file's name.
+- The notes list (one notebook and the combined one) has Print after
+  Export, as every other list.
+- `FileTreeNode.Here` (C-6.7): in the tree of a move or a copy the folder
+  the items are in is marked whichever node is chosen (Typecase's task 248).
+
+### Changed
+
+- The poll bar of a timeline says what was polled and what failed, no
+  longer what the records were matched by: no addresses in mono, no «and the
+  name» (Р-77).
+
 ## v0.2.390 — 2026-10-30
 
 ### Fixed

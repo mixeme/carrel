@@ -4,6 +4,23 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.13 — 2026-11-01
+
+Server `v0.2.391`, Typecase `f62d129`, notes 149–154. The whole client
+suite passes, its names check included.
+
+- A note's Attach — in the edit bar and in the column — picks files that
+  go with Save: the document sends multipart (`Doc.Multipart`), the picked
+  file joins the column's attachments, the separate upload is gone. From
+  Files of a new note sends the document it stands outside of
+  (`MenuItem.To` with `Form`). U-5.5 #36 and #43 are removed.
+- The Upload sheet's file field stands in the sheet's own form and names
+  none, so the sheet sends multipart for it.
+- A person's timeline has «Filter by word» first in its bar; the range
+  carries the kind and the word.
+- The tree of a move or a copy marks the folder the items are in, «the
+  items are here», whichever node is chosen.
+
 ## v0.11.12 — 2026-10-29
 
 - The contact photo controls keep the frame's line wrapper with one
