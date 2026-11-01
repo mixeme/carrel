@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.14 — 2026-11-01
+
+Typecase `5b0f920`, note 155 (Р-66, the first group); the server is the
+same, `v0.2.391`.
+
+- On a phone a table becomes cards that keep their main column
+  (`TableCol.Main`): Role of the users (`/admin/`), Changed of a folder,
+  a public folder and the files of a letter's Attach, Changed on the server
+  of a connection's collections, What it can see and do of davloom's
+  devices. A feed's table keeps none, as its frames.
+
 ## v0.11.13 — 2026-11-01
 
 Server `v0.2.391`, Typecase `f62d129`, notes 149–154. The whole client
