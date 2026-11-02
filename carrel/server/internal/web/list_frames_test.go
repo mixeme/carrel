@@ -56,15 +56,15 @@ func TestContactsListIsTheFrames(t *testing.T) {
 	// collection (the owner's decision of 09.10.2026): Артём Белов, linked
 	// in two books, and Анна Ковалёва, in three, are one row each and one
 	// card of the line under the title and of the poll's bar — the frame's
-	// «6 cards» —, and a card of each book in the rail: nine (Typecase's
-	// notes 44 and 117 — the set has «Лебедева Вера» in «Контакты», Анна in
-	// «Команда» and «Архив»; s-contacts-1 still counts seven, s-dup-1 counts
-	// her copies in its rail).
-	if string(page.Subtitle) != frameText(head[1]) || !strings.HasSuffix(runsText(page.Poll.Summary), " · 6 cards") {
+	// «7 cards» —, and a card of each book in the rail: ten (Typecase's
+	// notes 44, 117 and 158 — the set has «Лебедева Вера» in «Контакты»,
+	// Анна in «Команда» and «Архив», the owner's card «Михаил Енученко» in
+	// «Контакты»; s-dup-1 counts her copies in its rail).
+	if string(page.Subtitle) != frameText(head[1]) || !strings.HasSuffix(runsText(page.Poll.Summary), " · 7 cards") {
 		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), frameText(head[1]))
 	}
-	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 9 {
-		t.Errorf("the rail's combined row = %v, want the 9 cards of the ticked books", all.Count)
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 10 {
+		t.Errorf("the rail's combined row = %v, want the 10 cards of the ticked books", all.Count)
 	}
 	var want, got []string
 	for _, b := range frameHeadButton.FindAllStringSubmatch(head[2], -1) {
