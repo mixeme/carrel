@@ -96,19 +96,19 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 		// What the calendar already holds is skipped unless the person says
 		// otherwise (the owner's decision of 12.10.2026); this run takes the
 		// series in as a copy, under a new identity.
-		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[3] != "Already here — skipped" {
+		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[len(row)-1] != "Already here — skipped" {
 			t.Errorf("the taken series in the preview, by default = %q", row)
 		}
 		page = liveExistingCopies(t, app, page)
-		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[3] != "New UID will be assigned" {
+		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[len(row)-1] != "New UID will be assigned" {
 			t.Errorf("the taken series in the preview, as a copy = %q", row)
 		}
 		// An event with no end is a moment, and the row says so (Typecase's
 		// note 113).
-		if row := livePreviewRow(t, page.Preview, "Ковка"); row[3] != "Ready — a moment (no end)" {
+		if row := livePreviewRow(t, page.Preview, "Ковка"); row[len(row)-1] != "Ready — a moment (no end)" {
 			t.Errorf("the new event in the preview = %q", row)
 		}
-		if row := livePreviewRow(t, page.Preview, "VTODO"); !strings.HasPrefix(string(row[3]), "Skipped:") {
+		if row := livePreviewRow(t, page.Preview, "VTODO"); !strings.HasPrefix(string(row[len(row)-1]), "Skipped:") {
 			t.Errorf("the task in the preview = %q", row)
 		}
 
@@ -325,7 +325,8 @@ func (a *liveApp) importFile(path, name string, data []byte) *httptest.ResponseR
 	return rec
 }
 
-// livePreviewRow is the row of the preview's one table (s-io-5…8) with what
+// livePreviewRow is the row of the preview's one table (s-io-5…8) — its
+// result last: one file has no Source column (Typecase's note 157) — with what
 // in a cell.
 func livePreviewRow(t *testing.T, tables []view.ImportTable, what string) []view.Text {
 	t.Helper()
