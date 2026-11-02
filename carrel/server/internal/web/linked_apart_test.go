@@ -29,9 +29,12 @@ func TestALinkedGroupThatCameApartSaysSo(t *testing.T) {
 		t.Fatal("the other copy was not deleted")
 	}
 
+	// The owner's words of 03.11.2026: what Carrel saw — no record at the
+	// address —, not what happened to it.
 	card := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
-	apart := noticeTitled(card.Shell.Notices, "No longer linked")
-	if apart == nil || !strings.Contains(string(apart.Body), "Work") {
+	apart := noticeTitled(card.Shell.Notices, "Link removed.")
+	if apart == nil || !strings.HasPrefix(string(apart.Body), "The linked copy in ") || !strings.Contains(string(apart.Body), "Work") ||
+		!strings.HasSuffix(string(apart.Body), " is no longer at its address (deleted or moved). This record is unchanged.") {
 		t.Errorf("the card says nothing of the group it was in: %+v", card.Shell.Notices)
 	}
 	if d := f.decisions(t); len(d.Linked) != 0 {
@@ -39,7 +42,7 @@ func TestALinkedGroupThatCameApartSaysSo(t *testing.T) {
 	}
 	// Said once: the next open is the card of one record.
 	again := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
-	if noticeTitled(again.Shell.Notices, "No longer linked") != nil {
+	if noticeTitled(again.Shell.Notices, "Link removed.") != nil {
 		t.Error("the notice stays on every open")
 	}
 }
@@ -57,7 +60,8 @@ func TestTheDuplicatesScreenSaysGroupsCameApart(t *testing.T) {
 	f.h.do(postForm(f.record(f.otherID, workBook, "ada-there")+"/delete", f.sess, url.Values{"etag": {etag}, "sheet": {"1"}, "copy": {f.otherID + "/" + url.PathEscape(workBook)}}))
 	f.load(t)
 	page := f.page(t)
-	if n := noticeTitled(page.Shell.Notices, "1 linked group came apart"); n == nil {
+	n := noticeTitled(page.Shell.Notices, "1 linked group removed.")
+	if n == nil || string(n.Body) != "Its other records are no longer at their addresses (deleted or moved). The records left are unchanged on the server." {
 		t.Errorf("notices = %+v", page.Shell.Notices)
 	}
 }

@@ -40,6 +40,14 @@ current mockup; fonts are in `docs/visual/fonts/`.
   attached» · «scan.pdf: 507 Insufficient Storage. The other files were
   not attached either.». Was «scan.pdf could not be attached, so none of
   the files was. …».
+- A linked group whose other records are gone says what Carrel saw (the
+  owner's words of 03.11.2026): on the card «Link removed.» · «The linked
+  copy in nextcloud · Контакты is no longer at its address (deleted or
+  moved). This record is unchanged.», on the screen of duplicates «1
+  linked group removed.» · «Its other records are no longer at their
+  addresses (deleted or moved). The records left are unchanged on the
+  server.». Was «No longer linked» · «… this record stands on its own.» and
+  «1 linked group came apart».
 
 ## v0.2.393 — 2026-11-02
 

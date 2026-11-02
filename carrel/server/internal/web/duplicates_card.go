@@ -65,8 +65,9 @@ func (s *Server) linkedOf(ctx context.Context, c *collectionCtx, uid string) (li
 
 // apartNotice says that a record's linked group came apart because its
 // other members are gone (Б16 of the audit of 11.10.2026: it used to come
-// apart without a word): where they were, and that the record stands on its
-// own now.
+// apart without a word): where they were, and that this record is unchanged.
+// The owner's words of 03.11.2026 say what Carrel saw — no record at the
+// address —, since it cannot tell a delete from a move.
 func apartNotice(blob sealed.Blob, gone []sealed.RecordRef) *view.Notice {
 	var where []string
 	for _, ref := range gone {
@@ -76,11 +77,16 @@ func apartNotice(blob sealed.Blob, gone []sealed.RecordRef) *view.Notice {
 			where = append(where, connLabel(conn)+" · "+collectionLabel(col))
 		}
 	}
-	body := "Its other copy is no longer where it was linked; this record stands on its own."
-	if len(where) > 0 {
-		body = "Its other copy in " + strings.Join(where, ", ") + " is no longer there; this record stands on its own."
+	body := "The linked copy is no longer at its address (deleted or moved)."
+	switch {
+	case len(gone) > 1 && len(where) > 0:
+		body = "The linked copies in " + strings.Join(where, ", ") + " are no longer at their addresses (deleted or moved)."
+	case len(gone) > 1:
+		body = "The linked copies are no longer at their addresses (deleted or moved)."
+	case len(where) > 0:
+		body = "The linked copy in " + where[0] + " is no longer at its address (deleted or moved)."
 	}
-	return &view.Notice{Role: view.NoticeInfo, Title: "No longer linked", Body: text(body)}
+	return &view.Notice{Role: view.NoticeInfo, Title: "Link removed.", Body: text(body + " This record is unchanged.")}
 }
 
 // memberRows are the rows under a copy's card: every other member with

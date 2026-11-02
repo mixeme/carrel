@@ -772,13 +772,13 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	}
 	if st.apart > 0 {
 		// Groups whose other members are gone came apart as the screen was
-		// read (Б16): said, not left to be noticed.
-		title := strconv.Itoa(st.apart) + " linked groups came apart"
+		// read (Б16): said, not left to be noticed, in the owner's words of
+		// 03.11.2026.
+		title, body := strconv.Itoa(st.apart)+" linked groups removed.", "Their other records are no longer at their addresses (deleted or moved). The records left are unchanged on the server."
 		if st.apart == 1 {
-			title = "1 linked group came apart"
+			title, body = "1 linked group removed.", "Its other records are no longer at their addresses (deleted or moved). The records left are unchanged on the server."
 		}
-		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: text(title),
-			Body: "Their other records are no longer where they were linked; each record that is left stands on its own."})
+		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: text(title), Body: text(body)})
 	}
 	page.Notices = append(page.Notices, view.Notice{
 		Role: view.NoticeAccent,
