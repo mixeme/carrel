@@ -213,7 +213,7 @@ func TestDoneAndStatusAreOneState(t *testing.T) {
 				}
 			}
 		}
-		if want := "Done is ticked, but the status is " + status.label + ". Untick Done, or set the status to Completed."; said != want {
+		if want := "Done is ticked, but Status is " + status.label + ". Untick Done or set Status to Completed."; said != want {
 			t.Errorf("under Status: %q,\nwant %q", said, want)
 		}
 		if got := body(t, f, "t.ics"); got != before {

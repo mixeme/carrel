@@ -35,8 +35,9 @@ current mockup; fonts are in `docs/visual/fonts/`.
   organiser `mix@example.org` is a person of «Контакты», as `s-agenda-1`
   draws its organiser.
 - A task saved with Done ticked and another status chosen says under Status
-  what does not agree and the two ways out: «Done is ticked, but the status
-  is In process. Untick Done, or set the status to Completed.»
+  what does not agree and the two ways out, the field by its label: «Done is
+  ticked, but Status is In process. Untick Done or set Status to
+  Completed.»
 - The hint under Done of a repeating task, in the form and on the card:
   «Repeating task: Done marks this time and moves it on to 19 Jan.», on its
   last time «Repeating task, last time: Done completes it.»

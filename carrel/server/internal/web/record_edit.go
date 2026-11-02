@@ -1905,7 +1905,7 @@ func doneAndStatus(have, want formValues) string {
 					label = o.label
 				}
 			}
-			return "Done is ticked, but the status is " + label + ". Untick Done, or set the status to Completed."
+			return "Done is ticked, but Status is " + label + ". Untick Done or set Status to Completed."
 		}
 	case done != was && done:
 		status = "COMPLETED"
