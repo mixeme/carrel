@@ -20,6 +20,16 @@ var (
 	ErrTooMany = errors.New("file: too many entries")
 )
 
+// TooMany is ErrTooMany with the limit it stopped at, for the words of the
+// refusal.
+type TooMany struct{ Max int }
+
+func (e TooMany) Error() string {
+	return fmt.Sprintf("file: too many entries: stopped after %d entries", e.Max)
+}
+
+func (e TooMany) Is(target error) bool { return target == ErrTooMany }
+
 // Join builds a collection-relative path from segments (S-17.4).
 func Join(root string, segments ...string) (string, error) {
 	root = strings.TrimSuffix(normalizeRoot(root), "/")
@@ -230,7 +240,7 @@ func CopyTree(ctx context.Context, from *Provider, src string, to *Provider, dst
 		}
 		for _, e := range entries {
 			if n >= max {
-				return n, fmt.Errorf("%w: stopped after %d entries", ErrTooMany, max)
+				return n, TooMany{Max: max}
 			}
 			if err := checkSegment(e.Name); err != nil {
 				return n, err
@@ -277,7 +287,7 @@ func (p *Provider) Tree(ctx context.Context, root string, max int) ([]TreeFile, 
 		}
 		for _, e := range entries {
 			if len(out) >= max {
-				return nil, fmt.Errorf("%w: stopped after %d entries", ErrTooMany, max)
+				return nil, TooMany{Max: max}
 			}
 			f := TreeFile{Rel: cur.rel + e.Name, Dir: e.Dir}
 			if e.Dir {

@@ -273,6 +273,10 @@ func plural(n int, unit string) string {
 	if n == 1 {
 		return "1 " + unit
 	}
+	// A consonant and «y» make «ies»: «2 entries», «2 days».
+	if l := len(unit); l > 1 && unit[l-1] == 'y' && !strings.ContainsRune("aeiou", rune(unit[l-2])) {
+		return fmt.Sprintf("%d %sies", n, unit[:l-1])
+	}
 	return fmt.Sprintf("%d %ss", n, unit)
 }
 

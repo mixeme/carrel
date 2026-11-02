@@ -2721,7 +2721,7 @@ type TransferRow struct {
     Size     Size
     Percent  int
     State    OpState // C-8
-    Reason   Text // у строки, которой отказано и ответить нечем (s-files-24): почему, коротко — «the server needs the size»; что делать — в TransferQueue.Note
+    Reason   Text // у строки, которой отказано и ответить нечем (s-files-24): почему, коротко — «server requires the file size»; что делать — в TransferQueue.Note
     Question *NameClash // занятое имя — вопрос на месте, а не настройка
     Actions  []Action
 }

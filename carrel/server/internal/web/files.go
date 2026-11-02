@@ -284,24 +284,32 @@ func fileType(name, sent string) string {
 	return ""
 }
 
-// fileReason is a refusal of the far server in a sentence (C-9.1).
+// fileReason is a refusal of the far server in a sentence (C-9.1), direct
+// and precise (the owner's decision of 02.11.2026): its code and standard
+// text, a limit by its number and its setting.
 func fileReason(err error) string {
 	var se *dav.StatusError
+	var many file.TooMany
 	switch {
 	case dav.IsStatus(err, http.StatusForbidden):
-		return "This account can read here but not write."
-	case dav.IsStatus(err, http.StatusInsufficientStorage):
-		return "The storage is full."
-	case dav.IsStatus(err, http.StatusRequestEntityTooLarge):
-		return "The server refused a file this large."
+		return "403 Forbidden: this account has no write access here."
 	case errors.Is(err, dav.ErrResponseTooLarge):
 		return "The server's answer is larger than Carrel reads."
-	case errors.Is(err, file.ErrTooMany):
-		return "The folder holds more than Carrel copies at once (CARREL_FILES_MAX_ENTRIES)."
+	case errors.As(err, &many):
+		return "The folder has more than " + groupDigits(many.Max) + " entries, Carrel's limit (CARREL_FILES_MAX_ENTRIES)."
 	case errors.As(err, &se):
-		return fmt.Sprintf("The server answered %d %s.", se.Code, http.StatusText(se.Code))
+		return fmt.Sprintf("%d %s.", se.Code, http.StatusText(se.Code))
 	}
-	return "The server could not be reached."
+	return "No response from the server."
+}
+
+// groupDigits writes a number with its thousands apart: «10 000».
+func groupDigits(n int) string {
+	s := strconv.Itoa(n)
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + " " + s[i:]
+	}
+	return s
 }
 
 func (s *Server) fileFailure(c *fileCtx, title, method, p string, err error) view.Notice {

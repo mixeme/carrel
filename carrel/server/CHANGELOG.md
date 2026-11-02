@@ -47,6 +47,25 @@ current mockup; fonts are in `docs/visual/fonts/`.
   «no» under Deposited (`EscrowCoverRow.Deposited`, was «not deposited»),
   as `s-admin-1`, `-6`, `-30` draw them. Fixtures `admin-invites/normal`,
   `admin-escrow/normal`, `-recovered` reshot.
+- A refusal of a file server says its answer by code and standard text
+  (the owner's decision of 02.11.2026): «507 Insufficient Storage», «413
+  Request Entity Too Large», «403 Forbidden: this account has no write
+  access here», no answer «No response from the server», the entry limit by
+  its number — «The folder has more than 10 000 entries, Carrel's limit
+  (CARREL_FILES_MAX_ENTRIES)». The same in the notices of Files.
+- The rows of the transfer queue in the same words: «Move failed after 12
+  entries: 507 Insufficient Storage. Source unchanged» (a copy: «Copied
+  entries removed»), «upload interrupted after 3.2 MB», «could not create
+  its folder: …», «invalid file name», «New name «отчёт (2).pdf» also
+  taken; nothing overwritten», «Overwrite refused: 412 Precondition
+  Failed», «merged into the existing folder», «The target changed while
+  waiting for your answer; nothing overwritten. Upload again to choose»
+  (Move, Copy, Rename again for those); the row refused for want of a size
+  «server requires the file size» (`s-files-24` still draws the old words:
+  Typecase task 252). Fixtures `app-files-folder/long`, `-refused` reshot.
+- A count of a word ending in a consonant and «y» is «12 entries», not «12
+  entrys» (the folder copied to another account, a feed's folder, a move
+  that broke off).
 
 ## v0.2.391 — 2026-11-01
 

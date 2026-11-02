@@ -15,6 +15,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
@@ -383,16 +385,16 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 	t.rel = rel
 	defer func() { c.sess.KeepTransfer(t) }()
 	if name == "" {
-		t.name, t.state, t.note = part.FileName(), view.OpFailed, "this cannot be the name of a file"
+		t.name, t.state, t.note = part.FileName(), view.OpFailed, badNameNote
 		return nil
 	}
 	target, err := c.path(append(append(slices.Clone(c.segs), rel...), name), false)
 	if err != nil {
-		t.state, t.note = view.OpFailed, "this cannot be the name of a file"
+		t.state, t.note = view.OpFailed, badNameNote
 		return nil
 	}
 	if err := s.makeFolders(ctx, c, rel, made); err != nil {
-		t.state, t.note = view.OpFailed, "the folder it goes in was not created: "+sentenceEnd(fileReason(err))
+		t.state, t.note = view.OpFailed, folderNote(err)
 		return nil
 	}
 	label := t.label()
@@ -403,7 +405,7 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 		// server is told the version (If-Match), and another one written
 		// since is not this answer's to replace.
 		t.was = there.ETag
-		s.sendUpload(r, t, part, label, "what stood there changed while it was asked about; nothing was overwritten. Upload it again to choose", func(body io.Reader) error {
+		s.sendUpload(r, t, part, label, changedNote("upload"), func(body io.Reader) error {
 			_, err := c.files.UploadReplace(ctx, target, body, there.ETag)
 			return err
 		})
@@ -417,7 +419,7 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 			t.name, t.state, t.note = name, view.OpFailed, sentenceEnd(fileReason(err))
 			return nil
 		}
-		s.sendUpload(r, t, part, label, "the new name was taken as well; nothing was overwritten", func(body io.Reader) error {
+		s.sendUpload(r, t, part, label, takenNote(t.name), func(body io.Reader) error {
 			_, err := c.files.UploadCreate(ctx, target, body)
 			return err
 		})
@@ -428,12 +430,12 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 		// both and Replace bring the file again with the answer.
 		t.was = there.ETag
 		if t.size, err = io.Copy(io.Discard, part); err != nil {
-			t.state, t.note = view.OpFailed, "the upload broke off"
+			t.state, t.note = view.OpFailed, interruptedNote(t.size)
 			return nil
 		}
 		t.state = view.OpIdle
 	case file.NotFound(err):
-		s.sendUpload(r, t, part, label, "the name was taken while it uploaded; nothing was overwritten. Upload it again to choose", func(body io.Reader) error {
+		s.sendUpload(r, t, part, label, takenWhileNote, func(body io.Reader) error {
 			_, err := c.files.UploadCreate(ctx, target, body)
 			return err
 		})
@@ -464,8 +466,8 @@ func (s *Server) sendUpload(r *http.Request, t *transfer, part *multipart.Part, 
 		// S-17.1: the length was not sent and this server will not write
 		// without one. Carrel does not keep the body to measure it — there
 		// is no ceiling on a file — so it says so instead.
-		t.state, t.note = view.OpFailed, "this server writes a file only when its size is sent first, and the page did not send it. Turn scripts on, or put the file there with another client"
-		t.short = "the server needs the size" // s-files-24
+		t.state, t.note = view.OpFailed, needsSizeNote
+		t.short = needsSizeShort // s-files-24
 	default:
 		t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
 	}
@@ -618,6 +620,63 @@ func needsLength(err error) bool {
 // sentenceEnd is a reason as part of a longer line: without its full stop.
 func sentenceEnd(s string) string {
 	return strings.TrimSuffix(s, ".")
+}
+
+// The words of a row of the queue that did not go as asked (the owner's
+// decision of 02.11.2026: direct and technically precise — the server's
+// code and text, the numbers known, what became of the data).
+const (
+	badNameNote    = "invalid file name"
+	needsSizeShort = "server requires the file size"
+	needsSizeNote  = "The server accepts a file only with its size sent first; the page sent none. Turn on scripts or upload with another client"
+	mergedNote     = "merged into the existing folder"
+	takenWhileNote = "The name was taken during the upload; nothing overwritten. Upload again to choose"
+)
+
+// inLine is a refusal in the middle of a line: «no response from the
+// server», a code as it is.
+func inLine(reason string) string {
+	r, n := utf8.DecodeRuneInString(reason)
+	return string(unicode.ToLower(r)) + sentenceEnd(reason[n:])
+}
+
+// partialNote is a move or a copy of a folder that broke off after n
+// entries: what was copied of a move stays a copy until the source goes, so
+// the source is unchanged; a copy takes back what arrived.
+func partialNote(kind string, n int, err error) string {
+	if kind == "copy" {
+		return "Copy failed after " + plural(n, "entry") + ": " + inLine(fileReason(err)) + ". Copied entries removed"
+	}
+	return "Move failed after " + plural(n, "entry") + ": " + inLine(fileReason(err)) + ". Source unchanged"
+}
+
+// folderNote is an upload whose folder could not be made.
+func folderNote(err error) string {
+	return "could not create its folder: " + inLine(fileReason(err))
+}
+
+// interruptedNote is an upload whose body stopped coming after n bytes.
+func interruptedNote(n int64) string {
+	return "upload interrupted after " + string(formatSize(n))
+}
+
+// takenNote is Keep both whose new name was taken too.
+func takenNote(name string) string {
+	return "New name «" + name + "» also taken; nothing overwritten"
+}
+
+// changedNote is Replace of a version that is no longer there.
+func changedNote(kind string) string {
+	verb := map[string]string{"upload": "Upload", "move": "Move", "copy": "Copy", "rename": "Rename"}[kind]
+	if verb == "" {
+		verb = "Send it"
+	}
+	return "The target changed while waiting for your answer; nothing overwritten. " + verb + " again to choose"
+}
+
+// overwriteNote is Replace the server would not do.
+func overwriteNote(err error) string {
+	return "Overwrite refused: " + inLine(fileReason(err))
 }
 
 // uploadType is the type the browser declared for a part, else the one its
@@ -1541,10 +1600,7 @@ func (s *Server) finish(t *transfer, err error) {
 		}
 		var copied *partialCopy
 		if errors.As(err, &copied) {
-			t.note = fmt.Sprintf("%s after %s; the original stays where it was", t.note, plural(copied.n, "entry"))
-			if t.kind == "copy" {
-				t.note = fmt.Sprintf("%s after %s; what arrived was taken back", sentenceEnd(fileReason(err)), plural(copied.n, "entry"))
-			}
+			t.note = partialNote(t.kind, copied.n, err)
 		}
 	}
 }
@@ -1769,7 +1825,7 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 				next.state, next.note = view.OpFailed, sentenceEnd(fileReason(err))
 				break
 			}
-			next.state, next.note = view.OpDone, "merged with the folder there"
+			next.state, next.note = view.OpDone, mergedNote
 			break
 		}
 		// «Replace» was said of what stood there when the question was
@@ -1777,7 +1833,7 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 		// version, or nothing at all, is not what the person agreed to
 		// lose. An upload says it to the server as well (If-Match), so the
 		// write itself is refused when a version slips in between.
-		const changed = "what stood there changed while the question waited; nothing was overwritten. Send it again to choose"
+		changed := changedNote(t.kind)
 		if s.changedSince(ctx, c, t) {
 			next.state, next.note = view.OpFailed, changed
 			break
@@ -1788,7 +1844,7 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 		case t.kind == "upload" && t.was != "" && file.ErrOccupied(err):
 			next.state, next.note = view.OpFailed, changed
 		case next.Waiting():
-			next.state, next.note = view.OpFailed, "the server refused to overwrite it"
+			next.state, next.note = view.OpFailed, overwriteNote(err)
 		}
 	case "both":
 		name, err := s.freeName(ctx, c, t.rel, t.name)
@@ -1798,7 +1854,7 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 		}
 		s.finish(&next, err)
 		if next.Waiting() || (next.kind == "upload" && file.ErrOccupied(err)) {
-			next.state, next.note = view.OpFailed, "the new name was taken as well; nothing was overwritten"
+			next.state, next.note = view.OpFailed, takenNote(next.name)
 		}
 	}
 	s.afterPlaced(c.sess, &next)

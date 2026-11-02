@@ -310,7 +310,7 @@
   },
   "queue": {
     "hidden": false,
-    "note": "архив-2025.zip: this server writes a file only when its size is sent first, and the page did not send it. Turn scripts on, or put the file there with another client",
+    "note": "архив-2025.zip: The server accepts a file only with its size sent first; the page sent none. Turn on scripts or upload with another client",
     "rows": [
       {
         "actions": [],
@@ -405,7 +405,7 @@
         "name": "архив-2025.zip",
         "percent": 0,
         "question": null,
-        "reason": "the server needs the size",
+        "reason": "server requires the file size",
         "size": "3 B",
         "state": "failed"
       }

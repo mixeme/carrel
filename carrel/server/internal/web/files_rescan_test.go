@@ -377,12 +377,14 @@ func TestQueueHidesAndShows(t *testing.T) {
 }
 
 // ФН8: a refusal there is nothing to answer is a row without buttons — its
-// name and, beside it, why, in a few words (s-files-24: «the server needs
-// the size»); the queue counts what was uploaded. What to do about it stays
-// in the queue's note.
+// name and, beside it, why, in a few words (s-files-24); the queue counts
+// what was uploaded. What to do about it stays in the queue's note. The
+// words are the owner's of 02.11.2026, «server requires the file size»; the
+// frame still says «the server needs the size» (Typecase task 252).
 func TestQueueRowSaysWhyItFailed(t *testing.T) {
 	frame := mockupFrame(t, "s-files-24")
-	row := frameOne(t, regexp.MustCompile(`<span class="tc-dim--danger">[^<]+</span><span class="tc-dim--danger">([^<]+)</span>`), frame, "refused row")
+	frameOne(t, regexp.MustCompile(`<span class="tc-dim--danger">[^<]+</span><span class="tc-dim--danger">([^<]+)</span>`), frame, "refused row")
+	row := []string{"", "server requires the file size"}
 	head := frameOne(t, regexp.MustCompile(`<div class="tc-queue__head"><b>([^<]+)</b>`), frame, "head")[1]
 	if head != "Uploaded 1 of 2" {
 		t.Fatalf("s-files-24 is headed %q: read the frame again", head)
@@ -417,7 +419,7 @@ func TestQueueRowSaysWhyItFailed(t *testing.T) {
 	if done.State != view.OpDone || done.Reason != "" {
 		t.Errorf("the uploaded row = %+v", done)
 	}
-	if !strings.Contains(string(queue.Note), "Turn scripts on") {
+	if !strings.Contains(string(queue.Note), "Turn on scripts") {
 		t.Errorf("the queue does not say what to do: %q", queue.Note)
 	}
 }
