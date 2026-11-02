@@ -48,7 +48,7 @@ func frameAttendees(t *testing.T, id string) (count string, rows []frameAttendee
 func TestAttendeesAreTheFrames(t *testing.T) {
 	for _, id := range []string{"s-agenda-1", "s-agenda-2"} {
 		count, rows := frameAttendees(t, id)
-		if count != "4" || len(rows) != 4 || rows[0].status != "organiser" || !rows[1].known || rows[3].known {
+		if count != "4" || len(rows) != 4 || rows[0].status != "organiser" || !rows[0].known || !rows[1].known || rows[3].known {
 			t.Fatalf("%s: %s attendees %+v — read the frame again", id, count, rows)
 		}
 	}
@@ -77,10 +77,14 @@ func TestAttendeesAreTheFrames(t *testing.T) {
 	if anna.Href != app.listPath(t, "contacts", "kontakty")+"/4f2b-9c31-a0e7" || !strings.EqualFold(string(anna.Colour), "#4A6B52") || anna.Name != "Анна Ковалёва" {
 		t.Errorf("Анна = %+v, want her card and the colour of Контакты", anna)
 	}
-	for _, mail := range []string{"mix@example.org", "v@example.org"} {
-		if p, ok := byMail[mail]; !ok || p.Href != "" || p.Colour != "" {
-			t.Errorf("%s = %+v, want an address in no ticked book", mail, p)
-		}
+	// The organiser is the owner of the account, a person of the books by
+	// his card (the owner's decision of 01.11.2026, U-5.5 #26).
+	owner := byMail["mix@example.org"]
+	if owner.Href != app.listPath(t, "contacts", "kontakty")+"/0b7d-41e9-c2a6" || !strings.EqualFold(string(owner.Colour), "#4A6B52") || owner.Name != "Михаил Енученко" {
+		t.Errorf("the organiser = %+v, want the owner's card and the colour of Контакты", owner)
+	}
+	if p, ok := byMail["v@example.org"]; !ok || p.Href != "" || p.Colour != "" {
+		t.Errorf("v@example.org = %+v, want an address in no ticked book", p)
 	}
 	// The panel of the agenda is the card's.
 	agenda := decode[view.AgendaPage](t, app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10&open="+url.QueryEscape(rec), app.sess)))

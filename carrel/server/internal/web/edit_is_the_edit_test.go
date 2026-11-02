@@ -241,9 +241,10 @@ func TestASaveThatIsNotTheEditIsNotSent(t *testing.T) {
 		t.Fatalf("the save was sent:\n%s", got)
 	}
 	// The owner's words of 02.11.2026: an internal error of Carrel, said so,
-	// what went wrong by the property's name, nothing sent, report it.
+	// what went wrong — the field with what it would hold, the property by
+	// its name —, nothing sent, report it.
 	notice := faultOf(t, page.Notices)
-	if want := "Saving would have stored the field Title differently from what you entered, and would have changed the property TITLE, which you did not touch. " + faultTail; string(notice.Body) != want {
+	if want := "Pre-save check failed: the field Title would be saved empty instead of «Mathematician»; the property TITLE would change, though not edited. " + faultTail; string(notice.Body) != want {
 		t.Errorf("body = %q,\nwant %q", notice.Body, want)
 	}
 	// The form keeps what was entered, and the record under it is the one
@@ -274,23 +275,24 @@ func TestASaveThatDoesNotReadBackIsNotSent(t *testing.T) {
 	if got := body(t, f, "hard.ics"); got != before {
 		t.Fatalf("the save was sent:\n%s", got)
 	}
-	// What went wrong by the field's name, as the form calls it.
+	// What went wrong by the field's name, as the form calls it, and what it
+	// would hold instead of what was entered; no line changed but the
+	// field's own, so no details are promised.
 	notice := faultOf(t, page.Notices)
-	if !strings.HasPrefix(string(notice.Body), "Saving would have stored the field Summary differently from what you entered") ||
-		!strings.HasSuffix(string(notice.Body), faultTail) {
-		t.Errorf("body = %q", notice.Body)
+	if want := "Pre-save check failed: the field Summary would be saved as «Something else» instead of «Sync, weekly». Nothing sent to the server; the form keeps your entry. Report this as a Carrel bug."; string(notice.Body) != want || notice.Details != nil {
+		t.Errorf("body = %q,\nwant %q", notice.Body, want)
 	}
 }
 
 // faultTail is what every fault notice ends with: what became of the record
 // and the entry, and what to do.
-const faultTail = "Nothing was sent; the record is unchanged and the form keeps your entry. Please report this with the details below."
+const faultTail = "Nothing sent to the server; the form keeps your entry. Report this as a Carrel bug — details below."
 
 // faultOf is the notice of an internal error of Carrel among notices.
 func faultOf(t *testing.T, notices []view.Notice) view.Notice {
 	t.Helper()
 	for _, n := range notices {
-		if n.Title == "Internal Carrel error — the edit was not saved" {
+		if n.Title == "Internal error: edit not saved" {
 			if n.Role != view.NoticeAlert {
 				t.Errorf("the fault is no alarm: %+v", n)
 			}

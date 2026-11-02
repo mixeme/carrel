@@ -7,6 +7,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/model"
@@ -32,14 +33,40 @@ import (
 
 // editFault is a save Carrel would not make.
 type editFault struct {
-	// fields are the labels of the fields that would not read back as sent.
-	fields []string
+	// unread is a record that would not read back at all.
+	unread bool
+	// fields are the fields that would not read back as sent.
+	fields []faultField
+	// restored are the properties a conflict puts back that would not read
+	// back as the version opened held them (Рв6).
+	restored []string
 	// props are the properties that would change though no field that owns
 	// them did, each once, as «NAME» or «NAME in COMPONENT».
 	props []string
 	// lines are the content lines in question, «- » gone and «+ » come, for
 	// the details of the notice.
 	lines []string
+}
+
+// faultField is a field that would not read back as sent. shown is a field
+// of one short line: its value as entered and as it would be saved are said;
+// any other is said by its name.
+type faultField struct {
+	label          string
+	entered, saved string
+	shown          bool
+}
+
+// faultFieldOf is the field f as the save would leave it.
+func faultFieldOf(f editField, want, after formValues) faultField {
+	ff := faultField{label: f.label}
+	switch f.typ {
+	case fieldText, fieldArea, fieldPercent:
+		ff.entered, ff.saved = strings.TrimSpace(first(want[f.name])), strings.TrimSpace(first(after[f.name]))
+		short := func(v string) bool { return !strings.ContainsAny(v, "\r\n") && utf8.RuneCountInString(v) <= 80 }
+		ff.shown = short(ff.entered) && short(ff.saved)
+	}
+	return ff
 }
 
 // editAlso is what a field takes with it besides its own property: the
@@ -254,7 +281,7 @@ func shows(f editField, l wireLine) bool {
 func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, have, want formValues, restored map[string][]model.RawValue) *editFault {
 	fault := &editFault{}
 	whole := func() *editFault {
-		fault.fields = append(fault.fields, "the record as a whole")
+		fault.unread = true
 		return fault
 	}
 	// The record is read from what would be sent, not from the patched
@@ -283,7 +310,7 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 	}
 	for _, f := range fields {
 		if !readsAs(f, have, want, after, typed, organiser, invited) {
-			fault.fields = append(fault.fields, f.label)
+			fault.fields = append(fault.fields, faultFieldOf(f, want, after))
 		}
 	}
 
@@ -307,7 +334,7 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 	}
 	for i := 0; i < len(fault.fields); i++ {
 		for _, f := range fields {
-			if f.label == fault.fields[i] && (f.typ == fieldText || f.typ == fieldArea) && strings.TrimSpace(first(want[f.name])) == "" && held[f.prop] > 1 {
+			if f.label == fault.fields[i].label && (f.typ == fieldText || f.typ == fieldArea) && strings.TrimSpace(first(want[f.name])) == "" && held[f.prop] > 1 {
 				fault.fields = append(fault.fields[:i], fault.fields[i+1:]...)
 				i--
 				break
@@ -335,7 +362,7 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 	for _, name := range slices.Sorted(maps.Keys(restored)) {
 		also[name] = true
 		if !sameRaw(props[name], restored[name]) {
-			fault.fields = append(fault.fields, name)
+			fault.restored = append(fault.restored, name)
 		}
 	}
 	movedOn := first(want[taskNext]) == "on"
@@ -402,7 +429,7 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 	for _, l := range come {
 		note(l, true)
 	}
-	if len(fault.fields) == 0 && len(fault.props) == 0 {
+	if len(fault.fields) == 0 && len(fault.restored) == 0 && len(fault.props) == 0 {
 		return nil
 	}
 	sort.Strings(fault.props)
@@ -614,29 +641,48 @@ func (s *Server) applyChecked(c *collectionCtx, obj *model.Object, ch change, ha
 		// Carrel's own fault, and the one place it is known: the log names
 		// the fields and properties, never what they hold.
 		slog.Error("web: a save that is not the edit was not sent", "kind", string(c.spec.kind),
-			"fields", strings.Join(fault.fields, ", "), "properties", strings.Join(fault.props, ", "))
+			"unread", fault.unread, "fields", strings.Join(fault.labels(), ", "),
+			"restored", strings.Join(fault.restored, ", "), "properties", strings.Join(fault.props, ", "))
 	}
 	return sent, fault, nil
 }
 
 // faultNotice says a save was not made and that the fault is Carrel's own (the
-// owner's decision of 11.10.2026; his words of 02.11.2026): the form's fields
-// that would not read back as entered, the record's properties that would
-// change untouched — the form has no field for them —, what became of the
-// record and the entry, and the lines themselves for whoever reports it.
+// owner's decision of 11.10.2026; his words of 02.11.2026): the check that
+// failed, each thing it found — a field with what it would hold instead of
+// what was entered, a property by its name —, what became of the entry, and
+// the lines themselves for whoever reports it.
 func faultNotice(f *editFault) view.Notice {
 	var said []string
-	if len(f.fields) > 0 {
-		said = append(said, "stored "+named("field", f.fields)+" differently from what you entered")
+	if f.unread {
+		said = append(said, "the record would not read back after the change")
+	}
+	for _, ff := range f.fields {
+		switch {
+		case !ff.shown:
+			said = append(said, "the field "+ff.label+" would not be saved as entered")
+		case ff.saved == "":
+			said = append(said, "the field "+ff.label+" would be saved empty instead of «"+ff.entered+"»")
+		case ff.entered == "":
+			said = append(said, "the field "+ff.label+" would be saved as «"+ff.saved+"» instead of empty")
+		default:
+			said = append(said, "the field "+ff.label+" would be saved as «"+ff.saved+"» instead of «"+ff.entered+"»")
+		}
+	}
+	for _, p := range f.restored {
+		said = append(said, "the property "+p+" would not be restored as the version you opened had it")
 	}
 	if len(f.props) > 0 {
-		said = append(said, "changed "+named("property", f.props)+", which you did not touch")
+		said = append(said, named("property", f.props)+" would change, though not edited")
+	}
+	report := "Report this as a Carrel bug."
+	if len(f.lines) > 0 {
+		report = "Report this as a Carrel bug — details below."
 	}
 	n := view.Notice{
 		Role:  view.NoticeAlert,
-		Title: "Internal Carrel error — the edit was not saved",
-		Body: text("Saving would have " + strings.Join(said, ", and would have ") +
-			". Nothing was sent; the record is unchanged and the form keeps your entry. Please report this with the details below."),
+		Title: "Internal error: edit not saved",
+		Body:  text("Pre-save check failed: " + strings.Join(said, "; ") + ". Nothing sent to the server; the form keeps your entry. " + report),
 	}
 	if len(f.lines) > 0 {
 		d := &view.Diagnostic{Summary: "What the save would have changed"}
@@ -648,8 +694,17 @@ func faultNotice(f *editFault) view.Notice {
 	return n
 }
 
-// named is «the field Location», «the fields Location and Notes», «the
-// properties A, B and C».
+// labels are the labels of the fields at fault, for the log: it names the
+// fields, never what they hold.
+func (f *editFault) labels() []string {
+	var out []string
+	for _, ff := range f.fields {
+		out = append(out, ff.label)
+	}
+	return out
+}
+
+// named is «the property GEO», «the properties A, B and C».
 func named(noun string, names []string) string {
 	if len(names) == 1 {
 		return "the " + noun + " " + names[0]

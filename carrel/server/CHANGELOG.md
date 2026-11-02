@@ -23,11 +23,17 @@ current mockup; fonts are in `docs/visual/fonts/`.
 
 - The notice of a save Carrel refused to send because it would have spoiled
   the record now says plainly that it is Carrel's internal error: «Internal
-  Carrel error — the edit was not saved». It names what went wrong — «the
-  field Location» stored differently from what was entered, «the property
-  X-ALT-DESC» changed though untouched —, says nothing was sent and the form
-  keeps the entry, and asks to report it with the details (the owner's words
-  of 02.11.2026).
+  error: edit not saved». The body names the failed check and each finding:
+  a field of one short line with what it would hold — «the field Location
+  would be saved as «Room 4» instead of «Room 4, floor 2»» —, any other
+  field by its name, a property changed though not edited by its name; then
+  «Nothing sent to the server; the form keeps your entry. Report this as a
+  Carrel bug», with «— details below» only when there are lines to show (the
+  owner's words of 02.11.2026). The values are on the screen only; the log
+  keeps naming fields and properties without their content.
+- The attendees check follows the owner's card in the fixture set: the
+  organiser `mix@example.org` is a person of «Контакты», as `s-agenda-1`
+  draws its organiser.
 - A task saved with Done ticked and another status chosen says under Status
   what does not agree and the two ways out: «Done is ticked, but the status
   is In process. Untick Done, or set the status to Completed.»
