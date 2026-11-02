@@ -525,6 +525,7 @@ STATE_FRAME = {
     "app-note/source": "s-notes-27",
     "app-files-folder/print": "print-6",
     "app-agenda/print": "print-7",
+    "app-notes-all/print": "print-8",  # записка Typecase 159
     # Состояния поиска (записка Typecase 114): идёт, ничего не найдено, без
     # запроса, ничего не отмечено, слишком много обходов, не ответил никто,
     # остановлен.

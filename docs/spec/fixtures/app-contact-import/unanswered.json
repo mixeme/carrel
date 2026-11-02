@@ -121,37 +121,33 @@
   "preview": [
     {
       "columns": [
-        "Source",
         "Name",
-        "UID",
+        "Email",
         "Result"
       ],
       "count": 3,
       "lines": [
         {
           "cells": [
-            "Разное (mix).vcf",
             "Ирина Соколова",
-            "7c1e-2b40-9a11",
+            "i.sokolova@example.org",
             "Ready"
           ],
           "result": "ready"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "Вера Лебедева",
-            "8e20-5b1f-c7d4",
+            "vera@example.net",
             "Ready"
           ],
           "result": "ready"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "—",
             "",
-            "line 14: cannot decode quoted-printable"
+            "line 16: cannot decode quoted-printable"
           ],
           "result": "failed",
           "untitled": true
@@ -265,7 +261,7 @@
       "text": "Разное (mix).vcf"
     },
     {
-      "text": " · 276 B · vCard 3.0"
+      "text": " · 330 B · vCard 3.0"
     }
   ],
   "title": "Import contacts",

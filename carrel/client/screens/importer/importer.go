@@ -327,19 +327,24 @@ func preview(p *view.ImportPage) []w.DialogPart {
 	return out
 }
 
-// table is the preview's table: the source, a contact's identity and a
-// missing value monospaced — a time or a day in the card's words is not
-// (Typecase's note 142) —, the result last — a record that failed in alarm, one left out by
-// the kind dusty —, a missing value «—» dusty.
+// table is the preview's table: the file of a set monospaced — one file
+// has no such column, the head names it (Typecase's note 157) —, a
+// contact's address and a missing value monospaced — a time or a day in
+// the card's words is not (Typecase's note 142) —, the result last and the
+// main column of a card on a phone — a record that failed in alarm, one
+// left out by the kind dusty —, a missing value «—» dusty. The columns are
+// read from the end: result, the date or address, the name, the file.
 func table(t view.ImportTable, k view.Kind) w.Table {
 	out := w.Table{}
+	n := len(t.Columns)
+	result, detail, name := n-1, n-2, n-3
 	for i, c := range t.Columns {
 		col := w.TableCol{Label: string(c)}
 		switch i {
-		case 2:
+		case detail:
 			col.Rank = w.Rank3
-		case 3:
-			col.Rank = w.Rank4
+		case result:
+			col.Rank, col.Main = w.Rank4, true
 		}
 		out.Cols = append(out.Cols, col)
 	}
@@ -348,25 +353,25 @@ func table(t view.ImportTable, k view.Kind) w.Table {
 		for i, c := range l.Cells {
 			cell := w.TableCell{Parts: []w.CellPart{w.Text(c)}}
 			switch i {
-			case 0:
-				cell.Mono = true
-			case 1:
+			case name:
 				cell.Dim = l.Untitled || c == dash
 				if l.Component != "" {
 					cell.Parts = append(cell.Parts, w.Badge{Label: string(l.Component)})
 				}
-			case 2:
+			case detail:
 				cell.Mono = k == view.KindContact
 				if c == "" || c == dash {
 					cell.Parts, cell.Tone, cell.Mono = []w.CellPart{w.Text(dash)}, w.CellDusty, true
 				}
-			case 3:
+			case result:
 				switch {
 				case l.Result == view.ImportFailed:
 					cell.Tone = w.CellDanger
 				case l.Result == view.ImportSkipped && l.Component != "", l.Result == view.ImportSkipped && startsWith(string(c), "Skipped"):
 					cell.Tone = w.CellDusty
 				}
+			default:
+				cell.Mono = true
 			}
 			row.Cells = append(row.Cells, cell)
 		}

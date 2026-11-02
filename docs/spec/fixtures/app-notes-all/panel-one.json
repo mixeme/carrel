@@ -819,7 +819,10 @@
     "taskID": "t-task"
   },
   "print": {
+    "foot": "Carrel · notes · 3 notes · captured 2026-08-10 17:04 · 2 of 2 notebooks",
+    "heading": "Notes · Combined notebook",
     "range": "2 notebooks · 3 notes",
+    "sources": "nextcloud · Записи, Дневник",
     "taken": "10 August 2026, 17:04",
     "title": "Combined notebook"
   },

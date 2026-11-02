@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.16 — 2026-11-02
+
+Typecase `930ff57`, notes 157–159; server `v0.2.392`. The whole client
+suite passes, the contacts list's kinship included.
+
+- The import preview (s-io-5…8, -19): Result is the main column of a card
+  on a phone; the columns are read from the end, so the table of one file —
+  without Source now — and the notes' with File first are drawn alike.
+- The notes list on paper (`?print=1`, print-8): the heading, the notebooks
+  that answered, «Date | Note», the rubrics of the order, each note's date,
+  title and under it the excerpt and tags as Columns shows them and where
+  it is — one notebook its name, several «in 2 notebooks» —, the foot.
+- The combined contact lists with the owner's card (note 158) need nothing
+  of the client: the fixtures hold the card.
+
 ## v0.11.15 — 2026-11-02
 
 Typecase `5c3a40c`, note 156 (Р-66, the second group); server `v0.2.392`.

@@ -63,6 +63,17 @@ current mockup; fonts are in `docs/visual/fonts/`.
   (Move, Copy, Rename again for those); the row refused for want of a size
   «server requires the file size» (`s-files-24` still draws the old words:
   Typecase task 252). Fixtures `app-files-folder/long`, `-refused` reshot.
+- Typecase note 157: the import preview of one file has no Source column
+  (every row named the file the head names) — contacts «Name · Email ·
+  Result», events «Summary · When · Result», tasks «Summary · Due ·
+  Result»; the notes, read from many files, keep File first. A contact is
+  told by its first address, not its UID (the owner's decision of
+  02.11.2026). Fixtures `app-contact-import/*`, `app-event-import/preview`,
+  `app-task-import/preview` reshot, the import cards with addresses.
+- Typecase note 159: the combined notebook on paper (print-8) has its
+  heading «Notes · Combined notebook», the notebooks that answered and the
+  foot «Carrel · notes · 3 notes · captured … · 2 of 2 notebooks»; new
+  fixture `app-notes-all/print`.
 - A count of a word ending in a consonant and «y» is «12 entries», not «12
   entrys» (the folder copied to another account, a feed's folder, a move
   that broke off).

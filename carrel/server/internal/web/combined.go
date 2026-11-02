@@ -538,6 +538,9 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
 		}
 		page.Print = header(counted(page.Bar.Loaded, "note"))
+		// On paper (print-8; Typecase's note 159): the view as it is — its
+		// filter, order and columns —, how many notes of it.
+		paper(&page.Print, "Notes · "+string(st.shell.Title), "notes", plural(page.Bar.Loaded, "note"), filter.tag)
 		return page, nil
 	}
 }

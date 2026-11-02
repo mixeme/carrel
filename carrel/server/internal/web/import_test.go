@@ -121,7 +121,7 @@ func TestImportPreviewCountsAgainstTheChosenCollection(t *testing.T) {
 	}
 	// The preview of each kind is its own: a card is told from a card by its
 	// address, an event by its time.
-	if cols := page.Preview[0].Columns; len(cols) != 4 || cols[2] != "UID" {
+	if cols := page.Preview[0].Columns; len(cols) != 3 || cols[1] != "Email" {
 		t.Errorf("columns = %v", cols)
 	}
 	if row := previewRow(t, page.Preview, "Ада"); row[3] != "New UID will be assigned" {
@@ -290,7 +290,7 @@ func TestImportNamesWhatItDoesNotWrite(t *testing.T) {
 	if row := previewRow(t, page.Preview, "Ковка"); row[3] != "Ready — a moment (no end)" || !strings.Contains(string(row[2]), "January") {
 		t.Errorf("event = %q", row)
 	}
-	if cols := page.Preview[0].Columns; len(cols) != 4 || cols[2] != "When" {
+	if cols := page.Preview[0].Columns; len(cols) != 3 || cols[1] != "When" {
 		t.Errorf("columns = %v", cols)
 	}
 	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))

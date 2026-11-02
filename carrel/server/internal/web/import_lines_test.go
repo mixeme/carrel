@@ -34,20 +34,20 @@ func TestImportLinesAreTheFrames(t *testing.T) {
 	}
 	lines := map[string]view.ImportLine{}
 	for _, l := range page.Preview[0].Lines {
-		lines[string(l.Cells[1])] = l
+		lines[string(l.Cells[0])] = l
 	}
-	if l := lines["Сдать отчёт"]; l.Result != view.ImportReady || l.Cells[3] != "Ready — overdue, and stays overdue" {
+	if l := lines["Сдать отчёт"]; l.Result != view.ImportReady || l.Cells[2] != "Ready — overdue, and stays overdue" {
 		t.Errorf("overdue = %+v", l)
 	}
-	if l := lines["Когда-нибудь"]; l.Cells[3] != "Ready — a task without a date is a task" {
+	if l := lines["Когда-нибудь"]; l.Cells[2] != "Ready — a task without a date is a task" {
 		t.Errorf("no date = %+v", l)
 	}
 	// A task without a title under the default one, marked, and said so
 	// (Р-72; s-io-7: «Ready — no title»).
-	if l := lines["Untitled task"]; !l.Untitled || l.Cells[3] != "Ready — no title" {
+	if l := lines["Untitled task"]; !l.Untitled || l.Cells[2] != "Ready — no title" {
 		t.Errorf("untitled = %+v, want the default title marked", l)
 	}
-	if l := lines["Созвон с подрядчиком"]; l.Result != view.ImportSkipped || l.Component != "VEVENT" || !strings.Contains(string(l.Cells[2]), "2026") {
+	if l := lines["Созвон с подрядчиком"]; l.Result != view.ImportSkipped || l.Component != "VEVENT" || !strings.Contains(string(l.Cells[1]), "2026") {
 		t.Errorf("an event in a list of tasks = %+v, want skipped, VEVENT as a badge, its own date", l)
 	}
 
@@ -58,7 +58,7 @@ func TestImportLinesAreTheFrames(t *testing.T) {
 		"BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260101T000000Z\nSUMMARY:Встреча\nDTSTART;TZID=Asia/Yekaterinburg:20260817T100000\nDTEND;TZID=Asia/Yekaterinburg:20260817T110000\nEND:VEVENT\n" +
 		"END:VCALENDAR\n"
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cal.ics", []byte(events))))
-	if page.Title != "Import events" || len(page.Preview) != 1 || page.Preview[0].Lines[0].Cells[3] != "Ready — kept as sent: 10:00 Asia/Yekaterinburg" {
+	if page.Title != "Import events" || len(page.Preview) != 1 || page.Preview[0].Lines[0].Cells[2] != "Ready — kept as sent: 10:00 Asia/Yekaterinburg" {
 		t.Errorf("title %q, preview %+v", page.Title, page.Preview)
 	}
 }

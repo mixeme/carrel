@@ -127,73 +127,65 @@
   "preview": [
     {
       "columns": [
-        "Source",
         "Name",
-        "UID",
+        "Email",
         "Result"
       ],
       "count": 7,
       "lines": [
         {
           "cells": [
-            "Разное (mix).vcf",
             "Ирина Соколова",
-            "7c1e-2b40-9a11",
+            "i.sokolova@example.org",
             "Ready"
           ],
           "result": "ready"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "Анна Ковалева",
-            "4f2b-9c31-a0e7",
+            "a.kovaleva@example.org",
             "Already here — skipped"
           ],
           "result": "skipped"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "Вера Лебедева",
-            "8e20-5b1f-c7d4",
+            "vera@example.net",
             "Ready — name from N"
           ],
           "result": "ready"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "Вера Дорошенко",
-            "2b7e-11aa",
+            "v.doroshenko@example.org",
             "Ready"
           ],
           "result": "ready"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "Вера Дорошенко",
-            "2b7e-11aa",
+            "v.doroshenko@example.org",
             "Ready"
           ],
           "result": "ready"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "Галина Мещерякова",
-            "9f13-6be0-2a7c",
+            "g.meshcheryakova@example.org",
             "Ready"
           ],
           "result": "ready"
         },
         {
           "cells": [
-            "Разное (mix).vcf",
             "—",
             "",
-            "line 22: cannot decode quoted-printable"
+            "line 25: cannot decode quoted-printable"
           ],
           "result": "failed",
           "untitled": true
@@ -307,7 +299,7 @@
       "text": "Разное (mix).vcf"
     },
     {
-      "text": " · 885 B · vCard 2.1 and 3.0"
+      "text": " · 1 KB · vCard 2.1 and 3.0"
     }
   ],
   "title": "Import contacts",

@@ -2381,8 +2381,9 @@ type ImportPage struct {
     Counts   []ImportCount // над таблицей предпросмотра (s-io-5…8): ready всегда; with errors (Error), already here, skipped — когда не ноль
     Existing *ImportExisting // вопрос о записях файла, которые коллекция уже держит под тем же UID (S-19); nil — таких нет или коллекция не выбрана
     // Предпросмотр — одна таблица (s-io-5…8): столбцы рода и Result
-    // последним — контакты: Source, Name, UID; события: Source, Summary,
-    // When; задачи: Source, Summary, Due; заметки: File, Title, Date. Сначала
+    // последним — контакты: Name, Email (первый адрес карточки); события:
+    // Summary, When; задачи: Summary, Due — файл один, его называет шапка;
+    // заметки, из многих файлов: File, Title, Date (записка Typecase 157). Сначала
     // записи («Ready», «Ready — the series as one record»; у записи, которая
     // уже есть, по выбору Existing — «Already here — skipped», «Replaces the
     // one here», «New UID will be assigned»), за ними то, что файл несёт и импорт не пишет: «Skipped: a

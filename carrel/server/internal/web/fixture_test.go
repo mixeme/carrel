@@ -1846,6 +1846,15 @@ func TestFixtureCombinedNotes(t *testing.T) {
 	// p. 9): «Про дорогу до дачи» in «Дневник».
 	one := app.listPath(t, "notes", "dnevnik") + "/7f03-5b26-cc19"
 	app.compare(t, "app-notes-all/panel-one.json", app.h.do(get("/app/notes?task="+page.Poll.TaskID+"&open="+url.QueryEscape(one), app.sess)))
+	// On paper (print-8; Typecase's note 159): the heading, the notebooks
+	// that answered, the foot — how many notes, when, how many notebooks.
+	paperAt := onPaper("/app/notes?task=" + page.Poll.TaskID)
+	paper := decode[view.NotesPage](t, app.h.do(get(paperAt, app.sess))).Print
+	if !paper.Paper || paper.Heading != "Notes · Combined notebook" || paper.Sources != "nextcloud · Записи, Дневник" ||
+		!strings.HasPrefix(string(paper.Foot), "Carrel · notes · 3 notes · captured ") || !strings.HasSuffix(string(paper.Foot), " · 2 of 2 notebooks") {
+		t.Errorf("the notes on paper = %+v", paper)
+	}
+	app.compare(t, "app-notes-all/print.json", app.h.do(get(paperAt, app.sess)))
 }
 
 // C-14.2: the card of a task (s-tasks-2): «Собрать чемодан», the task the
@@ -4328,16 +4337,18 @@ func TestFixtureImport(t *testing.T) {
 
 	t.Run("app-contact-import", func(t *testing.T) {
 		book := app.listPath(t, "contacts", "kontakty")
-		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nN:Соколова;Ирина;;;\r\nTEL;TYPE=cell:+7 921 300-11-22\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:4f2b-9c31-a0e7\r\nFN:Анна Ковалева\r\nN:Ковалева;Анна;;;\r\nEND:VCARD\r\n" +
+		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nN:Соколова;Ирина;;;\r\nTEL;TYPE=cell:+7 921 300-11-22\r\nEMAIL:i.sokolova@example.org\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:4f2b-9c31-a0e7\r\nFN:Анна Ковалева\r\nN:Ковалева;Анна;;;\r\nEMAIL:a.kovaleva@example.org\r\nEND:VCARD\r\n" +
+			// Anna and Vera have their addresses, as the Email column of
+			// s-io-5 draws them (Typecase's note 157).
 			// What s-io-5 and -9 draw besides: a card named by its N in vCard
 			// 2.1, one whose quoted-printable cannot be read, a UID the file
 			// holds twice, a photo the server does not keep.
-			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:8e20-5b1f-c7d4\r\nN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:=D0=9B=D0=B5=D0=B1=D0=B5=D0=B4=D0=B5=D0=B2=D0=B0;=D0=92=D0=B5=D1=80=D0=B0;;;\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:8e20-5b1f-c7d4\r\nN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:=D0=9B=D0=B5=D0=B1=D0=B5=D0=B4=D0=B5=D0=B2=D0=B0;=D0=92=D0=B5=D1=80=D0=B0;;;\r\nEMAIL:vera@example.net\r\nEND:VCARD\r\n" +
 			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:3c90-aa41-0d2e\r\nNOTE;ENCODING=QUOTED-PRINTABLE:=ZZ broken\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nTEL:+7 900 000-00-00\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:9f13-6be0-2a7c\r\nFN:Галина Мещерякова\r\nPHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRgABAQ==\r\nEND:VCARD\r\n"
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nEMAIL:v.doroshenko@example.org\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nEMAIL:v.doroshenko@example.org\r\nTEL:+7 900 000-00-00\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:9f13-6be0-2a7c\r\nFN:Галина Мещерякова\r\nEMAIL:g.meshcheryakova@example.org\r\nPHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRgABAQ==\r\nEND:VCARD\r\n"
 		preview := app.h.do(importRequest(book+"/import", app.sess, false, "Разное (mix).vcf", []byte(vcf)))
 		app.compare(t, "app-contact-import/preview.json", preview)
 		// nextcloud keeps no photo of an imported card this once (s-io-9:
@@ -4446,8 +4457,8 @@ func TestFixtureImport(t *testing.T) {
 	t.Run("app-contact-import/unanswered", func(t *testing.T) {
 		book := app.listPath(t, "contacts", "kontakty")
 		// A card ready and one that cannot be read: the counts of s-io-19.
-		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:8e20-5b1f-c7d4\r\nFN:Вера Лебедева\r\nEND:VCARD\r\n" +
+		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nEMAIL:i.sokolova@example.org\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:8e20-5b1f-c7d4\r\nFN:Вера Лебедева\r\nEMAIL:vera@example.net\r\nEND:VCARD\r\n" +
 			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:3c90-aa41-0d2e\r\nNOTE;ENCODING=QUOTED-PRINTABLE:=ZZ broken\r\nEND:VCARD\r\n"
 		for _, m := range []string{"PROPFIND", "REPORT"} {
 			app.servers["nextcloud"].Refuse(m, http.StatusServiceUnavailable, "")

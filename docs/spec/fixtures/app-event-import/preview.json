@@ -152,7 +152,6 @@
   "preview": [
     {
       "columns": [
-        "Source",
         "Summary",
         "When",
         "Result"
@@ -161,7 +160,6 @@
       "lines": [
         {
           "cells": [
-            "Личный 2026.ics",
             "Планёрка",
             "Monday, 10 August 2026, 09:00 · weekly until 28 December",
             "Ready — the series as one record"
@@ -170,7 +168,6 @@
         },
         {
           "cells": [
-            "Личный 2026.ics",
             "Отпуск",
             "13 – 26 July 2026 · all day",
             "Ready"
@@ -179,7 +176,6 @@
         },
         {
           "cells": [
-            "Личный 2026.ics",
             "Синк-ап по релизу",
             "10 August 2026, 14:00",
             "Already here — skipped"
@@ -188,7 +184,6 @@
         },
         {
           "cells": [
-            "Личный 2026.ics",
             "Созвон с Екатеринбургом",
             "17 August 2026, 08:00",
             "Ready — kept as sent: 10:00 Asia/Yekaterinburg"
@@ -197,7 +192,6 @@
         },
         {
           "cells": [
-            "Личный 2026.ics",
             "Untitled event",
             "4 May 2026 · all day",
             "Ready — a whole day (no end), no title"
@@ -207,7 +201,6 @@
         },
         {
           "cells": [
-            "Личный 2026.ics",
             "—",
             "",
             "line 23: cannot read DTSTART «2026-02-30»"
@@ -217,7 +210,6 @@
         },
         {
           "cells": [
-            "Личный 2026.ics",
             "Купить билеты",
             "",
             "Skipped: a calendar takes events — import it into a list of tasks"

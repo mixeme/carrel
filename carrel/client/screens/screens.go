@@ -521,10 +521,15 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotesPage) },
-		Frames: []string{"s-notes-1", "s-notes-31", "s-notes-33", "states-25", "states-29"},
-		Draw:   func(model any) Root { return notes.Screen(model.(*view.NotesPage)) },
-		Title:  func(model any) string { return string(model.(*view.NotesPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return notes.Forms(model.(*view.NotesPage)) },
+		Frames: []string{"s-notes-1", "s-notes-31", "s-notes-33", "states-25", "states-29", "print-8"},
+		Draw: func(model any) Root {
+			if p := model.(*view.NotesPage); p.Print.Paper {
+				return notes.Paper(p)
+			}
+			return notes.Screen(model.(*view.NotesPage))
+		},
+		Title: func(model any) string { return string(model.(*view.NotesPage).Title) },
+		Forms: func(model any) []widget.PostForm { return notes.Forms(model.(*view.NotesPage)) },
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },

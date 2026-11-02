@@ -1456,14 +1456,19 @@ var intoNoun = map[view.Kind]string{
 
 // previewTable is the preview as the frames draw it (s-io-5…8): one table,
 // the columns of the kind and Result last; the records first, what the file
-// holds and this import does not write after them, each with why.
+// holds and this import does not write after them, each with why. Only the
+// notes, read from many files, have the file first; one file is named by
+// the head (Typecase's note 157).
 func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.ImportTable {
 	t := view.ImportTable{Columns: previewColumns[k], Lines: []view.ImportLine{}}
-	source := func(file string) view.Text {
-		if file != "" {
-			return text(file)
+	row := func(file string, cells ...view.Text) []view.Text {
+		if k != view.KindNote {
+			return cells
 		}
-		return text(d.Source)
+		if file == "" {
+			file = d.Source
+		}
+		return append([]view.Text{text(file)}, cells...)
 	}
 	for _, rec := range d.Records {
 		result := "Ready"
@@ -1477,15 +1482,13 @@ func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.Impor
 		case rec.Ready != "":
 			result += " — " + rec.Ready
 		}
-		third := rec.Detail
-		if k == view.KindContact {
-			third = rec.UID
-		}
+		// A contact's third cell is its first address (the owner's decision
+		// of 02.11.2026): a person tells two cards apart by it.
 		res := view.ImportReady
 		if taken[rec.UID] && d.Existing == existingSkip {
 			res = view.ImportSkipped
 		}
-		t.Lines = append(t.Lines, view.ImportLine{Cells: []view.Text{source(rec.File), text(rec.Title), text(third), text(result)},
+		t.Lines = append(t.Lines, view.ImportLine{Cells: row(rec.File, text(rec.Title), text(rec.Detail), text(result)),
 			Result: res, Untitled: rec.Untitled})
 	}
 	for _, sk := range d.Skipped {
@@ -1515,7 +1518,7 @@ func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.Impor
 				title = "—"
 			}
 		}
-		line.Cells = []view.Text{source(file), text(title), text(sk.Detail), text(result)}
+		line.Cells = row(file, text(title), text(sk.Detail), text(result))
 		t.Lines = append(t.Lines, line)
 	}
 	t.Count = len(t.Lines)
@@ -1524,9 +1527,9 @@ func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.Impor
 
 // previewColumns are the columns of the preview by kind (s-io-5…8).
 var previewColumns = map[view.Kind][]view.Text{
-	view.KindContact: {"Source", "Name", "UID", "Result"},
-	view.KindEvent:   {"Source", "Summary", "When", "Result"},
-	view.KindTask:    {"Source", "Summary", "Due", "Result"},
+	view.KindContact: {"Name", "Email", "Result"},
+	view.KindEvent:   {"Summary", "When", "Result"},
+	view.KindTask:    {"Summary", "Due", "Result"},
 	view.KindNote:    {"File", "Title", "Date", "Result"},
 }
 
