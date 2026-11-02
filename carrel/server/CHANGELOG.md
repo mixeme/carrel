@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.394 — 2026-11-02
+
+### Changed
+
+- What the card shows once — the name, the organisation and the title in
+  its head — may stand twice on the server. The first value is where it
+  was; every other one is under «Kept as the server sent them» by the
+  property's name: «TITLE · Countess», «ORG · Royal Society», «FN · Augusta
+  Ada King» (the owner's decision of 02.11.2026, variant Б). On paper the
+  head's fields come first, each once. The list's panel, which shows the
+  organisation and the title as fields, keeps a second FN and N. The form
+  edits the first value, as before; the others go back untouched. The note
+  waits for its section (Typecase task 253).
+
 ## v0.2.393 — 2026-11-02
 
 ### Fixed
