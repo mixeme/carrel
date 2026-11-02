@@ -45,7 +45,7 @@ func Split(doc []byte) ([]*model.Object, []Broken, error) {
 		lines, err := decodeQuoted(lines, card.at)
 		var c vcard.Card
 		if err == nil {
-			if c, err = vcard.NewDecoder(strings.NewReader(strings.Join(lines, "\r\n") + "\r\n")).Decode(); err != nil {
+			if c, err = readCard(strings.Join(lines, "\r\n") + "\r\n"); err != nil {
 				err = fmt.Errorf("line %d: %w", card.at[0], err)
 			}
 		}

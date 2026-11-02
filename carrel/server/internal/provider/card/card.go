@@ -99,7 +99,7 @@ func Parse(path, etag string, r io.Reader) (*model.Object, error) {
 
 // parseDoc reads the first card of doc, keeping the lines it came in.
 func parseDoc(path, etag string, doc []byte) (*model.Object, error) {
-	card, err := vcard.NewDecoder(bytes.NewReader(doc)).Decode()
+	card, err := readCard(string(doc))
 	if err != nil {
 		return nil, err
 	}

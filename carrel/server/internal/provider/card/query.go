@@ -206,7 +206,12 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 	out := make([]*model.Object, 0, len(aos))
 	var bad []Unreadable
 	for _, ao := range aos {
-		if ao.DecodeError != nil || ao.Card == nil {
+		card := ao.Card
+		if ao.DecodeError == nil && card != nil && hasBareParam(ao.Data) {
+			// Read again with its bare parameters named (readCard).
+			card, ao.DecodeError = readCard(ao.Data)
+		}
+		if ao.DecodeError != nil || card == nil {
 			err := ao.DecodeError
 			if err == nil {
 				err = errors.New("the resource contains no vCard")
@@ -218,7 +223,7 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		if blocks := cardBlocks([]byte(ao.Data)); len(blocks) > 0 {
 			lines = blocks[0]
 		}
-		obj := model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(ao.Card, lines))
+		obj := model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(card, lines))
 		obj.Modified = ao.ModTime
 		out = append(out, obj)
 	}

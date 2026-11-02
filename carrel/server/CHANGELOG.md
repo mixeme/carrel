@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.393 — 2026-11-02
+
+### Fixed
+
+- A vCard 2.1 line whose type is written without its name —
+  `TEL;HOME;VOICE:+7 900…`, `TEL;CELL:…`, `EMAIL;INTERNET:vera@example.net`,
+  as old phones export them — read as empty: go-vcard v0.1.0 took the
+  line's value for the last parameter's. A bare parameter is now read as a
+  TYPE (an ENCODING when it names one), as Carrel's own line reader always
+  did, wherever a card is read: one card, a file of them, the answer of a
+  query. The lines go back to the server as they came. A server built on
+  go-vcard itself still loses such a value; Carrel's read-back after a save
+  names it as not kept.
+
 ## v0.2.392 — 2026-11-02
 
 ### Changed

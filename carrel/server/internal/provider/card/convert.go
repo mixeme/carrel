@@ -14,6 +14,88 @@ import (
 // every value of a parameter, the escapes of a list — so an untouched value can
 // go back exactly as it came (S-7).
 
+// readCard reads one vCard with go-vcard, its bare parameters named first.
+// vCard 2.1 writes a type without its name — TEL;HOME;VOICE:…,
+// EMAIL;INTERNET:… —, and go-vcard v0.1.0 takes the value of such a line for
+// the last parameter's and leaves the line empty (found 02.11.2026): a bare
+// parameter is a TYPE, as model.ParseLine reads it, or an ENCODING when it
+// names one. The lines the card keeps for writing (cardBlocks) are the ones
+// it came in.
+func readCard(text string) (vcard.Card, error) {
+	return vcard.NewDecoder(strings.NewReader(namedParams(text))).Decode()
+}
+
+// hasBareParam reports a card with a parameter without a name.
+func hasBareParam(text string) bool { return namedParams(text) != text }
+
+// namedParams is text with every bare parameter named; text itself when it
+// has none.
+func namedParams(text string) string {
+	lines := model.LogicalLines([]byte(text))
+	changed := false
+	for i, l := range lines {
+		if named, ok := nameBare(l); ok {
+			lines[i], changed = named, true
+		}
+	}
+	if !changed {
+		return text
+	}
+	return strings.Join(lines, "\r\n") + "\r\n"
+}
+
+// bareEncodings are the bare parameters of vCard 2.1 that name an encoding.
+var bareEncodings = map[string]bool{"QUOTED-PRINTABLE": true, "BASE64": true, "8BIT": true, "7BIT": true}
+
+// nameBare writes the bare parameters of one content line with their
+// names; ok is false for a line that has none.
+func nameBare(line string) (string, bool) {
+	// The head ends at the first colon outside quotes.
+	quoted, end := false, -1
+	for i := 0; i < len(line) && end < 0; i++ {
+		switch line[i] {
+		case '"':
+			quoted = !quoted
+		case ':':
+			if !quoted {
+				end = i
+			}
+		}
+	}
+	if end < 0 {
+		return line, false
+	}
+	var parts []string
+	start := 0
+	quoted = false
+	for i := 0; i <= end; i++ {
+		if i < end && line[i] == '"' {
+			quoted = !quoted
+		}
+		if i == end || line[i] == ';' && !quoted {
+			parts = append(parts, line[start:i])
+			start = i + 1
+		}
+	}
+	changed := false
+	for i := 1; i < len(parts); i++ {
+		p := parts[i]
+		if p == "" || strings.ContainsRune(p, '=') {
+			continue
+		}
+		if bareEncodings[strings.ToUpper(p)] {
+			parts[i] = "ENCODING=" + p
+		} else {
+			parts[i] = "TYPE=" + p
+		}
+		changed = true
+	}
+	if !changed {
+		return line, false
+	}
+	return strings.Join(parts, ";") + line[end:], true
+}
+
 // cardToProps turns a decoded card into raw values. lines are the logical
 // lines of the same card; nil, or lines that do not match the card, leave the
 // values without a wire line, and they are written fresh.
