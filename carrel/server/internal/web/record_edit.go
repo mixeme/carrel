@@ -1992,9 +1992,9 @@ func (s *Server) doneHint(c *collectionCtx, obj *model.Object) view.Text {
 	case err != nil:
 		return ""
 	case !ok:
-		return "Repeating task, last time: Done completes it."
+		return "Repeating task, last occurrence: Done completes the task."
 	}
-	return text("Repeating task: Done marks this time and moves it on to " + c.tf.shortDay(next) + ".")
+	return text("Repeating task: Done completes this occurrence and moves the task to the next one, " + c.tf.shortDay(next) + ".")
 }
 
 // fillNames is U-6.1: the display name and the two parts of N fill each

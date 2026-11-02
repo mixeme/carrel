@@ -71,9 +71,22 @@ func TestTheFormOfARepeatingTaskSaysWhatDoneDoes(t *testing.T) {
 			}
 		}
 	}
-	// The owner's words of 02.11.2026.
-	if want := "Repeating task: Done marks this time and moves it on to 19 Jan."; hint != want {
+	// The owner's words of 02.11.2026, direct and precise.
+	if want := "Repeating task: Done completes this occurrence and moves the task to the next one, 19 Jan."; hint != want {
 		t.Errorf("hint under Done = %q, want %q", hint, want)
+	}
+	// On its last occurrence Done completes the task.
+	last := calendarFixture(t, nil, "water.ics", repeatingTask("FREQ=WEEKLY;BYDAY=MO;COUNT=1"))
+	lastHint := ""
+	for _, set := range decode[view.TaskEditPage](t, last.h.do(get(last.path("tasks")+"/water/edit", last.sess))).Form.Sets {
+		for _, row := range set.Rows {
+			if row.Name == "done" {
+				lastHint = string(row.Hint)
+			}
+		}
+	}
+	if want := "Repeating task, last occurrence: Done completes the task."; lastHint != want {
+		t.Errorf("hint under Done on the last occurrence = %q, want %q", lastHint, want)
 	}
 	form := formFields(page.Form)
 	form.Set("done", "on")

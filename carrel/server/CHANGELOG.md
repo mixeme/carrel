@@ -39,8 +39,9 @@ current mockup; fonts are in `docs/visual/fonts/`.
   ticked, but Status is In process. Untick Done or set Status to
   Completed.»
 - The hint under Done of a repeating task, in the form and on the card:
-  «Repeating task: Done marks this time and moves it on to 19 Jan.», on its
-  last time «Repeating task, last time: Done completes it.»
+  «Repeating task: Done completes this occurrence and moves the task to the
+  next one, 19 Jan.», on its last occurrence «Repeating task, last
+  occurrence: Done completes the task.»
 - Typecase note 156: an invitation by link has «by link» for its address
   (`InviteRow.Address`, was «—»); an account whose key is not deposited has
   «no» under Deposited (`EscrowCoverRow.Deposited`, was «not deposited»),
