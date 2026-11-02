@@ -6,6 +6,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/provider/file"
+	"carrel.dev/carrel/server/view"
 )
 
 // The words of a file that did not go, in the queue and in the notices of
@@ -53,6 +54,36 @@ func TestFileWordsAreDirect(t *testing.T) {
 	} {
 		if c.got != c.want {
 			t.Errorf("%q,\nwant %q", c.got, c.want)
+		}
+	}
+
+	// A delete the server refused for some of the items (the owner's words of
+	// 02.11.2026): how many of how many, one answer for all in the line, what
+	// was deleted and what stays; each item with its answer in the details.
+	forbidden := error(&dav.StatusError{Code: 403, Msg: "Forbidden"})
+	stale := error(&dav.StatusError{Code: 412, Msg: "Precondition Failed"})
+	for _, c := range []struct {
+		total          int
+		refused        []deleteRefusal
+		title, body    string
+		first, summary string
+	}{
+		{5, []deleteRefusal{{"отчёт.pdf", forbidden}, {"план.docx", stale}, {"смета.xlsx", forbidden}},
+			"Delete failed for 3 of 5 items.", "2 deleted, 3 unchanged.",
+			"отчёт.pdf · 403 Forbidden: this account has no write access here. " + forbidden.Error(), "Not deleted"},
+		{5, []deleteRefusal{{"отчёт.pdf", forbidden}, {"смета.xlsx", forbidden}},
+			"Delete failed for 2 of 5 items: 403 Forbidden: this account has no write access here.", "3 deleted, 2 unchanged.",
+			"отчёт.pdf · 403 Forbidden: this account has no write access here. " + forbidden.Error(), "Not deleted"},
+		{1, []deleteRefusal{{"план.docx", stale}},
+			"Delete failed for 1 of 1 item: 412 Precondition Failed: changed since the folder was read.", "0 deleted, 1 unchanged.",
+			"план.docx · 412 Precondition Failed: changed since the folder was read. " + stale.Error(), "Not deleted"},
+	} {
+		n := deleteFailed(c.total, c.refused)
+		if string(n.Title) != c.title || string(n.Body) != c.body || n.Role != view.NoticeAlert {
+			t.Errorf("deleteFailed: %q / %q (%s),\nwant %q / %q", n.Title, n.Body, n.Role, c.title, c.body)
+		}
+		if n.Details == nil || string(n.Details.Summary) != c.summary || len(n.Details.Lines) != len(c.refused) || string(n.Details.Lines[0]) != c.first {
+			t.Errorf("deleteFailed details = %+v,\nwant first %q", n.Details, c.first)
 		}
 	}
 }

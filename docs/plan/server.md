@@ -286,7 +286,7 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
         «прямо и точно» — «Internal error: edit not saved», «Pre-save check
         failed: the field … would be saved as «…» instead of «…»», `v0.2.392`; ошибка под Status — 02.11,
         «Done is ticked, but Status is …», пересмотрена по правилу; подсказка у Done — 02.11,
-        «Repeating task: Done completes this occurrence…», пересмотрена по правилу; строки очереди файлов и отказы сервера файлов — 02.11, код и текст ответа, «Move failed after 12 entries: 507 Insufficient Storage. Source unchanged», `v0.2.392`, кадр — задача Typecase 252): тревога удаления папки, уведомления Б3,
+        «Repeating task: Done completes this occurrence…», пересмотрена по правилу; строки очереди файлов и отказы сервера файлов — 02.11, код и текст ответа, «Move failed after 12 entries: 507 Insufficient Storage. Source unchanged», `v0.2.392`, кадр — задача Typecase 252; удаление в Files, отказанное не для всех, — 02.11, «Delete failed for 3 of 5 items.» · «2 deleted, 3 unchanged.», `v0.2.393`): уведомления Б3,
         Б6, Б16, Б42 и другие — в CHANGELOG они названы словами исполнителя;
       - поле карточки с несколькими значениями показывает одно; второе
         `DESCRIPTION` заметки хранится, но не видно — кадров нет: задача

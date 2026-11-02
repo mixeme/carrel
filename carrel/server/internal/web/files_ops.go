@@ -1477,6 +1477,47 @@ func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string, file
 	return out
 }
 
+// deleteRefusal is an item of a delete the server did not delete.
+type deleteRefusal struct {
+	name string
+	err  error
+}
+
+// deleteFailed is the notice of a delete the server refused for some of its
+// items (the owner's words of 02.11.2026): «Delete failed for 3 of 5 items.
+// 2 deleted, 3 unchanged.», the answer in the line when it is one for all;
+// each item with its answer, and the raw reply, in the details.
+func deleteFailed(total int, refused []deleteRefusal) view.Notice {
+	failed := &view.Diagnostic{Summary: "Not deleted"}
+	common := deleteReason(refused[0].err)
+	for _, f := range refused {
+		why := deleteReason(f.err)
+		if why != common {
+			common = ""
+		}
+		failed.Lines = append(failed.Lines, text(f.name+" · "+why+" "+f.err.Error()))
+	}
+	title := fmt.Sprintf("Delete failed for %d of %s", len(refused), plural(total, "item"))
+	if common != "" {
+		title += ": " + inLine(common)
+	}
+	return view.Notice{
+		Role:    view.NoticeAlert,
+		Title:   text(title + "."),
+		Body:    text(fmt.Sprintf("%d deleted, %d unchanged.", total-len(refused), len(refused))),
+		Details: failed,
+	}
+}
+
+// deleteReason is the server's answer to a delete; 412 is the item changed
+// since the folder was read, which is what the sheet's ETag asked about.
+func deleteReason(err error) string {
+	if dav.IsStatus(err, http.StatusPreconditionFailed) {
+		return "412 Precondition Failed: changed since the folder was read."
+	}
+	return fileReason(err)
+}
+
 // runOp runs a confirmed operation. Rename, move and copy report in the queue,
 // one row an item, a taken name as a question; delete reports in notices.
 // The folders written into are read again.
@@ -1492,31 +1533,19 @@ func (s *Server) runOp(w http.ResponseWriter, r *http.Request, c *fileCtx, op vi
 			break
 		}
 		etags := q["etag"]
-		failed := &view.Diagnostic{Summary: "Not deleted"}
-		done := 0
+		var refused []deleteRefusal
 		for i, e := range items {
 			etag := ""
 			if i < len(etags) {
 				etag = etags[i]
 			}
 			p, _ := c.path(append(slices.Clone(c.segs), e.Name), e.Dir)
-			err := c.files.Delete(ctx, p, etag)
-			switch {
-			case err == nil:
-				done++
-			case dav.IsStatus(err, http.StatusPreconditionFailed):
-				failed.Lines = append(failed.Lines, text(e.Name+" · changed since the folder was read; it stays"))
-			default:
-				failed.Lines = append(failed.Lines, text(e.Name+" · "+fileReason(err)+" "+err.Error()))
+			if err := c.files.Delete(ctx, p, etag); err != nil {
+				refused = append(refused, deleteRefusal{e.Name, err})
 			}
 		}
-		if len(failed.Lines) > 0 {
-			notices = append(notices, view.Notice{
-				Role:    view.NoticeAlert,
-				Title:   text(fmt.Sprintf("%d of %s deleted", done, plural(len(items), "item"))),
-				Body:    "The rest are still there.",
-				Details: failed,
-			})
+		if len(refused) > 0 {
+			notices = append(notices, deleteFailed(len(items), refused))
 		}
 	case view.FileRename:
 		name := strings.TrimSpace(r.FormValue("name"))

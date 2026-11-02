@@ -834,7 +834,7 @@ func TestFileOperationsOnOneServer(t *testing.T) {
 		Target string         `json:"target"`
 		Body   view.FilesPage `json:"body"`
 	}](t, f.h.do(fragment(postForm(confirmHref(t, del), f.sess, url.Values{}), "main")))
-	if stale.Target != "main" || !hasNotice(stale.Body.Notices, "0 of 1 item deleted") {
+	if stale.Target != "main" || !hasNotice(stale.Body.Notices, "Delete failed for 1 of 1 item: 412 Precondition Failed: changed since the folder was read.") {
 		t.Errorf("stale delete: %+v", stale.Body.Notices)
 	}
 	if _, ok := f.srv.File(filesDocs + "sub/inner.txt"); !ok {

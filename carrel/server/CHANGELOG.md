@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.393 — 2026-11-02
+
+### Changed
+
+- A delete in Files the server refused for some of the items says so in
+  the owner's words (02.11.2026): «Delete failed for 3 of 5 items.» and
+  «2 deleted, 3 unchanged.»; when every refusal is the same answer, it is in
+  the line — «Delete failed for 2 of 5 items: 403 Forbidden: this account
+  has no write access here.». Under «Not deleted» each item with its
+  answer by code and text, a changed one «412 Precondition Failed: changed
+  since the folder was read.», and the server's raw reply. Was «2 of 5
+  items deleted» · «The rest are still there.».
+
 ## v0.2.392 — 2026-11-02
 
 ### Changed
