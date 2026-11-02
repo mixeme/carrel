@@ -277,11 +277,12 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
         «прямо и точно» — «Internal error: edit not saved», «Pre-save check
         failed: the field … would be saved as «…» instead of «…»», `v0.2.392`; ошибка под Status — 02.11,
         «Done is ticked, but Status is …», пересмотрена по правилу; подсказка у Done — 02.11,
-        «Repeating task: Done completes this occurrence…», пересмотрена по правилу; строки очереди файлов и отказы сервера файлов — 02.11, код и текст ответа, «Move failed after 12 entries: 507 Insufficient Storage. Source unchanged», `v0.2.392`, кадр — задача Typecase 252; удаление в Files, отказанное не для всех, — 02.11, «Delete failed for 3 of 5 items.» · «2 deleted, 3 unchanged.», `v0.2.394`; записи, которых Carrel не прочитал (Б3), — 02.11, «1 record not shown: invalid vCard.» · «Unchanged on the server.», `v0.2.394`; один из нескольких файлов не прикрепился (Б6) — 02.11, «scan.pdf: 507 Insufficient Storage. The other files were not attached either.», `v0.2.394`; распавшаяся связанная группа (Б16) — 03.11, «Link removed.» · «… is no longer at its address (deleted or moved). This record is unchanged.», `v0.2.394`): уведомления
+        «Repeating task: Done completes this occurrence…», пересмотрена по правилу; строки очереди файлов и отказы сервера файлов — 02.11, код и текст ответа, «Move failed after 12 entries: 507 Insufficient Storage. Source unchanged», `v0.2.392`, кадр — задача Typecase 252; удаление в Files, отказанное не для всех, — 02.11, «Delete failed for 3 of 5 items.» · «2 deleted, 3 unchanged.», `v0.2.395`; записи, которых Carrel не прочитал (Б3), — 02.11, «1 record not shown: invalid vCard.» · «Unchanged on the server.», `v0.2.395`; один из нескольких файлов не прикрепился (Б6) — 02.11, «scan.pdf: 507 Insufficient Storage. The other files were not attached either.», `v0.2.395`; распавшаяся связанная группа (Б16) — 03.11, «Link removed.» · «… is no longer at its address (deleted or moved). This record is unchanged.», `v0.2.395`): уведомления
         Б42 и другие — в CHANGELOG они названы словами исполнителя;
-      - поле карточки с несколькими значениями показывает одно; второе
-        `DESCRIPTION` заметки хранится, но не видно — кадров нет: задача
-        Typecase или «не делаем»;
+      - второй текст `DESCRIPTION` заметки и её чужие свойства в чтении —
+        ждут кадра (задача Typecase 253; решение владельца 02.11.2026 по
+        полю с несколькими значениями, вариант Б: у контакта сделано в
+        `v0.2.394`);
       - файл по публичной ссылке не несёт записей, которых Carrel не
         разобрал (Б3), — так и оставить?
       - день рождения без года на Google (SV-56): с `v0.2.229` обход видом
@@ -376,6 +377,7 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
 
 | Что | Версии |
 |---|---|
+| Решение владельца 02.11.2026 по полю с несколькими значениями (вариант Б): первое значение — в поле, остальные — в «Kept as the server sent them» строкой «TITLE · Countess»; у контакта вторые FN, N, ORG, TITLE (в панели списка — FN, N, остальное там полями). События и задачи — без правки: RFC 5545 не даёт SUMMARY, LOCATION, DESCRIPTION повторяться, тестовый сервер не держит и второй RRULE. Заметка — задача Typecase 253 | сервер `v0.2.394` |
 | Карточка vCard 2.1 с параметром без имени (`TEL;HOME;VOICE:`, `EMAIL;INTERNET:`) читается со значением: голый параметр — TYPE до go-vcard; найдено на записке 157 (Б3) | сервер `v0.2.393` |
 | Решения владельца 01.11.2026: организатор-владелец — карточкой в книге набора (#26, вариант А; «узнавать себя без карточки» — в отложенном); даты таблиц файлов и опубликованных ссылок остаются числами, как в кадрах `s-files-1`, `s-publish-1` (ФН17, вариант А) | набор фикстур, задача Typecase 251 |
 | Нечитаемая vCard не прерывает чтение книги; частичный результат с диагностикой, явное подтверждение экспорта без неё, неполная резервная копия | `v0.2.390` |

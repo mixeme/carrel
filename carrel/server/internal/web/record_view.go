@@ -123,7 +123,9 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		av := avatarFor(uid, contactName(obj))
 		av.Href, _ = s.cardPhoto(c, uid, obj)
 		d.Avatar = &av
-		d.Foreign = card.Foreign(obj)
+		// The panel shows the organisation and the title as fields, every
+		// value; the name once.
+		d.Foreign = keptBesides(obj, "FN", "N")
 		d.ForeignShow = s.foreignShow(d.Foreign, c.recordPath(uid))
 		// All records: the person's timeline, beside Edit (s-contacts-1).
 		d.Actions = shown(ops.edit, &view.Action{ID: "contact.timeline", Label: "All records",
@@ -506,18 +508,23 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	page.Avatar.Href, page.PhotoHref = s.cardPhoto(c, uid, obj)
 	page.Print = s.recordPrint(c, page.Name)
 	page.Subtitle = text(contactSubtitle(obj))
+	led := map[string]bool{}
 	for _, f := range contactFieldsOf(obj) {
 		// Where the person works and as what is the head of the card; the
 		// panel beside a list has no such head and keeps them as fields.
 		if f.prop == "ORG" || f.prop == "TITLE" {
-			// On paper they are fields again, first (print-3).
-			page.Print.Lead = append(page.Print.Lead, f.Field)
+			// On paper they are fields again, first (print-3); a second
+			// value is kept, as on the screen.
+			if !led[f.prop] {
+				page.Print.Lead = append(page.Print.Lead, f.Field)
+			}
+			led[f.prop] = true
 			continue
 		}
 		page.Fields = append(page.Fields, f.Field)
 	}
 	page.Fields = withBirthdayAside(withTagLinks(page.Fields, s.recordTags(c, obj)), c.tf)
-	page.Foreign = card.Foreign(obj)
+	page.Foreign = keptBesides(obj, "FN", "N", "ORG", "TITLE")
 	page.ForeignShow = s.foreignShow(page.Foreign, c.recordPath(uid))
 	// The inset shows the timeline this session gathered; opening the card
 	// gathers nothing (S-15.4). The way to it is always there.
@@ -539,6 +546,28 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
 	page.Actions, page.Menu = shown(edit, send, print, ops.del), ops.menu
 	return page
+}
+
+// keptBesides is what the card keeps as the server sent it (card.Foreign)
+// and, of the properties it shows once — once —, every value after the
+// first, by the property's name: «TITLE · Countess» (the owner's decision
+// of 02.11.2026, variant Б). Nothing of the record is out of sight; the
+// form edits the first.
+func keptBesides(obj *model.Object, once ...string) []view.Field {
+	out := card.Foreign(obj)
+	props := obj.Props()
+	for _, name := range once {
+		for _, v := range props[name][min(1, len(props[name])):] {
+			out = append(out, view.Field{Label: text(name), Value: text(v.Text), Mono: true})
+		}
+	}
+	slices.SortStableFunc(out, func(a, b view.Field) int {
+		if c := strings.Compare(string(a.Label), string(b.Label)); c != 0 {
+			return c
+		}
+		return strings.Compare(string(a.Value), string(b.Value))
+	})
+	return out
 }
 
 // contactSubtitle is the line under the name: where the person works and as

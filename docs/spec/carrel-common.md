@@ -1410,7 +1410,7 @@ type ContactPage struct {
     PhotoHref string   // пусто — фотографии нет
     PhotoNote Text     // «внешняя ссылка, правка недоступна»
     Fields    []Field  // категории — строкой «Tags» между Birthday и Note (Field.Tags); у дня рождения Aside
-    Foreign   []Field  // чужие свойства, показанные как есть
+    Foreign   []Field  // чужие свойства, показанные как есть, и вторые значения того, что карточка показывает одним: FN, N, ORG, TITLE — «TITLE · Countess» (решение владельца 02.11.2026, вариант Б; панель списка — FN, N)
     ForeignShow *Action // «Show 3» — кнопка, раскрывающая Foreign (свёрнуты); без сценариев — ссылка на эту карточку с ?foreign=1; nil — их нет или они раскрыты
     Books     []Field  // тот же человек в других книгах: Label — книга, Value — чем разнится, Href, Colour
     Timeline  []TimelineRow // врезка: несколько последних, не вся хронология

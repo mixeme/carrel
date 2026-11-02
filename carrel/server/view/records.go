@@ -16,7 +16,7 @@ type ContactPage struct {
 	PhotoHref    string  `json:"photoHref"` // пусто — фотографии нет
 	PhotoNote    Text    `json:"photoNote"` // «внешняя ссылка, правка недоступна»
 	Fields       []Field `json:"fields"`    // категории — строкой «Tags» между Birthday и Note
-	Foreign      []Field `json:"foreign"`   // чужие свойства, показанные как есть
+	Foreign      []Field `json:"foreign"`   // чужие свойства, показанные как есть, и вторые значения FN, N, ORG, TITLE — «TITLE · Countess» (решение владельца 02.11.2026)
 	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign (свёрнуты): без
 	// сценариев — ссылка на ту же карточку с ?foreign=1; nil — их нет или
 	// они раскрыты
