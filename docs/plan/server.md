@@ -277,8 +277,8 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
         «прямо и точно» — «Internal error: edit not saved», «Pre-save check
         failed: the field … would be saved as «…» instead of «…»», `v0.2.392`; ошибка под Status — 02.11,
         «Done is ticked, but Status is …», пересмотрена по правилу; подсказка у Done — 02.11,
-        «Repeating task: Done completes this occurrence…», пересмотрена по правилу; строки очереди файлов и отказы сервера файлов — 02.11, код и текст ответа, «Move failed after 12 entries: 507 Insufficient Storage. Source unchanged», `v0.2.392`, кадр — задача Typecase 252; удаление в Files, отказанное не для всех, — 02.11, «Delete failed for 3 of 5 items.» · «2 deleted, 3 unchanged.», `v0.2.394`; записи, которых Carrel не прочитал (Б3), — 02.11, «1 record not shown: invalid vCard.» · «Unchanged on the server.», `v0.2.394`): уведомления
-        Б6, Б16, Б42 и другие — в CHANGELOG они названы словами исполнителя;
+        «Repeating task: Done completes this occurrence…», пересмотрена по правилу; строки очереди файлов и отказы сервера файлов — 02.11, код и текст ответа, «Move failed after 12 entries: 507 Insufficient Storage. Source unchanged», `v0.2.392`, кадр — задача Typecase 252; удаление в Files, отказанное не для всех, — 02.11, «Delete failed for 3 of 5 items.» · «2 deleted, 3 unchanged.», `v0.2.394`; записи, которых Carrel не прочитал (Б3), — 02.11, «1 record not shown: invalid vCard.» · «Unchanged on the server.», `v0.2.394`; один из нескольких файлов не прикрепился (Б6) — 02.11, «scan.pdf: 507 Insufficient Storage. The other files were not attached either.», `v0.2.394`): уведомления
+        Б16, Б42 и другие — в CHANGELOG они названы словами исполнителя;
       - поле карточки с несколькими значениями показывает одно; второе
         `DESCRIPTION` заметки хранится, но не видно — кадров нет: задача
         Typecase или «не делаем»;

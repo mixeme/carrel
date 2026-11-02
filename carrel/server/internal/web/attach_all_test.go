@@ -116,8 +116,9 @@ func TestAttachOfSeveralFilesIsAllOrNothing(t *testing.T) {
 		f := attachFixture(t, 1024, nil, "e1.ics", attachEvent("e1", "Sync-up", ""))
 		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
 		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"scan.pdf", strings.Repeat("x", 2048)}, upload{"note.txt", "small"})))
-		if got := noticeBodies(page.Notices); !strings.Contains(got, "scan.pdf could not be attached, so none of the files was.") {
-			t.Errorf("the notice does not say the files after it were not attached either: %+v", page.Notices)
+		// The owner's words of 02.11.2026: the file, why, then the others.
+		if got := noticeBodies(page.Notices); !strings.Contains(got, "scan.pdf: The file is larger than") || !strings.HasSuffix(got, " The other files were not attached either.\n") {
+			t.Errorf("the notice does not say the files after it were not attached either: %q", got)
 		}
 		if strings.Contains(body(t, f, "e1.ics"), "ATTACH") {
 			t.Errorf("the record carries an attachment")

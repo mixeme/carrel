@@ -500,7 +500,8 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 				}
 			}
 			if n > 0 {
-				notice.Body = text(name + " could not be attached, so none of the files was. " + string(notice.Body))
+				// The owner's words of 02.11.2026: the file, why, then the others.
+				notice.Body = text(name + ": " + string(notice.Body) + " The other files were not attached either.")
 			}
 			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, *notice))
 			return

@@ -35,6 +35,11 @@ current mockup; fonts are in `docs/visual/fonts/`.
   «Unchanged on the server.»; under «Not shown» each by its path and the
   parser's error. Was «1 record could not be read» · «The server returned
   them, but … other clients may still open them.».
+- A file of several that could not be attached is named first, then why,
+  then the others (the owner's words of 02.11.2026): «Nothing was
+  attached» · «scan.pdf: 507 Insufficient Storage. The other files were
+  not attached either.». Was «scan.pdf could not be attached, so none of
+  the files was. …».
 
 ## v0.2.393 — 2026-11-02
 
