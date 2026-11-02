@@ -37,7 +37,7 @@ func TestExportKeepsARecordCarrelCannotRead(t *testing.T) {
 	f := calendarFixture(t, nil, "plain.ics", plainEvent("plain"), "orphan.ics", orphan("VEVENT", "lone"))
 	// The premise: the list names it as unreadable.
 	page := decode[view.AgendaPage](t, f.h.do(get(f.path("calendar")+"?from=2026-01-05", f.sess)))
-	if !hasNotice(page.Notices, "1 record could not be read") {
+	if !hasNotice(page.Notices, "1 record not shown: invalid iCalendar.") {
 		t.Fatalf("the stand's orphan is read after all: notices = %+v", page.Notices)
 	}
 	base := f.path("calendar") + "/export"

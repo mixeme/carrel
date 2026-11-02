@@ -672,15 +672,17 @@ func unreadableOf(bad []cal.Unreadable) []unreadable {
 	return out
 }
 
+// appendUnreadable adds the notice of calendar records the server returned
+// and Carrel could not read, in the words of a card's (unreadableCardsNotice).
 func appendUnreadable(notices []view.Notice, bad []unreadable) []view.Notice {
 	if len(bad) == 0 {
 		return notices
 	}
 	n := view.Notice{
 		Role:    view.NoticeAlert,
-		Title:   text(plural(len(bad), "record") + " could not be read"),
-		Body:    text("The server returned them, but they are not valid iCalendar. They are left as they are; other clients may still open them."),
-		Details: &view.Diagnostic{Summary: text("Unreadable records")},
+		Title:   text(plural(len(bad), "record") + " not shown: invalid iCalendar."),
+		Body:    "Unchanged on the server.",
+		Details: &view.Diagnostic{Summary: "Not shown"},
 	}
 	for _, b := range bad {
 		line := b.Path + " · " + b.Err.Error()

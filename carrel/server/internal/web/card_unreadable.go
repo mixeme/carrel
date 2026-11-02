@@ -8,12 +8,15 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
+// unreadableCardsNotice is the cards the server returned and Carrel could not
+// read (the owner's words of 02.11.2026): «1 record not shown: invalid
+// vCard.» · «Unchanged on the server.», each by path and parser error.
 func unreadableCardsNotice(partial *card.PartialRead) view.Notice {
 	n := view.Notice{
 		Role:    view.NoticeAlert,
-		Title:   text(plural(len(partial.Records), "record") + " could not be read"),
-		Body:    "The server returned them, but they could not be read as vCard. They are left as they are; other clients may still open them.",
-		Details: &view.Diagnostic{Summary: "Unreadable records"},
+		Title:   text(plural(len(partial.Records), "record") + " not shown: invalid vCard."),
+		Body:    "Unchanged on the server.",
+		Details: &view.Diagnostic{Summary: "Not shown"},
 	}
 	for _, b := range partial.Records {
 		n.Details.Lines = append(n.Details.Lines, text(b.Path+" · "+b.Err.Error()))

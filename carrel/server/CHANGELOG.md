@@ -29,6 +29,12 @@ current mockup; fonts are in `docs/visual/fonts/`.
   answer by code and text, a changed one «412 Precondition Failed: changed
   since the folder was read.», and the server's raw reply. Was «2 of 5
   items deleted» · «The rest are still there.».
+- Records the server returned and Carrel could not read are named in the
+  owner's words (02.11.2026): «1 record not shown: invalid vCard.» (a
+  calendar's, a task list's, a notebook's «… invalid iCalendar.») ·
+  «Unchanged on the server.»; under «Not shown» each by its path and the
+  parser's error. Was «1 record could not be read» · «The server returned
+  them, but … other clients may still open them.».
 
 ## v0.2.393 — 2026-11-02
 

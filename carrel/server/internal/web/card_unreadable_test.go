@@ -94,7 +94,7 @@ func TestUnreadableContactListAndExport(t *testing.T) {
 	// Repeating the read must not hide the diagnostic in a successful cache entry.
 	for i := 0; i < 2; i++ {
 		page := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
-		if !hasNotice(page.Notices, "1 record could not be read") || page.Bar.Loaded != 2 {
+		if !hasNotice(page.Notices, "1 record not shown: invalid vCard.") || page.Bar.Loaded != 2 {
 			t.Fatalf("read %d: loaded %d, notices %+v", i, page.Bar.Loaded, page.Notices)
 		}
 		if page.Bar.Total == nil || *page.Bar.Total != 3 {
