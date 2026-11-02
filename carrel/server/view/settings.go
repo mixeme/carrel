@@ -1044,7 +1044,7 @@ type IssuedPassword struct {
 // InviteRow — ожидающее приглашение (s-admin-1). Логина у него нет: его
 // выбирает приглашённый.
 type InviteRow struct {
-	Address  Text `json:"address"`  // первая колонка: адрес письма; «—» у ссылки
+	Address  Text `json:"address"`  // первая колонка: адрес письма; «by link» у ссылки (записка 156)
 	Link     Text `json:"link"`     // видна всегда, независимо от отправки
 	Delivery Text `json:"delivery"` // «link» или «email»: как приглашение передано
 	Status   Text `json:"status"`   // «pending»: в списке только действующие
@@ -1097,10 +1097,10 @@ type AdminEscrowPage struct {
 type EscrowCoverRow struct {
 	Login        Text `json:"login"`
 	Covered      bool `json:"covered"`      // копия депонирована
-	Deposited    When `json:"deposited"`    // «2026-03-02» или «not deposited»
+	Deposited    When `json:"deposited"`    // «2026-03-02» или «no» (записка 156)
 	LastRecovery When `json:"lastRecovery"` // «never», «2026-08-14 18:40» или «—» у недепонировавшей
 	// Recovered — LastRecovery — момент; false у «never» и «—»: слово
-	// приглушено (s-admin-6, Ад35), как «not deposited» у !Covered
+	// приглушено (s-admin-6, Ад35), как «no» у !Covered
 	Recovered bool `json:"recovered"`
 }
 

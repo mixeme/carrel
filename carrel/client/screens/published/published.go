@@ -107,7 +107,7 @@ func table(rows []view.PublishedRow) w.Table {
 		{Label: colWhat},
 		{Label: colKind, Rank: w.Rank1},
 		{Label: colCreated, Rank: w.Rank3, Secondary: true},
-		{Label: colExpires, Rank: w.Rank4},
+		{Label: colExpires, Rank: w.Rank4, Main: true},
 		{Label: colSeen, Secondary: true},
 		{Label: colOpens},
 		{Width: w.Col120},

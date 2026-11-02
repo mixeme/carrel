@@ -433,7 +433,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		if len(u.LoginHash) == 0 && u.Disabled {
 			continue
 		}
-		row := view.EscrowCoverRow{Login: text(u.Login), Deposited: "not deposited", LastRecovery: "—"}
+		row := view.EscrowCoverRow{Login: text(u.Login), Deposited: "no", LastRecovery: "—"}
 		if store.UserDeposited(&u) {
 			page.Opens++
 			row.Covered, row.Deposited, row.LastRecovery = true, "", "never"

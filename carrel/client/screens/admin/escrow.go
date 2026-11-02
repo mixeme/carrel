@@ -130,9 +130,10 @@ func recoveredCard(r view.IssuedPassword) w.Pad {
 
 // coveredTable is whom the master password opens (s-admin-6): an account a
 // row, when its copy was deposited and when it was last recovered; the
-// words without a moment — «not deposited», «never» — muted.
+// words without a moment — «no», «never» — muted. Deposited is the main
+// column of a card on a phone (note 156).
 func coveredTable(rows []view.EscrowCoverRow) w.Table {
-	t := w.Table{Cols: []w.TableCol{{Label: colAccount}, {Label: colDeposited}, {Label: colRecovery, Rank: w.Rank3}}}
+	t := w.Table{Cols: []w.TableCol{{Label: colAccount}, {Label: colDeposited, Main: true}, {Label: colRecovery, Rank: w.Rank3}}}
 	for _, r := range rows {
 		dep := w.TableCell{Parts: []w.CellPart{w.Text(r.Deposited)}, Mono: true}
 		if !r.Covered {

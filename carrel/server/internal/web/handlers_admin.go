@@ -672,8 +672,9 @@ func (s *Server) buildAdminInvitesPage(r *http.Request, sess *session.Session, m
 		}
 		row := view.InviteRow{
 			// The first column is the address: the person chooses the
-			// login, and a link has no address yet (s-admin-1).
-			Address: "—",
+			// login, and a link has no address yet — «by link» (s-admin-1,
+			// note 156).
+			Address: "by link",
 			// Delivery and Status are columns of s-admin-1: how it was
 			// handed over, and pending — the list holds live ones only.
 			Delivery: "link",

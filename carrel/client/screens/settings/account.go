@@ -105,7 +105,7 @@ func profileField(p *view.AccountPage, r view.FormRow, fs *w.FieldSet) w.Field {
 // why; End every other session under them.
 func sessionsSet(p *view.AccountPage) w.FieldSet {
 	fs := w.FieldSet{Rubric: w.Rubric{Text: rubricSessions, Items: []w.RubricPart{w.Plain{Text: strconv.Itoa(len(p.Sessions)) + activeWord}}}}
-	t := w.Table{Cols: []w.TableCol{{Label: colWhere}, {Label: colStarted}, {Label: colLastSeen, Rank: w.Rank3}, {Width: w.Col120, Rank: w.Rank4}},
+	t := w.Table{Cols: []w.TableCol{{Label: colWhere}, {Label: colStarted}, {Label: colLastSeen, Rank: w.Rank3, Main: true}, {Width: w.Col120, Rank: w.Rank4}},
 		Variant: w.TableInset, Place: w.Grown}
 	for _, s := range p.Sessions {
 		where := w.TableCell{Parts: []w.CellPart{w.Text(s.Agent)}}

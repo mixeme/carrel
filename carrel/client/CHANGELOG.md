@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.15 — 2026-11-02
+
+Typecase `5c3a40c`, note 156 (Р-66, the second group); server `v0.2.392`.
+
+- More tables keep a main column on a phone (`TableCol.Main`): Last seen
+  of the sessions (`/settings/account`), Expires of the published links and
+  of the invitations, Deposited of the escrow table.
+- An invitation by link shows the server's «by link» muted; the ID of an
+  invitation's forms is the action and its address, without the row's
+  address (an ID holds no space).
+- The button before «⋯» — Copy link of an invitation and of a link, a
+  file's Download — already stands last in its row, as the cards need; the
+  CSS of the note (a field in a column line, the selection bar on two
+  lines) is Typecase's alone.
+
 ## v0.11.14 — 2026-11-01
 
 Typecase `5b0f920`, note 155 (Р-66, the first group); the server is the

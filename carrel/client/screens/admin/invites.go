@@ -205,17 +205,17 @@ func selfRegCard(c view.AddUserCard) w.Card {
 	return formCard(c, parts)
 }
 
-// invitesTable is the invitations pending (s-admin-1, -11): the address (a
-// dash for a link), how it went, its state, the letter's fate — in alarm
+// invitesTable is the invitations pending (s-admin-1, -11): the address
+// («by link», muted, for a link), how it went, its state, the letter's fate — in alarm
 // where it did not go —, when it lapses; Resend and Copy link, and «⋯» with
 // Extend and Revoke.
 func invitesTable(rows []view.InviteRow) w.Table {
-	t := w.Table{Cols: []w.TableCol{{Label: "Address"}, {Label: "Delivery"}, {Label: "Status", Rank: w.Rank3}, {Label: "Mail", Rank: w.Rank4}, {Label: "Expires"}, {}}}
+	t := w.Table{Cols: []w.TableCol{{Label: "Address"}, {Label: "Delivery"}, {Label: "Status", Rank: w.Rank3}, {Label: "Mail", Rank: w.Rank4}, {Label: "Expires", Main: true}, {}}}
 	for _, r := range rows {
 		mono := func(s view.Text) w.TableCell { return w.TableCell{Parts: []w.CellPart{w.Text(s)}, Mono: true} }
 		addr := mono(r.Address)
-		if r.Address == noCopy {
-			addr.Mono = false
+		if r.Delivery == "link" {
+			addr.Tone = w.CellDusty
 		}
 		sent := mono(r.Sent)
 		if r.Sent == noCopy {
@@ -226,7 +226,7 @@ func invitesTable(rows []view.InviteRow) w.Table {
 		}
 		acts := w.TableCell{Acts: true}
 		for _, a := range r.Actions {
-			b := bind.Button(a, inviteFormID(a, r))
+			b := bind.Button(a, inviteFormID(a))
 			b.Small = true
 			if a.Method == "GET" && a.Enabled {
 				// Copy link puts the whole address on the clipboard; without
@@ -248,16 +248,17 @@ func invitesTable(rows []view.InviteRow) w.Table {
 
 // inviteFormID is the ID of the form of an invitation's action that posts:
 // the same actions stand in every row, the address they post to tells them
-// apart.
-func inviteFormID(a view.Action, r view.InviteRow) string {
-	return a.ID + "/" + string(r.Address) + "/" + a.Href
+// apart — it names the invitation. The row's address is no part of it: an
+// ID holds no space, and a link's is «by link».
+func inviteFormID(a view.Action) string {
+	return a.ID + "/" + a.Href
 }
 
 // inviteMenu is an invitation's «⋯», each item's ID made its own.
 func inviteMenu(r view.InviteRow) []view.MenuItem {
 	out := make([]view.MenuItem, len(r.Menu))
 	for i, it := range r.Menu {
-		it.ID = inviteFormID(it.Action, r)
+		it.ID = inviteFormID(it.Action)
 		out[i] = it
 	}
 	return out
@@ -270,7 +271,7 @@ func InvitesForms(p *view.AdminInvitesPage) []w.PostForm {
 	for _, r := range p.Rows {
 		for _, a := range r.Actions {
 			if a.Method == "POST" && a.Enabled {
-				out = append(out, bind.ActionForm(a, inviteFormID(a, r)))
+				out = append(out, bind.ActionForm(a, inviteFormID(a)))
 			}
 		}
 		out = append(out, bind.MenuForms(inviteMenu(r))...)

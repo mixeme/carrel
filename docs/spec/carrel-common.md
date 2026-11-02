@@ -3681,7 +3681,7 @@ type IssuedPassword struct {
 }
 // Ожидающее приглашение (s-admin-1). Логина у него нет: его выбирает приглашённый.
 type InviteRow struct {
-    Address  Text // первая колонка: адрес письма; «—» у ссылки
+    Address  Text // первая колонка: адрес письма; «by link» у ссылки (записка 156)
     Link     Text // видна всегда, независимо от отправки
     Delivery Text // «link» или «email»: как приглашение передано (s-admin-1)
     Status   Text // «pending»: в списке только действующие
@@ -3726,9 +3726,9 @@ type AdminEscrowPage struct {
 type EscrowCoverRow struct {
     Login        Text
     Covered      bool // копия депонирована
-    Deposited    When // «2026-03-02» или «not deposited»
+    Deposited    When // «2026-03-02» или «no» (записка 156)
     LastRecovery When // «never», «2026-08-14 18:40» или «—» у недепонировавшей
-    Recovered    bool // LastRecovery — момент; false у «never» и «—»: слово приглушено (s-admin-6, Ад35), как «not deposited» у !Covered
+    Recovered    bool // LastRecovery — момент; false у «never» и «—»: слово приглушено (s-admin-6, Ад35), как «no» у !Covered
 }
 
 type AdminAuditPage struct {

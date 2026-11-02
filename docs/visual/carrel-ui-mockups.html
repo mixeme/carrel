@@ -1128,7 +1128,10 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-bar:has(> .is-3rd) .tc-bar__more + .tc-menu,.tc-docbar:has(.is-3rd) .tc-bar__more + .tc-menu{display:block}
   .tc-bar .tc-btn > .tc-btn__label{display:none}
   .tc-bar:has(> .tc-range,> .tc-in,> .tc-search){flex-wrap:wrap}
-  .tc-bar.tc-bar--sel{flex-wrap:wrap}
+  /* Панель выделения: счёт первой строкой, все действия — второй (разделитель становится
+     переносом), а не одна кнопка, упавшая вниз сама (решение владельца 02.11). */
+  .tc-bar.tc-bar--sel{flex-wrap:wrap;row-gap:8px}
+  .tc-bar.tc-bar--sel > .tc-bar__sep{flex-basis:100%;height:0;margin-top:-8px;background:none}
   .tc-docbar{flex-wrap:wrap}
   .tc-bar > .tc-range{flex-wrap:wrap}
   .tc-table .tc-acts{flex-wrap:wrap;white-space:normal}
@@ -1137,8 +1140,10 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-runbar .tc-btn > .tc-btn__label{display:none}
   /* Таблица с главной колонкой — карточки (Р-66): имя и «⋯» первой строкой, под ними
      главное с подписью колонки; остальные колонки уходят, кнопки строки — в «⋯».
-     Имя — ячейка с файлом или первая непустая, кроме галочки; «⋯» — последняя кнопка
-     строки (одна кнопка без «⋯», как Revoke, остаётся сама). */
+     Имя — ячейка с файлом или первая непустая, кроме галочки; справа — «⋯» и кнопка перед
+     ним (Copy link приглашения, Download файла); одна кнопка без «⋯», как Revoke, остаётся
+     сама. Где у строки складное «⋯» (tc-acts__more), уходит только сложенное в него
+     (is-2nd): Copy ссылки остаётся. */
   .tc-table:has(td.tc-table__main),.tc-table:has(td.tc-table__main) > tbody{display:block;width:100%}
   .tc-table:has(td.tc-table__main) > thead{display:none}
   .tc-table:has(td.tc-table__main) > tbody > tr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;row-gap:4px;
@@ -1149,7 +1154,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-table__name,
   .tc-table:has(td.tc-table__main) > tbody > tr > td:first-child:not(:empty):not(.tc-table__main):not(:has(> .tc-tickrow__tick,> .tc-tick)){display:block;grid-column:2;grid-row:1;min-width:0}
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts{display:block;grid-column:3;grid-row:1}
-  .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts > :not(:last-child){display:none}
+  .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts:not(:has(> .tc-drop > .tc-acts__more)) > :not(:last-child):not(:nth-last-child(2)),
+  .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts > .is-2nd{display:none}
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts .tc-acts__more,
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts > .tc-drop:has(> .tc-acts__more){display:inline-flex}
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-table__main{display:block;grid-column:2 / 4;grid-row:2;font-size:12px;white-space:normal}
@@ -1336,6 +1342,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-card{display:flex;flex-direction:column}
   /* Строка полей встаёт столбцом; фраза с полем-фишкой («старше [7] дней») — нет. */
   .tc-form .tc-line.tc-line:where(:not(:has(> .tc-in--chip))){flex-direction:column;align-items:stretch}
+  /* …и в столбце поле с flex:1 (tc-in--fill) не сжимается в нулевую основу: высота — своя, 38 px. */
+  .tc-form .tc-line.tc-line:where(:not(:has(> .tc-in--chip))) > *{flex-basis:auto}
   label,.tc-msg,.tc-diag,.tc-field__hint,.tc-rubric,.tc-dim--wrap,.tc-sheet__head,.tc-sheet__title{
     overflow-wrap:anywhere;min-width:0}
   /* input/textarea — replaced, без ::after: зону даёт поле. */
@@ -14117,10 +14125,10 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-fset">
           <div class="tc-rubric">Sessions <span class="tc-plain">2 active</span></div>
           <table class="tc-table tc-grow tc-table--mx-20">
-            <thead><tr><th>Where</th><th>Started</th><th class="tc-table__n3">Last seen</th><th class="tc-table__n4 tc-table__col--w120"></th></tr></thead>
+            <thead><tr><th>Where</th><th>Started</th><th class="tc-table__n3 tc-table__main">Last seen</th><th class="tc-table__n4 tc-table__col--w120"></th></tr></thead>
             <tbody>
-              <tr><td>Firefox · Windows <span class="tc-badge">this one</span></td><td class="tc-mono">2026-08-16 09:02</td><td class="tc-mono tc-table__n3">just now</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" title="This is the session you are using: sign out instead." type="button" disabled>End</button></td></tr>
-              <tr><td>Carrel desktop · Windows</td><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__n3">2 hours ago</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" type="button">End</button></td></tr>
+              <tr><td>Firefox · Windows <span class="tc-badge">this one</span></td><td class="tc-mono">2026-08-16 09:02</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="Last seen">just now</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" title="This is the session you are using: sign out instead." type="button" disabled>End</button></td></tr>
+              <tr><td>Carrel desktop · Windows</td><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="Last seen">2 hours ago</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" type="button">End</button></td></tr>
             </tbody>
           </table>
           <div class="tc-field"><button class="tc-btn is-danger" type="button">End every other session</button></div>
@@ -14267,10 +14275,10 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-fset">
             <div class="tc-rubric">Sessions <span class="tc-plain">2 active</span></div>
             <table class="tc-table tc-grow tc-table--mx-20">
-              <thead><tr><th>Where</th><th>Started</th><th class="tc-table__n3">Last seen</th><th class="tc-table__n4 tc-table__col--w120"></th></tr></thead>
+              <thead><tr><th>Where</th><th>Started</th><th class="tc-table__n3 tc-table__main">Last seen</th><th class="tc-table__n4 tc-table__col--w120"></th></tr></thead>
               <tbody>
-                <tr><td>Firefox · Windows <span class="tc-badge">this one</span></td><td class="tc-mono">2026-08-16 09:02</td><td class="tc-mono tc-table__n3">just now</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" title="This is the session you are using: sign out instead." type="button" disabled>End</button></td></tr>
-                <tr><td>Carrel desktop · Windows</td><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__n3">2 hours ago</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" type="button">End</button></td></tr>
+                <tr><td>Firefox · Windows <span class="tc-badge">this one</span></td><td class="tc-mono">2026-08-16 09:02</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="Last seen">just now</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" title="This is the session you are using: sign out instead." type="button" disabled>End</button></td></tr>
+                <tr><td>Carrel desktop · Windows</td><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="Last seen">2 hours ago</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" type="button">End</button></td></tr>
               </tbody>
             </table>
             <div class="tc-field"><button class="tc-btn is-danger" type="button">End every other session</button></div>
@@ -18266,10 +18274,10 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <div class="tc-fset">
           <div class="tc-rubric">Sessions <span class="tc-plain">2 active</span></div>
           <table class="tc-table tc-grow tc-table--mx-20">
-            <thead><tr><th>Where</th><th>Started</th><th class="tc-table__n3">Last seen</th><th class="tc-table__n4 tc-table__col--w120"></th></tr></thead>
+            <thead><tr><th>Where</th><th>Started</th><th class="tc-table__n3 tc-table__main">Last seen</th><th class="tc-table__n4 tc-table__col--w120"></th></tr></thead>
             <tbody>
-              <tr><td>Firefox · Windows <span class="tc-badge">this one</span></td><td class="tc-mono">2026-08-16 09:02</td><td class="tc-mono tc-table__n3">just now</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" title="This is the session you are using: sign out instead." type="button" disabled>End</button></td></tr>
-              <tr><td>Carrel desktop · Windows</td><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__n3">2 hours ago</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" type="button">End</button></td></tr>
+              <tr><td>Firefox · Windows <span class="tc-badge">this one</span></td><td class="tc-mono">2026-08-16 09:02</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="Last seen">just now</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" title="This is the session you are using: sign out instead." type="button" disabled>End</button></td></tr>
+              <tr><td>Carrel desktop · Windows</td><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="Last seen">2 hours ago</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" type="button">End</button></td></tr>
             </tbody>
           </table>
           <div class="tc-field"><button class="tc-btn is-danger" type="button">End every other session</button></div>
@@ -20475,11 +20483,11 @@ jobs:
           <div class="tc-head__titles"><div class="tc-head__title">Published links <span class="tc-badge is-local" title="Local instance: the link will not open from outside your network">local</span></div><div class="tc-head__sub">Read-only, one object or one collection per link · <span class="tc-dim--danger">this instance is local: the link opens only from your network</span></div></div>
         </div>
         <table class="tc-table tc-table--packed">
-          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
+          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4 tc-table__main">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
           <tbody>
-            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
+            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/9c1f4e" data-tc-copied="Copied">Copy</button><a class="tc-btn is-sm is-2nd" href="/app/mail/link?id=9c1f4e">Send</a><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="9c1f4e">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/mail/link?id=9c1f4e" role="menuitem"><svg><use href="#i-mail"/></svg>Send</a><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="9c1f4e" role="menuitem">Revoke</button></div></details></td></tr>
-            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
+            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7f3ac9/personal.ics" data-tc-copied="Copied">Copy</button><a class="tc-btn is-sm is-2nd" href="/app/mail/link?id=7f3ac9">Send</a><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="7f3ac9">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/mail/link?id=7f3ac9" role="menuitem"><svg><use href="#i-mail"/></svg>Send</a><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="7f3ac9" role="menuitem">Revoke</button></div></details></td></tr>
           </tbody>
         </table>
@@ -20531,11 +20539,11 @@ jobs:
           <div class="tc-head__titles"><div class="tc-head__title">Published links <span class="tc-badge is-local" title="Local instance: the link will not open from outside your network">local</span></div><div class="tc-head__sub">Read-only, one object or one collection per link · <span class="tc-dim--danger">this instance is local: the link opens only from your network</span></div></div>
         </div>
         <table class="tc-table tc-table--packed">
-          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
+          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4 tc-table__main">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
           <tbody>
-            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
+            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/9c1f4e" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="9c1f4e">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="9c1f4e" role="menuitem">Revoke</button></div></details></td></tr>
-            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
+            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7f3ac9/personal.ics" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="7f3ac9">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="7f3ac9" role="menuitem">Revoke</button></div></details></td></tr>
           </tbody>
         </table>
@@ -20615,11 +20623,11 @@ jobs:
     <div class="tc-root tc-shell">
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
         <table class="tc-table tc-table--packed">
-          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
+          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4 tc-table__main">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
           <tbody>
-            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
+            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/9c1f4e" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="9c1f4e">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="9c1f4e" role="menuitem">Revoke</button></div></details></td></tr>
-            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
+            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7f3ac9/personal.ics" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="7f3ac9">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="7f3ac9" role="menuitem">Revoke</button></div></details></td></tr>
           </tbody>
         </table>
@@ -20636,9 +20644,9 @@ jobs:
     <div class="tc-root tc-shell">
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
         <table class="tc-table tc-table--packed">
-          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
+          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4 tc-table__main">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
           <tbody>
-            <tr class="is-off"><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><span class="tc-table__filename">отчёт-июль.pdf</span></span> <span class="tc-badge is-alert" title="Deleted, or moved where Carrel could not follow it">no longer there</span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-07-02</td><td class="tc-mono tc-table__n4 tc-table__n4--dusty">—</td><td class="tc-mono is-2nd">2026-08-02 17:20</td><td class="tc-mono">3</td>
+            <tr class="is-off"><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><span class="tc-table__filename">отчёт-июль.pdf</span></span> <span class="tc-badge is-alert" title="Deleted, or moved where Carrel could not follow it">no longer there</span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-07-02</td><td class="tc-mono tc-table__n4 tc-table__n4--dusty tc-table__main" data-tc-label="Expires">—</td><td class="tc-mono is-2nd">2026-08-02 17:20</td><td class="tc-mono">3</td>
               <td class="tc-acts"><button class="tc-btn is-sm" title="It is no longer there" type="button" disabled>Copy</button><button class="tc-btn is-sm is-2nd" title="It is no longer there" type="button" disabled>Send</button><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="5d02b7">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem" title="It is no longer there" disabled><svg><use href="#i-mail"/></svg>Send</button><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="5d02b7" role="menuitem">Revoke</button></div></details></td></tr>
           </tbody>
         </table>
@@ -23305,11 +23313,11 @@ Read  2 min ago</div>
           <div class="tc-head__titles"><div class="tc-head__title">Published links <span class="tc-badge is-local" title="Local instance: the link will not open from outside your network">local</span></div><div class="tc-head__sub">Read-only, one object or one collection per link · <span class="tc-dim--danger">this instance is local: the link opens only from your network</span></div></div>
         </div>
         <table class="tc-table tc-table--packed">
-          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
+          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4 tc-table__main">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
           <tbody>
-            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
+            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/9c1f4e" data-tc-copied="Copied">Copy</button><a class="tc-btn is-sm is-2nd" href="/app/mail/link?id=9c1f4e">Send</a><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="9c1f4e">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/mail/link?id=9c1f4e" role="menuitem"><svg><use href="#i-mail"/></svg>Send</a><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="9c1f4e" role="menuitem">Revoke</button></div></details></td></tr>
-            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
+            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichnyj?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4 tc-table__main" data-tc-label="Expires">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7f3ac9/personal.ics" data-tc-copied="Copied">Copy</button><a class="tc-btn is-sm is-2nd" href="/app/mail/link?id=7f3ac9">Send</a><button class="tc-btn is-sm is-danger is-2nd" type="submit" form="post-revoke" name="id" value="7f3ac9">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/mail/link?id=7f3ac9" role="menuitem"><svg><use href="#i-mail"/></svg>Send</a><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="submit" form="post-revoke" name="id" value="7f3ac9" role="menuitem">Revoke</button></div></details></td></tr>
           </tbody>
         </table>
@@ -24135,11 +24143,11 @@ Read  2 min ago</div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Pending invitations</span><span class="tc-num">2</span></div>
         <table class="tc-table">
-          <thead><tr><th>Address</th><th>Delivery</th><th class="tc-table__n3">Status</th><th class="tc-table__n4">Mail</th><th>Expires</th><th></th></tr></thead>
+          <thead><tr><th>Address</th><th>Delivery</th><th class="tc-table__n3">Status</th><th class="tc-table__n4">Mail</th><th class="tc-table__main">Expires</th><th></th></tr></thead>
           <tbody>
-            <tr><td>—</td><td class="tc-mono">link</td><td class="tc-table__n3">pending</td><td class="tc-table__n4">—</td><td class="tc-mono">2026-08-18 12:00</td>
+            <tr><td class="tc-mono tc-mono--dusty">by link</td><td class="tc-mono">link</td><td class="tc-table__n3">pending</td><td class="tc-table__n4">—</td><td class="tc-mono tc-table__main" data-tc-label="Expires">2026-08-18 12:00</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/invite/2c9d" data-tc-copied="Copied">Copy link</button><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr><td class="tc-mono">anna@example.org</td><td class="tc-mono">email</td><td class="tc-table__n3">pending</td><td class="tc-mono tc-table__n4 tc-table__n4--danger">failed — 550 mailbox unavailable</td><td class="tc-mono">2026-08-17 09:30</td>
+            <tr><td class="tc-mono">anna@example.org</td><td class="tc-mono">email</td><td class="tc-table__n3">pending</td><td class="tc-mono tc-table__n4 tc-table__n4--danger">failed — 550 mailbox unavailable</td><td class="tc-mono tc-table__main" data-tc-label="Expires">2026-08-17 09:30</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button">Resend</button><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/invite/a41e" data-tc-copied="Copied">Copy link</button><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
           </tbody>
         </table>
@@ -25346,14 +25354,14 @@ password  4c1-tide-oven</div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Whom the master password opens</span><span class="tc-num">4</span></div>
         <table class="tc-table">
-          <thead><tr><th>Account</th><th>Deposited</th><th class="tc-table__n3">Last recovery</th></tr></thead>
+          <thead><tr><th>Account</th><th class="tc-table__main">Deposited</th><th class="tc-table__n3">Last recovery</th></tr></thead>
           <tbody>
-            <tr><td>anna</td><td class="tc-mono">2026-03-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
-            <tr><td>viktor</td><td class="tc-mono">2026-04-19</td><td class="tc-mono tc-table__n3">2026-08-14 18:40</td></tr>
-            <tr><td>olga</td><td class="tc-mono">2026-05-11</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
-            <tr><td>petr</td><td class="tc-mono">2026-06-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
-            <tr><td>ivan</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
-            <tr><td>mix</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
+            <tr><td>anna</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-03-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>viktor</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-04-19</td><td class="tc-mono tc-table__n3">2026-08-14 18:40</td></tr>
+            <tr><td>olga</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-05-11</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>petr</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-06-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>ivan</td><td class="tc-mono tc-mono--dusty tc-table__main" data-tc-label="Deposited">no</td><td class="tc-mono tc-table__n3">—</td></tr>
+            <tr><td>mix</td><td class="tc-mono tc-mono--dusty tc-table__main" data-tc-label="Deposited">no</td><td class="tc-mono tc-table__n3">—</td></tr>
           </tbody>
         </table>
       </div>
@@ -25441,14 +25449,14 @@ password  9f2-brick-lamp</div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Whom the master password opens</span><span class="tc-num">4</span></div>
         <table class="tc-table">
-          <thead><tr><th>Account</th><th>Deposited</th><th class="tc-table__n3">Last recovery</th></tr></thead>
+          <thead><tr><th>Account</th><th class="tc-table__main">Deposited</th><th class="tc-table__n3">Last recovery</th></tr></thead>
           <tbody>
-            <tr><td>anna</td><td class="tc-mono">2026-03-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
-            <tr><td>viktor</td><td class="tc-mono">2026-04-19</td><td class="tc-mono tc-table__n3">2026-08-14 18:40</td></tr>
-            <tr><td>olga</td><td class="tc-mono">2026-05-11</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
-            <tr><td>petr</td><td class="tc-mono">2026-06-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
-            <tr><td>ivan</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
-            <tr><td>mix</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
+            <tr><td>anna</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-03-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>viktor</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-04-19</td><td class="tc-mono tc-table__n3">2026-08-14 18:40</td></tr>
+            <tr><td>olga</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-05-11</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>petr</td><td class="tc-mono tc-table__main" data-tc-label="Deposited">2026-06-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>ivan</td><td class="tc-mono tc-mono--dusty tc-table__main" data-tc-label="Deposited">no</td><td class="tc-mono tc-table__n3">—</td></tr>
+            <tr><td>mix</td><td class="tc-mono tc-mono--dusty tc-table__main" data-tc-label="Deposited">no</td><td class="tc-mono tc-table__n3">—</td></tr>
           </tbody>
         </table>
       </div>

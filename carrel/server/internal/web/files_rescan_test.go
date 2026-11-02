@@ -247,7 +247,8 @@ func TestSelectionIsTheOperationsForm(t *testing.T) {
 func TestFileAndLinkTablesAreTheFrames(t *testing.T) {
 	day, stamp := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`), regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$`)
 	links := mockupFrame(t, "s-publish-1")
-	cells := regexp.MustCompile(`<td class="tc-mono[^"]*">([^<]*)</td>`).FindAllStringSubmatch(links, -1)
+	// Expires is the main column of a card (note 156), named for it.
+	cells := regexp.MustCompile(`<td class="tc-mono[^"]*"(?: data-tc-label="[^"]*")?>([^<]*)</td>`).FindAllStringSubmatch(links, -1)
 	copied := frameOne(t, regexp.MustCompile(`data-tc-copy="([^"]+)"`), links, "address Copy takes")[1]
 	if len(cells) < 10 || !day.MatchString(cells[1][1]) || !stamp.MatchString(cells[8][1]) || !regexp.MustCompile(`^https?://[^/]+/p/`).MatchString(copied) ||
 		!strings.Contains(links, `<td class="tc-mono is-2nd tc-mono--dusty">never opened</td>`) {
