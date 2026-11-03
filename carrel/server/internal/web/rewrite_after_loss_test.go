@@ -34,6 +34,11 @@ func TestTheAddressQuestionSurvivesALossReport(t *testing.T) {
 		for _, a := range n.Actions {
 			if a.ID == "contact.rewrite" {
 				sheet = a.Href
+				// The owner's words of 03.11.2026: the old address, which
+				// the records still name; the button as the sheet it opens.
+				if n.Title != "Address replaced: ada@old.example." || n.Body != "Events and tasks that name it are unchanged." || a.Label != "Rewrite the addresses" {
+					t.Errorf("notice = %q / %q / %q", n.Title, n.Body, a.Label)
+				}
 			}
 		}
 	}

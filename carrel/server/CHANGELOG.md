@@ -116,6 +116,14 @@ current mockup; fonts are in `docs/visual/fonts/`.
   it». Was «the time of …: its start and end, its repetition and its
   rewritten occurrences» and «… of the kept record, which belongs to the
   time it gives up».
+- The notice beside a loss report of a card whose address was replaced
+  names the old address, which the records still name (the owner's words
+  of 03.11.2026): «Address replaced: anna@oldfirm.example.» · «Events and
+  tasks that name it are unchanged.» («2 addresses replaced: …» · «…
+  name them …»), its button «Rewrite the addresses» as the sheet it opens
+  (s-contacts-15). Was «An address on this card was replaced» · «Events
+  and tasks that name the old address have not been looked at yet. They
+  can be rewritten to the new one.» · «Review those records».
 
 ## v0.2.394 — 2026-11-02
 

@@ -4019,22 +4019,35 @@ func (s *Server) finishCardWrite(w http.ResponseWriter, r *http.Request, c *coll
 	// the question stands beside the report, not dropped with it (Б44 of
 	// the audit of 11.10.2026: after a loss report it was never asked).
 	if c.spec.kind == view.KindContact {
-		if sheet, _ := s.offerRewrite(c, uid, wasEmails, typedEmails, sent); sheet != "" {
+		if sheet, pairs := s.offerRewrite(c, uid, wasEmails, typedEmails, sent); sheet != "" {
 			s.finishWriteWith(w, r, c, uid, sent, sheet, func(loss *model.Loss, _ *model.Object) ([]view.Action, []view.Notice) {
 				if loss == nil {
 					return nil, nil
 				}
-				return nil, []view.Notice{{
-					Role:    view.NoticeInfo,
-					Title:   "An address on this card was replaced",
-					Body:    "Events and tasks that name the old address have not been looked at yet. They can be rewritten to the new one.",
-					Actions: []view.Action{{ID: "contact.rewrite", Label: "Review those records", Href: s.route(sheet), Method: "GET", Enabled: true}},
-				}}
+				return nil, []view.Notice{replacedNotice(pairs, s.route(sheet))}
 			})
 			return
 		}
 	}
 	s.finishWrite(w, r, c, uid, sent, back)
+}
+
+// replacedNotice stands beside a loss report for the question it put off
+// (the owner's words of 03.11.2026): the old addresses, which the records
+// still name, and the button by the sheet it opens (s-contacts-15).
+func replacedNotice(pairs []rewritePair, sheet string) view.Notice {
+	old := make([]string, 0, len(pairs))
+	for _, p := range pairs {
+		old = append(old, p.From)
+	}
+	title, them := "Address replaced: "+old[0]+".", "it"
+	if len(old) > 1 {
+		// plural would make «addresss».
+		title, them = fmt.Sprintf("%d addresses replaced: %s.", len(old), strings.Join(old, ", ")), "them"
+	}
+	return view.Notice{Role: view.NoticeInfo, Title: text(title),
+		Body:    text("Events and tasks that name " + them + " are unchanged."),
+		Actions: []view.Action{{ID: "contact.rewrite", Label: "Rewrite the addresses", Href: sheet, Method: "GET", Enabled: true}}}
 }
 
 // notMoved is the title of every answer where a note's edit was saved and

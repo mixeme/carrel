@@ -361,19 +361,19 @@ func defaultEmail(obj *model.Object) string {
 
 // offerRewrite keeps a new plan for a saved card, was being its addresses
 // before the edit. It answers where the save goes next — the sheet, or ""
-// when no address was replaced — and the plan's token.
-func (s *Server) offerRewrite(c *collectionCtx, uid string, was, typed []string, after *model.Object) (string, string) {
+// when no address was replaced — and the addresses replaced.
+func (s *Server) offerRewrite(c *collectionCtx, uid string, was, typed []string, after *model.Object) (string, []rewritePair) {
 	pairs := replacedAddresses(was, typed, after)
 	if len(pairs) == 0 {
-		return "", ""
+		return "", nil
 	}
 	token, err := user.NewPlanID()
 	if err != nil {
-		return "", ""
+		return "", nil
 	}
 	saveRewritePlan(c.sess, &rewritePlan{Token: token, Account: c.conn.ID, Col: c.col.Path, UID: uid, Name: contactName(after),
 		Pairs: pairs, Card: append(append([]string(nil), was...), cardEmails(after)...), Now: cardEmails(after)})
-	return s.rewriteAddress(c, uid, token, ""), token
+	return s.rewriteAddress(c, uid, token, ""), pairs
 }
 
 func (s *Server) rewriteAddress(c *collectionCtx, uid, token, op string) string {
