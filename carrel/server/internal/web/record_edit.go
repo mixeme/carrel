@@ -1839,12 +1839,13 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				}
 				if v == reminderCustom {
 					// «Custom…» whose numbers make no trigger: the form
-					// comes back with them open and says what is wrong —
-					// and so does the path without scripts, where the
-					// numbers were hidden when «Custom…» was chosen.
+					// comes back with them open and says what is wrong
+					// under that row — and so does the path without
+					// scripts, where the numbers were hidden when
+					// «Custom…» was chosen.
 					count, unit, at, _ := customNumbers(v, rowAt(custom, i), false)
 					_, bad := customTrigger(count, unit, at, formAllDay(c.spec.kind, want))
-					ch.errors[f.name] = bad
+					ch.errors[fmt.Sprintf("%s.%d", f.name, i)] = bad
 					break
 				}
 				// A step, a reminder the record has, or one the numbers of
@@ -3333,6 +3334,9 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				}
 				if i == 0 {
 					row.Error = errText
+				}
+				if own := st.errors[name]; own != "" {
+					row.Error = text(own)
 				}
 				set.Rows = append(append(set.Rows, row), more...)
 			}

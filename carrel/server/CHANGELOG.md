@@ -89,6 +89,14 @@ current mockup; fonts are in `docs/visual/fonts/`.
   said in a message of their own (the owner's words of 03.11.2026): «The
   server also did not keep two days of the series.», its body as states-36
   has it. Was «Nor did it keep two days of the series.».
+- The reasons of a reminder's «Custom…» name the field and what it takes
+  (the owner's words of 03.11.2026): «How long: enter a whole number, 0 or
+  more.», «Unit: choose minutes, hours, days or weeks before.», «At: enter
+  a time as HH:MM, for example 09:00.». The reason stands under the row of
+  «Custom…» (`Form.errors` names it, `reminder.2`); it stood under the
+  first reminder whichever row it was. Was «Enter how long before as a
+  whole number.», «Choose minutes, hours, days or weeks.», «Enter the hour
+  as HH:MM.».
 
 ## v0.2.394 — 2026-11-02
 

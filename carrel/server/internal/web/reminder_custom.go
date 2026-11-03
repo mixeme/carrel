@@ -63,7 +63,7 @@ func customOf(trigger string, allDay bool) (count, unit, at string, ok bool) {
 func customTrigger(count, unit, at string, allDay bool) (string, string) {
 	n, err := strconv.Atoi(strings.TrimSpace(count))
 	if err != nil || n < 0 {
-		return "", "Enter how long before as a whole number."
+		return "", "How long: enter a whole number, 0 or more."
 	}
 	var per time.Duration
 	for _, u := range reminderUnits {
@@ -72,13 +72,13 @@ func customTrigger(count, unit, at string, allDay bool) (string, string) {
 		}
 	}
 	if per == 0 {
-		return "", "Choose minutes, hours, days or weeks."
+		return "", "Unit: choose minutes, hours, days or weeks before."
 	}
 	d := -time.Duration(n) * per
 	if allDay && strings.TrimSpace(at) != "" {
 		clock, err := time.Parse("15:04", strings.TrimSpace(at))
 		if err != nil {
-			return "", "Enter the hour as HH:MM."
+			return "", "At: enter a time as HH:MM, for example 09:00."
 		}
 		d += time.Duration(clock.Hour())*time.Hour + time.Duration(clock.Minute())*time.Minute
 	}

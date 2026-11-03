@@ -89,8 +89,12 @@ func TestCustomReminder(t *testing.T) {
 	if r := rowNamed(t, back.Form, "reminder.2"); r.Value != "custom" || !customOption(r).Selected || rowNamed(t, back.Form, "reminder.2.count").Hidden {
 		t.Errorf("the row came back as %+v", r)
 	}
-	if !strings.Contains(formErrors(back.Form), "Enter how long before") {
-		t.Errorf("no reason: %q", formErrors(back.Form))
+	// The reason stands under the row of «Custom…», not under the first.
+	if got := rowNamed(t, back.Form, "reminder.2").Error; got != "How long: enter a whole number, 0 or more." {
+		t.Errorf("the row's reason = %q (all: %q)", got, formErrors(back.Form))
+	}
+	if got := rowNamed(t, back.Form, "reminder.0").Error; got != "" {
+		t.Errorf("the first row says %q, though its reminder is a step", got)
 	}
 }
 
