@@ -84,9 +84,11 @@ func trace(steps []view.TraceStep) w.Diag {
 
 // exerciseTable is the second stage (s-admin-29): a row a kind — created,
 // read back and deleted —, what was asked and answered monospaced; the one
-// refused in alarm, one skipped grey.
+// refused in alarm, one skipped grey. What happened is what a row's card
+// keeps on a phone, the operation its name (TableCol.Main, Typecase's note
+// 161, Р-66).
 func exerciseTable(rows []view.ExerciseRow) w.Table {
-	t := w.Table{Cols: []w.TableCol{{Width: w.ColMenu}, {Label: colOperation, Width: w.Col26}, {Label: colHappened, Rank: w.Rank3}}}
+	t := w.Table{Cols: []w.TableCol{{Width: w.ColMenu}, {Label: colOperation, Width: w.Col26}, {Label: colHappened, Rank: w.Rank3, Main: true}}}
 	for _, r := range rows {
 		st := view.CheckUnknown
 		switch r.Result {

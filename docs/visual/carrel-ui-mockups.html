@@ -1159,6 +1159,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-table:has(td.tc-table__main) > tbody > tr > td:has(> .tc-tickrow__tick,> .tc-tick){display:block;grid-column:1;grid-row:1}
   .tc-table:has(td.tc-table__main) > tbody > tr > td:has(> .tc-table__file),
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-table__name,
+  .tc-table:has(td.tc-table__main) > tbody > tr > td:first-child:has(> .tc-tickrow__tick,> .tc-tick) + td:not(.tc-table__main),
   .tc-table:has(td.tc-table__main) > tbody > tr > td:first-child:not(:empty):not(.tc-table__main):not(:has(> .tc-tickrow__tick,> .tc-tick)){display:block;grid-column:2;grid-row:1;min-width:0}
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts{display:block;grid-column:3;grid-row:1}
   .tc-table:has(td.tc-table__main) > tbody > tr > td.tc-acts:not(:has(> .tc-drop > .tc-acts__more)) > :not(:last-child):not(:nth-last-child(2)),
@@ -24987,25 +24988,25 @@ password  4c1-tide-oven</div>
         </div>
         <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="100%"></i></span>11 checks · <span class="tc-dim--accent">8 fine</span> · <span class="tc-dim--danger">2 broken</span> · 1 not measured<span class="tc-mono tc-push">4.2 s</span></div>
         <table class="tc-table">
-          <thead><tr><th class="tc-table__col--menu"></th><th class="tc-table__col--w26">Check</th><th class="tc-table__n3">What happened</th><th class="tc-table__n4 tc-table__col--w26">What to do</th></tr></thead>
+          <thead><tr><th class="tc-table__col--menu"></th><th class="tc-table__col--w26">Check</th><th class="tc-table__n3 tc-table__main">What happened</th><th class="tc-table__n4 tc-table__col--w26">What to do</th></tr></thead>
           <tbody>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Reachable from outside</td><td class="tc-mono tc-table__n3">GET https://carrel.example/healthz → 200 · 41 ms</td><td class="tc-table__n4"></td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Certificate</td><td class="tc-mono tc-table__n3">Let’s Encrypt R11 · until 2026-11-02 · chain complete · name matches</td><td class="tc-table__n4"></td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Base address</td><td class="tc-mono tc-table__n3">Host and X-Forwarded-Host match base_url</td><td class="tc-table__n4"></td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Scheme behind the proxy</td><td class="tc-mono tc-table__n3">X-Forwarded-Proto: https · links are built as https</td><td class="tc-table__n4"></td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Client address</td><td class="tc-mono tc-table__n3">X-Forwarded-For: 203.0.113.7 · limits count this, not the proxy</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Reachable from outside</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">GET https://carrel.example/healthz → 200 · 41 ms</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Certificate</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">Let’s Encrypt R11 · until 2026-11-02 · chain complete · name matches</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Base address</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">Host and X-Forwarded-Host match base_url</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Scheme behind the proxy</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">X-Forwarded-Proto: https · links are built as https</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Client address</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">X-Forwarded-For: 203.0.113.7 · limits count this, not the proxy</td><td class="tc-table__n4"></td></tr>
             <tr class="is-sel"><td><button class="tc-tick tc-tick--edge-danger" type="button"></button></td><td class="tc-dim--danger">Event stream (SSE)</td>
-              <td class="tc-mono tc-table__n3">first event after 30.0 s instead of 0.2 s — the response is buffered</td>
+              <td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">first event after 30.0 s instead of 0.2 s — the response is buffered</td>
               <td class="tc-mono tc-table__n4 tc-table__n4--t11">nginx: proxy_buffering off for /app/find/*/stream</td></tr>
             <tr class="is-sel"><td><button class="tc-tick tc-tick--edge-danger" type="button"></button></td><td class="tc-dim--danger">Upload size</td>
-              <td class="tc-mono tc-table__n3">20 MB probe → 413 from the proxy; Carrel streams and has no size ceiling of its own</td>
+              <td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">20 MB probe → 413 from the proxy; Carrel streams and has no size ceiling of its own</td>
               <td class="tc-mono tc-table__n4 tc-table__n4--t11">client_max_body_size — the proxy is cutting the body</td></tr>
             <tr><td><button class="tc-tick tc-tick--edge-dusty" type="button"></button></td><td class="tc-dim--muted">Long request timeout</td>
-              <td class="tc-mono tc-table__n3">seven sources polled in 21 s; the proxy ceiling cannot be measured from outside</td>
+              <td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">seven sources polled in 21 s; the proxy ceiling cannot be measured from outside</td>
               <td class="tc-mono tc-table__n4 tc-table__n4--t11">proxy_read_timeout ≥ 60s</td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Cookie</td><td class="tc-mono tc-table__n3">Secure, HttpOnly, SameSite=Lax · came back</td><td class="tc-table__n4"></td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Clock</td><td class="tc-mono tc-table__n3">0.4 s from NTP · TZ Europe/Moscow</td><td class="tc-table__n4"></td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Data folder</td><td class="tc-mono tc-table__n3">/var/lib/carrel · writable · 41 GB free</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Cookie</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">Secure, HttpOnly, SameSite=Lax · came back</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Clock</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">0.4 s from NTP · TZ Europe/Moscow</td><td class="tc-table__n4"></td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Data folder</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">/var/lib/carrel · writable · 41 GB free</td><td class="tc-table__n4"></td></tr>
           </tbody>
         </table>
         <form class="tc-post" id="install" action="/admin/install" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
@@ -25334,12 +25335,12 @@ password  4c1-tide-oven</div>
           <div class="tc-field"><button class="tc-btn is-danger" type="submit" form="dav" formaction="/admin/dav?op=exercise">Run the full check</button></div>
         </div>
         <table class="tc-table">
-          <thead><tr><th class="tc-table__col--menu"></th><th class="tc-table__col--w26">Operation</th><th class="tc-table__n3">What happened</th></tr></thead>
+          <thead><tr><th class="tc-table__col--menu"></th><th class="tc-table__col--w26">Operation</th><th class="tc-table__n3 tc-table__main">What happened</th></tr></thead>
           <tbody>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Create, read back, delete · event</td><td class="tc-mono tc-table__n3">PUT · GET · DELETE /dav.php/calendars/m.yenuchenko/personal/carrel-check.ics → 201 · 200 · 204</td></tr>
-            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Create, read back, delete · task</td><td class="tc-mono tc-table__n3">PUT · GET · DELETE /dav.php/calendars/m.yenuchenko/tasks/carrel-check.ics → 201 · 200 · 204</td></tr>
-            <tr class="is-sel"><td><button class="tc-tick tc-tick--edge-danger" type="button"></button></td><td class="tc-dim--danger">Create, read back, delete · contact</td><td class="tc-mono tc-table__n3">PUT /dav.php/addressbooks/m.yenuchenko/contacts/carrel-check.vcf → 403 Forbidden</td></tr>
-            <tr><td><button class="tc-tick tc-tick--edge-dusty" type="button"></button></td><td class="tc-dim--muted">Create, read back, delete · file</td><td class="tc-mono tc-table__n3">skipped: no collection of this kind that can be written to</td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Create, read back, delete · event</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">PUT · GET · DELETE /dav.php/calendars/m.yenuchenko/personal/carrel-check.ics → 201 · 200 · 204</td></tr>
+            <tr><td><button class="tc-tick is-done" type="button"></button></td><td>Create, read back, delete · task</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">PUT · GET · DELETE /dav.php/calendars/m.yenuchenko/tasks/carrel-check.ics → 201 · 200 · 204</td></tr>
+            <tr class="is-sel"><td><button class="tc-tick tc-tick--edge-danger" type="button"></button></td><td class="tc-dim--danger">Create, read back, delete · contact</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">PUT /dav.php/addressbooks/m.yenuchenko/contacts/carrel-check.vcf → 403 Forbidden</td></tr>
+            <tr><td><button class="tc-tick tc-tick--edge-dusty" type="button"></button></td><td class="tc-dim--muted">Create, read back, delete · file</td><td class="tc-mono tc-table__n3 tc-table__main" data-tc-label="What happened">skipped: no collection of this kind that can be written to</td></tr>
           </tbody>
         </table>
       </div></div>
@@ -25624,12 +25625,12 @@ password  9f2-brick-lamp</div>
           <button class="tc-btn" title="Columns" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg><span class="tc-btn__label">Columns</span></button>
         </div>
         <table class="tc-table">
-          <thead><tr><th>When</th><th>Action</th><th class="tc-table__n3">Actor</th><th class="tc-table__n4">Target</th><th>Detail</th></tr></thead>
+          <thead><tr><th>When</th><th class="tc-table__main">Action</th><th class="tc-table__n3">Actor</th><th class="tc-table__n4">Target</th><th>Detail</th></tr></thead>
           <tbody>
-            <tr><td class="tc-mono">2026-08-15 09:20</td><td class="tc-mono">login.ok</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">—</td><td class="tc-mono">—</td></tr>
-            <tr><td class="tc-mono">2026-08-14 22:07</td><td class="tc-mono tc-mono--danger">login.fail</td><td class="tc-table__n3">—</td><td class="tc-table__n4">anna</td><td class="tc-mono">3rd attempt · ip 203.0.113.9 · rate-limited</td></tr>
-            <tr><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono">escrow.recover</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">viktor</td><td class="tc-mono">notice mailed</td></tr>
-            <tr><td class="tc-mono">2026-08-12 10:02</td><td class="tc-mono">settings.instance</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">—</td><td class="tc-mono">smtp_host, smtp_port</td></tr>
+            <tr><td class="tc-mono">2026-08-15 09:20</td><td class="tc-mono tc-table__main" data-tc-label="Action">login.ok</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">—</td><td class="tc-mono">—</td></tr>
+            <tr><td class="tc-mono">2026-08-14 22:07</td><td class="tc-mono tc-mono--danger tc-table__main" data-tc-label="Action">login.fail</td><td class="tc-table__n3">—</td><td class="tc-table__n4">anna</td><td class="tc-mono">3rd attempt · ip 203.0.113.9 · rate-limited</td></tr>
+            <tr><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__main" data-tc-label="Action">escrow.recover</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">viktor</td><td class="tc-mono">notice mailed</td></tr>
+            <tr><td class="tc-mono">2026-08-12 10:02</td><td class="tc-mono tc-table__main" data-tc-label="Action">settings.instance</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">—</td><td class="tc-mono">smtp_host, smtp_port</td></tr>
           </tbody>
         </table>
       </div></div>
@@ -25963,11 +25964,11 @@ If you deposited the encryption key, ask the administrator in person. Otherwise 
           <div class="tc-head__title tc-head__title--bot8">Password history of viktor</div>
           <div class="tc-prose tc-prose--muted-flush-bot10">Times are Europe/Moscow.</div>
           <table class="tc-table">
-            <thead><tr><th>When</th><th>What</th><th>Who</th></tr></thead>
+            <thead><tr><th>When</th><th class="tc-table__main">What</th><th>Who</th></tr></thead>
             <tbody>
-              <tr><td class="tc-mono">2026-08-14 19:02</td><td>Password changed</td><td>viktor</td></tr>
-              <tr><td class="tc-mono">2026-08-14 18:40</td><td>Opened with the master password; a temporary password set</td><td>mix</td></tr>
-              <tr><td class="tc-mono">2026-05-03 10:15</td><td>Password changed</td><td>viktor</td></tr>
+              <tr><td class="tc-mono">2026-08-14 19:02</td><td class="tc-table__main" data-tc-label="What">Password changed</td><td>viktor</td></tr>
+              <tr><td class="tc-mono">2026-08-14 18:40</td><td class="tc-table__main" data-tc-label="What">Opened with the master password; a temporary password set</td><td>mix</td></tr>
+              <tr><td class="tc-mono">2026-05-03 10:15</td><td class="tc-table__main" data-tc-label="What">Password changed</td><td>viktor</td></tr>
             </tbody>
           </table>
         </div>

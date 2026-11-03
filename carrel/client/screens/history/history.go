@@ -20,14 +20,16 @@ const (
 
 // Screen draws the history from its view model: whose (Title), the zone its
 // times are in (Lede), and a row a thing done — the moment monospaced, what,
-// by whom —, newest first; an empty history says so (Empty).
+// by whom —, newest first, What what a row's card keeps on a phone, the
+// time its name (TableCol.Main, Typecase's note 161, Р-66); an empty
+// history says so (Empty).
 func Screen(p *view.PasswordHistoryPage) w.Page {
 	items := []w.DialogPart{
 		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap8},
 		w.Prose{Parts: bind.Inlines(p.Lede), Variant: w.ProseMutedClose},
 	}
 	if len(p.Rows) > 0 {
-		t := w.Table{Cols: []w.TableCol{{Label: colWhen}, {Label: colWhat}, {Label: colWho}}}
+		t := w.Table{Cols: []w.TableCol{{Label: colWhen}, {Label: colWhat, Main: true}, {Label: colWho}}}
 		for _, r := range p.Rows {
 			t.Rows = append(t.Rows, w.TableRow{Cells: []w.TableCell{
 				{Parts: []w.CellPart{w.Text(r.When)}, Mono: true},

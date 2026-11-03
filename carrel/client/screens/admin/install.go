@@ -84,9 +84,11 @@ func tally(rows []view.InstallRow, took view.Text) w.Runbar {
 
 // checksTable is a row a check: a passed one ticked; a broken one marked
 // at its edge in alarm, its name too, the row picked out; one that cannot
-// be measured from outside grey; what to do small and monospaced.
+// be measured from outside grey; what to do small and monospaced. What
+// happened is what a row's card keeps on a phone, the check its name
+// (TableCol.Main, Typecase's note 161, Р-66).
 func checksTable(rows []view.InstallRow) w.Table {
-	t := w.Table{Cols: []w.TableCol{{Width: w.ColMenu}, {Label: colCheck, Width: w.Col26}, {Label: colHappened, Rank: w.Rank3}, {Label: colToDo, Width: w.Col26, Rank: w.Rank4}}}
+	t := w.Table{Cols: []w.TableCol{{Width: w.ColMenu}, {Label: colCheck, Width: w.Col26}, {Label: colHappened, Rank: w.Rank3, Main: true}, {Label: colToDo, Width: w.Col26, Rank: w.Rank4}}}
 	for _, r := range rows {
 		mark, name, row := checkRow(r.State, r.Check)
 		advice := w.TableCell{}

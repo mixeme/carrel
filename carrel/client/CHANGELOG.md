@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.18 — 2026-11-03
+
+Typecase `3c73244`, note 161 (Р-66, the fourth group); server `v0.2.395`.
+The whole client suite passes.
+
+- More tables keep a main column on a phone (`TableCol.Main`): What
+  happened of the setup check (s-admin-4) and of the DAV check (s-admin-29),
+  Action of the audit log (s-admin-7), What of the password history
+  (s-auth-15). A row that begins with a tick or a status mark is named by
+  its next cell — Typecase's CSS, the markup the same.
+
 ## v0.11.17 — 2026-11-03
 
 Typecase `08687ad`, note 160 (Р-66, the third group; one selection bar);
