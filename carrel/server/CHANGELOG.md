@@ -97,6 +97,16 @@ current mockup; fonts are in `docs/visual/fonts/`.
   first reminder whichever row it was. Was «Enter how long before as a
   whole number.», «Choose minutes, hours, days or weeks.», «Enter the hour
   as HH:MM.».
+- Subtasks a task marked done could not close are said in the owner's
+  words of 03.11.2026, as a delete in Files is: «Task done. Mark done
+  failed for 1 of 3 subtasks: 403 Forbidden: this account has no write
+  access here.» · «2 marked done, 1 still open.», the answer in the line
+  when it is one for all, each subtask with its answer under «Still open».
+  A list that could not be read again: «Task done. Subtasks not checked:
+  503 Service Unavailable.» · «Carrel could not read the list again. Open
+  subtasks stay open.». Was «The task is done, 1 subtask still open» ·
+  «They could not be marked done with it. Open them and mark them
+  yourself.» and «The task is done, its subtasks were not looked at».
 
 ## v0.2.394 — 2026-11-02
 

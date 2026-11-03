@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+
+	"carrel.dev/carrel/server/view"
 )
 
 // А9 of the audit of 11.10.2026 (the owner's decision of 12.10.2026: a task
@@ -64,5 +66,34 @@ func TestATaskMarkedDoneClosesItsSubtasks(t *testing.T) {
 	mark("parent", "off")
 	if done("parent") || !done("leaflets") || !done("proof") {
 		t.Errorf("after the mark is taken off: parent done %v, leaflets %v, proof %v — want the parent open and the subtasks as they were", done("parent"), done("leaflets"), done("proof"))
+	}
+}
+
+// A subtask the server would not take is said in the owner's words of
+// 03.11.2026, as a delete in Files is: how many of how many, the answer in
+// the line when it is one for all, what was marked and what stays open;
+// each subtask with its answer under «Still open».
+func TestASubtaskNotClosedIsSaid(t *testing.T) {
+	task := func(uid, title string, more ...string) string {
+		return ics("BEGIN:VTODO\nUID:" + uid + "\nDTSTAMP:20260101T000000Z\nSUMMARY:" + title + strings.Join(append([]string{""}, more...), "\n") + "\nEND:VTODO")
+	}
+	f := calendarFixture(t, nil,
+		"parent.ics", task("parent", "Release 2.0"),
+		"notes.ics", task("notes", "Write the notes", "RELATED-TO:parent"),
+		"letter.ics", task("letter", "Write the letter", "RELATED-TO:parent"),
+		"tag.ics", task("tag", "Tag the build", "RELATED-TO:parent"),
+	)
+	f.srv.RefuseAt("PUT", f.col+"letter.ics", http.StatusForbidden, "")
+	_, etag, _ := f.srv.Object(f.col + "parent.ics")
+	href := f.path("tasks") + "/parent/edit?" + url.Values{"op": {"done"}, "etag": {etag}, "done": {"on"}}.Encode()
+	rec := f.h.do(postForm(href, f.sess, url.Values{}))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("mark: %d, want the card with the notice", rec.Code)
+	}
+	page := decode[view.TaskPage](t, rec)
+	n := mustNotice(t, page.Notices, "Task done. Mark done failed for 1 of 3 subtasks: 403 Forbidden: this account has no write access here.")
+	if string(n.Body) != "2 marked done, 1 still open." || n.Details == nil ||
+		detailText(n.Details) != "Still open | Write the letter · 403 Forbidden: this account has no write access here." {
+		t.Errorf("notice = %q / %+v", n.Body, n.Details)
 	}
 }

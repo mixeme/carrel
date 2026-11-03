@@ -3910,8 +3910,8 @@ func subtaskParents(obj *model.Object) []string {
 func (s *Server) closeSubtasks(ctx context.Context, c *collectionCtx, parent string) *view.Notice {
 	objs, _, err := c.cal.Query(ctx, c.col.Path, "VTODO", nil, nil)
 	if err != nil {
-		return &view.Notice{Role: view.NoticeAlert, Title: "The task is done, its subtasks were not looked at",
-			Body: "The list could not be read again, so subtasks that are still open stayed open."}
+		n := subtasksUnread(err)
+		return &n
 	}
 	under := map[string][]*model.Object{}
 	for _, o := range objs {
@@ -3919,7 +3919,8 @@ func (s *Server) closeSubtasks(ctx context.Context, c *collectionCtx, parent str
 			under[p] = append(under[p], o)
 		}
 	}
-	var left []view.Text
+	var left []subtaskRefusal
+	tried := 0
 	seen := map[string]bool{parent: true}
 	queue := []string{parent}
 	for len(queue) > 0 {
@@ -3935,9 +3936,10 @@ func (s *Server) closeSubtasks(ctx context.Context, c *collectionCtx, parent str
 				queue = append(queue, uid)
 				continue
 			}
+			tried++
 			closed, err := s.markTaskDone(ctx, c, kid)
 			if err != nil {
-				left = append(left, text(titleOr(cal.Text(kid, "SUMMARY"), "Untitled task")))
+				left = append(left, subtaskRefusal{titleOr(cal.Text(kid, "SUMMARY"), "Untitled task"), err})
 				continue
 			}
 			if closed {
@@ -3948,10 +3950,62 @@ func (s *Server) closeSubtasks(ctx context.Context, c *collectionCtx, parent str
 	if len(left) == 0 {
 		return nil
 	}
-	return &view.Notice{Role: view.NoticeAlert,
-		Title:   text(fmt.Sprintf("The task is done, %s still open", plural(len(left), "subtask"))),
-		Body:    "They could not be marked done with it. Open them and mark them yourself.",
-		Details: &view.Diagnostic{Summary: "Still open", Lines: left}}
+	n := subtasksLeft(tried, left)
+	return &n
+}
+
+// subtaskRefusal is a subtask Mark done could not close, by its title, and
+// the answer it got.
+type subtaskRefusal struct {
+	title string
+	err   error
+}
+
+// subtasksLeft is the notice of the subtasks of a task marked done that
+// stay open (the owner's words of 03.11.2026, in the form of a delete in
+// Files): «Task done. Mark done failed for 1 of 3 subtasks: 403 Forbidden:
+// …» · «2 marked done, 1 still open.», the answer in the line when it is
+// one for all; each subtask with its answer under «Still open».
+func subtasksLeft(total int, left []subtaskRefusal) view.Notice {
+	open := &view.Diagnostic{Summary: "Still open"}
+	common := subtaskReason(left[0].err)
+	for _, l := range left {
+		why := subtaskReason(l.err)
+		if why != common {
+			common = ""
+		}
+		open.Lines = append(open.Lines, text(l.title+" · "+why))
+	}
+	title := fmt.Sprintf("Task done. Mark done failed for %d of %s", len(left), plural(total, "subtask"))
+	if common != "" {
+		title += ": " + inLine(common)
+	}
+	return view.Notice{Role: view.NoticeAlert, Title: text(title + "."),
+		Body:    text(fmt.Sprintf("%d marked done, %d still open.", total-len(left), len(left))),
+		Details: open}
+}
+
+// subtaskReason is the answer to the write of a subtask: the server's by
+// code and text, or why Carrel could not write it as it stands.
+func subtaskReason(err error) string {
+	var not markDoneError
+	if errors.As(err, &not) {
+		return sentence(string(not)) + "."
+	}
+	return fileReason(err)
+}
+
+// subtasksUnread is the notice of a task marked done whose list could not
+// be read again to find its subtasks: the answer of the read, by code and
+// text — a read, so 403 is not the write access fileReason says.
+func subtasksUnread(err error) view.Notice {
+	why := "no response from the server"
+	var se *dav.StatusError
+	if errors.As(err, &se) {
+		why = fmt.Sprintf("%d %s", se.Code, http.StatusText(se.Code))
+	}
+	return view.Notice{Role: view.NoticeAlert, Title: text("Task done. Subtasks not checked: " + why + "."),
+		Body: "Carrel could not read the list again. Open subtasks stay open."}
 }
 
 // finishCardWrite is finishWrite for a save that may have replaced an
