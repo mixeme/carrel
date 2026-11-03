@@ -1068,7 +1068,9 @@ func noteReady(body []byte, dated bool) string {
 	case cal.HasNoteHeader(body):
 		return "title, date and tags from front matter"
 	case !dated:
-		return "no front matter: title from the first heading; the file has no date — dated today"
+		// The owner's words of 03.11.2026: the frame's row with the date's
+		// own source; the date itself stands in its column.
+		return "no front matter: title from the first heading, date of the import (the file has none)"
 	}
 	return "no front matter: title from the first heading, date from the file"
 }

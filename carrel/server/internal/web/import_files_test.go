@@ -54,7 +54,7 @@ func TestImportTakesEveryFileOfADrop(t *testing.T) {
 		// Where the title and the date come from (Им12; s-io-8): a browser
 		// sends no file's time (Б35).
 		"Встреча с подрядчиком": "Ready — title, date and tags from front matter",
-		"Что почитать про CRDT": "Ready — no front matter: title from the first heading; the file has no date — dated today",
+		"Что почитать про CRDT": "Ready — no front matter: title from the first heading, date of the import (the file has none)",
 		"skan.pdf":              "Skipped: not Markdown",
 		"pustoj.md":             "Empty file: nothing to store and nothing to name it by",
 	} {

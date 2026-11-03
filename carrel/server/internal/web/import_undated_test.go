@@ -16,7 +16,7 @@ import (
 func TestANoteWhoseFileHasNoTimeIsDatedTheDayOfTheImport(t *testing.T) {
 	f := notebookFixture(t)
 	f.h.srv.SetClock(time.Date(2026, 8, 10, 12, 0, 0, 0, time.UTC))
-	const undated = "Ready — no front matter: title from the first heading; the file has no date — dated today"
+	const undated = "Ready — no front matter: title from the first heading, date of the import (the file has none)"
 
 	page := freshImport(t, f)
 	archive := zipAt(t, map[string]time.Time{"idei/crdt.md": {}}, "idei/crdt.md", "# Что почитать про CRDT\n\nСсылки.\n")

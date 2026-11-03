@@ -76,6 +76,10 @@ current mockup; fonts are in `docs/visual/fonts/`.
   «Not exported» by path and parser error, «Export without them» beside.
   Was «The file would lack 2 records» · «The server returned them, but
   Carrel could not read them … other clients may still open them.».
+- The preview of a note whose file carries no date says where its date
+  comes from in the frame's form (the owner's words of 03.11.2026): «Ready —
+  no front matter: title from the first heading, date of the import (the
+  file has none)». Was «…; the file has no date — dated today».
 
 ## v0.2.394 — 2026-11-02
 
