@@ -411,23 +411,117 @@ func nextFile(up *uploadBody) (*multipart.Part, error) {
 }
 
 // takeBack removes the files put into the attachment folder for a write that
-// was not made.
-func takeBack(ctx context.Context, placed []*placedFile) {
+// was not made, and answers those that stay there.
+func takeBack(ctx context.Context, placed []*placedFile) []leftFile {
+	var left []leftFile
 	for _, p := range placed {
-		if p != nil {
-			p.remove(ctx)
+		if p == nil {
+			continue
 		}
+		if err := p.remove(ctx); err != nil {
+			left = append(left, p.left(err))
+		}
+	}
+	return left
+}
+
+// leftFile is a file put into the attachment folder that could not be taken
+// back: no record points at it, and the notice says where it stays
+// («report.pdf stays in Documents / carrel: 403 Forbidden: …»), the request
+// in its details.
+type leftFile struct{ say, detail string }
+
+func (p *placedFile) left(err error) leftFile {
+	where := strings.Join(append([]string{collectionLabel(p.files.col)}, p.files.segs...), " / ")
+	return leftFile{
+		say:    p.name + " stays in " + where + ": " + inLine(fileReason(err)) + ".",
+		detail: "DELETE " + connLabel(p.files.conn) + p.path + " · " + err.Error(),
 	}
 }
 
-// postAttach writes the files of the form into the record — every one of
-// them, by one write (Б6 of the audit of 11.10.2026: only the first was
-// taken, the rest dropped without a word). Each goes inside or, when the
-// finished object would be larger than the limit, into the attachment folder
-// with a link in the record, on the record the files before it made. A file
-// that cannot be attached stops them all: the record is not written, and the
-// files put in the folder for it are taken away again — nothing points at
-// them.
+// withLeft is n with the files that stay in the attachment folder after its
+// body, and the requests that met them in its details.
+func withLeft(n view.Notice, left []leftFile) view.Notice {
+	if len(left) == 0 {
+		return n
+	}
+	d := view.Diagnostic{Summary: "Not removed"}
+	if n.Details != nil {
+		d = *n.Details
+		d.Lines = slices.Clone(d.Lines)
+	}
+	body := string(n.Body)
+	for _, l := range left {
+		body += " " + l.say
+		d.Lines = append(d.Lines, text(l.detail))
+	}
+	n.Body, n.Details = text(body), &d
+	return n
+}
+
+// attachRefused is why a file was not attached: the notice that says it when
+// the file came alone, and its reason as a line among others («scan.pdf: 507
+// Insufficient Storage.»).
+type attachRefused struct {
+	notice view.Notice
+	reason string
+}
+
+// refusedFile is a file of the form that was not attached, and why.
+type refusedFile struct {
+	name string
+	attachRefused
+}
+
+// brokeOff is the line of a file the upload broke off in.
+const brokeOff = "the upload broke off; nothing after it was received."
+
+// partlyAttached is the notice of a form whose files went in only in part
+// (the owner's words of 03.11.2026): how many of them, then each that did not
+// with its reason — «2 of 3 files attached.» · «scan.pdf: 507 Insufficient
+// Storage.» —, the requests in the details. broke is the sentence of an
+// upload that broke off after the files counted; "" when it came whole.
+func partlyAttached(total, done int, refused []refusedFile, broke string) view.Notice {
+	title := fmt.Sprintf("%d of %s attached.", done, plural(total, "file"))
+	if done == total {
+		title = plural(done, "file") + " attached."
+	}
+	var says []string
+	var actions []view.Action
+	failed := &view.Diagnostic{Summary: "Not attached"}
+	for _, f := range refused {
+		says = append(says, f.name+": "+f.reason)
+		if d := f.notice.Details; d != nil {
+			failed.Lines = append(failed.Lines, text(f.name+" · "+string(d.Summary)))
+			failed.Lines = append(failed.Lines, d.Lines...)
+		}
+		for _, a := range f.notice.Actions {
+			if !slices.ContainsFunc(actions, func(b view.Action) bool { return b.ID == a.ID }) {
+				actions = append(actions, a)
+			}
+		}
+	}
+	if broke != "" {
+		says = append(says, broke)
+	}
+	n := view.Notice{Role: view.NoticeAlert, Title: text(title), Body: text(strings.Join(says, " ")), Actions: actions}
+	if len(failed.Lines) > 0 {
+		n.Details = failed
+	}
+	return n
+}
+
+// postAttach writes the files of the form into the record — every one that
+// can be attached, by one write (Б6 of the audit of 11.10.2026: only the
+// first was taken, the rest dropped without a word). Each goes inside or,
+// when the finished object would be larger than the limit, into the
+// attachment folder with a link in the record, on the record the files
+// before it made. A file that cannot be attached does not stop the others
+// (the owner's decision of 03.11.2026: all or nothing was the executor's
+// choice): the notice names it with its reason. An upload that broke off
+// keeps the files that came whole before it. Only a record the server did
+// not write takes back what went to the folder for it — nothing points at
+// those files.
 func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
 	ctx := r.Context()
 	q := r.URL.Query()
@@ -457,58 +551,76 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 	}
 	sent := obj
 	var placed []*placedFile
-	for n := 0; part != nil; n++ {
+	var refused []refusedFile
+	total, done, broke := 0, 0, ""
+	for part != nil {
+		total++
 		name := uploadName(part.FileName())
 		mediaType := fileType(name, part.Header.Get("Content-Type"))
 		if mediaType == "application/octet-stream" {
 			mediaType = fileType(name, "")
 		}
-		notice := &view.Notice{Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the file again."}
 		head, err := io.ReadAll(io.LimitReader(part, attachLimit(c.col)+1))
-		if err == nil {
+		if err != nil {
+			refused = append(refused, refusedFile{name, attachRefused{reason: brokeOff}})
+			break
+		}
+		base := sent
+		if done > 0 {
+			// The next file is attached to the record as the ones before left it.
+			base, err = settled(sent)
+		}
+		var why *attachRefused
+		if err != nil {
+			why = &attachRefused{notice: attachFailure(s.writeFailure(c, "PUT", obj.Path, err)), reason: unwritableReason}
+		} else {
 			// A file that ended inside what was read travels in the record.
 			// Past it, the only length this path can know is the one the page
 			// sent in front of the files (S-17.1).
 			var next *model.Object
 			var put *placedFile
-			next, put, notice = s.attached(ctx, c, sent, attachFile{
+			next, put, why = s.attached(ctx, c, base, attachFile{
 				name: name, mediaType: mediaType, head: head, rest: part, size: declaredSize(r, name),
 			})
-			if notice == nil {
-				sent, placed = next, append(placed, put)
-				if part, err = nextFile(up); err == nil && part != nil {
-					// The next file is attached to the record as this one left it.
-					sent, err = settled(sent)
-				}
-				if err != nil {
-					takeBack(ctx, placed)
-					s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
-						Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the files again.",
-					}))
-					return
-				}
-				continue
+			if why == nil {
+				sent, placed, done = next, append(placed, put), done+1
 			}
 		}
-		if notice != nil {
-			takeBack(ctx, placed)
-			// The files before it were taken and are not written either, nor
-			// are those after it (Б6).
-			if n == 0 {
-				if more, err := nextFile(up); err == nil && more != nil {
-					n++
-				}
+		if why != nil {
+			refused = append(refused, refusedFile{name, *why})
+		}
+		if part, err = nextFile(up); err != nil {
+			// The rest of this file, or what came after it, did not arrive.
+			if why != nil {
+				refused[len(refused)-1].reason = brokeOff
+			} else {
+				broke = "The upload broke off after " + name + "; nothing after it was received."
 			}
-			if n > 0 {
-				// The owner's words of 02.11.2026: the file, why, then the others.
-				notice.Body = text(name + ": " + string(notice.Body) + " The other files were not attached either.")
-			}
-			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, *notice))
-			return
+			break
 		}
 	}
-	s.writeAttached(w, r, c, uid, obj, etag, back, sent, placed, nil)
+	if done == 0 {
+		notice := partlyAttached(total, done, refused, broke)
+		if total == 1 {
+			notice = refused[0].notice
+			if refused[0].reason == brokeOff {
+				notice = view.Notice{Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the file again."}
+			}
+		}
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, notice))
+		return
+	}
+	var partly *view.Notice
+	if len(refused) > 0 || broke != "" {
+		n := partlyAttached(total, done, refused, broke)
+		partly = &n
+	}
+	s.writeAttached(w, r, c, uid, obj, etag, back, sent, placed, nil, partly)
 }
+
+// unwritableReason is a file Carrel could not write into the record it built:
+// its own fault, not the server's.
+const unwritableReason = "Carrel could not write it into the record."
 
 // attachFile is a file on its way into a record: its name and type, and
 // what was read of it — at most one byte past the limit; nil when its size
@@ -526,8 +638,8 @@ type attachFile struct {
 // whatever the file came from: inside when the finished object stays within
 // the limit, else a link — to where a file of Files lies, or to the copy of
 // an upload put first into the attachment folder. placed is that copy, taken
-// back when the write is refused; a notice says why nothing was done.
-func (s *Server) attached(ctx context.Context, c *collectionCtx, obj *model.Object, in attachFile) (*model.Object, *placedFile, *view.Notice) {
+// back when the write is refused; a refusal says why nothing was done.
+func (s *Server) attached(ctx context.Context, c *collectionCtx, obj *model.Object, in attachFile) (*model.Object, *placedFile, *attachRefused) {
 	limit := attachLimit(c.col)
 	if in.head != nil && int64(len(in.head)) <= limit {
 		if sent := s.inlineTrial(c, obj, in.name, in.mediaType, in.head, limit); sent != nil {
@@ -537,20 +649,21 @@ func (s *Server) attached(ctx context.Context, c *collectionCtx, obj *model.Obje
 	uri, size := in.link, in.size
 	var placed *placedFile
 	if uri == "" {
-		var notice *view.Notice
-		placed, notice = s.placeAttachment(ctx, c, obj, in.name, in.mediaType, io.MultiReader(bytes.NewReader(in.head), in.rest), limit, in.size)
-		if notice != nil {
-			return nil, nil, notice
+		var why *attachRefused
+		placed, why = s.placeAttachment(ctx, c, obj, in.name, in.mediaType, io.MultiReader(bytes.NewReader(in.head), in.rest), limit, in.size)
+		if why != nil {
+			return nil, nil, why
 		}
 		uri, size = placed.uri, placed.size
 	}
 	sent, err := patched(obj, cal.AttachLink(obj, uri, in.name, in.mediaType, size))
 	if err != nil {
-		if placed != nil {
-			placed.remove(ctx)
-		}
 		n := attachFailure(s.writeFailure(c, "PUT", obj.Path, err))
-		return nil, nil, &n
+		why := &attachRefused{notice: n, reason: unwritableReason}
+		if left := takeBack(ctx, []*placedFile{placed}); len(left) > 0 {
+			why.notice, why.reason = withLeft(n, left), unwritableReason+" "+left[0].say
+		}
+		return nil, nil, why
 	}
 	return sent, placed, nil
 }
@@ -624,14 +737,20 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 			in.size = -1
 		}
 	}
-	sent, placed, notice := s.attached(ctx, c, obj, in)
-	s.writeAttached(w, r, c, uid, obj, etag, back, sent, []*placedFile{placed}, notice)
+	sent, placed, why := s.attached(ctx, c, obj, in)
+	var notice *view.Notice
+	if why != nil {
+		notice = &why.notice
+	}
+	s.writeAttached(w, r, c, uid, obj, etag, back, sent, []*placedFile{placed}, notice, nil)
 }
 
 // writeAttached writes the record its attachments made, with If-Match of the
-// version the page showed, and answers where the page came from. A refusal
-// takes back the files put into the attachment folder for it.
-func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, etag, back string, sent *model.Object, placed []*placedFile, notice *view.Notice) {
+// version the page showed, and answers where the page came from — with partly
+// beside the record when some files of the form were not attached. A refusal
+// takes back the files put into the attachment folder for it, and names
+// those it could not.
+func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, etag, back string, sent *model.Object, placed []*placedFile, notice, partly *view.Notice) {
 	ctx := r.Context()
 	if notice != nil {
 		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, *notice))
@@ -639,7 +758,7 @@ func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collec
 	}
 	sent.ETag = etag
 	if err := c.update(ctx, sent); err != nil {
-		takeBack(ctx, placed)
+		left := takeBack(ctx, placed)
 		n := attachFailure(s.writeFailure(c, "PUT", obj.Path, err))
 		if dav.IsStatus(err, http.StatusPreconditionFailed) {
 			n = changedNotice("nothing was attached")
@@ -647,10 +766,16 @@ func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collec
 		if current, ferr := c.find(ctx, uid); ferr == nil {
 			obj = current
 		}
-		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, n))
+		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, withLeft(n, left)))
 		return
 	}
-	s.finishWrite(w, r, c, uid, sent, back)
+	if partly == nil {
+		s.finishWrite(w, r, c, uid, sent, back)
+		return
+	}
+	s.finishWriteWith(w, r, c, uid, sent, back, func(*model.Loss, *model.Object) ([]view.Action, []view.Notice) {
+		return nil, []view.Notice{*partly}
+	})
 }
 
 func attachFailure(n view.Notice) view.Notice {
@@ -698,9 +823,11 @@ func (s *Server) inlineTrial(c *collectionCtx, obj *model.Object, name, mediaTyp
 	return trial
 }
 
-// placedFile is a large attachment written to the attachment folder.
+// placedFile is a large attachment written to the attachment folder, under
+// name there.
 type placedFile struct {
 	files *fileCtx
+	name  string
 	path  string
 	uri   string
 	size  int64
@@ -716,15 +843,18 @@ func (p *placedFile) remove(ctx context.Context) error {
 
 // placeAttachment writes body to the attachment folder under a free name: the
 // folder is made on first use, a taken name gets a number and nothing is
-// overwritten. A notice says why nothing was written.
+// overwritten. A refusal says why nothing was written.
 // size is the length of body when it is known: the file ended inside what was
 // read to measure it against the limit, or the page sent it. -1 means nothing
 // said, and then the body goes out as a stream (S-17.1).
-func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *model.Object, name, mediaType string, body io.Reader, limit, size int64) (*placedFile, *view.Notice) {
+func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *model.Object, name, mediaType string, body io.Reader, limit, size int64) (*placedFile, *attachRefused) {
 	large := fmt.Sprintf("The file is larger than %s, the most %s takes inside a record, so it goes to the folder for attachments.", sizeText(limit), collectionLabel(c.col))
 	settings := []view.Action{{ID: "settings.attachments", Label: "Choose the folder", Href: s.route("/app/settings/attachments"), Method: "GET", Enabled: true}}
-	refuse := func(title, body string) (*placedFile, *view.Notice) {
-		return nil, &view.Notice{Role: view.NoticeAlert, Title: text("Nothing was attached: " + title), Body: text(large + " " + body), Actions: settings}
+	refuse := func(title, body string) (*placedFile, *attachRefused) {
+		return nil, &attachRefused{
+			notice: view.Notice{Role: view.NoticeAlert, Title: text("Nothing was attached: " + title), Body: text(large + " " + body), Actions: settings},
+			reason: title + ".",
+		}
 	}
 	fc := s.savedFolder(c.sess, s.catalogOf(c.sess))
 	switch {
@@ -735,9 +865,8 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 	case fc.col.ReadOnly:
 		return refuse("the folder for attachments is read-only", "The server lets this account read that storage but not write. Choose another folder in Settings → Attachments.")
 	}
-	failed := func(method, p string, err error) (*placedFile, *view.Notice) {
-		n := s.fileFailure(fc, "Nothing was attached", method, p, err)
-		return nil, &n
+	failed := func(method, p string, err error) (*placedFile, *attachRefused) {
+		return nil, &attachRefused{notice: s.fileFailure(fc, "Nothing was attached", method, p, err), reason: fileReason(err)}
 	}
 	day := attachmentDay(c, obj)
 	if af := s.catalogOf(c.sess).Attachments; af != nil && af.Monthly {
@@ -799,7 +928,7 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 				c.sess.KeepTransfer(t)
 			}
 		}
-		return &placedFile{files: fc, path: target, uri: fileURI(fc.conn.Server, target), size: counted.n.Load(), etag: etag}, nil
+		return &placedFile{files: fc, name: candidate, path: target, uri: fileURI(fc.conn.Server, target), size: counted.n.Load(), etag: etag}, nil
 	}
 	return refuse("every name for it is taken", fmt.Sprintf("The folder already holds %s and its numbered copies up to -%d.", base, attachNameTries))
 }

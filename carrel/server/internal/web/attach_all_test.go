@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"bytes"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -20,7 +21,7 @@ import (
 // form that carries several — another client of the contract, a field that
 // lets many be chosen — had the first written and the rest dropped without a
 // word. Now all of them go into the record by one write, each by the rule of
-// S-20, or none does and the notice says which file stood in the way.
+// S-20, and the notice names each that could not go in.
 
 // attachForm is the form of Attach with several files: the fields in front
 // of them, as a page sends its sizes.
@@ -94,34 +95,34 @@ func TestAttachOfSeveralFilesFollowsTheRuleForEach(t *testing.T) {
 	}
 }
 
-// A file that cannot be attached stops the whole form: nothing is written,
-// and what went to the folder for the files before it is taken back — no
-// file is left that no record points at.
-func TestAttachOfSeveralFilesIsAllOrNothing(t *testing.T) {
+// A file that cannot be attached does not stop the others (the owner's
+// decision of 03.11.2026: all or nothing was the executor's choice). The
+// record is written with every file that can go in, and the notice counts
+// them and names each that did not, with its reason.
+func TestAttachOfSeveralFilesAttachesWhatItCan(t *testing.T) {
+	big := strings.Repeat("x", 2048)
 	t.Run("no folder", func(t *testing.T) {
 		f := attachFixture(t, 1024, nil, "e1.ics", attachEvent("e1", "Sync-up", ""))
 		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
-		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"note.txt", "small"}, upload{"scan.pdf", strings.Repeat("x", 2048)})))
-		if !hasNotice(page.Notices, "Nothing was attached: no folder for attachments is chosen") {
-			t.Fatalf("notices = %+v", page.Notices)
+		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"note.txt", "small"}, upload{"scan.pdf", big})))
+		n := mustNotice(t, page.Notices, "1 of 2 files attached.")
+		if string(n.Body) != "scan.pdf: no folder for attachments is chosen." {
+			t.Errorf("body = %q", n.Body)
 		}
-		if !strings.Contains(noticeBodies(page.Notices), "scan.pdf") {
-			t.Errorf("the notice does not name the file that stood in the way: %+v", page.Notices)
+		if actionByID(n.Actions, "settings.attachments").Href == "" {
+			t.Errorf("the notice does not offer to choose the folder: %+v", n.Actions)
 		}
-		if strings.Contains(body(t, f, "e1.ics"), "ATTACH") {
-			t.Errorf("the record carries an attachment")
+		if got := attachNames(page.Attach); got != "note.txt" {
+			t.Errorf("attachments = %s, want note.txt", got)
 		}
 	})
 	t.Run("the first file refused, others after it", func(t *testing.T) {
 		f := attachFixture(t, 1024, nil, "e1.ics", attachEvent("e1", "Sync-up", ""))
 		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
-		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"scan.pdf", strings.Repeat("x", 2048)}, upload{"note.txt", "small"})))
-		// The owner's words of 02.11.2026: the file, why, then the others.
-		if got := noticeBodies(page.Notices); !strings.Contains(got, "scan.pdf: The file is larger than") || !strings.HasSuffix(got, " The other files were not attached either.\n") {
-			t.Errorf("the notice does not say the files after it were not attached either: %q", got)
-		}
-		if strings.Contains(body(t, f, "e1.ics"), "ATTACH") {
-			t.Errorf("the record carries an attachment")
+		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"scan.pdf", big}, upload{"note.txt", "small"}, upload{"plan.txt", "plan"})))
+		mustNotice(t, page.Notices, "2 of 3 files attached.")
+		if got := attachNames(eventAt(t, f, "e1").Attach); got != "note.txt, plan.txt" {
+			t.Errorf("attachments = %s, want the two after the refused one", got)
 		}
 	})
 	t.Run("a later file refused", func(t *testing.T) {
@@ -129,24 +130,115 @@ func TestAttachOfSeveralFilesIsAllOrNothing(t *testing.T) {
 		srv.RefuseUnsizedPUT = true
 		f := attachFixtureOn(t, srv, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
 		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
-		big := strings.Repeat("x", 2048)
 		// The first has its size in front of it and is written; the second has
 		// none, and this server refuses it.
 		fields := url.Values{"size.first.pdf": {strconv.Itoa(len(big))}}
 		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, fields, upload{"first.pdf", big}, upload{"second.pdf", big})))
-		if !hasNotice(page.Notices, "Nothing was attached: this server needs the size of a file before it writes it") {
-			t.Fatalf("notices = %+v", page.Notices)
+		n := mustNotice(t, page.Notices, "1 of 2 files attached.")
+		if string(n.Body) != "second.pdf: this server needs the size of a file before it writes it." {
+			t.Errorf("body = %q", n.Body)
 		}
-		if !strings.Contains(noticeBodies(page.Notices), "second.pdf") {
-			t.Errorf("the notice does not name the file that stood in the way: %+v", page.Notices)
+		if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10 first.pdf"); got != big {
+			t.Errorf("the first file is not in the folder: %+v", folderRows(t, f, "carrel"))
 		}
-		if rows := folderRows(t, f, "carrel"); len(rows) != 0 {
-			t.Errorf("the folder holds %+v, want the first file taken back", rows)
+		if got := attachNames(eventAt(t, f, "e1").Attach); got != "2026-08-10 first.pdf" {
+			t.Errorf("attachments = %s, want the link to the first", got)
+		}
+	})
+	t.Run("the server's code", func(t *testing.T) {
+		f := attachFixture(t, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
+		f.srv.RefuseAt("PUT", attachFiles+"carrel/2026-08-10 scan.pdf", http.StatusInsufficientStorage, "")
+		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"notes.txt", "notes"}, upload{"report.txt", "report"}, upload{"scan.pdf", big})))
+		n := mustNotice(t, page.Notices, "2 of 3 files attached.")
+		if string(n.Body) != "scan.pdf: 507 Insufficient Storage." {
+			t.Errorf("body = %q", n.Body)
+		}
+		// The request stays in the details, the way the other notices keep it.
+		if n.Details == nil || !strings.Contains(detailText(n.Details), "scan.pdf · PUT ") {
+			t.Errorf("details = %+v, want the PUT of scan.pdf", n.Details)
+		}
+	})
+	t.Run("none of them", func(t *testing.T) {
+		f := attachFixture(t, 1024, nil, "e1.ics", attachEvent("e1", "Sync-up", ""))
+		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"a.pdf", big}, upload{"b.pdf", big})))
+		n := mustNotice(t, page.Notices, "0 of 2 files attached.")
+		if string(n.Body) != "a.pdf: no folder for attachments is chosen. b.pdf: no folder for attachments is chosen." {
+			t.Errorf("body = %q", n.Body)
 		}
 		if strings.Contains(body(t, f, "e1.ics"), "ATTACH") {
 			t.Errorf("the record carries an attachment")
 		}
 	})
+}
+
+// An upload that broke off keeps the files that came whole before it.
+func TestAttachThatBrokeOffKeepsTheFilesBefore(t *testing.T) {
+	f := attachFixture(t, 0, nil, "e1.ics", attachEvent("e1", "Sync-up", ""))
+	href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+	req := attachForm(href, f.sess, nil, upload{"notes.txt", "notes"}, upload{"scan.pdf", strings.Repeat("x", 4096)})
+	whole, _ := io.ReadAll(req.Body)
+	cut := bytes.Index(whole, []byte("xxxx")) + 1000
+	req.Body = io.NopCloser(io.MultiReader(bytes.NewReader(whole[:cut]), brokenReader{}))
+	page := decode[view.EventPage](t, f.h.do(req))
+	n := mustNotice(t, page.Notices, "1 of 2 files attached.")
+	if string(n.Body) != "scan.pdf: the upload broke off; nothing after it was received." {
+		t.Errorf("body = %q", n.Body)
+	}
+	if got := attachNames(eventAt(t, f, "e1").Attach); got != "notes.txt" {
+		t.Errorf("attachments = %s, want notes.txt", got)
+	}
+}
+
+type brokenReader struct{}
+
+func (brokenReader) Read([]byte) (int, error) { return 0, io.ErrUnexpectedEOF }
+
+// A record the server did not write takes back what went to the folder for
+// it: nothing points at those files. One it cannot take back is named, with
+// where it stays — before, Carrel said nothing of it.
+func TestAttachNamesAFileItCouldNotTakeBack(t *testing.T) {
+	f := attachFixture(t, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
+	f.srv.RefuseAt("PUT", f.col+"e1.ics", http.StatusForbidden, "")
+	f.srv.RefuseAt("DELETE", attachFiles, http.StatusForbidden, "")
+	href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+	page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"scan.pdf", strings.Repeat("x", 2048)})))
+	if !strings.Contains(noticeBodies(page.Notices), "Nothing was attached. 2026-08-10 scan.pdf stays in ") ||
+		!strings.Contains(noticeBodies(page.Notices), " / carrel: 403 Forbidden: this account has no write access here.") {
+		t.Errorf("bodies = %q, want the file that stays and where", noticeBodies(page.Notices))
+	}
+	var details string
+	for _, n := range page.Notices {
+		if n.Details != nil {
+			details += detailText(n.Details)
+		}
+	}
+	if !strings.Contains(details, "DELETE ") {
+		t.Errorf("details = %q, want the DELETE that was refused", details)
+	}
+	if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10 scan.pdf"); got == "" {
+		t.Errorf("the file is not in the folder, yet the notice says it stays")
+	}
+}
+
+func mustNotice(t *testing.T, ns []view.Notice, title string) view.Notice {
+	t.Helper()
+	for _, n := range ns {
+		if string(n.Title) == title {
+			return n
+		}
+	}
+	t.Fatalf("no notice %q: %+v", title, ns)
+	return view.Notice{}
+}
+
+func detailText(d *view.Diagnostic) string {
+	s := string(d.Summary)
+	for _, l := range d.Lines {
+		s += " | " + string(l)
+	}
+	return s
 }
 
 func noticeBodies(ns []view.Notice) string {
@@ -158,8 +250,8 @@ func noticeBodies(ns []view.Notice) string {
 	return b.String()
 }
 
-// A new form's Attach keeps every file too: they wait for Save together, or
-// none is kept when together they would not fit inside the record.
+// A new form's Attach keeps every file too: they wait for Save together, and
+// one that would not fit inside the record with those before it is named.
 func TestNewEventAttachTakesEveryFileOfTheForm(t *testing.T) {
 	f := attachFixture(t, 1024, []string{"carrel"})
 	list := f.path("calendar")
@@ -177,15 +269,24 @@ func TestNewEventAttachTakesEveryFileOfTheForm(t *testing.T) {
 		t.Fatalf("the files waiting = %s, want both", got)
 	}
 
-	// Two that fit one by one and not together: neither is kept.
+	// Two that fit one by one and not together: the first is kept, the
+	// second named (the owner's decision of 03.11.2026).
 	attach = actionByID(page.Form.Actions, "attach.add")
 	half := strings.Repeat("x", 600)
 	page = decode[view.EventEditPage](t, f.h.do(attachForm(attach.Href, f.sess, formFields(page.Form), upload{"a.bin", half}, upload{"b.bin", half})))
+	n := mustNotice(t, page.Notices, "1 of 2 files attached.")
+	if !strings.HasPrefix(string(n.Body), "b.bin: save the record first. Up to ") {
+		t.Errorf("body = %q", n.Body)
+	}
+	if got := attachNames(page.Attach); got != "agenda.md, notes.txt, a.bin" {
+		t.Errorf("the files waiting = %s, want a.bin after the two kept before", got)
+	}
+
+	// One file alone that does not fit keeps its own notice.
+	attach = actionByID(page.Form.Actions, "attach.add")
+	page = decode[view.EventEditPage](t, f.h.do(attachForm(attach.Href, f.sess, formFields(page.Form), upload{"c.bin", half})))
 	if !hasNotice(page.Notices, "Nothing was attached: save the record first") {
 		t.Fatalf("notices = %+v", page.Notices)
-	}
-	if got := attachNames(page.Attach); got != "agenda.md, notes.txt" {
-		t.Errorf("the files waiting = %s, want the two kept before", got)
 	}
 }
 

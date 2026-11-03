@@ -35,11 +35,20 @@ current mockup; fonts are in `docs/visual/fonts/`.
   «Unchanged on the server.»; under «Not shown» each by its path and the
   parser's error. Was «1 record could not be read» · «The server returned
   them, but … other clients may still open them.».
-- A file of several that could not be attached is named first, then why,
-  then the others (the owner's words of 02.11.2026): «Nothing was
-  attached» · «scan.pdf: 507 Insufficient Storage. The other files were
-  not attached either.». Was «scan.pdf could not be attached, so none of
-  the files was. …».
+- Attach writes every file of its form that can be attached, and a file
+  that cannot no longer stops the others (the owner's decision of
+  03.11.2026: all or nothing was the executor's choice in v0.2.196). The
+  notice counts them and names each one left out with its reason: «2 of 3
+  files attached.» · «scan.pdf: 507 Insufficient Storage.», the request
+  under «Not attached». An upload that broke off keeps the files that came
+  whole before it: «scan.pdf: the upload broke off; nothing after it was
+  received.». Files put into the attachment folder are taken back only when
+  the server did not write the record; one it would not let go is named
+  with where it stays — «2026-08-10 scan.pdf stays in Documents / carrel:
+  403 Forbidden: …» — where before Carrel said nothing. A new record's form
+  keeps the files that fit inside it and names the rest: «1 of 2 files
+  attached.» · «b.bin: save the record first. …». Was «Nothing was
+  attached» · «scan.pdf could not be attached, so none of the files was.».
 - A linked group whose other records are gone says what Carrel saw (the
   owner's words of 03.11.2026): on the card «Link removed.» · «The linked
   copy in nextcloud · Контакты is no longer at its address (deleted or

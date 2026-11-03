@@ -4113,9 +4113,13 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	}
 	uid, got, err := wr.uid, wr.got, wr.err
 	if err != nil {
-		tell(nil, nil)
+		_, notices := tell(nil, nil)
 		sent.ETag = ""
 		c.noteWrite(sent.Path, sent)
+		if len(notices) > 0 {
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, sent, notices...))
+			return
+		}
 		s.redirect(w, r, done)
 		return
 	}
@@ -4123,6 +4127,12 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	loss := writeLoss(c.conn.ID, sent, got, c.sess.Losses(), wr.theirUID)
 	actions, notices := tell(loss, got)
 	if loss == nil {
+		// What the write leaves to say without a loss stands by the record:
+		// the files of a form that were not attached.
+		if len(notices) > 0 {
+			s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, got, notices...))
+			return
+		}
 		s.redirect(w, r, done)
 		return
 	}

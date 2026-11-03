@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -207,15 +208,16 @@ func (s *Server) postNewAttach(w http.ResponseWriter, r *http.Request, c *collec
 	uid := issuedUID(r.URL.Query().Get("uid"))
 	d, held := loadAttachDraft(c, uid)
 	var uploads []draftFile
-	tooLarge := false
+	var over []string
 	if op == "attach" {
-		f, large, err := readNewAttachUpload(r, attachLimit(c.col))
+		// The files kept already take their room inside the record first.
+		f, large, err := readNewAttachUpload(r, attachLimit(c.col)-d.inlineBytes())
 		if err != nil {
 			s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: s.newFormValues(c), isNew: true, readAt: s.now(),
 				notices: []view.Notice{{Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the file again."}}}))
 			return
 		}
-		uploads, tooLarge = f, large
+		uploads, over = f, large
 	} else if r.ParseForm() != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -239,15 +241,19 @@ func (s *Server) postNewAttach(w http.ResponseWriter, r *http.Request, c *collec
 	var notice *view.Notice
 	switch op {
 	case "attach":
-		limit := attachLimit(c.col)
+		saveFirst := "Up to " + sizeText(attachLimit(c.col)) + " together the files of a new record go inside it. A larger file goes to the attachments folder, and only a record that exists has one to link: save, then attach."
+		d.Files = append(d.Files, uploads...)
 		switch {
-		case len(uploads) == 0 && !tooLarge:
+		case len(uploads) == 0 && len(over) == 0:
 			notice = &view.Notice{Role: view.NoticeAlert, Title: "No file was chosen", Body: "Choose the file to attach and send the form again."}
-		case tooLarge || d.inlineBytes()+draftBytes(uploads) > limit:
-			notice = &view.Notice{Role: view.NoticeAlert, Title: "Nothing was attached: save the record first",
-				Body: text("Up to " + sizeText(limit) + " together the files of a new record go inside it. A larger file goes to the attachments folder, and only a record that exists has one to link: save, then attach.")}
-		default:
-			d.Files = append(d.Files, uploads...)
+		case len(uploads) == 0 && len(over) == 1:
+			notice = &view.Notice{Role: view.NoticeAlert, Title: "Nothing was attached: save the record first", Body: text(saveFirst)}
+		case len(over) > 0:
+			// The files that fit wait for Save, and those that did not are
+			// named (the owner's decision of 03.11.2026).
+			total := len(uploads) + len(over)
+			notice = &view.Notice{Role: view.NoticeAlert, Title: text(fmt.Sprintf("%d of %s attached.", len(uploads), plural(total, "file"))),
+				Body: text(strings.Join(over, ", ") + ": save the record first. " + saveFirst)}
 		}
 	case "detach":
 		if n, err := strconv.Atoi(r.URL.Query().Get("n")); err == nil && n >= 0 && n < len(d.Files) {
@@ -289,14 +295,14 @@ func draftBytes(files []draftFile) int64 {
 
 // readNewAttachUpload reads the form a new form's Attach sent with its files:
 // the fields before and after them, a form's worth at most, and every file
-// (Б6: the first alone was kept) while together they stay within the limit;
-// large says they went over it — the rest was left unread, and none is kept.
-// The middleware read the fields in front of the files for _csrf
-// (isFileUpload).
-func readNewAttachUpload(r *http.Request, limit int64) ([]draftFile, bool, error) {
+// (Б6: the first alone was kept) that fits within the limit with those kept
+// before it; over names the files that did not — each was left unread, and
+// a smaller one after it may still fit. The middleware read the fields in
+// front of the files for _csrf (isFileUpload).
+func readNewAttachUpload(r *http.Request, limit int64) ([]draftFile, []string, error) {
 	up, err := uploadOf(r)
 	if err != nil {
-		return nil, false, err
+		return nil, nil, err
 	}
 	fields := url.Values{}
 	for k, v := range up.fields {
@@ -304,31 +310,26 @@ func readNewAttachUpload(r *http.Request, limit int64) ([]draftFile, bool, error
 	}
 	remain := int64(conf.MaxFormBodyBytes)
 	var got []draftFile
-	large := false
+	var over []string
 	for part := up.next; ; part = nil {
 		if part == nil {
 			if part, err = up.mr.NextPart(); err == io.EOF {
 				break
 			} else if err != nil {
-				return nil, false, err
+				return nil, nil, err
 			}
 		}
 		if part.FileName() != "" {
-			if large {
-				if _, err := io.Copy(io.Discard, part); err != nil {
-					return nil, false, err
-				}
-				continue
-			}
 			name := uploadName(part.FileName())
-			data, err := io.ReadAll(io.LimitReader(part, limit-draftBytes(got)+1))
+			room := max(limit-draftBytes(got), 0)
+			data, err := io.ReadAll(io.LimitReader(part, room+1))
 			if err != nil {
-				return nil, false, err
+				return nil, nil, err
 			}
-			if draftBytes(got)+int64(len(data)) > limit {
-				large, got = true, nil
+			if int64(len(data)) > room {
+				over = append(over, name)
 				if _, err := io.Copy(io.Discard, part); err != nil {
-					return nil, false, err
+					return nil, nil, err
 				}
 				continue
 			}
@@ -337,10 +338,10 @@ func readNewAttachUpload(r *http.Request, limit int64) ([]draftFile, bool, error
 		}
 		data, err := io.ReadAll(io.LimitReader(part, remain+1))
 		if err != nil {
-			return nil, false, err
+			return nil, nil, err
 		}
 		if remain -= int64(len(data)); remain < 0 {
-			return nil, false, &http.MaxBytesError{Limit: conf.MaxFormBodyBytes}
+			return nil, nil, &http.MaxBytesError{Limit: conf.MaxFormBodyBytes}
 		}
 		fields.Add(part.FormName(), string(data))
 	}
@@ -350,7 +351,7 @@ func readNewAttachUpload(r *http.Request, limit int64) ([]draftFile, bool, error
 		}
 	}
 	r.Form, r.PostForm = fields, fields
-	return got, large, nil
+	return got, over, nil
 }
 
 // draftFileOfFiles is a file of Files chosen for a new form (From Files):

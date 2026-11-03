@@ -131,9 +131,9 @@ func (s *Server) readFormUpload(r *http.Request, c *collectionCtx, uid string) (
 		}
 		f := formFile{attachFile: attachFile{name: uploadName(part.FileName()), mediaType: http.DetectContentType(head), head: head, size: int64(len(head)), rest: bytes.NewReader(nil)}}
 		if int64(len(head)) > remaining {
-			p, n := s.placeAttachment(r.Context(), c, obj, f.name, f.mediaType, io.MultiReader(bytes.NewReader(head), part), attachLimit(c.col), declaredSizeValues(up.fields, f.name))
-			if n != nil {
-				u.notice = n
+			p, why := s.placeAttachment(r.Context(), c, obj, f.name, f.mediaType, io.MultiReader(bytes.NewReader(head), part), attachLimit(c.col), declaredSizeValues(up.fields, f.name))
+			if why != nil {
+				u.notice = &why.notice
 				continue
 			}
 			u.placed = append(u.placed, p)
@@ -195,10 +195,10 @@ func (s *Server) applyFormUpload(r *http.Request, c *collectionCtx, obj *model.O
 			if p.etag == "" {
 				p.etag = d.ETag
 			}
-			final, n := s.placeAttachment(r.Context(), c, obj, f.name, f.mediaType, d.Body, attachLimit(c.col), f.size)
+			final, why := s.placeAttachment(r.Context(), c, obj, f.name, f.mediaType, d.Body, attachLimit(c.col), f.size)
 			_ = d.Body.Close()
-			if n != nil {
-				return nil, n
+			if why != nil {
+				return nil, &why.notice
 			}
 			u.placed = append(u.placed, final)
 			if err := p.remove(r.Context()); err != nil {
@@ -207,9 +207,9 @@ func (s *Server) applyFormUpload(r *http.Request, c *collectionCtx, obj *model.O
 			}
 			f.link = final.uri
 		}
-		next, placed, n := s.attached(r.Context(), c, obj, f.attachFile)
-		if n != nil {
-			return nil, n
+		next, placed, why := s.attached(r.Context(), c, obj, f.attachFile)
+		if why != nil {
+			return nil, &why.notice
 		}
 		if placed != nil {
 			u.placed = append(u.placed, placed)
