@@ -5292,6 +5292,29 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       **office · Archive** did not answer in 8 s.» — строка о том, кто ищет
       и что `home` искал по тексту, ушла.
 
+Записка 167 от 04.11.2026 (Typecase `99f680a`; своя задача Typecase —
+проход Р-77, партия 2, принята владельцем 04.11).
+**Последний коммит Typecase, который она описывает, — `99f680a`** (570 кадров).
+
+167. **Пояснения короче (Р-77), партия 2.** Тексты дословно из макета:
+   1. **Профиль Apple** (`s-plan-1`, `-6`): плашка — «**The profile
+      carries passwords in cleartext.** Install it, then delete the file:
+      otherwise it stays in Downloads and in the phone’s backup.»; у ссылки —
+      «Opens once, for you signed in to Carrel.». В `s-plan-1` у Generate
+      profile пояснения больше нет (окно открыто — значок в шапке); в
+      `s-plan-6` осталось «Asks for your Carrel password first.»
+   2. **Почта выключена** (`s-mailbox-28`): «The administrator turned off
+      mailboxes on this instance. Their passwords stay sealed in your
+      profile, and everything works again when mailboxes are back on.»
+   3. **Картинки показаны** (`s-mailbox-13`): «**Pictures are shown for
+      this letter.** `cdn.bookfair.example`, `img.mailer.example` and
+      `open.mailer.example` now know the letter was opened. Next time it
+      opens without pictures.»
+   4. **Перенос без UIDPLUS** (`s-mailbox-5`): «The letters are copied to
+      **Стройка**. In Inbox they stay struck through until your mail
+      program cleans it: this server cannot remove only these.» — без
+      числа писем.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
