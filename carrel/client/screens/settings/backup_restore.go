@@ -174,7 +174,9 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 }
 
 // copiesTable is a job's copies (s-backup-7): a row a job, its radio — the
-// one chosen picked —, its name, the day, the size and how many collections.
+// one chosen picked —, its name, the day, the size and how many collections;
+// on a narrow screen the count goes first, then the size, the day stays
+// (Typecase's note 165).
 func copiesTable(r view.FormRow) w.Table {
 	var t w.Table
 	for _, o := range r.Options {
@@ -193,10 +195,10 @@ func copiesTable(r view.FormRow) w.Table {
 		for i, c := range o.Columns {
 			cell := w.TableCell{Parts: []w.CellPart{w.Text(c)}, Mono: true}
 			switch i {
-			case 0:
-				cell.Rank = w.Rank3
 			case 1:
 				cell.Rank = w.Rank4
+			case 2:
+				cell.Rank = w.Rank3
 			}
 			row.Cells = append(row.Cells, cell)
 		}

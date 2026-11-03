@@ -4,6 +4,23 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.19 — 2026-11-04
+
+Typecase `8d83d14`, notes 162–165; server `v0.2.397`. The whole client
+suite passes.
+
+- A note's column has «Kept as the server sent them» above Source: folded
+  under «Show 4», open a row a property in Source's monospace, a long text
+  by its first line with «…»; then what they are (s-notes-2, -3, -27). On
+  paper (print-5) the rubric and a field a property, the text whole.
+- More tables keep a main column on a phone (`TableCol.Main`): Server of
+  the selected storages (s-files-6), Objects of a subscription's «Lands in»
+  (s-profile-1, -4, -10, -26, -27).
+- The archive pick (s-backup-7) keeps its date on a narrow screen: the
+  count of collections goes first (`Rank3`), then the size (`Rank4`).
+- The queue row's words (task 252) and a heading inside a note in the
+  text's font (Р-83) are Typecase's: nothing of the client changed.
+
 ## v0.11.18 — 2026-11-03
 
 Typecase `3c73244`, note 161 (Р-66, the fourth group); server `v0.2.395`.

@@ -400,6 +400,9 @@ func (s *Server) linkedPage(sess *session.Session, spec kindSpec, lr linkedRecor
 			}
 		}
 		p.Doc.Bar, p.Meta.Actions, p.Meta.Menu, p.Source = actions, nil, menu, view.SourceBlock{}
+		// «Kept as the server sent them» waits for its frame: s-notes-32
+		// does not draw it (Typecase's task 254), though Р-78 shows it.
+		p.Meta.Foreign, p.Meta.ForeignShow = nil, nil
 		return p
 	default:
 		return p

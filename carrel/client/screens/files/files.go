@@ -125,11 +125,12 @@ func railParts(r view.Rail) []w.RailPart {
 
 // table is the storages ticked, a row each: a folder by its name, which
 // opens it, its connection and its access monospaced, its purpose as a
-// badge.
+// badge. The connection is what a row's card keeps on a phone, the folder
+// its name (TableCol.Main, Typecase's note 163, Р-66).
 func table(cs []view.FileCollectionRow) w.Table {
 	t := w.Table{Cols: []w.TableCol{
 		{Label: colName},
-		{Label: colServer, Width: w.ColTime},
+		{Label: colServer, Width: w.ColTime, Main: true},
 		{Label: colAccess, Width: w.Col80, Rank: w.Rank3},
 		{Label: colUse, Width: w.ColTime, Rank: w.Rank4},
 	}}

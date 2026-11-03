@@ -533,6 +533,9 @@ write(u'nextcloud-home/zapisi.ics', cal(u'Записи',
        u'ATTACH;FMTTYPE=image/png;ENCODING=BASE64;VALUE=BINARY;'
        u'FILENAME=2026-08-10-sync-board.png:' +
        base64.b64encode(sync_board()).decode('ascii'),
+       # Второй текст, его хранят как есть: с тремя свойствами ниже —
+       # «Kept as the server sent them», «Show 4» (s-notes-2, задача 253).
+       u'DESCRIPTION:%s' % esc(u'Договорились заморозить ветку в четверг.'),
        # Три свойства, которых Carrel не знает: «X-JTX-COLOR and two more»
        # (s-notes-20).
        u'X-JTX-COLOR:#4A6B52',

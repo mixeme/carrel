@@ -448,6 +448,8 @@
     "attach": [],
     "attendees": [],
     "date": "",
+    "foreign": [],
+    "foreignShow": null,
     "link": null,
     "linked": [],
     "menu": [],

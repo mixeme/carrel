@@ -20,7 +20,8 @@ const (
 // бумаге» (print-5) draws it, in a reader's width: its title, where it lies
 // and when it was written, the text read — a heading of the text a heading,
 // a task a box, struck when done —, its files with the row naming the
-// columns and where each lies, the foot. Nothing is pressed.
+// columns and where each lies, what it keeps as the server sent it — a
+// field a property, the text whole —, the foot. Nothing is pressed.
 func Paper(p *view.NotePage) w.Page {
 	rows := paperBlocks(p.Doc.Rendered)
 	if len(p.Meta.Attach) > 0 {
@@ -35,6 +36,12 @@ func Paper(p *view.NotePage) w.Page {
 			rows = append(rows, w.PrintRow{Columns: true, Items: []w.PrintRowPart{
 				w.PrintCell{Name: string(a.Name)}, w.PrintNum{Text: string(a.Size)}, w.PrintNum{Text: where},
 			}})
+		}
+	}
+	if len(p.Meta.Foreign) > 0 {
+		rows = append(rows, w.PrintRubric{Text: keptAsSent})
+		for _, f := range p.Meta.Foreign {
+			rows = append(rows, w.PrintRow{Field: true, Items: []w.PrintRowPart{w.PrintCell{Name: string(f.Label)}, w.PrintCell{Name: string(f.Value)}}})
 		}
 	}
 	return bind.Paper(p.Print, rows)

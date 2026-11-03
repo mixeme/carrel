@@ -225,8 +225,12 @@ func ownRecurrenceID(rest []string) bool {
 }
 
 // wireDiff are the lines of before that after no longer has, and the lines
-// after has gained, each line counted as often as it stands.
+// after has gained, each line counted as often as it stands. A line that
+// stands where it stood — the same value of its property, the same words —
+// is kept first: of two equal values, the one changed is the one whose place
+// changed, not the first found.
 func wireDiff(before, after []wireLine) (gone, come []wireLine) {
+	before, after = unplaced(before, after), unplaced(after, before)
 	count := map[string]int{}
 	key := func(l wireLine) string { return l.scope + "\x00" + l.text }
 	for _, l := range after {
@@ -251,6 +255,28 @@ func wireDiff(before, after []wireLine) (gone, come []wireLine) {
 		come = append(come, l)
 	}
 	return gone, come
+}
+
+// unplaced are the lines of these that the others do not hold at the same
+// place: the same scope, property, value number and words.
+func unplaced(these, others []wireLine) []wireLine {
+	type place struct {
+		scope, name, text string
+		nth               int
+	}
+	at := map[place]int{}
+	for _, l := range others {
+		at[place{l.scope, l.name, l.text, l.nth}]++
+	}
+	var out []wireLine
+	for _, l := range these {
+		if p := (place{l.scope, l.name, l.text, l.nth}); at[p] > 0 {
+			at[p]--
+			continue
+		}
+		out = append(out, l)
+	}
+	return out
 }
 
 // wholeField reports a field that shows every value of its property; the

@@ -217,6 +217,43 @@
     ],
     "attendees": [],
     "date": "10 August 2026, 11:05",
+    "foreign": [
+      {
+        "from": null,
+        "href": "",
+        "label": "DESCRIPTION",
+        "mono": true,
+        "value": "Договорились заморозить ветку в четверг."
+      },
+      {
+        "from": null,
+        "href": "",
+        "label": "X-JTX-COLOR",
+        "mono": true,
+        "value": "#4A6B52"
+      },
+      {
+        "from": null,
+        "href": "",
+        "label": "X-JTX-PINNED",
+        "mono": true,
+        "value": "FALSE"
+      },
+      {
+        "from": null,
+        "href": "",
+        "label": "X-MOZ-LASTACK",
+        "mono": true,
+        "value": "20260810T081000Z"
+      }
+    ],
+    "foreignShow": {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?foreign=1",
+      "id": "note.foreign",
+      "label": "Show 4",
+      "method": "GET"
+    },
     "link": null,
     "linked": [
       {

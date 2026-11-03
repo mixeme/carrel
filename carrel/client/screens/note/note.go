@@ -56,8 +56,11 @@ var (
 // The screen's words (U-1.3): the rubrics of the column, the lead of a kind
 // and of a difference, what joins a kind and a day, the attachment kept
 // inside the note, the rail's rubric of the neighbours and the phone's short
-// «Back», «Upload» after Attach's arrow (Typecase's task 109).
+// «Back», «Upload» after Attach's arrow (Typecase's task 109), the rubric of
+// what the note keeps as the server sent it and what that is (task 253).
 const (
+	keptAsSent = "Kept as the server sent them"
+	keptHint   = "Properties Carrel does not edit are stored byte for byte and go back untouched."
 	neighbours = "Neighbours"
 	back       = "Back"
 	lead       = "· "
@@ -381,6 +384,9 @@ func column(p *view.NotePage) []w.DocmetaSec {
 			Items: []w.DocmetaPart{refs},
 		})
 	}
+	if kept := keptSec(p.Meta); kept != nil {
+		secs = append(secs, *kept)
+	}
 	if p.Source.UID == "" {
 		return secs
 	}
@@ -391,6 +397,41 @@ func column(p *view.NotePage) []w.DocmetaSec {
 	}
 	lines = append(lines, bind.DiagLine{Name: "Read", Value: read})
 	return append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Source"}, Items: []w.DocmetaPart{bind.Diag(lines...)}})
+}
+
+// keptSec is «Kept as the server sent them» above Source, as a contact's
+// card has it (Carrel's task 253, s-notes-2): folded, «Show 4» in its
+// rubric; open, a row a property — its name and its value monospaced, as
+// Source, a long text its first line —; then what they are. Nil where the
+// note keeps nothing.
+func keptSec(m view.NoteMeta) *w.DocmetaSec {
+	if m.ForeignShow == nil && len(m.Foreign) == 0 {
+		return nil
+	}
+	sec := w.DocmetaSec{Title: w.Rubric{Text: keptAsSent}}
+	if m.ForeignShow != nil {
+		show := bind.Button(*m.ForeignShow, "")
+		show.Small = true
+		sec.Title.Items = []w.RubricPart{show}
+	} else {
+		var lines []bind.DiagLine
+		for _, f := range m.Foreign {
+			lines = append(lines, bind.DiagLine{Name: string(f.Label), Value: firstLine(string(f.Value))})
+		}
+		sec.Items = append(sec.Items, bind.Diag(lines...))
+	}
+	sec.Items = append(sec.Items, w.SecHint{Text: keptHint})
+	return &sec
+}
+
+// firstLine is a value's first line, «…» after it when more follow.
+func firstLine(v string) string {
+	for i := 0; i < len(v); i++ {
+		if v[i] == '\n' {
+			return v[:i] + "…"
+		}
+	}
+	return v
 }
 
 // danger is the deletion at the column's end; nil where there is none (a new

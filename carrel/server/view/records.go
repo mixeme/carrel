@@ -414,9 +414,18 @@ type NoteMeta struct {
 	Attendees []AttendeeRow `json:"attendees"`
 	Related   []TimelineRow `json:"related"`
 	Linked    []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)
-	Attach    []AttachRow   `json:"attach"`
-	Actions   []Action      `json:"actions"` // колонка: вложение, удаление
-	Menu      []MenuItem    `json:"menu"`    // «⋯» над текстом: Move, Copy, Publish a link
+	// Foreign — «Kept as the server sent them», как у контакта (s-notes-2,
+	// -3, -27, print-5; задача Typecase 253): второй DESCRIPTION и
+	// свойства, которых Carrel не знает, по строке на значение, имя —
+	// Label, Mono; на бумаге текст целиком
+	Foreign []Field `json:"foreign"`
+	// ForeignShow — «Show 4», кнопка, раскрывающая Foreign (свёрнуты): без
+	// сценариев — ссылка на ту же заметку с ?foreign=1; nil — их нет или
+	// они раскрыты
+	ForeignShow *Action     `json:"foreignShow"`
+	Attach      []AttachRow `json:"attach"`
+	Actions     []Action    `json:"actions"` // колонка: вложение, удаление
+	Menu        []MenuItem  `json:"menu"`    // «⋯» над текстом: Move, Copy, Publish a link
 }
 
 type ConflictPage struct {

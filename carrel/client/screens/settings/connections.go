@@ -354,8 +354,9 @@ func allFiles(rows []view.CollectionRow) bool {
 // feedCard is a subscription: its name, the badge «feed» and its buttons;
 // its address, whether it has a password, when, how much and how fast it
 // was read; where its kinds land, each ticked where it is polled, when it
-// changed said once for all of them — or, refused, the trace and what that
-// means, in alarm.
+// changed said once for all of them, Objects what a row's card keeps on a
+// phone, the collection its name (TableCol.Main, Typecase's note 164) — or,
+// refused, the trace and what that means, in alarm.
 func feedCard(f view.SubscriptionCard, narrow bool) w.Card {
 	r := w.Rubric{Text: string(f.Title), Items: []w.RubricPart{w.Badge{Label: feedBadge}, cardButtons(f.Actions, f.Password, feedActs)}}
 	line := []string{string(f.URL)}
@@ -388,7 +389,7 @@ func feedCard(f view.SubscriptionCard, narrow bool) w.Card {
 		}
 		return card
 	}
-	t := w.Table{Cols: []w.TableCol{{Width: w.ColTickSmall}, {Label: colLandsIn}, {Label: colObjects, Width: w.ColNum, Rank: w.Rank3, Secondary: narrow},
+	t := w.Table{Cols: []w.TableCol{{Width: w.ColTickSmall}, {Label: colLandsIn}, {Label: colObjects, Width: w.ColNum, Rank: w.Rank3, Secondary: narrow, Main: true},
 		{Label: colChanged, Width: w.ColChanged, Rank: w.Rank4}}}
 	for i, l := range f.Lands {
 		tick := bind.Ticked(l.Tick)

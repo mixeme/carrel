@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.397 — 2026-11-04
+
+### Added
+
+- A note's page has «Kept as the server sent them», as a contact's card
+  does (Typecase's note 162, Carrel's task 253): `NoteMeta.Foreign` — a
+  second `DESCRIPTION` and the properties Carrel does not know, a row a
+  value, the name monospaced — and `NoteMeta.ForeignShow` «Show 4», which
+  without scripts is the note with `?foreign=1`. The edit changes the first
+  text; the second goes back untouched. A linked note has no such section
+  until its frame draws one (Typecase's task 254).
+
+### Fixed
+
+- The check before a save is sent told two equal values of a property by
+  their words, not their place: a note with two equal texts whose first
+  was edited was refused as «Internal error: edit not saved … the
+  properties DESCRIPTION would change, though not edited». Lines now pair
+  by their place first.
+
 ## v0.2.396 — 2026-11-03
 
 ### Changed

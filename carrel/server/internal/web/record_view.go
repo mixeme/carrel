@@ -42,9 +42,15 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 			page = p
 		}
 		// «Show 3» without scripts: the card with the kept properties open.
-		if p, ok := page.(view.ContactPage); ok && r.URL.Query().Get("foreign") == "1" {
-			p.ForeignShow = nil
-			page = p
+		if r.URL.Query().Get("foreign") == "1" {
+			switch p := page.(type) {
+			case view.ContactPage:
+				p.ForeignShow = nil
+				page = p
+			case view.NotePage:
+				p.Meta.ForeignShow = nil
+				page = p
+			}
 		}
 		s.writePage(w, r, http.StatusOK, page)
 	}
@@ -126,7 +132,7 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		// The panel shows the organisation and the title as fields, every
 		// value; the name once.
 		d.Foreign = keptBesides(obj, "FN", "N")
-		d.ForeignShow = s.foreignShow(d.Foreign, c.recordPath(uid))
+		d.ForeignShow = s.foreignShow("contact.foreign", d.Foreign, c.recordPath(uid))
 		// All records: the person's timeline, beside Edit (s-contacts-1).
 		d.Actions = shown(ops.edit, &view.Action{ID: "contact.timeline", Label: "All records",
 			Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}, ops.del)
@@ -183,14 +189,15 @@ func panelFields(own, more []view.Field) []view.Field {
 }
 
 // foreignShow is the button that opens the kept properties, with their
-// count: «Show 3» (s-contacts-1, -6); none when there are none. Without
-// scripts it is the card with them open (?foreign=1); the panel beside a
-// list points it at the list with the panel instead (openInPanel).
-func (s *Server) foreignShow(foreign []view.Field, card string) *view.Action {
+// count: «Show 3» (s-contacts-1, -6), «Show 4» of a note (s-notes-2); none
+// when there are none. Without scripts it is the card with them open
+// (?foreign=1); the panel beside a list points it at the list with the
+// panel instead (openInPanel).
+func (s *Server) foreignShow(id string, foreign []view.Field, card string) *view.Action {
 	if len(foreign) == 0 {
 		return nil
 	}
-	return &view.Action{ID: "contact.foreign", Label: text("Show " + strconv.Itoa(len(foreign))),
+	return &view.Action{ID: id, Label: text("Show " + strconv.Itoa(len(foreign))),
 		Href: s.route(card + "?foreign=1"), Method: "GET", Enabled: true}
 }
 
@@ -525,7 +532,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	}
 	page.Fields = withBirthdayAside(withTagLinks(page.Fields, s.recordTags(c, obj)), c.tf)
 	page.Foreign = keptBesides(obj, "FN", "N", "ORG", "TITLE")
-	page.ForeignShow = s.foreignShow(page.Foreign, c.recordPath(uid))
+	page.ForeignShow = s.foreignShow("contact.foreign", page.Foreign, c.recordPath(uid))
 	// The inset shows the timeline this session gathered; opening the card
 	// gathers nothing (S-15.4). The way to it is always there.
 	page.Timeline, page.TimelineCount = s.timelineInset(c, uid, obj)
@@ -554,7 +561,25 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 // of 02.11.2026, variant Б). Nothing of the record is out of sight; the
 // form edits the first.
 func keptBesides(obj *model.Object, once ...string) []view.Field {
-	out := card.Foreign(obj)
+	return keptWith(card.Foreign(obj), obj, once...)
+}
+
+// noteKept is what a note keeps as the server sent it (Carrel's task 253,
+// s-notes-2): the properties Carrel does not know, a row a value, and a
+// second DESCRIPTION — the note's text is the first.
+func noteKept(obj *model.Object) []view.Field {
+	var foreign []view.Field
+	for _, name := range cal.NoteForeign(obj) {
+		for _, v := range obj.PropText(name) {
+			foreign = append(foreign, view.Field{Label: text(name), Value: text(v), Mono: true})
+		}
+	}
+	return keptWith(foreign, obj, "DESCRIPTION")
+}
+
+// keptWith is the foreign properties and every value after the first of
+// the properties shown once, by name, then value.
+func keptWith(out []view.Field, obj *model.Object, once ...string) []view.Field {
 	props := obj.Props()
 	for _, name := range once {
 		for _, v := range props[name][min(1, len(props[name])):] {
@@ -838,6 +863,9 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Meta.Attendees = recordPeople(obj, s.knownPeople(c.sess))
 	page.Meta.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Meta.Related = s.relatedRows(c, obj)
+	// What the note keeps as the server sent it, folded (Carrel's task 253).
+	page.Meta.Foreign = noteKept(obj)
+	page.Meta.ForeignShow = s.foreignShow("note.foreign", page.Meta.Foreign, c.recordPath(uid))
 	return page
 }
 
