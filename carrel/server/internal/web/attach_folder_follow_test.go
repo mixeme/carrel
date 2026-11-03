@@ -29,6 +29,12 @@ func TestTheAttachmentFolderGoesWithItsFolder(t *testing.T) {
 	if !strings.Contains(plainText(del.Warning), "attachments") {
 		t.Errorf("the deletion says nothing of the attachment folder: %q", plainText(del.Warning))
 	}
+	// The owner's words of 03.11.2026: which attachment comes next, and where
+	// the folder comes back.
+	want := view.Reference{What: "Attachments", Then: "the attachment folder is in it; the next attachment too large to go inside its record creates it again, empty, at the same path"}
+	if !slices.Contains(del.References, want) {
+		t.Errorf("references = %+v, want %+v", del.References, want)
+	}
 
 	// Renamed: the setting names the new path.
 	ren := opSheetOf(t, f, "rename", []string{"carrel"})

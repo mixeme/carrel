@@ -49,7 +49,9 @@ func (s *Server) deletionRefs(c *fileCtx, items []file.Entry) []view.Reference {
 	for _, e := range items {
 		item := append(slices.Clone(c.segs), e.Name)
 		if att := blob.Attachments; e.Dir && att != nil && att.AccountID == c.conn.ID && att.Path == c.col.Path && under(att.Folder, item) {
-			refs = append(refs, view.Reference{What: "Attachments", Then: "the attachment folder is in it; the next large attachment makes it again, empty"})
+			// The owner's words of 03.11.2026, in the form of the collection's
+			// row (s-profile-19).
+			refs = append(refs, view.Reference{What: "Attachments", Then: "the attachment folder is in it; the next attachment too large to go inside its record creates it again, empty, at the same path"})
 		}
 		for _, l := range s.users.PublishedLinks(c.sess.AccountID()) {
 			if l.Target.Kind == string(view.KindFile) && l.Target.AccountID == c.conn.ID && l.Target.Col == c.col.Path &&

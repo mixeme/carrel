@@ -57,6 +57,12 @@ current mockup; fonts are in `docs/visual/fonts/`.
   addresses (deleted or moved). The records left are unchanged on the
   server.». Was «No longer linked» · «… this record stands on its own.» and
   «1 linked group came apart».
+- The sheet of deleting a folder in Files that holds the attachment folder
+  says which attachment brings it back and where (the owner's words of
+  03.11.2026, in the form of the collection's row): «Attachments — the
+  attachment folder is in it; the next attachment too large to go inside
+  its record creates it again, empty, at the same path». Was «… the next
+  large attachment makes it again, empty».
 
 ## v0.2.394 — 2026-11-02
 
