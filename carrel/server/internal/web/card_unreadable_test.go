@@ -75,17 +75,28 @@ func TestUnreadableContactSearchKeepsResults(t *testing.T) {
 	}
 }
 
+// A backup takes the card Carrel could not read as the server holds it, the
+// way it takes a calendar's record; one the server will not give makes the
+// book not whole.
 func TestUnreadableContactBackupIsNotWhole(t *testing.T) {
-	f := unreadableBookFixture(t)
-	f.srv.SeedFolder(filesDocs)
-	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
-		b.Collections = append(b.Collections, sealed.Collection{AccountID: f.id, Path: filesDocs, Name: "Docs", Kinds: []view.Kind{view.KindFile}})
-	})
-	form := jobForm(f, sealed.BackupToWebDAV, "8", "archive-pw")
-	form["src"] = []string{sel(f, f.col)}
-	run := runJob(t, f, saveJob(t, f, form))
-	if run.State != "partial" || run.Whole != 0 || !strings.Contains(run.Error, "broken.vcf") {
-		t.Fatalf("incomplete book called whole: %+v", run)
+	for _, refused := range []bool{false, true} {
+		f := unreadableBookFixture(t)
+		if refused {
+			f.srv.RefuseAt(http.MethodGet, davtest.AddressBookHome+"people/broken.vcf", http.StatusForbidden, "")
+		}
+		f.srv.SeedFolder(filesDocs)
+		editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+			b.Collections = append(b.Collections, sealed.Collection{AccountID: f.id, Path: filesDocs, Name: "Docs", Kinds: []view.Kind{view.KindFile}})
+		})
+		form := jobForm(f, sealed.BackupToWebDAV, "8", "archive-pw")
+		form["src"] = []string{sel(f, f.col)}
+		run := runJob(t, f, saveJob(t, f, form))
+		switch {
+		case refused && (run.State != "partial" || run.Whole != 0 || !strings.Contains(run.Error, "broken.vcf")):
+			t.Fatalf("incomplete book called whole: %+v", run)
+		case !refused && (run.Whole != 1 || run.Error != ""):
+			t.Fatalf("the book with the card as the server holds it: %+v", run)
+		}
 	}
 }
 
@@ -104,10 +115,31 @@ func TestUnreadableContactListAndExport(t *testing.T) {
 			t.Fatalf("missing resource path: %+v", page.Notices)
 		}
 	}
+	// The card goes into the .vcf as the server holds it, the way a calendar's
+	// record goes into the .ics (kinds are equal).
+	exported := download(t, f, f.path("contacts")+"/export", "people.vcf", "text/vcard")
+	if strings.Count(exported, "BEGIN:VCARD") != 3 || !strings.Contains(exported, "UID:broken") {
+		t.Fatalf("the card Carrel could not read is not in the file as the server holds it: %s", exported)
+	}
+}
+
+// A card the server will not give as it is stops the export, in the owner's
+// words of 03.11.2026, and the file without it is one explicit step away.
+func TestUnreadableContactExportStops(t *testing.T) {
+	f := unreadableBookFixture(t)
+	f.srv.RefuseAt(http.MethodGet, davtest.AddressBookHome+"people/broken.vcf", http.StatusForbidden, "")
 	rec := f.h.do(get(f.path("contacts")+"/export", f.sess))
 	page := decode[view.ContactsListPage](t, rec)
-	if rec.Header().Get("Content-Disposition") != "" || !hasNotice(page.Notices, "The file would lack 1 record") {
-		t.Fatalf("silent incomplete export: %v, %+v", rec.Header(), page.Notices)
+	if rec.Header().Get("Content-Disposition") != "" {
+		t.Fatalf("silent incomplete export: %v", rec.Header())
+	}
+	n := mustNotice(t, page.Notices, "Export stopped: 1 record is invalid vCard.")
+	if n.Body != "No file was made. The record is unchanged on the server." || n.Details == nil || n.Details.Summary != "Not exported" ||
+		!strings.Contains(plainLines(n.Details.Lines), "broken.vcf") {
+		t.Errorf("notice = %+v", n)
+	}
+	if actionByID(n.Actions, "collection.export.without").Label != "Export without them" {
+		t.Errorf("actions = %+v", n.Actions)
 	}
 	exported := download(t, f, f.path("contacts")+"/export?without=1", "people.vcf", "text/vcard")
 	if strings.Count(exported, "BEGIN:VCARD") != 2 || strings.Contains(exported, "UID:broken") {

@@ -63,6 +63,19 @@ current mockup; fonts are in `docs/visual/fonts/`.
   attachment folder is in it; the next attachment too large to go inside
   its record creates it again, empty, at the same path». Was «… the next
   large attachment makes it again, empty».
+- A card the server returned and Carrel could not read goes into the .vcf
+  of an export and into the backup of a book as the server holds it, BEGIN:VCARD
+  to END:VCARD, the way a calendar's record goes into the .ics (kinds are
+  equal). Before, the export of a book stopped on it and its backup was
+  never whole.
+- An export that cannot take such a record — the server will not give it,
+  or the file is Markdown — says so in the words of the list's notice (the
+  owner's words of 03.11.2026): «Export stopped: 2 records are invalid
+  vCard.» («… invalid iCalendar.» for a calendar, a task list, a notebook) ·
+  «No file was made. The records are unchanged on the server.», each under
+  «Not exported» by path and parser error, «Export without them» beside.
+  Was «The file would lack 2 records» · «The server returned them, but
+  Carrel could not read them … other clients may still open them.».
 
 ## v0.2.394 — 2026-11-02
 

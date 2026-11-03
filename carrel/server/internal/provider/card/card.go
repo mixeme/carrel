@@ -70,6 +70,47 @@ func (p *Provider) Get(ctx context.Context, path string) (*model.Object, error) 
 	return Parse(path, etag, rc)
 }
 
+// Raw is one card as the server holds it, undecoded and asked for in no
+// version: what an export hands over of a card Carrel could not read.
+func (p *Provider) Raw(ctx context.Context, path string) ([]byte, error) {
+	rc, _, err := p.t.Get(ctx, path, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer rc.Close()
+	return io.ReadAll(rc)
+}
+
+// RawCards are the cards of doc as their lines stand, BEGIN:VCARD to
+// END:VCARD each, folds kept, every line ended by CRLF; a card that does not
+// end is not one.
+func RawCards(doc []byte) [][]byte {
+	var out [][]byte
+	var cur []string
+	depth := 0
+	for _, l := range strings.Split(strings.ReplaceAll(string(doc), "\r\n", "\n"), "\n") {
+		switch strings.ToUpper(strings.TrimSpace(l)) {
+		case "BEGIN:VCARD":
+			if depth == 0 {
+				cur = nil
+			}
+			depth++
+		case "END:VCARD":
+			if depth == 0 {
+				continue
+			}
+			if depth--; depth == 0 {
+				out = append(out, []byte(strings.Join(append(cur, l), "\r\n")+"\r\n"))
+				continue
+			}
+		}
+		if depth > 0 {
+			cur = append(cur, l)
+		}
+	}
+	return out
+}
+
 // get reads one card asking for vCard 4.0, as every read of a card asks
 // (S-7, docs/servers.md, SV-1): sabre/dav answers a GET without Accept in
 // 3.0 and drops what 3.0 cannot hold — KIND among others — before any

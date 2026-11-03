@@ -36,4 +36,20 @@ func TestUnreadableWordsAreDirect(t *testing.T) {
 			t.Errorf("details = %+v,\nwant first %q", d, c.first)
 		}
 	}
+	// The export they stop, in the owner's words of 03.11.2026.
+	two := []cal.Unreadable{{Path: "/dav/people/a1b2.vcf", Err: bad}, {Path: "/dav/people/c3d4.vcf", Err: bad}}
+	for _, c := range []struct {
+		n           view.Notice
+		title, body string
+	}{
+		{exportStopped(true, two), "Export stopped: 2 records are invalid vCard.", "No file was made. The records are unchanged on the server."},
+		{exportStopped(false, two[:1]), "Export stopped: 1 record is invalid iCalendar.", "No file was made. The record is unchanged on the server."},
+	} {
+		if string(c.n.Title) != c.title || string(c.n.Body) != c.body || c.n.Role != view.NoticeAlert {
+			t.Errorf("%q / %q (%s),\nwant %q / %q", c.n.Title, c.n.Body, c.n.Role, c.title, c.body)
+		}
+		if d := c.n.Details; d == nil || d.Summary != "Not exported" || string(d.Lines[0]) != "/dav/people/a1b2.vcf · vcard: missing END:VCARD" {
+			t.Errorf("details = %+v", d)
+		}
+	}
 }

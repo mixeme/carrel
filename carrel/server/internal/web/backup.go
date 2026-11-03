@@ -106,8 +106,15 @@ func (s *Server) backupSources(ctx context.Context, blob sealed.Blob, job sealed
 							return 0, err
 						}
 					}
-					_, lacks := c.unreadKept(ctx, bad)
-					return len(objs), lacks
+					// A card Carrel could not read goes in as the server
+					// holds it, as a calendar's record does.
+					raw, lacks := c.unreadKept(ctx, bad)
+					for _, b := range raw {
+						if _, err := w.Write(b); err != nil {
+							return 0, err
+						}
+					}
+					return len(objs) + len(raw), lacks
 				}
 				w, err := add("calendar.ics")
 				if err != nil {

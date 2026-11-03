@@ -153,19 +153,32 @@ func (c *collectionCtx) allRecordsAndUnread(ctx context.Context) ([]*model.Objec
 // (Б3 of the audit of 11.10.2026: they were left out of the file without a
 // word, the file before a calendar is deleted among them). A calendar file
 // takes such a record as the server holds it — its components are copied,
-// nothing is decoded —, so it is asked for again, raw. lost are the ones that
-// cannot go into the file: the server would not give the record, nothing in
-// it is a component, or the file is Markdown, which has no place for a
-// record nobody read.
-func (c *collectionCtx) exportUnread(ctx context.Context, bad []cal.Unreadable, calendar bool) (raw [][]byte, lost []cal.Unreadable) {
+// nothing is decoded —, so it is asked for again, raw; a .vcf takes a card
+// the same way, its BEGIN:VCARD to END:VCARD (kinds are equal). lost are the
+// ones that cannot go into the file: the server would not give the record,
+// nothing in it is a component or a card, or the file is Markdown, which has
+// no place for a record nobody read.
+func (c *collectionCtx) exportUnread(ctx context.Context, bad []cal.Unreadable, asHeld bool) (raw [][]byte, lost []cal.Unreadable) {
 	for _, b := range bad {
-		if !calendar || c.cal == nil {
+		var doc []byte
+		var err error
+		switch {
+		case !asHeld || (c.cal == nil && c.card == nil):
 			lost = append(lost, b)
 			continue
-		}
-		doc, err := c.cal.Raw(ctx, b.Path)
-		if err == nil && len(cal.Components(doc)) == 0 {
-			err = errors.New("no component of a calendar in it")
+		case c.card != nil:
+			if doc, err = c.card.Raw(ctx, b.Path); err == nil {
+				if cards := card.RawCards(doc); len(cards) > 0 {
+					raw = append(raw, cards...)
+					continue
+				}
+				err = errors.New("no card in it")
+			}
+		default:
+			doc, err = c.cal.Raw(ctx, b.Path)
+			if err == nil && len(cal.Components(doc)) == 0 {
+				err = errors.New("no component of a calendar in it")
+			}
 		}
 		if err != nil {
 			b.Err = fmt.Errorf("%v; asked for as it is: %v", b.Err, err)
@@ -199,13 +212,28 @@ func (c *collectionCtx) unreadKept(ctx context.Context, bad []cal.Unreadable) ([
 func (s *Server) exportLacks(c *collectionCtx, r *http.Request, lost []cal.Unreadable) view.Notice {
 	q := r.URL.Query()
 	q.Set("without", "1")
+	n := exportStopped(c.card != nil, lost)
+	n.Actions = []view.Action{{ID: "collection.export.without", Label: "Export without them", Icon: "i-export", Href: s.exportHref(c, q), Method: "GET", Enabled: true}}
+	return n
+}
+
+// exportStopped says it in the words of the list's notice (the owner's words
+// of 03.11.2026): «Export stopped: 2 records are invalid vCard.» · «No file
+// was made. The records are unchanged on the server.», each by path and
+// parser error.
+func exportStopped(vcard bool, lost []cal.Unreadable) view.Notice {
+	format, are, them := "iCalendar", "are", "The records are"
+	if vcard {
+		format = "vCard"
+	}
+	if len(lost) == 1 {
+		are, them = "is", "The record is"
+	}
 	n := view.Notice{
-		Role:  view.NoticeAlert,
-		Title: text("The file would lack " + plural(len(lost), "record")),
-		Body: text("The server returned them, but Carrel could not read them and cannot put them into the file as they are. " +
-			"Nothing was handed over. They are left on the server as they are; other clients may still open them."),
-		Details: &view.Diagnostic{Summary: text("Unreadable records")},
-		Actions: []view.Action{{ID: "collection.export.without", Label: "Export without them", Icon: "i-export", Href: s.exportHref(c, q), Method: "GET", Enabled: true}},
+		Role:    view.NoticeAlert,
+		Title:   text("Export stopped: " + plural(len(lost), "record") + " " + are + " invalid " + format + "."),
+		Body:    text("No file was made. " + them + " unchanged on the server."),
+		Details: &view.Diagnostic{Summary: "Not exported"},
 	}
 	for _, b := range lost {
 		n.Details.Lines = append(n.Details.Lines, text(b.Path+" · "+b.Err.Error()))
@@ -247,7 +275,7 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 	case c.spec.kind == view.KindNote:
 		f = notebookFormat
 	}
-	raw, lost := c.exportUnread(r.Context(), bad, f.ext == ".ics")
+	raw, lost := c.exportUnread(r.Context(), bad, f.ext == ".ics" || f.ext == ".vcf")
 	if len(lost) > 0 && r.URL.Query().Get("without") == "" {
 		s.writePage(w, r, http.StatusOK, s.emptyListPage(c, s.exportLacks(c, r, lost)))
 		return
@@ -273,12 +301,17 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 // writeExport streams the records. A write that breaks off — the browser went
 // away — ends the answer: there is nothing to say on a body already begun.
 // raw are the documents of records Carrel could not read, for a calendar
-// file (exportUnread).
+// file, and the cards of them for a .vcf (exportUnread).
 func writeExport(w io.Writer, c *collectionCtx, objs []*model.Object, raw [][]byte) {
 	switch {
 	case c.card != nil:
 		for _, obj := range objs {
 			if card.Encode(w, obj) != nil {
+				return
+			}
+		}
+		for _, b := range raw {
+			if _, err := w.Write(b); err != nil {
 				return
 			}
 		}

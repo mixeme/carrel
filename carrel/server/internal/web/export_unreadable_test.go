@@ -65,7 +65,7 @@ func TestExportAsksBeforeLeavingARecordOut(t *testing.T) {
 		if rec.Header().Get("Content-Disposition") != "" {
 			t.Fatalf("a file was handed over without the record: %v", rec.Header())
 		}
-		if !hasNotice(page.Notices, "The file would lack 1 record") {
+		if !hasNotice(page.Notices, "Export stopped: 1 record is invalid iCalendar.") {
 			t.Fatalf("notices = %+v", page.Notices)
 		}
 		var without string
@@ -98,7 +98,7 @@ func TestExportAsksBeforeLeavingARecordOut(t *testing.T) {
 		if rec.Header().Get("Content-Disposition") != "" {
 			t.Fatalf("a file was handed over without the record: %v", rec.Header())
 		}
-		if !hasNotice(page.Notices, "The file would lack 1 record") {
+		if !hasNotice(page.Notices, "Export stopped: 1 record is invalid iCalendar.") {
 			t.Fatalf("notices = %+v", page.Notices)
 		}
 		files := notebookFiles(t, download(t, f, f.path("notes")+"/export?without=1", "work.zip", "application/zip"))
