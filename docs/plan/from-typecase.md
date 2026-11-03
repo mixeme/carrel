@@ -5249,6 +5249,72 @@ Typecase, который она описывает, — `d771527`** (570 кад�
    у таблицы в карточке нет полей, и подсветка начиналась у края галочки.
    Разметка та же; новых полей нет.
 
+Записка 166 от 04.11.2026 (Typecase `2dc7a6b`; своя задача Typecase —
+проход Р-77 по пояснениям, партия 1, принята владельцем 04.11).
+**Последний коммит Typecase, который она описывает, — `2dc7a6b`** (570 кадров).
+
+166. **Пояснения короче (Р-77), партия 1.** Разметка та же, меняются
+   только тексты; новые — дословно из макета:
+   1. **Локальный запуск** (`desktop-6`): Data folder — «Your connections
+      and settings, encrypted. Records stay on the servers.»; Port — «A
+      free one at every start; its number is in the status bar.»; Allow
+      other devices — «Turning it on **pins the port**: a phone and DAVx5
+      reach `http://192.168.1.14:8765` with your password.»; плашка пароля —
+      «Nobody can recover the password, not even this app; without it the
+      saved connections are lost.»; плашка «What only works from outside»
+      стала «**Not reachable from the internet.** **Published links**,
+      **devices over davloom**, **external backup triggers** and
+      **invitation links** work on this machine only, until you set up port
+      forwarding, a tunnel or your own domain.»
+   2. **Выход** (`desktop-12`): «**Sign out of carrel.example?** **Your
+      other devices stay signed in**: end those sessions in Settings →
+      Account.»; плашка удаления — «… The folder `…\Roaming\Carrel`, the
+      instance address and the session token. The saved connections cannot
+      be brought back; records on your DAV servers are not touched.» —
+      третьей плашки больше нет.
+   3. **Настройки приложения** (`desktop-13`): у Sign out… — «Nothing is
+      deleted: the app returns to the first screen.»; у сертификата —
+      «Appears only after a certificate was rejected; it trusts that one
+      fingerprint, checking stays on.»; у Installed — «Last checked 2 hours
+      ago: `0.8.0` was the latest.», и у поля `aria-label="Installed"`; под
+      галочками обновлений — «With these clear, the app does not go online.
+      An update is verified by its signature; without the second tick it
+      waits until you install it.» и «In local mode this updates the server
+      too; with your own server, the app only.»
+   4. **Задание копии** (`s-backup-2`, `-19`): Keep copies — «Older copies
+      are deleted only **after** the new one is checked.»; плашка режимов —
+      «**Download** writes nothing to the server. On a schedule it runs only
+      from an external trigger: someone has to take the file. **Both** does
+      the two, and its trigger has **two steps**.»; Encrypt — «Turn it off
+      only where nobody but you can reach the copy.»
+   5. **Поиск по почте** (`s-mailbox-14`): «**office** searches headers
+      only: a letter with «смета» only in its text is not found there.
+      **office · Archive** did not answer in 8 s.» — строка о том, кто ищет
+      и что `home` искал по тексту, ушла.
+
+Записка 167 от 04.11.2026 (Typecase `99f680a`; своя задача Typecase —
+проход Р-77, партия 2, принята владельцем 04.11).
+**Последний коммит Typecase, который она описывает, — `99f680a`** (570 кадров).
+
+167. **Пояснения короче (Р-77), партия 2.** Тексты дословно из макета:
+   1. **Профиль Apple** (`s-plan-1`, `-6`): плашка — «**The profile
+      carries passwords in cleartext.** Install it, then delete the file:
+      otherwise it stays in Downloads and in the phone’s backup.»; у ссылки —
+      «Opens once, for you signed in to Carrel.». В `s-plan-1` у Generate
+      profile пояснения больше нет (окно открыто — значок в шапке); в
+      `s-plan-6` осталось «Asks for your Carrel password first.»
+   2. **Почта выключена** (`s-mailbox-28`): «The administrator turned off
+      mailboxes on this instance. Their passwords stay sealed in your
+      profile, and everything works again when mailboxes are back on.»
+   3. **Картинки показаны** (`s-mailbox-13`): «**Pictures are shown for
+      this letter.** `cdn.bookfair.example`, `img.mailer.example` and
+      `open.mailer.example` now know the letter was opened. Next time it
+      opens without pictures.»
+   4. **Перенос без UIDPLUS** (`s-mailbox-5`): «The letters are copied to
+      **Стройка**. In Inbox they stay struck through until your mail
+      program cleans it: this server cannot remove only these.» — без
+      числа писем.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
