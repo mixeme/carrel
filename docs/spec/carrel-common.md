@@ -1745,6 +1745,12 @@ type NoteMeta struct {
     Attendees []AttendeeRow
     Related []TimelineRow
     Linked  []Field // та же заметка в других тетрадях (S-16)
+    // Foreign — «Kept as the server sent them», как у контакта (s-notes-2,
+    // -3, -27, print-5; задача Typecase 253): второй DESCRIPTION и свойства,
+    // которых Carrel не знает, строка на значение, имя — Label, Mono; на
+    // бумаге текст целиком; у связанной заметки пусто до кадра (задача 254)
+    Foreign     []Field
+    ForeignShow *Action // «Show 4» — кнопка, раскрывающая Foreign (свёрнуты); без сценариев — ссылка на эту заметку с ?foreign=1; nil — их нет или они раскрыты
     Attach  []AttachRow
     Actions []Action   // колонка: Attach, удаление
     Menu    []MenuItem // «⋯» над текстом: Move, Copy, Publish a link (s-notes-14)
