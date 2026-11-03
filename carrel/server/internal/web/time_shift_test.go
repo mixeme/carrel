@@ -98,7 +98,7 @@ func TestASeriesGoesWithItsStart(t *testing.T) {
 }
 
 // A start moved past the last day leaves a series that ends before it
-// begins: the form says so, and nothing is written.
+// begins: the form says so with both days, and nothing is written.
 func TestASeriesDoesNotStartAfterItsLastDay(t *testing.T) {
 	f := calendarFixture(t, nil, "e.ics", shiftSeries())
 	before := body(t, f, "e.ics")
@@ -114,11 +114,25 @@ func TestASeriesDoesNotStartAfterItsLastDay(t *testing.T) {
 			}
 		}
 	}
-	if !strings.Contains(string(said), "last day") {
-		t.Errorf("the form's error = %q, want it to speak of the last day", said)
+	if want := "Until (2 March) is before the start (9 March). Change one of them."; string(said) != want {
+		t.Errorf("the form's error = %q, want %q", said, want)
 	}
 	if after := body(t, f, "e.ics"); after != before {
 		t.Errorf("the record was written:\n%s", after)
+	}
+
+	// Days of two years carry their years.
+	_, page, _ = shiftEdit(t, f, url.Values{"start.date": {"2027-01-04"}, "end.date": {"2027-01-04"}, "repeat.until": {"2026-12-28"}})
+	said = ""
+	for _, set := range page.Form.Sets {
+		for _, row := range set.Rows {
+			if row.Error != "" {
+				said = row.Error
+			}
+		}
+	}
+	if want := "Until (28 December 2026) is before the start (4 January 2027). Change one of them."; string(said) != want {
+		t.Errorf("the form's error = %q, want %q", said, want)
 	}
 }
 

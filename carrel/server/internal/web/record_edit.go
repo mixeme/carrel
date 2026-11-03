@@ -537,8 +537,8 @@ func rowAt(row []string, i int) string {
 // hour later would lose its last day, unseen. So when the rule would no
 // longer read as that day, UNTIL is written as the form writes it — the end
 // of that day in tz —, and it is a date exactly when the start is one
-// (RFC 5545 §3.3.10). A start past the last day is an error of the form:
-// the series would end before it begins. A rule without UNTIL, or one whose
+// (RFC 5545 §3.3.10). A start past the last day is an error of the form,
+// which names both days. A rule without UNTIL, or one whose
 // last day the form could not show, is handed back as it is.
 func untilKept(rule, last string, startRow [3]string, start time.Time, tz *time.Location) (string, error) {
 	r := parseRule(rule)
@@ -553,7 +553,14 @@ func untilKept(rule, last string, startRow [3]string, start time.Time, tz *time.
 		first = startRow[0]
 	}
 	if first > last {
-		return "", errors.New("The series would end before it starts: its last day is before the start. Change Until or the start.")
+		// Two days of different years carry their years: 30 December is
+		// not before 3 January.
+		begins, _ := time.ParseInLocation("2006-01-02", first, tz)
+		layout := "2 January"
+		if begins.Year() != day.Year() {
+			layout = "2 January 2006"
+		}
+		return "", fmt.Errorf("Until (%s) is before the start (%s). Change one of them.", day.Format(layout), begins.Format(layout))
 	}
 	if allDay {
 		return r.set("UNTIL", day.Format("20060102")).String(), nil

@@ -80,6 +80,11 @@ current mockup; fonts are in `docs/visual/fonts/`.
   comes from in the frame's form (the owner's words of 03.11.2026): «Ready —
   no front matter: title from the first heading, date of the import (the
   file has none)». Was «…; the file has no date — dated today».
+- A series whose start is moved past its last day says both days under
+  Repeats (the owner's words of 03.11.2026): «Until (2 March) is before the
+  start (9 March). Change one of them.», the years given when the two days
+  are in different years. Was «The series would end before it starts: its
+  last day is before the start. Change Until or the start.».
 
 ## v0.2.394 — 2026-11-02
 
