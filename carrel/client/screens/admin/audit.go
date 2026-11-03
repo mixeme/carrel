@@ -18,13 +18,16 @@ const (
 var columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
 
 // The journal's columns (C-6.4 Columns, the ids the server names them by):
-// their place in the row, and how soon each leaves as the page narrows —
-// Actor and Target first (s-admin-7).
+// their place in the row, how soon each leaves as the page narrows —
+// Actor and Target first (s-admin-7) —, whether it is what a row's card
+// keeps on a phone — Action, the time its name (TableCol.Main, Typecase's
+// note 161, Р-66).
 var auditCols = []struct {
 	id   string
 	rank w.ColRank
+	main bool
 }{
-	{"when", 0}, {"action", 0}, {"actor", w.Rank3}, {"target", w.Rank4}, {"detail", 0},
+	{"when", 0, false}, {"action", 0, true}, {"actor", w.Rank3, false}, {"target", w.Rank4, false}, {"detail", 0, false},
 }
 
 // Audit is the journal of the instance, /admin/audit (AdminAuditPage,
@@ -144,7 +147,7 @@ func auditTable(p *view.AdminAuditPage) w.Table {
 	t := w.Table{}
 	for _, c := range auditCols {
 		if label, ok := shown[c.id]; ok {
-			t.Cols = append(t.Cols, w.TableCol{Label: label, Rank: c.rank})
+			t.Cols = append(t.Cols, w.TableCol{Label: label, Rank: c.rank, Main: c.main})
 			order = append(order, c.id)
 		}
 	}

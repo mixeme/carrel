@@ -217,8 +217,10 @@ func copyButton(a view.Action, text string) w.Button {
 // addressTable is Thunderbird and anything else (s-plan-4, -5): a row an
 // account — its name, its login and its password with Copy password —, a
 // row a collection — its mark and name, its protocol, its address, Copy.
+// The protocol is what a row's card keeps on a phone: where to paste the
+// address Copy copies (TableCol.Main, Typecase's note 160, Р-66).
 func addressTable(accounts []view.DeviceAccount) w.Table {
-	t := w.Table{Cols: []w.TableCol{{Label: colCollection}, {Label: colType}, {Label: colURL, Rank: w.Rank3}, {Width: w.ColNum, Rank: w.Rank4}}}
+	t := w.Table{Cols: []w.TableCol{{Label: colCollection}, {Label: colType, Main: true}, {Label: colURL, Rank: w.Rank3}, {Width: w.ColNum, Rank: w.Rank4}}}
 	for _, a := range accounts {
 		line := w.Line{Gap: w.LineGap8, Items: []w.LinePart{w.Strong(a.Label), w.Dim{Parts: []w.Inline{w.Text(loginWord)}}, w.Mono{Text: string(a.Login)}}}
 		if a.Refused != "" {

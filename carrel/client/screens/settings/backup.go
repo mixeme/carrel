@@ -167,11 +167,12 @@ func menuTwin(a view.Action) w.MenuItem {
 // which job, how big, how many collections went in whole (in alarm when not
 // all), whether it was read back and what was not copied, what started it
 // and, for an external run, with which password and from where; Restore and
-// Download of a copy there is.
+// Download of a copy there is. Verified is what a row's card keeps on a
+// phone, the day its name (TableCol.Main, Typecase's note 160, Р-66).
 func historyTable(rows []view.BackupHistoryRow) w.Table {
 	t := w.Table{Cols: []w.TableCol{
 		{Label: colWhen}, {Label: colJob}, {Label: colSize, Rank: w.Rank3, Secondary: true}, {Label: colCols, Rank: w.Rank4},
-		{Label: colVerified}, {Label: colTrigger, Secondary: true}, {Width: w.ColTime},
+		{Label: colVerified, Main: true}, {Label: colTrigger, Secondary: true}, {Width: w.ColTime},
 	}}
 	for _, r := range rows {
 		cols := w.TableCell{Parts: []w.CellPart{w.Text(r.Collections)}, Mono: true}

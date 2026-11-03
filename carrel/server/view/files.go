@@ -59,7 +59,8 @@ type FilesPage struct {
 	// выделения — Rename, Move, Copy, Delete — её кнопки (Action.Submits,
 	// операция — в адресе кнопки). Без сценариев полоса выделения стоит
 	// всегда, поэтому операции приходят и когда ничего не выделено. Actions
-	// — «Clear selection» (files.select.clear, папка без select), пока
+	// — «Select all» (files.select.all, папка, где выделены все её показанные
+	// строки) и «Clear selection» (files.select.clear, папка без select), пока
 	// выделено адресом
 	Select *Form `json:"select"`
 	// SelectField — имя поля отметки формы Select: «item»
