@@ -85,6 +85,10 @@ current mockup; fonts are in `docs/visual/fonts/`.
   start (9 March). Change one of them.», the years given when the two days
   are in different years. Was «The series would end before it starts: its
   last day is before the start. Change Until or the start.».
+- The days of a series the server lost after the properties it lost are
+  said in a message of their own (the owner's words of 03.11.2026): «The
+  server also did not keep two days of the series.», its body as states-36
+  has it. Was «Nor did it keep two days of the series.».
 
 ## v0.2.394 — 2026-11-02
 

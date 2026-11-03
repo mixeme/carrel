@@ -31,7 +31,7 @@ func TestLostDaysOfASeriesAreDays(t *testing.T) {
 		{"the days alone", []string{"EXDATE", "RECURRENCE-ID"}, nil,
 			"The change was saved, but the server did not keep two days of the series."},
 		{"a property too", []string{"EXDATE", "RECURRENCE-ID", "X-PRIVATE"}, []string{"X-PRIVATE"},
-			"Nor did it keep two days of the series."},
+			"The server also did not keep two days of the series."},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f := calendarFixture(t, nil, "e.ics", ics(series))

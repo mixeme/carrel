@@ -51,7 +51,7 @@ func lostDaysNotice(days []model.LostDay, kind view.Kind, tf timeFmt, also bool)
 	count := countWords(len(days), "day")
 	title := "The change was saved, but the server did not keep " + count + " of the series."
 	if also {
-		title = "Nor did it keep " + count + " of the series."
+		title = "The server also did not keep " + count + " of the series."
 	}
 	noun := "meeting"
 	if kind == view.KindTask {
