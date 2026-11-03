@@ -1056,8 +1056,18 @@
             "csrf": "csrf",
             "enabled": true,
             "href": "/app/settings/backup/restore/match?op=all",
+            "icon": "i-selectall",
             "id": "restore.all",
             "label": "Select all",
+            "method": "POST"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/backup/restore/match?op=none",
+            "icon": "i-close",
+            "id": "restore.none",
+            "label": "Clear selection",
             "method": "POST"
           }
         ],

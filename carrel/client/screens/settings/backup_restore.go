@@ -24,6 +24,7 @@ const (
 	selectedWord  = " selected"
 	noTarget      = "—"
 	restoreAllID  = "restore.all"
+	restoreNoneID = "restore.none"
 	restoreRunID  = "restore.run"
 	restoreIntoID = "restore.into"
 	restoreSkipID = "restore.skip"
@@ -61,14 +62,15 @@ func restoreMain(p *view.BackupPage) []w.MainPart {
 // reportDialog is the third step (s-backup-18): what was restored from the
 // archive's day, the sums under it, Done; a row a collection — its mark and
 // name, where it went, how many were created, what happened, a refusal in
-// alarm, «no differences» muted.
+// alarm, «no differences» muted. What happened is what a row's card keeps
+// on a phone (TableCol.Main, Typecase's note 160, Р-66).
 func reportDialog(rep *view.RestoreReport) w.Dialog {
 	h := w.Head{Title: &w.HeadTitle{Text: string(rep.Title)}, Acts: &w.Acts{Items: []w.ActsPart{bind.Button(rep.Done, "")}}}
 	if rep.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(rep.Subtitle)}}}
 	}
 	t := w.Table{Variant: w.TableFit, Cols: []w.TableCol{
-		{Label: colInArchive}, {Label: colRestored, Width: w.Col26, Rank: w.Rank4}, {Label: colCreated, Rank: w.Rank3, Secondary: true}, {Label: colHappened},
+		{Label: colInArchive}, {Label: colRestored, Width: w.Col26, Rank: w.Rank4}, {Label: colCreated, Rank: w.Rank3, Secondary: true}, {Label: colHappened, Main: true},
 	}}
 	for _, r := range rep.Rows {
 		happened := w.TableCell{Parts: as[w.CellPart](bind.Inlines(r.Happened))}
@@ -208,7 +210,7 @@ func copiesTable(r view.FormRow) w.Table {
 // Cancel and «Restore 3 collections» in the head; what becomes of the
 // records already here that differ — the answers a segment of links, what
 // the one on does under it —; the bar over the ticked rows — how many,
-// Restore into, Skip, Select all —; a row a collection of the archive —
+// Restore into, Skip, Select all, Clear selection —; a row a collection of the archive —
 // ticked to restore, its mark and name, how many records, where it goes,
 // what will happen —; that restoring is an import, in alarm.
 func matchDialog(r view.RestoreBlock, m *view.RestoreMatch) w.Dialog {
@@ -233,10 +235,15 @@ func matchDialog(r view.RestoreBlock, m *view.RestoreMatch) w.Dialog {
 			bar.Items = append(bar.Items, b, intoPick(m.Into))
 		case restoreSkipID:
 			bar.Items = append(bar.Items, b)
-		case restoreAllID:
-			// With a script it ticks the rows in place (s-backup-8).
-			b.Small, b.ScriptOnly = true, true
-			bar.Right = &w.BarRight{Items: []w.BarPart{b}}
+		case restoreAllID, restoreNoneID:
+			// The bar ends with the two, icon and label, the label a title
+			// where it is narrow (Typecase's note 160); Select all with a
+			// script only (s-backup-8).
+			b.Folds, b.Small, b.Title, b.ScriptOnly = true, true, string(a.Label), a.ID == restoreAllID
+			if bar.Right == nil {
+				bar.Right = &w.BarRight{}
+			}
+			bar.Right.Items = append(bar.Right.Items, b)
 		}
 	}
 	d.Items = append(d.Items, w.Steps{Items: []string{stepArchive, stepMatch, stepReport}, On: 2}, h)
@@ -276,7 +283,9 @@ func submitTo(a view.Action, action string) w.Button {
 // its mark and name, its count, «Restore into» its own choice under into.N
 // — the collections of its kind, a rule, New collection, Skip this one —,
 // and what will happen, in alarm where it is one; a row skipped is
-// unticked, its target «—», what will happen muted.
+// unticked, its target «—», what will happen muted. Restore into is what a
+// row's card keeps on a phone, the field to choose (TableCol.Main,
+// Typecase's note 160, Р-66).
 func matchTable(m *view.RestoreMatch) w.Table {
 	ticked := 0
 	for _, r := range m.Rows {
@@ -293,7 +302,7 @@ func matchTable(m *view.RestoreMatch) w.Table {
 	}
 	t := w.Table{Variant: w.TableFit, Cols: []w.TableCol{
 		{Width: w.ColTick, Tick: &head}, {Label: colInArchive}, {Label: colRecords, Rank: w.Rank3, Secondary: true},
-		{Label: colInto, Width: w.Col26, Rank: w.Rank4}, {Label: colWill},
+		{Label: colInto, Width: w.Col26, Rank: w.Rank4, Main: true}, {Label: colWill},
 	}}
 	for _, r := range m.Rows {
 		tick := w.TickedOff

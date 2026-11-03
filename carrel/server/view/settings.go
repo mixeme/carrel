@@ -894,7 +894,8 @@ type RestoreReportRow struct {
 // та же форма на свой адрес.
 type RestoreMatch struct {
 	// Form — POST ?op=restore-run, скрытый _csrf; кнопки — «Restore 3
-	// collections» (основная) и полосы: Restore into, Skip, Select all
+	// collections» (основная) и полосы: Restore into, Skip, Select all,
+	// Clear selection (restore.none: отметки сняты, куда — как было)
 	Form     Form `json:"form"`
 	Selected int  `json:"selected"` // «3 selected»
 	// Existing — вопрос над полосой (s-backup-8, -20; владелец, 26.10):

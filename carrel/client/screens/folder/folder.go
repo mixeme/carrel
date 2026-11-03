@@ -113,6 +113,9 @@ const (
 	sortID         = "files.sort."
 	fileGet        = "file.download"
 	fileOpen       = "file.open"
+	// selectAllID is the selection's Select all: with a script only
+	// (s-files-1, Typecase's note 160).
+	selectAllID = "files.select.all"
 )
 
 // selectionActs are the actions of the bar of the selected, in its order
@@ -129,7 +132,7 @@ var selectionActs = []string{"file.download", "file.rename", "file.move", "file.
 //     Folder), New folder, Refresh, Details, «⋯» with Print.
 //   - The notices.
 //   - The bar of the selected while rows are selected: their size, Download,
-//     Rename, Move, Copy, Delete, how many, Clear selection.
+//     Rename, Move, Copy, Delete, how many, Select all, Clear selection.
 //   - The bar: the filter, the order, the view, Columns, «⋯» with the
 //     order; on its right how many and how large.
 //   - The rows (a list) or the tiles: a row goes up; each row its tick, the
@@ -432,7 +435,9 @@ func head(p *view.FilesPage) w.Head {
 }
 
 // selection is the bar of the selected rows: their size, Download, Rename,
-// Move, Copy, Delete, how many, Clear selection; with none selected a bar
+// Move, Copy, Delete, how many, Select all, Clear selection — icon and
+// label, the label a title where the bar is narrow (Typecase's note 160);
+// with none selected a bar
 // of a page without a script only.
 func selection(p *view.FilesPage) w.Bar {
 	// How large the selected are, while some are (states-34 draws the bar
@@ -457,11 +462,12 @@ func selection(p *view.FilesPage) w.Bar {
 		items = append(items, b)
 	}
 	b := w.Bar{Items: items, Count: &w.BarCount{Text: strconv.Itoa(p.Bar.Selected) + selected}, Variant: w.BarSelection, NoScript: p.Bar.Selected == 0}
-	if p.Select != nil {
+	if p.Select != nil && len(p.Select.Actions) > 0 {
+		b.Right = &w.BarRight{}
 		for _, a := range p.Select.Actions {
 			c := bind.Button(a, "")
-			c.Small = true
-			b.Right = &w.BarRight{Items: []w.BarPart{c}}
+			c.Folds, c.Small, c.Title, c.ScriptOnly = true, true, string(a.Label), a.ID == selectAllID
+			b.Right.Items = append(b.Right.Items, c)
 		}
 	}
 	return b

@@ -600,7 +600,8 @@ func (s *Server) restoreMatch(sess *session.Session, blob sealed.Blob, t *restor
 	m.Form.Actions = []view.Action{run,
 		{ID: "restore.into", Label: "Restore into", Href: q("into"), Method: "POST", Enabled: true},
 		{ID: "restore.skip", Label: "Skip", Href: q("skip"), Method: "POST", Enabled: true},
-		{ID: "restore.all", Label: "Select all", Href: q("all"), Method: "POST", Enabled: true},
+		{ID: "restore.all", Label: "Select all", Icon: "i-selectall", Href: q("all"), Method: "POST", Enabled: true},
+		{ID: "restore.none", Label: "Clear selection", Icon: "i-close", Href: q("none"), Method: "POST", Enabled: true},
 	}
 	return m
 }
@@ -719,7 +720,8 @@ func (s *Server) restoreExisting(here int, unread bool, answer string) *view.Imp
 // matchRestore is a press on the bar of the matching (s-backup-8): the form
 // as it stands, and do= — into gives the ticked rows the bar's target (a row
 // whose kind it does not take keeps its own), skip skips them and unticks
-// them, all ticks every row. Nothing is written; the page comes back.
+// them, all ticks every row, none unticks every row. Nothing is written;
+// the page comes back.
 func (s *Server) matchRestore(w http.ResponseWriter, r *http.Request, sess *session.Session, blob sealed.Blob) {
 	t := restoreOf(sess)
 	if t == nil {
@@ -728,7 +730,7 @@ func (s *Server) matchRestore(w http.ResponseWriter, r *http.Request, sess *sess
 	}
 	fields := restoreFields(r)
 	c := postedChoice(fields, blob, t, t.choiceOf(blob))
-	switch restoreOp(r, fields) {
+	switch op := restoreOp(r, fields); op {
 	case "into":
 		v := fields.Get("into")
 		for i, e := range t.manifest.Collections {
@@ -742,9 +744,9 @@ func (s *Server) matchRestore(w http.ResponseWriter, r *http.Request, sess *sess
 				c.into[i], c.picked[i] = restoreSkip, false
 			}
 		}
-	case "all":
+	case "all", "none":
 		for i := range c.picked {
-			c.picked[i] = true
+			c.picked[i] = op == "all"
 		}
 	}
 	t.keep(c)
@@ -1618,8 +1620,8 @@ func restoreOp(r *http.Request, fields url.Values) string {
 }
 
 // postBackupRestoreMatch is the one form of the matching (s-backup-8), by
-// the op of the button pressed: restore — the run; into, skip, all — the
-// bar on the ticked rows; cancel — the archive closed, back to the jobs.
+// the op of the button pressed: restore — the run; into, skip, all, none —
+// the bar on the ticked rows; cancel — the archive closed, back to the jobs.
 func (s *Server) postBackupRestoreMatch(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -1634,7 +1636,7 @@ func (s *Server) postBackupRestoreMatch(w http.ResponseWriter, r *http.Request) 
 	switch restoreOp(r, restoreFields(r)) {
 	case "restore":
 		s.runRestore(w, r, sess, key, blob)
-	case "into", "skip", "all":
+	case "into", "skip", "all", "none":
 		s.matchRestore(w, r, sess, blob)
 	case "cancel":
 		endRestore(sess)

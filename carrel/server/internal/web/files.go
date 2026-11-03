@@ -834,7 +834,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		page.Details = s.filePanel(c, segs, picked[0], here, q, dims)
 	}
 	page.Bar.Actions = append(page.Bar.Actions, s.detailsToggle(here, q, picked, shown), s.printAction(here))
-	page.Select, page.SelectField = s.selectForm(c, segs, here, q), "item"
+	page.Select, page.SelectField = s.selectForm(c, segs, here, q, page.Rows), "item"
 	// The queue hides into its head and shows again (s-files-2, -3): an
 	// address of the folder either way.
 	if page.Queue = s.transferQueue(c.sess); page.Queue != nil {
@@ -1034,17 +1034,26 @@ func (s *Server) detailsToggle(here string, q url.Values, picked []file.Entry, s
 
 // selectForm is the selection of a folder (s-files-5): the form of its
 // operations — a POST of the folder's op with the token —, whose ticks are
-// the fields «item» and whose buttons are the operations of the bar. Clear
-// selection is the folder with its query and nothing selected by the
-// address.
-func (s *Server) selectForm(c *fileCtx, segs []string, here string, q url.Values) *view.Form {
+// the fields «item» and whose buttons are the operations of the bar. The
+// bar ends with Select all — the folder with every row it shows selected —
+// and Clear selection — the folder with its query and nothing selected by
+// the address (Typecase's note 160).
+func (s *Server) selectForm(c *fileCtx, segs []string, here string, q url.Values, rows []view.FileRow) *view.Form {
 	f := view.Form{Action: s.route(c.href("op", segs, true)), Method: "POST", Target: render.TargetSheet,
 		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess)}}}}
 	if len(q["select"]) > 0 {
-		clear := cloneValues(q)
+		all, clear := cloneValues(q), cloneValues(q)
+		all.Del("select")
+		all.Del("details")
+		for _, r := range rows {
+			all.Add("select", string(r.Name))
+		}
 		clear.Del("select")
 		clear.Del("details")
-		f.Actions = []view.Action{{ID: "files.select.clear", Label: "Clear selection", Href: s.route(here + querySuffix(clear)), Method: "GET", Enabled: true}}
+		f.Actions = []view.Action{
+			{ID: "files.select.all", Label: "Select all", Icon: "i-selectall", Href: s.route(here + querySuffix(all)), Method: "GET", Enabled: true},
+			{ID: "files.select.clear", Label: "Clear selection", Icon: "i-close", Href: s.route(here + querySuffix(clear)), Method: "GET", Enabled: true},
+		}
 	}
 	return &f
 }

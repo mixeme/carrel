@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.395 — 2026-11-03
+
+### Changed
+
+- Every selection bar ends with Select all and Clear selection (Typecase's
+  note 160). A folder selected by its address now has `files.select.all`:
+  the same folder with every row it shows selected, its filter and order
+  kept. `files.select.clear` stays. The restore's matching gains
+  `restore.none` «Clear selection»: every row unticked, where each goes
+  unchanged. The four come with their icons, `i-selectall` and `i-close`.
+
 ## v0.2.394 — 2026-11-02
 
 ### Changed
