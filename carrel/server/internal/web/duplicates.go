@@ -834,8 +834,13 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 			// A number that is not one is said, not dropped (Б45 of the
 			// audit of 11.10.2026): the screen showed the old threshold as
 			// if it were the one just typed.
-			s.duplicatesRefused(w, r, sess, "The threshold was not changed",
-				fmt.Sprintf("«%s» is not a number from 0 to %d.", raw, conf.MaxDuplicatesPoints))
+			// The owner's words of 03.11.2026: the field by its name, what
+			// it takes, and what it stays.
+			s.duplicatesRefused(w, r, sess, func(page *view.DuplicatesPage) view.Notice {
+				return view.Notice{Role: view.NoticeAlert,
+					Title: text(fmt.Sprintf("Match threshold not changed: «%s» is not a whole number from 0 to %d.", raw, conf.MaxDuplicatesPoints)),
+					Body:  text(fmt.Sprintf("It stays %d.", page.Threshold.Value))}
+			})
 			return
 		}
 		_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.threshold", strconv.Itoa(n), func(d *sealed.Duplicates) error {
@@ -855,6 +860,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	}
 	if do == "weights" {
 		var refused []string
+		sentN := 0
 		if r.ParseForm() == nil {
 			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.weights", "", func(d *sealed.Duplicates) error {
 				for _, sig := range dupes.Signals {
@@ -863,13 +869,14 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 						continue
 					}
 					raw := strings.TrimSpace(vals[0])
+					sentN++
 					if raw == "" {
 						delete(d.Weights, string(sig))
 						continue
 					}
 					n, err := strconv.Atoi(raw)
 					if err != nil || n < 0 || n > conf.MaxDuplicatesPoints {
-						refused = append(refused, "«"+raw+"»")
+						refused = append(refused, signalLabels[sig]+" · «"+raw+"»")
 						continue
 					}
 					if d.Weights == nil {
@@ -881,8 +888,19 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 		if len(refused) > 0 {
-			s.duplicatesRefused(w, r, sess, text(plural(len(refused), "weight")+" not changed"),
-				fmt.Sprintf("%s: a weight is a number from 0 to %d. The other weights were saved.", strings.Join(refused, ", "), conf.MaxDuplicatesPoints))
+			// As a delete in Files (the owner's words of 03.11.2026): how
+			// many of how many, the rule in the line, what was saved; each
+			// by its signal under «Not saved».
+			s.duplicatesRefused(w, r, sess, func(*view.DuplicatesPage) view.Notice {
+				lines := make([]view.Text, 0, len(refused))
+				for _, l := range refused {
+					lines = append(lines, text(l))
+				}
+				return view.Notice{Role: view.NoticeAlert,
+					Title:   text(fmt.Sprintf("%d of %s not saved: a weight is a whole number from 0 to %d.", len(refused), plural(sentN, "weight"), conf.MaxDuplicatesPoints)),
+					Body:    text(fmt.Sprintf("%d saved, %d unchanged.", sentN-len(refused), len(refused))),
+					Details: &view.Diagnostic{Summary: "Not saved", Lines: lines}}
+			})
 			return
 		}
 		s.redirect(w, r, "/app/duplicates")
@@ -994,10 +1012,11 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 }
 
 // duplicatesRefused answers a setting of the duplicates screen that was not
-// taken: the screen as it stands, and why.
-func (s *Server) duplicatesRefused(w http.ResponseWriter, r *http.Request, sess *session.Session, title view.Text, body string) {
+// taken: the screen as it stands, and why — said of the screen, which holds
+// what stays.
+func (s *Server) duplicatesRefused(w http.ResponseWriter, r *http.Request, sess *session.Session, why func(*view.DuplicatesPage) view.Notice) {
 	page := s.duplicatesPage(sess, s.readDuplicates(sess, false), kindFilter(r))
-	page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Title: title, Body: text(body)})
+	page.Notices = append(page.Notices, why(&page))
 	s.writePage(w, r, http.StatusOK, page)
 }
 

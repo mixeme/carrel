@@ -124,6 +124,14 @@ current mockup; fonts are in `docs/visual/fonts/`.
   (s-contacts-15). Was «An address on this card was replaced» · «Events
   and tasks that name the old address have not been looked at yet. They
   can be rewritten to the new one.» · «Review those records».
+- A wrong number on the duplicates screen is said in the owner's words of
+  03.11.2026: «Match threshold not changed: «7x» is not a whole number from
+  0 to 1000.» · «It stays 60.»; weights as a delete in Files — «2 of 6
+  weights not saved: a weight is a whole number from 0 to 1000.» · «4
+  saved, 2 unchanged.», each under «Not saved» by its signal, «Same email ·
+  «-3»». Was «The threshold was not changed» · ««7x» is not a number from 0
+  to 1000.» and «2 weights not changed» · ««-3», «abc»: a weight is a
+  number from 0 to 1000. The other weights were saved.».
 
 ## v0.2.394 — 2026-11-02
 
