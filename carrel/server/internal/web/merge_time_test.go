@@ -64,7 +64,7 @@ func TestMergeAsksWhen(t *testing.T) {
 	for _, l := range page.Gains {
 		lines += string(l) + "\n"
 	}
-	if !strings.Contains(lines, "the time of ") {
+	if !strings.Contains(lines, "the time from ") {
 		t.Errorf("the page does not say whose time is taken:\n%s", lines)
 	}
 	confirm := mergeAction(t, page, "duplicates.merge.confirm")
@@ -78,5 +78,58 @@ func TestMergeAsksWhen(t *testing.T) {
 	mustContain(t, unfolded(body), "UID:e1", "DTEND:20260810T073000Z", "RRULE:FREQ=WEEKLY;BYDAY=MO")
 	if _, _, ok := srv.Object(duty + "e2.ics"); ok {
 		t.Error("the other event was not deleted")
+	}
+}
+
+// The two lines of «What changes» of a time taken from another record (the
+// owner's words of 03.11.2026): what the time is made of, from whom; and the
+// kept record's own rewritten occurrences, named by the record, going with
+// the time it gives up — as s-dup-4 says those of a deleted series.
+func TestMergeTimeLines(t *testing.T) {
+	srv := searchServer(t)
+	duty := davtest.CalendarHome + "duty/"
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	srv.AddCalendar(caldav.Calendar{Path: duty, Name: "Duty"})
+	srv.Seed(searchWork+"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nSUMMARY:Standup\nDTSTART:20260810T070000Z\nDTEND:20260810T080000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO\nEND:VEVENT\n"+
+		"BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nRECURRENCE-ID:20260817T070000Z\nSUMMARY:Standup\nDTSTART:20260817T090000Z\nDTEND:20260817T100000Z\nEND:VEVENT"))
+	srv.Seed(duty+"e2.ics", ics("BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260801T000000Z\nSUMMARY:Standup\nDTSTART:20260810T070000Z\nDTEND:20260810T073000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO\nEND:VEVENT"))
+	f := connectFixture(t, srv, searchWork, nil)
+	cal := func(col string) string { return "/app/calendar/" + f.id + "/" + url.PathEscape(col) }
+	for _, col := range []string{searchWork, duty} {
+		f.h.do(get(cal(col)+"?from=2026-08-10", f.sess))
+	}
+	g := onlyGroup(t, decode[view.DuplicatesPage](t, f.h.do(get("/app/duplicates", f.sess))))
+	var pick string
+	for _, c := range g.Choices {
+		if c.Name != "choice.WHEN" {
+			continue
+		}
+		for i, o := range c.Options {
+			if strings.Contains(string(o), "Duty") {
+				pick = c.Values[i]
+			}
+		}
+	}
+	if pick == "" {
+		t.Fatalf("no time of Duty to choose: %+v", g.Choices)
+	}
+	page := openMerge(t, f.h, f.sess, g, url.Values{"choice.WHEN": {pick}})
+	if !strings.HasSuffix(string(page.Target.Stamp), "Work") {
+		page = decode[view.DuplicatesMergePage](t, f.h.do(get(mergeAction(t, page, "duplicates.merge.into").Href, f.sess)))
+	}
+	var gains, left []string
+	for _, l := range page.Gains {
+		gains = append(gains, string(l))
+	}
+	for _, l := range page.NotCarried {
+		left = append(left, string(l))
+	}
+	gained := strings.Join(gains, "\n")
+	if !strings.Contains(gained, "the time from Standup · ") || !strings.Contains(gained, "Duty: start, end, repetition, added and skipped days, rewritten occurrences") {
+		t.Errorf("gains:\n%s", gained)
+	}
+	lost := strings.Join(left, "\n")
+	if !strings.Contains(lost, "1 rewritten occurrence of Standup · ") || !strings.Contains(lost, "Work, which belongs to its old time and goes with it") {
+		t.Errorf("not carried over:\n%s", lost)
 	}
 }

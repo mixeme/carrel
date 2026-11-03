@@ -107,6 +107,15 @@ current mockup; fonts are in `docs/visual/fonts/`.
   subtasks stay open.». Was «The task is done, 1 subtask still open» ·
   «They could not be marked done with it. Open them and mark them
   yourself.» and «The task is done, its subtasks were not looked at».
+- A merge that takes another record's time says it in «What changes» in
+  the owner's words of 03.11.2026: «the time from Standup · nextcloud ·
+  Duty: start, end, repetition, added and skipped days, rewritten
+  occurrences» under what the record gains, and the kept record's own as
+  s-dup-4 says those of a deleted series — «1 rewritten occurrence of
+  Standup · nextcloud · Work, which belongs to its old time and goes with
+  it». Was «the time of …: its start and end, its repetition and its
+  rewritten occurrences» and «… of the kept record, which belongs to the
+  time it gives up».
 
 ## v0.2.394 — 2026-11-02
 

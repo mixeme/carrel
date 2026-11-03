@@ -413,7 +413,9 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		page.Gains = append(page.Gains, text(gainLine(calendar, g, from(g.From))))
 	}
 	if plan.Time > 0 {
-		page.Gains = append(page.Gains, text("the time of "+from(plan.Time).label()+": its start and end, its repetition and its rewritten occurrences"))
+		// What the time is made of, from whom (the owner's words of
+		// 03.11.2026), as «2 reminders from the others» beside it.
+		page.Gains = append(page.Gains, text("the time from "+from(plan.Time).label()+": start, end, repetition, added and skipped days, rewritten occurrences"))
 	}
 	if plan.Alarms > 0 {
 		page.Gains = append(page.Gains, text(plural(plan.Alarms, "reminder")+" from the others"))
@@ -422,8 +424,10 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		page.NotCarried = append(page.NotCarried, text(gainLine(calendar, dupes.Gain{Prop: l.Prop, Value: l.Value}, target)+" — left out, as you chose"))
 	}
 	if plan.Dropped > 0 {
-		page.NotCarried = append(page.NotCarried, text(fmt.Sprintf("%s of the kept record, which %s to the time it gives up",
-			plural(plan.Dropped, "rewritten occurrence"), verbs(plan.Dropped, "belongs", "belong"))))
+		// The kept record's own, by its name, as s-dup-4 says those of a
+		// deleted series (the owner's words of 03.11.2026).
+		page.NotCarried = append(page.NotCarried, text(fmt.Sprintf("%s of %s, which %s to its old time and %s with it",
+			plural(plan.Dropped, "rewritten occurrence"), target.label(), verbs(plan.Dropped, "belongs", "belong"), verbs(plan.Dropped, "goes", "go"))))
 	}
 	for i := 1; i <= len(others); i++ {
 		if n := plan.Instances[i]; n > 0 {
