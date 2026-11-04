@@ -356,7 +356,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		// s-admin-6 writes it as it stands in the product, without a title.
 		Warning: view.Notice{
 			Role: view.NoticeAlert,
-			Body: text("Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and shown to them."),
+			Body: text("Key escrow is a way in, not a backup: with the master password an administrator can decrypt a covered user’s DAV credentials, and through them their records. Covered users are told so, and every recovery is shown to them."),
 		},
 		Result:  flash.result,
 		Covered: []view.EscrowCoverRow{},
@@ -372,7 +372,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("policy")},
 			view.FormRow{Name: "coverNew", Label: "New accounts are covered", Kind: view.InputCheck,
 				Value: text(boolStr(snap.Settings.EscrowCoverNewUsers)),
-				Hint:  "Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision."},
+				Hint:  "Copies already taken stay: only their owners delete them."},
 		), "escrow.policy.save", "Save")
 		legend(&page.Form, "Policy")
 		if flash.formErr != "" {
@@ -384,7 +384,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			view.FormRow{Name: "current", Label: "Current", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "master", Label: "New", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true,
-				Hint: "Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again."},
+				Hint: "The deposited copies stay as they are: nobody has to opt in again."},
 		), "escrow.master.change", "Change")
 		legend(&page.Master, "Master password")
 		if flash.masterErr != "" {
@@ -399,7 +399,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "temp", Label: "Temporary password for the user", Kind: view.InputText, Required: true, Mono: true,
 				Value: text(s.users.SuggestPassword()),
-				Hint:  "Connections survive a recovery. The user sees it by the password-history link they were given; a letter goes too when mail can reach them."},
+				Hint:  "Connections survive a recovery. The user sees it in their password history, and gets a letter when mail can reach them."},
 		), "escrow.recover", "Recover")
 		page.Recover.Actions[0].Danger = true
 		legend(&page.Recover, "Recover an account")

@@ -405,7 +405,7 @@
           "required": false,
           "value": ""
         },
-        "hint": "A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.",
+        "hint": "A name or an address. On save, the server sends the invitations, not Carrel.",
         "name": "attendee",
         "readOnly": false,
         "rows": [],

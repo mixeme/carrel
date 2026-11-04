@@ -164,15 +164,7 @@ func (s *Server) attendeeField(c *collectionCtx, st editState) view.AttendeeFiel
 		f.ReadOnly, f.Hint = true, text("You are invited by "+who+": only the organiser changes the list.")
 		return f
 	}
-	server := connLabel(c.conn)
-	switch c.conn.Scheduling {
-	case discover.SchedulingYes:
-		f.Hint = text("A name or an address: the ticked address books are searched. On save, " + server + " sends the invitations and their changes — Carrel sends no mail itself.")
-	case discover.SchedulingNo:
-		f.Hint = text("A name or an address: the ticked address books are searched. " + server + " sends no invitations, and Carrel sends no mail itself.")
-	default:
-		f.Hint = text("A name or an address: the ticked address books are searched. " + server + " did not say whether it sends invitations; Carrel sends no mail itself.")
-	}
+	f.Hint = attendeeHint(c.conn.Scheduling)
 	if c.col.ReadOnly {
 		f.ReadOnly = true
 		return f
@@ -394,4 +386,17 @@ func foundRuns(name string, at, n int) view.Runs {
 		out = append(out, view.Run{Text: text(string(rs[at+n:]))})
 	}
 	return out
+}
+
+// attendeeHint is the line under the attendees: what to type, and who sends
+// the invitations — «the server», not its name (the owner, 04.11.2026;
+// Typecase's note 168, s-agenda-3), in every answer it gave about them.
+func attendeeHint(scheduling string) view.Text {
+	switch scheduling {
+	case discover.SchedulingYes:
+		return "A name or an address. On save, the server sends the invitations, not Carrel."
+	case discover.SchedulingNo:
+		return "A name or an address. The server sends no invitations, and neither does Carrel."
+	}
+	return "A name or an address. The server did not say whether it sends invitations; Carrel does not."
 }

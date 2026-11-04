@@ -20,14 +20,13 @@ type TraceStep struct {
 	Detail Text       `json:"detail"` // что именно ответил сервер
 }
 
-// LossReport — сервер принял запись, но что-то потерял. Сообщение кадра
-// (states-12, -17, -24, -31): Title жирным, за ним Note и свойства через
-// запятую, моноширинно, точкой в конце. Свойств нет — сообщения о свойствах
-// нет.
+// LossReport — сервер принял запись, но что-то потерял; уведомление, не
+// блокировка: запись уже произошла. Сообщение кадра (states-12, -17, -24,
+// -31): Title жирным, за ним свойства через запятую, моноширинно, точкой в
+// конце. Свойств нет — сообщения о свойствах нет.
 type LossReport struct {
-	Title      Text     `json:"title"` // «The change was saved, but the server did not keep these properties.»
+	Title      Text     `json:"title"` // «The change was saved, but the server did not keep these properties:»
 	Properties []Text   `json:"properties"`
-	Note       Text     `json:"note"`       // уведомление, не блокировка: запись уже произошла — «Other clients will not see them either:»
 	Aggregated bool     `json:"aggregated"` // повторная потеря на этом сервере: сказано один раз
 	Actions    []Action `json:"actions"`    // что можно сделать с потерей; пусто — нечего
 	// Days — второе сообщение: дни серии, которых сервер не сохранил, словами

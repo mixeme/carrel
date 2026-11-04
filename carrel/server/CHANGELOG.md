@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.399 — 2026-11-04
+
+### Changed
+
+- Shorter hints, the frames' words (Р-77, Typecase's note 168, accepted by
+  the owner 04.11.2026):
+  - the root of Files (s-files-6): «The storages ticked in the rail, each
+    with its own tree.» — the storages not ticked are no longer named
+    there;
+  - key escrow (s-admin-6, -30, -31): «Key escrow is a way in, not a
+    backup: …», «Copies already taken stay: only their owners delete
+    them.», «The deposited copies stay as they are: nobody has to opt in
+    again.», «Connections survive a recovery. The user sees it in their
+    password history, and gets a letter when mail can reach them.»;
+  - what the server did not keep (states-12, -17, -24, -31, -36):
+    «**The change was saved, but the server did not keep these
+    properties:** …»; the days of a series — «The skipped meeting of 24
+    August is back; the one moved from 31 August to 1 September, 15:00, is
+    back on its day at 12:00.»;
+  - the invitations are sent by «the server», without its name (the owner,
+    04.11.2026): under the attendees «A name or an address. On save, the
+    server sends the invitations, not Carrel.»; a server that sends none —
+    «… The server sends no invitations, and neither does Carrel.»; one that
+    did not say — «… The server did not say whether it sends invitations;
+    Carrel does not.» (these two have no frame and follow the first); the
+    delete sheet «The server may send its attendees a cancellation.» (a
+    move still names it, s-agenda-29).
+- `LossReport.note` is gone: the frames no longer draw a line between the
+  title and the properties. A client that drew it drops it.
+
 ## v0.2.398 — 2026-11-04
 
 ### Changed

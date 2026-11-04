@@ -4,6 +4,16 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.21 — 2026-11-04
+
+Typecase `09827c3`, note 168 (Р-77, shorter hints); server `v0.2.399`.
+The whole client suite passes.
+
+- What the server did not keep of a save is its title in bold, then the
+  properties (`bind.Loss`): `LossReport.Note` is gone from the contract
+  (states-12, -17, -24, -31). The other words of the note are the
+  server's.
+
 ## v0.11.20 — 2026-11-04
 
 Typecase `99f680a`, notes 166 and 167 (Р-77, shorter hints); server

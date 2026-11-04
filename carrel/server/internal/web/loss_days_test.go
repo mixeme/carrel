@@ -2,11 +2,17 @@ package web_test
 
 import (
 	"net/http"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
 
 	"carrel.dev/carrel/server/view"
+)
+
+var (
+	frameLossMsg   = regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush-top2">(<b>The change was saved.*?)</div>`)
+	frameLossTitle = regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush-top2"><b>(The change was saved[^<]*)</b>`)
 )
 
 // Typecase's Р-60 (the owner's answer of 14.10.2026, states-36): a server
@@ -19,9 +25,14 @@ func TestLostDaysOfASeriesAreDays(t *testing.T) {
 		"RRULE:FREQ=WEEKLY;COUNT=6\nEXDATE:20260824T120000Z\nSUMMARY:Sync-up\nX-PRIVATE:yes\nEND:VEVENT\n" +
 		"BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID:20260831T120000Z\nDTSTART:20260901T150000Z\n" +
 		"DTEND:20260901T160000Z\nSUMMARY:Sync-up\nEND:VEVENT"
-	if !strings.Contains(mockupFrame(t, "states-36"), "did not keep two days of the series") {
-		t.Fatal("states-36 says something else: read the frame again")
+	// The words are the frames' (Р-77, Typecase's note 168): states-36 the
+	// days, states-17 the properties.
+	lostDays := frameSaid(frameLossMsg, mockupFrame(t, "states-36"))
+	lostProps := frameAll(frameLossTitle, mockupFrame(t, "states-17"), 1)
+	if len(lostDays) != 1 || !strings.HasPrefix(lostDays[0], "The change was saved, but the server did not keep two days of the series. ") || len(lostProps) != 1 {
+		t.Fatalf("states-36 %q, states-17 %q: read the frames again", lostDays, lostProps)
 	}
+	daysSaid := strings.TrimPrefix(lostDays[0], "The change was saved, but the server did not keep two days of the series. ")
 	for _, tc := range []struct {
 		name  string
 		drop  []string
@@ -56,9 +67,11 @@ func TestLostDaysOfASeriesAreDays(t *testing.T) {
 			}
 			days := page.Loss.Days
 			body := string(days.Body)
-			if string(days.Title) != tc.title || !strings.HasPrefix(body, "Other clients will not see them either: the meeting of 24 August, which was skipped, is back; the meeting of 31 August, which was moved to 1 September, ") ||
-				!strings.Contains(body, ", is back on its day at ") || !strings.HasSuffix(body, ".") {
-				t.Errorf("days = %q / %q", days.Title, body)
+			if string(days.Title) != tc.title || body != daysSaid {
+				t.Errorf("days = %q / %q, want %q", days.Title, body, daysSaid)
+			}
+			if len(tc.props) > 0 && string(page.Loss.Title) != lostProps[0] {
+				t.Errorf("properties' title = %q, want %q", page.Loss.Title, lostProps[0])
 			}
 		})
 	}

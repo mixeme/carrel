@@ -1589,7 +1589,7 @@ type AttendeeField struct {
     Rows     []AttendeeRow // организатор первым; Value, Fixed
     Add      *FormRow      // строка набора: Name «attendee.add», Label «Add attendee», Placeholder «Name or address», Value — набранное, Error — почему не взято; nil — список меняет только организатор
     Suggest  string        // адрес подсказок, /app/contacts/suggest (C-5): набранное — ?q=
-    Hint     Text          // под полем: «A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.» (сервер планирует, RFC 6638), «… nextcloud sends no invitations, and Carrel sends no mail itself.», «… nextcloud did not say whether it sends invitations; …»; приглашённому — «You are invited by Мария Лебедева: only the organiser changes the list.»
+    Hint     Text          // под полем: «A name or an address. On save, the server sends the invitations, not Carrel.» (сервер планирует, RFC 6638), «… The server sends no invitations, and neither does Carrel.», «… The server did not say whether it sends invitations; Carrel does not.» — сервер без имени (владелец 04.11.2026); приглашённому — «You are invited by Мария Лебедева: only the organiser changes the list.»
     ReadOnly bool          // приглашённый или календарь только для чтения
 }
 
@@ -4337,18 +4337,17 @@ type TraceStep struct {
 }
 
 type LossReport struct { // сервер принял запись, но что-то потерял
-    Title      Text     // жирным: «The change was saved, but the server did not keep these properties.» (states-12, -17, -24, -31)
+    Title      Text     // жирным: «The change was saved, but the server did not keep these properties:» (states-12, -17, -24, -31); уведомление, не блокировка: запись уже произошла
     Properties []Text   // моноширинно, через запятую, точкой в конце; пусто — сообщения о свойствах нет
-    Note       Text     // уведомление, не блокировка: запись уже произошла — «Other clients will not see them either:»
     Aggregated bool     // повторная потеря на этом сервере: сказано один раз
     Actions    []Action // что можно сделать с потерей; пусто — нечего
     // Days — дни серии, которых сервер не сохранил, вторым сообщением и
     // словами (states-36; Р-60 Typecase): Title — что потеряно, Body —
-    // каждый день своим началом в серии и что с ним стало: пропуск пропал —
-    // «the meeting of 24 August, which was skipped, is back»; перенос пропал
-    // или отвязан — «the meeting of 31 August, which was moved to 1
-    // September, 15:00, is back on its day at 12:00». Пропуск и перенос
-    // тогда не стоят в Properties именами. nil — дни серии целы
+    // каждый день своим началом в серии и что с ним стало, имя записи
+    // один раз, дальше «the one» (Р-77): «The skipped meeting of 24 August
+    // is back; the one moved from 31 August to 1 September, 15:00, is back
+    // on its day at 12:00.» Пропуск и перенос тогда не стоят в Properties
+    // именами. nil — дни серии целы
     Days *Notice
 }
 ```

@@ -1048,13 +1048,12 @@
     "actions": [],
     "aggregated": false,
     "days": null,
-    "note": "Other clients will not see them either:",
     "properties": [
       "X-ABLABEL",
       "X-CARREL-UNKNOWN-FLAG",
       "X-EVOLUTION-FILE-AS"
     ],
-    "title": "The change was saved, but the server did not keep these properties."
+    "title": "The change was saved, but the server did not keep these properties:"
   },
   "name": "Анна Ковалёва",
   "notices": [],

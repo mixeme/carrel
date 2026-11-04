@@ -27,7 +27,7 @@
       "what": "agenda-10-08.pdf"
     }
   ],
-  "cancels": "nextcloud may send its attendees a cancellation.",
+  "cancels": "The server may send its attendees a cancellation.",
   "form": {
     "action": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete",
     "actions": [],

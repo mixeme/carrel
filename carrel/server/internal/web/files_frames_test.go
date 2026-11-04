@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"image"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -17,6 +18,8 @@ import (
 // ФА1, ФА2, ФА3, ФБ1…ФБ4: the root — its refresh, its rail row open with
 // «1 of 2», the line under the title, the server of each storage, the
 // message naming what is not ticked; empty, a button that ticks them all.
+var frameRootMsg = regexp.MustCompile(`(?s)</table>\s*<div class="tc-msg">(.*?)</div>`)
+
 func TestFilesRootIsTheFrame(t *testing.T) {
 	f := filesFixture(t, true)
 	f.srv.SeedFolder(filesDocs)
@@ -37,14 +40,10 @@ func TestFilesRootIsTheFrame(t *testing.T) {
 	if len(root.Collections) != 1 || root.Collections[0].Server == "" || strings.Contains(string(root.Collections[0].Server), "Docs") {
 		t.Errorf("rows = %+v", root.Collections)
 	}
-	var strong []string
-	for _, r := range root.Note {
-		if r.Mark == view.RunStrong {
-			strong = append(strong, string(r.Text))
-		}
-	}
-	if strings.Join(strong, ",") != "Old" || !strings.Contains(plainText(root.Note), "is not ticked, so it is not here") {
-		t.Errorf("note = %+v", root.Note)
+	// What the root is, in the frame's words (Р-77, Typecase's note 168):
+	// the storages not ticked are not named — the rail says it.
+	if want := frameSaid(frameRootMsg, mockupFrame(t, "s-files-6")); len(want) != 1 || plainText(root.Note) != want[0] {
+		t.Errorf("note = %q, want %q", plainText(root.Note), want)
 	}
 
 	// A folder read says when; its storage is the open row of the rail.

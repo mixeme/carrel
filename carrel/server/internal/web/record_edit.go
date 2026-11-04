@@ -4224,8 +4224,7 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	// properties; the days of a series as days, in a message of their own
 	// (states-36).
 	report := &view.LossReport{
-		Title:      "The change was saved, but the server did not keep these properties.",
-		Note:       "Other clients will not see them either:",
+		Title:      "The change was saved, but the server did not keep these properties:",
 		Aggregated: loss.Aggregated,
 		Actions:    actions,
 	}

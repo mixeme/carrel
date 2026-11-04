@@ -346,7 +346,7 @@
   },
   "warning": {
     "actions": [],
-    "body": "Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and shown to them.",
+    "body": "Key escrow is a way in, not a backup: with the master password an administrator can decrypt a covered user’s DAV credentials, and through them their records. Covered users are told so, and every recovery is shown to them.",
     "details": null,
     "role": "alert",
     "title": ""

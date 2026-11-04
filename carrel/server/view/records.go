@@ -226,11 +226,10 @@ type AttendeeField struct {
 	// Suggest — адрес подсказок (C-5, /app/contacts/suggest): набранное
 	// уходит в ?q=, ответ — SuggestList (s-agenda-12, -13)
 	Suggest string `json:"suggest"`
-	// Hint — под полем: где ищется и кто шлёт приглашения — «A name or an
-	// address: the ticked address books are searched. On save, nextcloud
-	// sends the invitations and their changes — Carrel sends no mail
-	// itself.»; у приглашённого — «You are invited by Мария Лебедева: only
-	// the organiser changes the list.»
+	// Hint — под полем: что набрать и кто шлёт приглашения — «A name or an
+	// address. On save, the server sends the invitations, not Carrel.»; у
+	// приглашённого — «You are invited by Мария Лебедева: only the
+	// organiser changes the list.»
 	Hint     Text `json:"hint"`
 	ReadOnly bool `json:"readOnly"` // приглашённый или календарь только для чтения
 }

@@ -57,14 +57,25 @@ func lostDaysNotice(days []model.LostDay, kind view.Kind, tf timeFmt, also bool)
 	if kind == view.KindTask {
 		noun = "task"
 	}
+	// Р-77 (Typecase's note 168, states-36): «The skipped meeting of 24
+	// August is back; the one moved from 31 August to 1 September, 15:00, is
+	// back on its day at 12:00.» — the noun once, «the one» after it.
 	items := make([]string, 0, len(days))
-	for _, d := range days {
-		of := "the " + noun + " of " + lostDate(tf, d.At, d.Day)
+	for i, d := range days {
+		one := "the one"
+		if i == 0 {
+			one = "the " + noun
+		}
+		at := lostDate(tf, d.At, d.Day)
 		switch {
 		case !d.Moved:
-			items = append(items, of+", which was skipped, is back")
+			skipped := "the skipped one"
+			if i == 0 {
+				skipped = "the skipped " + noun
+			}
+			items = append(items, skipped+" of "+at+" is back")
 		case d.To.IsZero():
-			items = append(items, of+", which was changed on its own, is back as the series has it")
+			items = append(items, one+" changed on its own on "+at+" is back as the series has it")
 		default:
 			back := "is back on its day"
 			if !d.Day {
@@ -74,11 +85,11 @@ func lostDaysNotice(days []model.LostDay, kind view.Kind, tf timeFmt, also bool)
 			if !d.ToDay {
 				to += ", " + tf.clock(d.To)
 			}
-			items = append(items, of+", which was moved to "+to+", "+back)
+			items = append(items, one+" moved from "+at+" to "+to+", "+back)
 		}
 	}
-	return &view.Notice{Role: view.NoticeInfo, Title: text(title),
-		Body: text("Other clients will not see them either: " + strings.Join(items, "; ") + ".")}
+	body := strings.Join(items, "; ") + "."
+	return &view.Notice{Role: view.NoticeInfo, Title: text(title), Body: text(strings.ToUpper(body[:1]) + body[1:])}
 }
 
 // lostDate is a day of a series as the report says it: «24 August»; a whole

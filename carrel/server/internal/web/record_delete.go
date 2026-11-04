@@ -66,9 +66,11 @@ func (s *Server) recordDeleteSheet(ctx context.Context, c *collectionCtx, uid st
 	}
 
 	// Its attendees, on a server that sends invitations itself: it may tell
-	// them — «may», as the sheets of a move say it (А12).
+	// them — «may», as the sheets of a move say it (А12); «the server», not
+	// its name (s-agenda-26; the owner, 04.11.2026). A move names it: there
+	// are two (s-agenda-29).
 	if len(obj.Props()["ATTENDEE"]) > 0 && c.conn.Scheduling == discover.SchedulingYes {
-		sheet.Cancels = text(connLabel(c.conn) + " may send its attendees a cancellation.")
+		sheet.Cancels = "The server may send its attendees a cancellation."
 	}
 
 	// Its attachments: written into it, they go with it; a link stays, and

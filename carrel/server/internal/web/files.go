@@ -400,23 +400,9 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 	if len(page.Collections) == 0 {
 		page.Empty = filesEmpty(s, blob)
 	} else {
-		// What the root is, and which storages it leaves out (s-files-6).
-		page.Note = line("This is where the section starts: the storages you ticked in the rail, as top-level folders. " +
-			"Open one and its own tree opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage.")
-		if len(off) > 0 {
-			parts := []any{" "}
-			for i, name := range off {
-				if i > 0 {
-					parts = append(parts, ", ")
-				}
-				parts = append(parts, strongRun(name))
-			}
-			verb := " is not ticked, so it is not here."
-			if len(off) > 1 {
-				verb = " are not ticked, so they are not here."
-			}
-			page.Note = append(page.Note, join(append(parts, verb)...)...)
-		}
+		// What the root is (s-files-6; Р-77, Typecase's note 168): the
+		// storages left out are the rail's to say.
+		page.Note = line("The storages ticked in the rail, each with its own tree.")
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
