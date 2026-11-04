@@ -5478,8 +5478,64 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       two it lets out. The envelope sender stays `carrel@slovo.example`, so
       SPF is unaffected; DKIM and DMARC are set up on the relay.»
 
+Записка 173 от 04.11.2026 (Typecase `40cd92a`; своя задача Typecase —
+проход Р-77, партия 8, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `40cd92a`** (570 кадров).
+
+173. **Пояснения короче (Р-77), партия 8.** Тексты дословно из макета:
+   1. **Импорт заметок** (`s-io-4`): «`.md` — Markdown, `.zip` — any number
+      of them, `.ics` — iCalendar journal entries. Several files at once;
+      events and tasks in an `.ics` are skipped and named in the report.»;
+      у папки — «Every `.md` directly in that folder, without subfolders.
+      Nothing on the server is moved or deleted.»
+   2. **Portable в настройках** (`desktop-4`): «The same folder on any
+      computer: plug the stick in, run, sign in. In this mode the data folder
+      always sits next to the app.»
+   3. **Приложение новее сервера** (`desktop-15`): плашка — «**The app is
+      newer than the server.** This app is 0.8.0, `carrel.example` runs
+      0.6.4. What both know works; what is newer than the server is not
+      there.»; подсказка — «The app does not update a server from outside:
+      that would be a way in. Whoever runs the server updates it.»
+   4. **Подпись** (`s-mailbox-27`): «Goes under your text in every letter
+      from home, above the quote, after the line «-- ». Plain text. Empty —
+      no signature.»
+   5. **Загрузка файлов** (`s-files-1`): со сценарием — «Drop files onto
+      the window to upload them here. A name already taken is refused, not
+      overwritten.»; без сценария — «Without scripts there is no drop and no
+      queue: **Upload** sends the files. A name already taken is refused, not
+      overwritten.»
+   6. **Thunderbird** (`s-plan-4`): «… with the login and the password from
+      the account row. No import file is needed.»
+   7. **Дубликаты** (`s-dup-1`, `-6`): «Linking changes nothing on any
+      server: the records are shown as one. Merging on the server is a
+      separate, destructive step you confirm.»; у пар — «The same event in
+      two calendars, different UIDs: Agenda shows it twice.» и «Same title
+      and the same date: a note copied into a second notebook.»
+
+Записка 174 от 05.11.2026 (Typecase `dba3c8c`, `5fe384c`; своя задача
+Typecase — решения владельца 05.11 по проходу Р-77).
+**Последний коммит Typecase, который она описывает, — `5fe384c`** (570 кадров).
+
+174. **Плашки у ленты нет; сервер обновляет администратор.**
+   1. **Панель «Subscribe to a feed»** (`s-profile-10`): плашки «The feed is
+      fetched by the Carrel server, not by your browser…» **нет** (владелец
+      05.11): проверка адреса идёт с сервера и показывает недоступный адрес до
+      подписки. У Carrel это `feedReach` в
+      `carrel/server/internal/web/feeds_settings.go` — убрать вместе с её
+      сообщением в панели.
+   2. **Ломающее в библиотеке:** `Msg` больше не `SidePart` — это было
+      единственное сообщение в боковой панели, и сборка укажет на место, где
+      панель его получает.
+   3. **Приложение новее сервера** (`desktop-15`): подсказка — «The app does
+      not update a server from outside: that would be a way in. The server’s
+      administrator has to update it.»
+
 ## Для сведения — сервер не трогает
 
+- **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
+  данных создаётся один раз (S-2) и так и остаётся. Утёкший ключ уже открыл
+  DAV-пароли; помогает смена паролей на серверах, смена пароля Carrel, End
+  every other session и отзыв устройств.
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
   путь к паре — экран дубликатов; сворачивает строки только связывание.
 - **Быстрая заметка** в кадрах — общий `NewSheet`, `/app/{kind}/quick`.
