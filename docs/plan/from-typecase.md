@@ -5512,6 +5512,24 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       two calendars, different UIDs: Agenda shows it twice.» и «Same title
       and the same date: a note copied into a second notebook.»
 
+Записка 174 от 05.11.2026 (Typecase `dba3c8c`, `5fe384c`; своя задача
+Typecase — решения владельца 05.11 по проходу Р-77).
+**Последний коммит Typecase, который она описывает, — `5fe384c`** (570 кадров).
+
+174. **Плашки у ленты нет; сервер обновляет администратор.**
+   1. **Панель «Subscribe to a feed»** (`s-profile-10`): плашки «The feed is
+      fetched by the Carrel server, not by your browser…» **нет** (владелец
+      05.11): проверка адреса идёт с сервера и показывает недоступный адрес до
+      подписки. У Carrel это `feedReach` в
+      `carrel/server/internal/web/feeds_settings.go` — убрать вместе с её
+      сообщением в панели.
+   2. **Ломающее в библиотеке:** `Msg` больше не `SidePart` — это было
+      единственное сообщение в боковой панели, и сборка укажет на место, где
+      панель его получает.
+   3. **Приложение новее сервера** (`desktop-15`): подсказка — «The app does
+      not update a server from outside: that would be a way in. The server’s
+      administrator has to update it.»
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
