@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.400 — 2026-11-05
+
+### Fixed
+
+- A birthday without a year is kept on Google (docs/servers.md, SV-56; the
+  owner's decision 04.11.2026, variant А — Google Contacts show «13 April»
+  in the browser and «--04-13» on Android, no year 1604). Found live:
+  - a new contact went as vCard 4.0 with `--0413`, Google keeps cards as
+    3.0 and dropped it: «The change was saved, but the server did not keep
+    these properties: BDAY». A new card the server kept as 3.0 without the
+    day is written once more with the day as Apple writes it;
+  - an edit of a 3.0 card went as Apple writes it, Google kept it as
+    `BDAY;VALUE=DATE,X-APPLE-OMIT-YEAR=1604:1604-04-13`, and the save was
+    reported as a loss of BDAY. The days of a card (`BDAY`, `ANNIVERSARY`,
+    `X-ABDATE`) are compared as days: `--0413`, Apple's form and Google's
+    are one day, `VALUE=DATE` is a day's form;
+  - such a card showed the year 1604: Apple's marker is read inside `VALUE`
+    too, and a year typed to such a day takes it off there as well.
+
 ## v0.2.399 — 2026-11-04
 
 ### Changed

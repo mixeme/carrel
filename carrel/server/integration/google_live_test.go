@@ -96,6 +96,47 @@ func TestGoogleContactFields(t *testing.T) {
 	runContactFieldsInTheOnlyBook(t, endpoint, user, pass, "google")
 }
 
+// SV-56, the owner's decision 04.11.2026 (variant А): a birthday without a
+// year typed into a new contact is kept. Google keeps the card as vCard 3.0,
+// drops --MMDD and keeps Apple's form, so Carrel writes the day once more in
+// that form; Google Contacts then show «13 April» in the browser and
+// «--04-13» on Android (looked at by the owner that day). The page opens the
+// card: no loss is reported.
+func TestGoogleBirthdayWithoutAYear(t *testing.T) {
+	endpoint, user, pass := googleCardConfig(t)
+	ctx := context.Background()
+	client := liveClient(t, endpoint, user, pass)
+	app := newLiveApp(t)
+	connID := connectLive(t, app, endpoint, user, pass)
+	var book sealed.Collection
+	for _, c := range liveCatalog(t, app).Collections {
+		if c.Has(view.KindContact) {
+			book = c
+			break
+		}
+	}
+	if book.Path == "" {
+		t.Skip("no address book in the catalog")
+	}
+	list := "/app/contacts/" + connID + "/" + url.PathEscape(book.Path)
+	family := "Birthday-" + yandexSuffix("google")
+	form := liveForm(liveDecode[view.ContactEditPage](t, "new contact form", app.get(list+"/new")).Form)
+	form.Set("n.given", "Carrel")
+	form.Set("n.family", family)
+	form.Set("bday", "13.04")
+	rec := app.post(list+"/new", form)
+	stored, storedUID := liveRecordWhere(ctx, t, client, book.Path, "of "+family, func(b string) bool {
+		return strings.Contains(b, family)
+	})
+	removeLater(t, client, book.Path+storedUID)
+	if rec.Code != http.StatusSeeOther {
+		t.Errorf("a new contact with a birthday without a year answered %d, want the card: %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(stored, "X-APPLE-OMIT-YEAR=1604") || !strings.Contains(stored, "1604-04-13") {
+		t.Errorf("Google kept no day without a year:\n%s", stored)
+	}
+}
+
 func googleCalConfig(t *testing.T) (endpoint, user, pass string) {
 	liveCredEnv()
 	endpoint = os.Getenv("CARREL_GOOGLE_CALDAV_URL")

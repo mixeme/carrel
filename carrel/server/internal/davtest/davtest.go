@@ -158,6 +158,13 @@ type Server struct {
 	// Google does (docs/servers.md, SV-56).
 	MarksThePreferred bool
 
+	// StoresVCard3 keeps every card as vCard 3.0, the way Google does
+	// (docs/servers.md, SV-56; found live 04.11.2026): VERSION 3.0 whatever
+	// was sent, a BDAY without a year (--0413, --04-13) dropped, and Apple's
+	// day without a year, BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-13, kept with
+	// the marker inside VALUE — BDAY;VALUE=DATE,X-APPLE-OMIT-YEAR=1604:….
+	StoresVCard3 bool
+
 	// OneUIDPerAccount answers 412 with an empty body to a PUT of a calendar
 	// object whose UID another resource of the account holds, in any
 	// calendar and under any name, the way iCloud does (docs/servers.md,
@@ -1755,6 +1762,9 @@ func (b cardBackend) PutAddressObject(_ context.Context, p string, card vcard.Ca
 	if b.s.MarksThePreferred && data != nil {
 		data = markPreferred(data)
 	}
+	if b.s.StoresVCard3 && data != nil {
+		data = asVCard3(data)
+	}
 	if len(b.s.Drop) > 0 || data == nil {
 		for _, n := range b.s.Drop {
 			delete(card, strings.ToUpper(n))
@@ -1825,6 +1835,37 @@ func markPreferred(doc []byte) []byte {
 		lines[i] = strings.Join(params, ";") + ":" + value
 	}
 	return []byte(strings.Join(lines, "\r\n"))
+}
+
+// asVCard3 is Google's keeping of a card (StoresVCard3): VERSION 3.0, a
+// birthday without a year gone, Apple's marker folded into VALUE.
+func asVCard3(doc []byte) []byte {
+	var out []string
+	for _, l := range strings.Split(string(doc), "\r\n") {
+		head, value, ok := strings.Cut(l, ":")
+		if !ok || strings.HasPrefix(l, " ") {
+			out = append(out, l)
+			continue
+		}
+		params := strings.Split(head, ";")
+		switch strings.ToUpper(params[0]) {
+		case "VERSION":
+			out = append(out, "VERSION:3.0")
+			continue
+		case "BDAY":
+			if strings.HasPrefix(value, "--") {
+				continue
+			}
+			for j, p := range params[1:] {
+				if k, v, _ := strings.Cut(p, "="); strings.EqualFold(k, "X-APPLE-OMIT-YEAR") {
+					params[j+1] = "VALUE=DATE,X-APPLE-OMIT-YEAR=" + v
+				}
+			}
+			l = strings.Join(params, ";") + ":" + value
+		}
+		out = append(out, l)
+	}
+	return []byte(strings.Join(out, "\r\n"))
 }
 
 func (b cardBackend) DeleteAddressObject(_ context.Context, p string) error { return b.s.remove(p) }

@@ -100,7 +100,12 @@ func propsEqual(a, b *Object, prop string) bool {
 	}
 	structured := isStructured(prop)
 	rule := isRule(prop)
+	day := isCardDay(prop)
 	for i := range av {
+		if day && sameCardDay(av[i], bv[i]) {
+			// One day in another form (vcard_day.go; SV-56).
+			continue
+		}
 		switch {
 		case av[i].text == bv[i].text:
 		case structured && withoutTrailingEmpty(av[i].text) == withoutTrailingEmpty(bv[i].text):

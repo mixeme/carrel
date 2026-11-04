@@ -1700,9 +1700,15 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], written, false)...)
 			_, yearless, _ := birthdayDigits(v)
 			switch {
-			case written != "" && !yearless && len(props[f.prop]) > 0 && props[f.prop][0].Params[appleOmitYear] != "":
-				// A full date: the marker would hide the year typed.
-				ch.ops = append(ch.ops, model.RemoveParam{Prop: f.prop, Index: 0, Param: appleOmitYear})
+			case written != "" && !yearless && len(props[f.prop]) > 0 && omitYear(props[f.prop][0].Params) != "":
+				// A full date: the marker would hide the year typed — where
+				// Apple writes it, or inside VALUE, where Google keeps it
+				// (SV-56), and then the value is a date again.
+				if _, folded := model.AppleOmitYear(props[f.prop][0].Params); folded {
+					ch.ops = append(ch.ops, model.SetParam{Prop: f.prop, Index: 0, Param: "VALUE", Value: "DATE"})
+				} else {
+					ch.ops = append(ch.ops, model.RemoveParam{Prop: f.prop, Index: 0, Param: appleOmitYear})
+				}
 			case yearless && apple3(f.prop, props[f.prop], firstValue(obj, "VERSION")):
 				// Apple's day without a year names the year it stands for.
 				ch.ops = append(ch.ops, model.SetParam{Prop: f.prop, Index: 0, Param: appleOmitYear, Value: appleYear})
@@ -2180,7 +2186,7 @@ func keptTags(items, held []string) []string {
 // not a date at all (vCard 4 allows text) is shown as it is.
 func birthdayShown(raw string, params map[string]string) string {
 	v := strings.TrimSpace(raw)
-	if omit := params[appleOmitYear]; omit != "" && strings.HasPrefix(v, omit) {
+	if omit := omitYear(params); omit != "" && strings.HasPrefix(v, omit) {
 		// Apple's day without a year, as sabre keeps --MMDD: the year is a
 		// placeholder the marker names.
 		v = "--" + strings.TrimLeft(strings.TrimPrefix(v, omit), "-")
@@ -2265,6 +2271,21 @@ const appleOmitYear = "X-APPLE-OMIT-YEAR"
 // X-APPLE-OMIT-YEAR naming it.
 const appleYear = "1604"
 
+// omitYear is the placeholder year a day's marker names, where Apple writes
+// it or inside VALUE, where Google keeps it (model.AppleOmitYear; SV-56).
+func omitYear(params map[string]string) string {
+	year, _ := model.AppleOmitYear(params)
+	return year
+}
+
+// cur0Params is the parameters of the first value held, nil without one.
+func cur0Params(cur []model.RawValue) map[string]string {
+	if len(cur) == 0 {
+		return nil
+	}
+	return cur[0].Params
+}
+
 // apple3 says whether a birthday without a year goes as Apple writes it: a
 // vCard 3.0 card that does not hold --MMDD of another client already, nor a
 // marker of its own year. Apple writes so BDAY alone: ANNIVERSARY is a
@@ -2276,7 +2297,7 @@ func apple3(prop string, cur []model.RawValue, version string) bool {
 	if len(cur) == 0 {
 		return true
 	}
-	return !strings.HasPrefix(strings.TrimSpace(cur[0].Text), "--") && len(cur[0].Params[appleOmitYear]) != 4
+	return !strings.HasPrefix(strings.TrimSpace(cur[0].Text), "--") && len(omitYear(cur[0].Params)) != 4
 }
 
 // birthdayWritten turns what was typed into BDAY or ANNIVERSARY (prop) in the
@@ -2315,11 +2336,11 @@ func birthdayWritten(prop, typed string, cur []model.RawValue, version string) (
 	}
 	if yearless {
 		out = "--" + out
-		if len(cur) > 0 && len(cur[0].Params[appleOmitYear]) == 4 {
+		if year := omitYear(cur0Params(cur)); len(year) == 4 {
 			// Written the way the card holds such a day: the marker's year.
-			out = cur[0].Params[appleOmitYear] + strings.TrimPrefix(out, "--")
+			out = year + strings.TrimPrefix(out, "--")
 			if extended {
-				out = cur[0].Params[appleOmitYear] + "-" + digits[:2] + "-" + digits[2:]
+				out = year + "-" + digits[:2] + "-" + digits[2:]
 			}
 		}
 	}
@@ -4839,7 +4860,42 @@ func (s *Server) finishCreate(w http.ResponseWriter, r *http.Request, c *collect
 			}
 		}
 	}
+	if c.card != nil && wr.err == nil {
+		if again := yearlessAgain(sent, wr.got); again != nil {
+			if err := c.update(ctx, again); err == nil {
+				if kept, err := c.fetch(ctx, wr.got.Path); err == nil {
+					wr.got = kept
+				}
+			}
+		}
+	}
 	s.reportWrite(w, r, c, sent, c.recordPath(wr.uid), wr, nil)
+}
+
+// yearlessAgain is a new card once more, when the server kept it as vCard
+// 3.0 and dropped its birthday without a year, as Google does (SV-56; the
+// owner's decision 04.11.2026, variant А): 3.0 has no day without a year
+// (RFC 2426), so it goes the way Apple writes it, as an edit of a 3.0 card
+// writes it, which Google keeps and shows as the day alone. nil when there
+// is nothing to write again: the day kept, or none sent.
+func yearlessAgain(sent, got *model.Object) *model.Object {
+	if got == nil || strings.TrimSpace(firstValue(got, "VERSION")) != "3.0" || len(got.Props()["BDAY"]) > 0 {
+		return nil
+	}
+	held := sent.Props()["BDAY"]
+	if len(held) == 0 {
+		return nil
+	}
+	digits, yearless, ok := birthdayDigits(birthdayShown(held[0].Text, held[0].Params))
+	if !ok || !yearless {
+		return nil
+	}
+	day := model.RawValue{Text: appleYear + "-" + digits[:2] + "-" + digits[2:], Params: map[string]string{appleOmitYear: appleYear}}
+	patch, err := model.NewPatch(model.SetRaw{Prop: "BDAY", Values: []model.RawValue{day}})
+	if err != nil || patch.Apply(got) != nil {
+		return nil
+	}
+	return got
 }
 
 // namelessNotice is a record the server took and then did not show: not under
