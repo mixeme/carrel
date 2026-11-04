@@ -5437,6 +5437,47 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       one»): «It sees exactly what a browser or DAVx5 will. Nothing is
       changed or stored, apart from the audit line that the check was run.»
 
+Записка 172 от 04.11.2026 (Typecase `f0a75a6`; своя задача Typecase —
+проход Р-77, партия 7, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `f0a75a6`** (570 кадров).
+
+172. **Пояснения короче (Р-77), партия 7.** Тексты дословно из макета:
+   1. **Подписка на ленту** (`s-profile-10`): «A feed is read anew on every
+      visit: there is nothing to refresh. **Check** asks whether the address
+      still replies.»; у имени — «Taken from the feed; yours to change.»; у
+      цвета — «A feed has no colour of its own: Carrel picks one and hatches
+      the strip.»; у входа — «Kept encrypted, like DAV credentials. A secret
+      link needs none.»; у рода — «A feed is one file: what it carries
+      decides where it lands.»; плашка — «**The Carrel server fetches the
+      feed, not your browser.** An address on your local network works only
+      if the server can reach it.»
+   2. **Новый календарь** (`s-profile-5`): «`baikal` is not answering, so it
+      is not listed.» — без «Two of three»; у родов — «Most servers will not
+      change this later. A collection holding only tasks appears in
+      **Tasks**, not here.»; у адреса — «… — taken from the name, yours to
+      change. Other clients and restores go by the address, not the name.»
+   3. **Почта на экземпляре** (`s-mailbox-29`): «Carrel then keeps each
+      person's mailbox password, usually the most valuable one they have.
+      Their letters go through their own mail server, not the relay above.»;
+      «When off, there is no mail anywhere in Carrel. Connected mailboxes are
+      kept and come back when it is on again.»
+   4. **Пароли открыты** (`s-plan-5`; значок «credentials unlocked · 4:12» и
+      Lock now в шапке): «Unlocked everywhere credentials are shown, not only
+      here; every reveal goes to the audit log.»
+   5. **Ссылки на вложения** (`s-publish-4`): «They expire and are revoked
+      with this link. Without it the page shows how many files there are, not
+      their names: a name can give away a lot.»
+   6. **Неизвестная кодировка** (`s-mailbox-8`): «The letter says its charset
+      is `x-mac-ukrainian`, and Carrel does not know it: some characters may
+      be wrong. **Download .eml** opens it in a mail program that knows the
+      charset.»
+   7. **Календарь без задач** (`s-agenda-11`): «**The server did not take
+      tasks.** It made «Дом» for events only. Tasks need another calendar, on
+      this server or another.» и кнопка New calendar.
+   8. **Отправитель реле** (`s-admin-32`): «Your relay decides which of the
+      two it lets out. The envelope sender stays `carrel@slovo.example`, so
+      SPF is unaffected; DKIM and DMARC are set up on the relay.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
