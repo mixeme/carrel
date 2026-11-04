@@ -5350,6 +5350,134 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       события (`s-agenda-26`) — «The server may send its attendees a
       cancellation.»
 
+Записка 169 от 04.11.2026 (Typecase `a41fbf1`; своя задача Typecase —
+проход Р-77, партия 4, принята владельцем 04.11).
+**Последний коммит Typecase, который она описывает, — `a41fbf1`** (570 кадров).
+
+169. **Пояснения короче (Р-77), партия 4: депонирование ключа у
+   пользователя.** Тексты дословно из макета:
+   1. **Account** (`account-1`, `-15`, `s-mail-9`): у Key escrow — «No copy
+      of your data key is deposited: if you lose your password, nobody can
+      recover the account.»; у Password — «Your saved connections stay
+      readable after the change.»
+   2. **Лист Deposit my key** (`account-2`): плашка — «With the escrow master
+      password, an administrator will be able to decrypt the DAV credentials
+      you save here, and through them your records. You can withdraw the copy
+      later from Account.»; у поля «Your Carrel password» подсказки **нет**.
+   3. **Копия депонирована** (`account-4`, `-16`; подзаголовок «A copy of
+      your key on this server»): плашка — «With the escrow master password,
+      an administrator can decrypt the DAV credentials you save here, and
+      through them your records.»; строка `account-7` (значок «deposited») —
+      «If you lose your password, an administrator with the escrow master
+      password can recover the account and read the DAV credentials you save
+      here.»
+   4. **Копии нет** (`account-12`, «What a deposit does»): «With a copy, an
+      administrator with the escrow master password can recover this account
+      if you lose your password, and read the DAV credentials you save here.
+      You can withdraw it at any time.»
+
+Записка 170 от 04.11.2026 (Typecase `cbc6e31`; своя задача Typecase —
+проход Р-77, партия 5, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `cbc6e31`** (570 кадров).
+
+170. **Пояснения короче (Р-77), партия 5: внешние запуски копии.** Тексты
+   дословно из макета:
+   1. **cron** (`s-backup-3`): у скрипта — «Put it where the password is to
+      live, make it executable, and give `crontab -e` one line: `0 3 * * *
+      /usr/local/bin/carrel-personal.sh`. Keep the date in the script:
+      `cron` reads `%` as a newline, so `date +%F` in the crontab line breaks
+      the entry.»; ниже — «A failed copy needs no separate check: the
+      download answers with an error, `set -eu` stops the script, and cron
+      sends the mail. The wait has no limit: `409` means «not yet», not
+      «broken».»
+   2. **GoSentry** (`s-backup-4`): «GoSentry runs commands, not URL checks:
+      its job dialog asks for **Name**, **Folder**, **Schedule**, **Command**
+      and **Arguments** (one per line, no quotes), and this tab gives those
+      fields. Leave **Start only, do not wait for exit** off: `curl` exits
+      when the `202` comes back.»; ниже — «Add a second GoSentry job, same
+      form: Command `curl`, Arguments a `GET /api/backup/status?job=personal`,
+      failing when the last **successful** copy is older than 26 hours. The
+      first job only asks for the copy; the second says it happened.»
+   3. **Gitea** (`s-backup-10`): «Put the file into the repository as
+      `.gitea/workflows/carrel-personal.yaml` and the password into its
+      secrets as `CARREL_BACKUP`: the password never sits in the file. A job
+      that also **downloads** gets the script as a step and keeps the archive
+      with `actions/upload-artifact`.»
+   4. **Любой планировщик** (`s-backup-11`): «For anything that can send a
+      `POST`: your own scheduler, a monitoring service, a terminal. `GET
+      /api/backup/status?job=personal` tells when the last copy went
+      through.»
+
+Записка 171 от 04.11.2026 (Typecase `76e4d56`; своя задача Typecase —
+проход Р-77, партия 6, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `76e4d56`** (570 кадров).
+
+171. **Пояснения короче (Р-77), партия 6.** Тексты дословно из макета:
+   1. **Перезапись адреса** (`s-contacts-21`): «**Rewritten in 10 of 12
+      records.** «Созвон с подрядчиком» was not written: it changed after
+      Carrel read it. «Ревью архитектуры» was refused: 403 Forbidden. Общий ·
+      baikal could not be read, so what it holds keeps the old address.» —
+      ответ сервера назван кодом, без «the server answered».
+   2. **Формат выгрузки заметок** (`s-mail-5`): «Markdown is for reading:
+      the text and links to attachments, without the properties other
+      clients wrote. The source `.ics` keeps everything and needs a client
+      that reads VJOURNAL — jtx Board, Evolution.»
+   3. **Копия мимо Sent** (`s-mailbox-20`): «Its copy did not reach
+      **Sent**: the server answered `APPEND → NO [OVERQUOTA] Quota
+      exceeded`. The recipients have the letter. Free some space in the
+      mailbox: Carrel keeps no copy to put there later.»
+   4. **Обновление готово** (`desktop-14`): плашка — «**Carrel 0.8.0 is
+      ready to install.** It is applied when the app closes, or now: the
+      window reopens where it was.»; подсказка — «In local mode one update
+      covers the app and the server. Connections and settings stay as they
+      are.»; третье сообщение — только «You see this because automatic
+      checking is on; out of the box the app never goes looking.»
+   5. **Проверка снаружи** (`s-admin-4`, `-25`, `-26`; подзаголовок «Carrel
+      asks itself from outside, at the address you declared as the base
+      one»): «It sees exactly what a browser or DAVx5 will. Nothing is
+      changed or stored, apart from the audit line that the check was run.»
+
+Записка 172 от 04.11.2026 (Typecase `f0a75a6`; своя задача Typecase —
+проход Р-77, партия 7, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `f0a75a6`** (570 кадров).
+
+172. **Пояснения короче (Р-77), партия 7.** Тексты дословно из макета:
+   1. **Подписка на ленту** (`s-profile-10`): «A feed is read anew on every
+      visit: there is nothing to refresh. **Check** asks whether the address
+      still replies.»; у имени — «Taken from the feed; yours to change.»; у
+      цвета — «A feed has no colour of its own: Carrel picks one and hatches
+      the strip.»; у входа — «Kept encrypted, like DAV credentials. A secret
+      link needs none.»; у рода — «A feed is one file: what it carries
+      decides where it lands.»; плашка — «**The Carrel server fetches the
+      feed, not your browser.** An address on your local network works only
+      if the server can reach it.»
+   2. **Новый календарь** (`s-profile-5`): «`baikal` is not answering, so it
+      is not listed.» — без «Two of three»; у родов — «Most servers will not
+      change this later. A collection holding only tasks appears in
+      **Tasks**, not here.»; у адреса — «… — taken from the name, yours to
+      change. Other clients and restores go by the address, not the name.»
+   3. **Почта на экземпляре** (`s-mailbox-29`): «Carrel then keeps each
+      person's mailbox password, usually the most valuable one they have.
+      Their letters go through their own mail server, not the relay above.»;
+      «When off, there is no mail anywhere in Carrel. Connected mailboxes are
+      kept and come back when it is on again.»
+   4. **Пароли открыты** (`s-plan-5`; значок «credentials unlocked · 4:12» и
+      Lock now в шапке): «Unlocked everywhere credentials are shown, not only
+      here; every reveal goes to the audit log.»
+   5. **Ссылки на вложения** (`s-publish-4`): «They expire and are revoked
+      with this link. Without it the page shows how many files there are, not
+      their names: a name can give away a lot.»
+   6. **Неизвестная кодировка** (`s-mailbox-8`): «The letter says its charset
+      is `x-mac-ukrainian`, and Carrel does not know it: some characters may
+      be wrong. **Download .eml** opens it in a mail program that knows the
+      charset.»
+   7. **Календарь без задач** (`s-agenda-11`): «**The server did not take
+      tasks.** It made «Дом» for events only. Tasks need another calendar, on
+      this server or another.» и кнопка New calendar.
+   8. **Отправитель реле** (`s-admin-32`): «Your relay decides which of the
+      two it lets out. The envelope sender stays `carrel@slovo.example`, so
+      SPF is unaffected; DKIM and DMARC are set up on the relay.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
