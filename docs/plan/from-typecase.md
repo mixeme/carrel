@@ -5376,6 +5376,38 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       if you lose your password, and read the DAV credentials you save here.
       You can withdraw it at any time.»
 
+Записка 170 от 04.11.2026 (Typecase `cbc6e31`; своя задача Typecase —
+проход Р-77, партия 5, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `cbc6e31`** (570 кадров).
+
+170. **Пояснения короче (Р-77), партия 5: внешние запуски копии.** Тексты
+   дословно из макета:
+   1. **cron** (`s-backup-3`): у скрипта — «Put it where the password is to
+      live, make it executable, and give `crontab -e` one line: `0 3 * * *
+      /usr/local/bin/carrel-personal.sh`. Keep the date in the script:
+      `cron` reads `%` as a newline, so `date +%F` in the crontab line breaks
+      the entry.»; ниже — «A failed copy needs no separate check: the
+      download answers with an error, `set -eu` stops the script, and cron
+      sends the mail. The wait has no limit: `409` means «not yet», not
+      «broken».»
+   2. **GoSentry** (`s-backup-4`): «GoSentry runs commands, not URL checks:
+      its job dialog asks for **Name**, **Folder**, **Schedule**, **Command**
+      and **Arguments** (one per line, no quotes), and this tab gives those
+      fields. Leave **Start only, do not wait for exit** off: `curl` exits
+      when the `202` comes back.»; ниже — «Add a second GoSentry job, same
+      form: Command `curl`, Arguments a `GET /api/backup/status?job=personal`,
+      failing when the last **successful** copy is older than 26 hours. The
+      first job only asks for the copy; the second says it happened.»
+   3. **Gitea** (`s-backup-10`): «Put the file into the repository as
+      `.gitea/workflows/carrel-personal.yaml` and the password into its
+      secrets as `CARREL_BACKUP`: the password never sits in the file. A job
+      that also **downloads** gets the script as a step and keeps the archive
+      with `actions/upload-artifact`.»
+   4. **Любой планировщик** (`s-backup-11`): «For anything that can send a
+      `POST`: your own scheduler, a monitoring service, a terminal. `GET
+      /api/backup/status?job=personal` tells when the last copy went
+      through.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
