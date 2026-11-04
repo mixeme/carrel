@@ -5315,6 +5315,41 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       program cleans it: this server cannot remove only these.» — без
       числа писем.
 
+Записка 168 от 04.11.2026 (Typecase `09827c3`; своя задача Typecase —
+проход Р-77, партия 3, принята владельцем 04.11 после трёх замечаний).
+**Последний коммит Typecase, который она описывает, — `09827c3`** (570 кадров).
+
+168. **Пояснения короче (Р-77), партия 3.** Тексты дословно из макета:
+   1. **Корень «Selected collections»** (`s-files-6`): «The storages ticked
+      in the rail, each with its own tree.» — строки про Public и про то,
+      почему деревья не смешиваются, ушли.
+   2. **Депонирование ключей** (`s-admin-6`, `-30`, `-31`): плашка — «Key
+      escrow is a way in, not a backup: with the master password an
+      administrator can decrypt a covered user’s DAV credentials, and through
+      them their records. Covered users are told so, and every recovery is
+      shown to them.»; подсказки — «Copies already taken stay: only their
+      owners delete them.», «The deposited copies stay as they are: nobody
+      has to opt in again.», «Connections survive a recovery. The user sees
+      it in their password history, and gets a letter when mail can reach
+      them.»
+   3. **Portable** (`desktop-3`): у папки — «Nothing is written outside this
+      folder; move it, and Carrel moves with it.»; плашка называет угрозу —
+      «**Lose the stick, and the finder can guess your password as long as
+      they like.** The encryption holds only as well as the password: choose
+      a long one.» (D-7: перебор без ограничений у того, кто держит файл).
+   4. **Сервер не сохранил свойства** (`states-12`, `-17`, `-24`, `-31`):
+      «**The change was saved, but the server did not keep these
+      properties:** …» — «Other clients will not see them either» ушло;
+      дни серии (`states-36`): «**The change was saved, but the server did
+      not keep two days of the series.** The skipped meeting of 24 August is
+      back; the one moved from 31 August to 1 September, 15:00, is back on
+      its day at 12:00.»
+   5. **Приглашения шлёт «сервер», без имени** (владелец 04.11): у поля
+      участников во всех кадрах события — «A name or an address. On save,
+      the server sends the invitations, not Carrel.»; в листе удаления
+      события (`s-agenda-26`) — «The server may send its attendees a
+      cancellation.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
