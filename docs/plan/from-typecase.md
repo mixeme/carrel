@@ -5408,6 +5408,35 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       /api/backup/status?job=personal` tells when the last copy went
       through.»
 
+Записка 171 от 04.11.2026 (Typecase `76e4d56`; своя задача Typecase —
+проход Р-77, партия 6, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `76e4d56`** (570 кадров).
+
+171. **Пояснения короче (Р-77), партия 6.** Тексты дословно из макета:
+   1. **Перезапись адреса** (`s-contacts-21`): «**Rewritten in 10 of 12
+      records.** «Созвон с подрядчиком» was not written: it changed after
+      Carrel read it. «Ревью архитектуры» was refused: 403 Forbidden. Общий ·
+      baikal could not be read, so what it holds keeps the old address.» —
+      ответ сервера назван кодом, без «the server answered».
+   2. **Формат выгрузки заметок** (`s-mail-5`): «Markdown is for reading:
+      the text and links to attachments, without the properties other
+      clients wrote. The source `.ics` keeps everything and needs a client
+      that reads VJOURNAL — jtx Board, Evolution.»
+   3. **Копия мимо Sent** (`s-mailbox-20`): «Its copy did not reach
+      **Sent**: the server answered `APPEND → NO [OVERQUOTA] Quota
+      exceeded`. The recipients have the letter. Free some space in the
+      mailbox: Carrel keeps no copy to put there later.»
+   4. **Обновление готово** (`desktop-14`): плашка — «**Carrel 0.8.0 is
+      ready to install.** It is applied when the app closes, or now: the
+      window reopens where it was.»; подсказка — «In local mode one update
+      covers the app and the server. Connections and settings stay as they
+      are.»; третье сообщение — только «You see this because automatic
+      checking is on; out of the box the app never goes looking.»
+   5. **Проверка снаружи** (`s-admin-4`, `-25`, `-26`; подзаголовок «Carrel
+      asks itself from outside, at the address you declared as the base
+      one»): «It sees exactly what a browser or DAVx5 will. Nothing is
+      changed or stored, apart from the audit line that the check was run.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
