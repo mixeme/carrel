@@ -17925,18 +17925,17 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </div>
             <div class="tc-msg is-alert is-row tc-msg--flush tc-msg--max580">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-              <span class="tc-msg__aside"><b>The profile carries passwords in cleartext.</b> It is an ordinary file: it lands in Downloads, in a messenger, in the phone’s backup. Open it on the device and delete it. The link opens once and lives 5 minutes, for you signed in to Carrel; nothing is written to the server’s disk, and the issue is recorded in the audit log.</span>
+              <span class="tc-msg__aside"><b>The profile carries passwords in cleartext.</b> Install it, then delete the file: otherwise it stays in Downloads and in the phone’s backup.</span>
             </div>
           </div>
           <div class="tc-stack tc-stack--gap-12 tc-form__col--300">
             <div class="tc-card">
               <div class="tc-rubric">Profile</div>
-              <span class="tc-field__hint">Issued inside the unlock window: nothing more is asked.</span>
               <div class="tc-card__acts"><button class="tc-btn is-danger" type="button">Generate profile</button></div>
             </div>
             <div class="tc-card">
               <div class="tc-rubric">Link ready until 09:46 <span class="tc-badge is-local" title="Local instance: the link will not open from outside your network">local</span></div>
-              <span class="tc-field__hint">It opens once, for you signed in to Carrel. Open it on the device, install the profile, then delete the file.</span>
+              <span class="tc-field__hint">Opens once, for you signed in to Carrel.</span>
               <div class="tc-line tc-line--gap-6 tc-card__top9">
                 <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download profile</button>
                 <button class="tc-btn is-danger" type="button">Revoke</button>
@@ -18009,7 +18008,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </div>
             <div class="tc-msg is-alert is-row tc-msg--flush tc-msg--max580">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-              <span class="tc-msg__aside"><b>The profile carries passwords in cleartext.</b> It is an ordinary file: it lands in Downloads, in a messenger, in the phone’s backup. Open it on the device and delete it. The link opens once and lives 5 minutes, for you signed in to Carrel; nothing is written to the server’s disk, and the issue is recorded in the audit log.</span>
+              <span class="tc-msg__aside"><b>The profile carries passwords in cleartext.</b> Install it, then delete the file: otherwise it stays in Downloads and in the phone’s backup.</span>
             </div>
           </div>
           <div class="tc-stack tc-stack--gap-12 tc-form__col--300">
@@ -19359,14 +19358,14 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           <div class="tc-field tc-field--lg"><label>Collection</label><details class="tc-drop"><summary class="tc-in is-pick" title="Collection"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="nextcloud|files" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="sftpgo|documents"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>sftpgo · vps · Documents</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="sftpgo|public" disabled><span class="tc-mark" data-tc-colour="#9A9280"></span>sftpgo · vps · Public files<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <div class="tc-field tc-field--lg"><label>Folder in it</label><span class="tc-line tc-line--gap-8"><input class="tc-in is-mono tc-in--fill" type="text" name="folder" value="carrel-backup" aria-label="Folder in it"><button class="tc-btn" type="submit" formaction="/app/settings/backup?op=browse&amp;job=personal">Browse</button></span></div>
           <div class="tc-field tc-field--xs"><label>Keep copies</label><input class="tc-in is-mono" type="text" name="keep" value="8" aria-label="Keep copies"></div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Copies past the eighth are deleted <b>after</b> the new one has been read back and checked, not before. The file is dated and never overwritten.</span></div>
-          <div class="tc-msg tc-grow tc-msg--flush-top4 tc-msg--max580"><b>Download</b> streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. <b>Both</b> does the two at once — and then the trigger has <b>two steps</b>, because the file still has to be taken.</div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Older copies are deleted only <b>after</b> the new one is checked.</span></div>
+          <div class="tc-msg tc-grow tc-msg--flush-top4 tc-msg--max580"><b>Download</b> writes nothing to the server. On a schedule it runs only from an external trigger: someone has to take the file. <b>Both</b> does the two, and its trigger has <b>two steps</b>.</div>
         </div>
 
         <div class="tc-fset">
           <div class="tc-rubric">How the archive is closed</div>
           <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="encrypted" value="1" checked><span class="tc-tickrow__tick"></span>Encrypt the archive</label>
-            <span class="tc-field__hint tc-field__hint--max580">On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">Turn it off only where nobody but you can reach the copy.</span></div>
           <div class="tc-field tc-field--lg"><label>Archive password</label><input class="tc-in is-ph" type="password" name="password" placeholder="••••••••••••" aria-label="Archive password">
             <span class="tc-field__hint tc-field__hint--max580">Separate from the sign-in password.</span></div>
         </div>
@@ -19470,14 +19469,14 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           <div class="tc-field tc-field--lg"><label>Collection</label><details class="tc-drop"><summary class="tc-in is-pick" title="Collection"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="nextcloud|files" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="sftpgo|documents"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>sftpgo · vps · Documents</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" role="menuitemradio" name="dest" value="sftpgo|public" disabled><span class="tc-mark" data-tc-colour="#9A9280"></span>sftpgo · vps · Public files<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <div class="tc-field tc-field--lg"><label>Folder in it</label><span class="tc-line tc-line--gap-8"><input class="tc-in is-mono tc-in--fill" type="text" name="folder" value="carrel-backup" aria-label="Folder in it"><button class="tc-btn" type="submit" formaction="/app/settings/backup?op=browse&amp;job=personal">Browse</button></span></div>
           <div class="tc-field tc-field--xs"><label>Keep copies</label><input class="tc-in is-mono" type="text" name="keep" value="8" aria-label="Keep copies"></div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Copies past the eighth are deleted <b>after</b> the new one has been read back and checked, not before. The file is dated and never overwritten.</span></div>
-          <div class="tc-msg tc-grow tc-msg--flush-top4 tc-msg--max580"><b>Download</b> streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. <b>Both</b> does the two at once — and then the trigger has <b>two steps</b>, because the file still has to be taken.</div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Older copies are deleted only <b>after</b> the new one is checked.</span></div>
+          <div class="tc-msg tc-grow tc-msg--flush-top4 tc-msg--max580"><b>Download</b> writes nothing to the server. On a schedule it runs only from an external trigger: someone has to take the file. <b>Both</b> does the two, and its trigger has <b>two steps</b>.</div>
         </div>
 
         <div class="tc-fset">
           <div class="tc-rubric">How the archive is closed</div>
           <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="encrypted" value="1" checked><span class="tc-tickrow__tick"></span>Encrypt the archive</label>
-            <span class="tc-field__hint tc-field__hint--max580">On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">Turn it off only where nobody but you can reach the copy.</span></div>
           <div class="tc-field tc-field--lg"><label>Archive password</label><input class="tc-in" type="password" name="password" aria-label="Archive password" required>
             <span class="tc-field__hint tc-field__hint--max580">Separate from the sign-in password.</span></div>
         </div>
@@ -26941,7 +26940,7 @@ Read  2 min ago · not changed on server</div>
   <div class="frame" data-frame="s-mailbox-5">
   <div class="frame-label"><span>Перенос на сервере без UIDPLUS</span><span class="frag">отложена</span><i>тот же список после Move to → Стройка</i></div>
   <div class="tc-root tc-root--on-bg">
-    <div class="tc-msg is-row"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--muted"><use href="#i-move"/></svg><span class="tc-msg__aside">3 letters are copied to <b>Стройка</b> and marked deleted here. They stay in Inbox, struck through, until your mail program cleans the folder. This server cannot remove only these three letters. Removing every marked letter would also take letters that another program marked and is not done with.</span></div>
+    <div class="tc-msg is-row"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--muted"><use href="#i-move"/></svg><span class="tc-msg__aside">The letters are copied to <b>Стройка</b>. In Inbox they stay struck through until your mail program cleans it: this server cannot remove only these.</span></div>
     <div class="tc-list">
       <div class="tc-row tc-row--mailcols is-done">
         <button class="tc-tickrow__tick is-off" type="button"></button>
@@ -27474,7 +27473,7 @@ Read    2 min ago</div>
 <div class="frame cap900" data-frame="s-mailbox-13">
   <div class="frame-label"><span>Оригинал · картинки показаны</span><span class="frag">отложена</span><i>тот же экран после Show pictures</i></div>
   <div class="tc-root tc-root--on-bg">
-    <div class="tc-msg is-row is-accent"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-eye"/></svg><span class="tc-msg__aside"><b>Pictures are shown for this letter.</b> Your browser loaded them straight from <span class="tc-mono">cdn.bookfair.example</span>, <span class="tc-mono">img.mailer.example</span> and <span class="tc-mono">open.mailer.example</span>. These three now know the letter was opened. Carrel did not fetch them and did not pass on its own address. Next time the letter opens without pictures again.</span></div>
+    <div class="tc-msg is-row is-accent"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-eye"/></svg><span class="tc-msg__aside"><b>Pictures are shown for this letter.</b> <span class="tc-mono">cdn.bookfair.example</span>, <span class="tc-mono">img.mailer.example</span> and <span class="tc-mono">open.mailer.example</span> now know the letter was opened. Next time it opens without pictures.</span></div>
     <div class="tc-doc">
       <iframe class="tc-original" sandbox="" title="Original of the letter, pictures shown" srcdoc="<body style='margin:0;background:#efe9dc;font-family:Georgia,serif;color:#222'><div style='max-width:560px;margin:0 auto;background:#fff;padding-bottom:18px'><div style='height:92px;margin:0 0 18px;background:#b0392b;display:flex;align-items:center;justify-content:center;font:bold 22px Georgia,serif;color:#fff;letter-spacing:.06em'>КНИЖНАЯ ЯРМАРКА</div><h1 style='font-size:26px;font-weight:normal;margin:0 24px 8px'>Сорок новинок осени</h1><p style='margin:0 24px 18px;font:15px/1.5 Arial,sans-serif;color:#444'>Мы собрали книги, которые выходят в сентябре и октябре: прозу, нон-фикшн и детское. Предзаказ открыт до 5 октября.</p><table style='border-collapse:collapse;margin:0 16px;width:calc(100% - 32px)'><tr><td style='width:50%;padding:8px;vertical-align:top'><div style='height:150px;background:linear-gradient(135deg,#2e4a62,#5d7f99)'></div><p style='font:bold 14px Arial,sans-serif;margin:8px 0 2px'>Переплётчик</p><p style='font:12px Arial,sans-serif;color:#777;margin:0'>роман, 2026</p></td><td style='width:50%;padding:8px;vertical-align:top'><div style='height:150px;background:linear-gradient(135deg,#8a6d3b,#c9a867)'></div><p style='font:bold 14px Arial,sans-serif;margin:8px 0 2px'>Как устроена типография</p><p style='font:12px Arial,sans-serif;color:#777;margin:0'>нон-фикшн</p></td></tr></table><a style='display:inline-block;background:#b0392b;color:#fff;padding:10px 18px;margin:16px 24px;font:bold 14px Arial,sans-serif;text-decoration:none'>Смотреть все новинки</a><p style='font:11px Arial,sans-serif;color:#999;margin:0 24px'>Вы получили это письмо, потому что подписались на рассылку. Отписаться</p></div></body>"></iframe>
     </div>
@@ -27583,7 +27582,7 @@ Read    2 min ago</div>
             <span class="tc-row__cell tc-row__caption">letter</span><span class="tc-row__cell tc-row__source">office · Inbox</span>
           </div>
         </div>
-        <div class="tc-msg" data-part="results">Mail is searched by each mailbox's own server; Carrel keeps no index of it. <b>home</b> looked through the text of letters. <b>office</b> looks only at headers — subject, sender, recipients — so a letter that mentions «смета» only in its text is not found there. <b>office · Archive</b> did not answer in 8 s, and the list did not wait for it.</div>
+        <div class="tc-msg" data-part="results"><b>office</b> searches headers only: a letter with «смета» only in its text is not found there. <b>office · Archive</b> did not answer in 8 s.</div>
       </div>
     </div>
   </div>
@@ -28337,7 +28336,7 @@ SMTP  mail.home.example:465  TLS
   <div class="tc-root tc-root--on-bg tc-root--pad14">
     <div class="tc-stack tc-stack--gap-10">
       <div class="tc-rubric tc-rubric--split tc-rubric--nudge">Mailboxes <span class="tc-badge">off on this instance</span><span class="tc-mono tc-mono--ls0">2</span></div>
-      <div class="tc-msg tc-msg--flush">The administrator turned off mailboxes on this instance. Nothing is read from them or sent through them, and they are not in the rail, search or timelines. Their passwords stay sealed in your profile: the administrator cannot open or remove them, only you can. If mailboxes come back on, everything works as before.</div>
+      <div class="tc-msg tc-msg--flush">The administrator turned off mailboxes on this instance. Their passwords stay sealed in your profile, and everything works again when mailboxes are back on.</div>
       <div class="tc-card tc-card--flush">
         <div class="tc-rubric">home <span class="tc-line tc-line--gap-6"><button class="tc-btn is-sm is-danger" type="button">Remove</button></span></div>
         <div class="tc-mono tc-mono--t11-5-dusty">mix@home.example · not used while mail is off</div>
@@ -32768,25 +32767,25 @@ dav: HTTP 503: the server is busy</div></div>
           <div class="tc-form tc-form--gap12-16-pad0">
             <div class="tc-field tc-grow"><label>Data folder</label>
               <input class="tc-in is-mono tc-in--t11-5" type="text" value="C:\Users\mix\AppData\Local\Carrel" aria-label="Data folder">
-              <span class="tc-field__hint">Encrypted state lives here: your DAV connections and settings. Not one contact, event or note — those stay on the servers.</span></div>
+              <span class="tc-field__hint">Your connections and settings, encrypted. Records stay on the servers.</span></div>
             <div class="tc-field tc-field--fill300"><label>Port</label>
               <input class="tc-in is-mono" type="text" value="chosen at every start · now 51734" aria-label="Port">
-              <span class="tc-field__hint">Nothing to set here. The app asks the system for a free port on <span class="tc-mono">127.0.0.1</span>, so a busy 8080, a second copy of Carrel or someone else’s server cannot collide with it. The current number is always in the status bar — it is needed only to open the address in a browser.</span></div>
+              <span class="tc-field__hint">A free one at every start; its number is in the status bar.</span></div>
             <div class="tc-field"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Stop the server on exit</button></div>
             <div class="tc-field is-own-line tc-grow tc-field--gap7">
               <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Allow other devices on this network</button>
-              <span class="tc-field__hint">While this is off, Carrel listens on <span class="tc-mono">127.0.0.1</span> only — from outside it does not exist. Turning it on <b>pins the port</b> and gives <span class="tc-mono">http://192.168.1.14:8765</span> for a phone and for DAVx5, and asks for a password like any other instance: an address that other devices remember cannot change at every start.</span>
+              <span class="tc-field__hint">Turning it on <b>pins the port</b>: a phone and DAVx5 reach <span class="tc-mono">http://192.168.1.14:8765</span> with your password.</span>
             </div>
           </div>
           <div class="tc-fset tc-fset--rule">
             <div class="tc-rubric">Account</div>
             <div class="tc-field tc-field--md"><label>Login</label><input class="tc-in" type="text" value="mix" aria-label="Login"></div>
             <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="text" value="••••••••••••" aria-label="Password"></div>
-            <div class="tc-msg is-alert tc-grow tc-msg--flush-top2">The password is the only key to the saved connections. Running locally changes nothing about that: nobody can recover it, including the app on your own computer.</div>
+            <div class="tc-msg is-alert tc-grow tc-msg--flush-top2">Nobody can recover the password, not even this app; without it the saved connections are lost.</div>
           </div>
           <div class="tc-msg is-alert is-row tc-msg--flush">
             <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-            <span class="tc-msg__aside"><b>What only works from outside.</b> A local Carrel is not visible from the internet, so <b>published links</b>, <b>devices over davloom</b>, <b>backup started by an external request</b> and <b>invitation links</b> either do not work or need you to arrange the access yourself — an invitation letter will go out, but the address inside it opens on your machine only — port forwarding, a tunnel, your own domain and certificate. Carrel neither guesses nor configures any of that: it marks such places and shows what is not answering.</span>
+            <span class="tc-msg__aside"><b>Not reachable from the internet.</b> <b>Published links</b>, <b>devices over davloom</b>, <b>external backup triggers</b> and <b>invitation links</b> work on this machine only, until you set up port forwarding, a tunnel or your own domain.</span>
           </div>
           <div class="tc-line tc-line--gap-8">
             <button class="tc-btn is-primary" type="button">Run</button>
@@ -33027,12 +33026,11 @@ dav: HTTP 503: the server is busy</div></div>
         <span class="mk-winbtns"><span class="mk-winbtns__btn mk-winbtns__btn--h30"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
       </div>
       <div class="tc-stack tc-stack--gap-10 tc-win__sheet--pad12">
-        <div class="tc-msg tc-msg--flush"><b>Sign out of <span class="tc-mono">carrel.example</span>?</b> The app goes back to the first screen, where the mode is chosen again — a server or a local run. <b>Your other devices stay signed in</b> — those sessions end in Settings → Account, and they end there whether this app is running or not.</div>
+        <div class="tc-msg tc-msg--flush"><b>Sign out of <span class="tc-mono">carrel.example</span>?</b> <b>Your other devices stay signed in</b>: end those sessions in Settings → Account.</div>
         <div class="tc-msg is-alert is-row tc-msg--flush">
           <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside"><b>Delete what this app keeps on this computer?</b> The data folder <span class="tc-mono">C:\Users\mix\AppData\Roaming\Carrel</span>, the instance address and name, the start-at-sign-in setting and the session token in the keychain. The next start would be indistinguishable from the first, and no one can bring the saved connections back — not even from here.</span>
+          <span class="tc-msg__aside"><b>Delete what this app keeps on this computer?</b> The folder <span class="tc-mono">C:\Users\mix\AppData\Roaming\Carrel</span>, the instance address and the session token. The saved connections cannot be brought back; records on your DAV servers are not touched.</span>
         </div>
-        <div class="tc-msg tc-msg--flush">Your events, contacts and notes are not here and are not touched: they live on your DAV servers. What would be deleted is the key to them, not them.</div>
         <div class="tc-line tc-line--gap-8">
           <button class="tc-btn is-primary" type="button">Keep and sign out</button>
           <kbd class="tc-kbd">Enter</kbd>
@@ -33064,7 +33062,7 @@ dav: HTTP 503: the server is busy</div></div>
                 <input class="tc-in is-mono tc-in--fill" type="text" value="mix · https://carrel.example" aria-label="Signed in as">
                 <button class="tc-btn" type="button">Sign out…</button>
               </span>
-              <span class="tc-field__hint">Signing out brings back the first screen, where the mode is chosen again — a server or a local run. Nothing is deleted by it. It asks first, which is what the ellipsis promises — in the web user menu the same words end the session at once and carry no ellipsis. In local mode the line reads <span class="tc-mono">mix · local run</span>: there is no address to show.</span></div>
+              <span class="tc-field__hint">Nothing is deleted: the app returns to the first screen.</span></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Behaviour</div>
@@ -33081,22 +33079,22 @@ dav: HTTP 503: the server is busy</div></div>
             <div class="tc-rubric">Network</div>
             <div class="tc-field tc-field--md"><label>Proxy</label><button class="tc-in is-pick" type="button">system</button></div>
             <div class="tc-field"><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Trust this instance’s self-signed certificate</button></div>
-            <div class="tc-field tc-grow"><span class="tc-field__hint">This appears only after a certificate has been rejected, and it remembers that one fingerprint — it is not “turn checking off”.</span></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint">Appears only after a certificate was rejected; it trusts that one fingerprint, checking stays on.</span></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Updates</div>
             <div class="tc-field tc-field--fill300"><label>Installed</label>
               <span class="tc-line tc-line--gap-8">
-                <input class="tc-in is-mono tc-in--t11-5-fill" type="text" value="app 0.8.0 · server 0.8.0">
+                <input class="tc-in is-mono tc-in--t11-5-fill" type="text" value="app 0.8.0 · server 0.8.0" aria-label="Installed">
                 <button class="tc-btn" type="button">Check now</button>
               </span>
-              <span class="tc-field__hint">Last checked 2 hours ago, by this button · <span class="tc-mono">0.8.0</span> was the latest. Nothing is checked on its own while the tick below is clear.</span></div>
+              <span class="tc-field__hint">Last checked 2 hours ago: <span class="tc-mono">0.8.0</span> was the latest.</span></div>
             <div class="tc-field tc-grow tc-field--gap7">
               <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Check for updates automatically</button>
               <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Install when I close the app</button>
               <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Include pre-releases</button>
-              <span class="tc-field__hint">Both are off out of the box, and off means the app does not reach the network at all — not “checks and stays quiet”. The button above works either way. With checking on, an update is downloaded from the project’s releases and verified by signature before anything is replaced; with the second tick off it then waits until the button is pressed, and nothing restarts under your hands mid-work.</span></div>
-            <div class="tc-field tc-grow"><span class="tc-field__hint">The app and the server are versioned separately. In local mode both are updated here at once, because the server runs inside the app. Connected to your own server, this updates the app only — the server is updated where it runs, and the app says so when the two versions stop matching.</span></div>
+              <span class="tc-field__hint">With these clear, the app does not go online. An update is verified by its signature; without the second tick it waits until you install it.</span></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint">In local mode this updates the server too; with your own server, the app only.</span></div>
           </div>
         </div>
       </div></div>

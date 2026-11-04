@@ -617,20 +617,18 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 			Rows:     []view.FormRow{{Name: "src", Label: "What to copy", Kind: view.InputCheck, Options: srcOpts, Error: errs["src"]}}},
 		{Legend: "Where to", Rows: []view.FormRow{
 			{Name: "mode", Label: "Where to", Kind: view.InputRadio, Options: modes,
-				HintRuns: join(strongRun("Download"), " streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. "+
-					"It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: "+
-					"a browser is not there at that hour, a machine with a disk is. ", strongRun("Both"), " does the two at once — and then the trigger has ",
-					strongRun("two steps"), ", because the file still has to be taken.")},
+				// Р-77 (Typecase's note 166): only what the screen does not say.
+				HintRuns: join(strongRun("Download"), " writes nothing to the server. On a schedule it runs only from an external trigger: someone has to take the file. ",
+					strongRun("Both"), " does the two, and its trigger has ", strongRun("two steps"), ".")},
 			{Name: "dest", Label: "Collection", Kind: view.InputSelect, Options: destOpts, Error: errs["dest"]},
 			{Name: "folder", Label: "Folder in it", Kind: view.InputText, Value: text(strings.Join(job.DestFolder, "/")), Error: errs["folder"], Mono: true, Extra: &browse},
 			{Name: "keep", Label: "Keep copies", Kind: view.InputNumber, Value: text(strconv.Itoa(job.Keep)), Error: errs["keep"], Mono: true,
-				HintRuns: join("Copies past the "+keepOrdinal(job.Keep)+" are deleted ", strongRun("after"),
-					" the new one has been read back and checked, not before. The file is dated and never overwritten.")},
+				HintRuns: join("Older copies are deleted only ", strongRun("after"), " the new one is checked.")},
 		}},
 		{Legend: "How the archive is closed", Rows: []view.FormRow{
 			{Name: "encrypted", Label: "Encrypt the archive", Kind: view.InputCheck, Value: text(encrypted),
 				Options: []view.Option{{Value: "1", Label: "Encrypt the archive", Selected: job.Encrypted}},
-				Hint:    "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it."},
+				Hint:    "Turn it off only where nobody but you can reach the copy."},
 			// The owner's words (19.10.2026, Typecase's note 95).
 			{Name: "password", Label: "Archive password", Kind: view.InputPassword, Error: errs["password"], Placeholder: passwordSet,
 				Required: job.ID == "", Hint: "Separate from the sign-in password."},
@@ -685,24 +683,6 @@ func (s *Server) chosenAside(viewerID string, blob sealed.Blob, job sealed.Backu
 		}
 	}
 	return text(aside)
-}
-
-// keepOrdinal is a count of copies as the hint of Keep says it: «the eighth».
-func keepOrdinal(n int) string {
-	words := []string{"", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth",
-		"eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth"}
-	if n > 0 && n < len(words) {
-		return words[n]
-	}
-	switch {
-	case n%10 == 1 && n%100 != 11:
-		return fmt.Sprintf("%dst", n)
-	case n%10 == 2 && n%100 != 12:
-		return fmt.Sprintf("%dnd", n)
-	case n%10 == 3 && n%100 != 13:
-		return fmt.Sprintf("%drd", n)
-	}
-	return fmt.Sprintf("%dth", n)
 }
 
 // jobFromForm reads the editor into job, and what is wrong with it.

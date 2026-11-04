@@ -234,21 +234,21 @@
                 "text": "Download"
               },
               {
-                "text": " streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. "
+                "text": " writes nothing to the server. On a schedule it runs only from an external trigger: someone has to take the file. "
               },
               {
                 "mark": "strong",
                 "text": "Both"
               },
               {
-                "text": " does the two at once — and then the trigger has "
+                "text": " does the two, and its trigger has "
               },
               {
                 "mark": "strong",
                 "text": "two steps"
               },
               {
-                "text": ", because the file still has to be taken."
+                "text": "."
               }
             ],
             "kind": "radio",
@@ -338,14 +338,14 @@
             "hint": "",
             "hintRuns": [
               {
-                "text": "Copies past the eighth are deleted "
+                "text": "Older copies are deleted only "
               },
               {
                 "mark": "strong",
                 "text": "after"
               },
               {
-                "text": " the new one has been read back and checked, not before. The file is dated and never overwritten."
+                "text": " the new one is checked."
               }
             ],
             "kind": "number",
@@ -367,7 +367,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.",
+            "hint": "Turn it off only where nobody but you can reach the copy.",
             "kind": "check",
             "label": "Encrypt the archive",
             "name": "encrypted",

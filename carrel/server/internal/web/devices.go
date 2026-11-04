@@ -10,11 +10,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"rsc.io/qr"
 
-	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
@@ -235,23 +233,22 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	case view.TabApple:
 		page.Warning = view.Notice{
 			Role:  view.NoticeAlert,
-			Title: "The profile carries passwords in cleartext",
-			Body: text(fmt.Sprintf("It is an ordinary file: it lands in Downloads, in a messenger, in the phone's backup. Open it on the device and delete it. "+
-				"The link opens once and lives %d minutes, for you signed in to Carrel; nothing is written to the server's disk, and the issue is recorded in the audit log.",
-				int(conf.DeviceProfileLinkTTL/time.Minute))),
+			Title: "The profile carries passwords in cleartext.",
+			// What to do with the file and why (Р-77, Typecase's note 167):
+			// how long the link lives is on its card.
+			Body: "Install it, then delete the file: otherwise it stays in Downloads and in the phone’s backup.",
 		}
 		gen := view.Action{ID: "device.profile", Label: "Generate profile", Method: "POST", Danger: true, Enabled: true,
 			Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {"profile"}})}
-		// The line above the button says how it is issued (s-plan-1,
-		// s-plan-3); a working button carries no reason (C-6.2).
+		// The line above the button says why it asks (s-plan-6); inside the
+		// unlock window there is none — the badge in the head says it
+		// (s-plan-1, Р-77). A working button carries no reason (C-6.2).
 		switch {
 		case profileAccounts == 0:
 			gen.Enabled, gen.Reason = false, "No included account has calendars or address books."
 		case !unlocked:
 			gen.Method, gen.Href = "GET", unlock
 			page.Note = "Asks for your Carrel password first." // s-plan-6
-		default:
-			page.Note = "Issued inside the unlock window: nothing more is asked."
 		}
 		page.Actions = append(page.Actions, gen)
 		page.Link = s.profileLink(sess, tab)
@@ -293,7 +290,7 @@ func (s *Server) profileLink(sess *session.Session, tab view.DeviceTab) *view.De
 	return &view.DeviceLink{
 		Title: text("Link ready until " + s.timeFor(sess).clock(expires)),
 		Local: s.instanceLocal(),
-		Hint:  "It opens once, for you signed in to Carrel. Open it on the device, install the profile, then delete the file.",
+		Hint:  "Opens once, for you signed in to Carrel.",
 		Actions: []view.Action{
 			{ID: "device.profile.download", Label: "Download profile", Icon: "i-download", Href: s.postQuery("/app/settings/devices/profile", url.Values{"t": {token}}), Method: "GET", Enabled: true},
 			{ID: "device.profile.revoke", Label: "Revoke", Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {"revoke"}}), Method: "POST", Enabled: true, Danger: true},

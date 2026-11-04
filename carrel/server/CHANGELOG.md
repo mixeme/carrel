@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.398 — 2026-11-04
+
+### Changed
+
+- Shorter hints, the frames' words (Р-77, Typecase's notes 166 and 167,
+  accepted by the owner 04.11.2026). The Apple profile's alert (s-plan-1,
+  -6): «The profile carries passwords in cleartext.» · «Install it, then
+  delete the file: otherwise it stays in Downloads and in the phone’s
+  backup.»; the link's card «Opens once, for you signed in to Carrel.»;
+  inside the unlock window Generate profile has no line (`DevicesPage.note`
+  empty — the badge in the head says it), outside it still «Asks for your
+  Carrel password first.». The backup job (s-backup-2, -19): Keep copies
+  «Older copies are deleted only **after** the new one is checked.» (the
+  count is no longer in the words), Where to «**Download** writes nothing
+  to the server. On a schedule it runs only from an external trigger:
+  someone has to take the file. **Both** does the two, and its trigger has
+  **two steps**.», Encrypt «Turn it off only where nobody but you can reach
+  the copy.». The other frames of the notes — the desktop app (desktop-6,
+  -12, -13) and mail (s-mailbox-5, -13, -14, -28) — are not drawn by Carrel
+  yet.
+
 ## v0.2.397 — 2026-11-04
 
 ### Added

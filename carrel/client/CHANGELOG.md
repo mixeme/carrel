@@ -4,6 +4,16 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.20 — 2026-11-04
+
+Typecase `99f680a`, notes 166 and 167 (Р-77, shorter hints); server
+`v0.2.398`. The whole client suite passes.
+
+- The hints are the server's words: nothing of the client changed. On
+  s-plan-1 Generate profile has no line inside the unlock window — the
+  server sends none, and the card draws none (the frame was red until the
+  fixture was reshot).
+
 ## v0.11.19 — 2026-11-04
 
 Typecase `8d83d14`, notes 162–165; server `v0.2.397`. The whole client
