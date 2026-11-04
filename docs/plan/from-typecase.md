@@ -5350,6 +5350,32 @@ Typecase, который она описывает, — `d771527`** (570 кад�
       события (`s-agenda-26`) — «The server may send its attendees a
       cancellation.»
 
+Записка 169 от 04.11.2026 (Typecase `a41fbf1`; своя задача Typecase —
+проход Р-77, партия 4, принята владельцем 04.11).
+**Последний коммит Typecase, который она описывает, — `a41fbf1`** (570 кадров).
+
+169. **Пояснения короче (Р-77), партия 4: депонирование ключа у
+   пользователя.** Тексты дословно из макета:
+   1. **Account** (`account-1`, `-15`, `s-mail-9`): у Key escrow — «No copy
+      of your data key is deposited: if you lose your password, nobody can
+      recover the account.»; у Password — «Your saved connections stay
+      readable after the change.»
+   2. **Лист Deposit my key** (`account-2`): плашка — «With the escrow master
+      password, an administrator will be able to decrypt the DAV credentials
+      you save here, and through them your records. You can withdraw the copy
+      later from Account.»; у поля «Your Carrel password» подсказки **нет**.
+   3. **Копия депонирована** (`account-4`, `-16`; подзаголовок «A copy of
+      your key on this server»): плашка — «With the escrow master password,
+      an administrator can decrypt the DAV credentials you save here, and
+      through them your records.»; строка `account-7` (значок «deposited») —
+      «If you lose your password, an administrator with the escrow master
+      password can recover the account and read the DAV credentials you save
+      here.»
+   4. **Копии нет** (`account-12`, «What a deposit does»): «With a copy, an
+      administrator with the escrow master password can recover this account
+      if you lose your password, and read the DAV credentials you save here.
+      You can withdraw it at any time.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
