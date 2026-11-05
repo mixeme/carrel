@@ -278,9 +278,7 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
         failed: the field … would be saved as «…» instead of «…»», `v0.2.392`; ошибка под Status — 02.11,
         «Done is ticked, but Status is …», пересмотрена по правилу; подсказка у Done — 02.11,
         «Repeating task: Done completes this occurrence…», пересмотрена по правилу; строки очереди файлов и отказы сервера файлов — 02.11, код и текст ответа, «Move failed after 12 entries: 507 Insufficient Storage. Source unchanged», `v0.2.392`, кадр — задача Typecase 252; удаление в Files, отказанное не для всех, — 02.11, «Delete failed for 3 of 5 items.» · «2 deleted, 3 unchanged.», `v0.2.396`; записи, которых Carrel не прочитал (Б3), — 02.11, «1 record not shown: invalid vCard.» · «Unchanged on the server.», `v0.2.396`; один из нескольких файлов не прикрепился (Б6) — 03.11, решение владельца: прикрепляются все, какие можно, — «2 of 3 files attached.» · «scan.pdf: 507 Insufficient Storage.», неубранный из папки вложений файл назван, «… stays in Documents / carrel: 403 Forbidden: …», `v0.2.396` (слова 02.11 «The other files were not attached either.» отменены вместе со «всё или ничего»); распавшаяся связанная группа (Б16) — 03.11, «Link removed.» · «… is no longer at its address (deleted or moved). This record is unchanged.», `v0.2.396`; строка папки вложений в листе удаления папки (Б42) — 03.11, «Attachments — the attachment folder is in it; the next attachment too large to go inside its record creates it again, empty, at the same path», `v0.2.396`, остальные слова Б42 — из кадров; отказ экспорта из-за нечитаемых записей — 03.11, «Export stopped: 2 records are invalid vCard.» · «No file was made. The records are unchanged on the server.», `v0.2.396`, и карточка теперь идёт в `.vcf` сырой, как запись в `.ics`; заметка без даты в предпросмотре импорта — 03.11, «Ready — no front matter: title from the first heading, date of the import (the file has none)», `v0.2.396`; ошибка серии, чьё начало перенесено за её последний день — 03.11, «Until (2 March) is before the start (9 March). Change one of them.», годы — когда дни в разных годах, `v0.2.396`; второе сообщение о потерянных днях серии, после потерянных свойств — 03.11, «The server also did not keep two days of the series.», `v0.2.396`; причины «Custom…» напоминания — 03.11, «How long: enter a whole number, 0 or more.», «Unit: choose minutes, hours, days or weeks before.», «At: enter a time as HH:MM, for example 09:00.», под строкой «Custom…», `v0.2.396`; подзадачи, не закрытые с задачей — 03.11, «Task done. Mark done failed for 1 of 3 subtasks: 403 Forbidden: …» · «2 marked done, 1 still open.», список не перечитан — «Task done. Subtasks not checked: 503 Service Unavailable.» · «Carrel could not read the list again. Open subtasks stay open.», `v0.2.396`; время при слиянии в «What changes» — 03.11, «the time from …: start, end, repetition, added and skipped days, rewritten occurrences» и «1 rewritten occurrence of …, which belongs to its old time and goes with it», `v0.2.396`; заменённый адрес рядом с отчётом о потере — 03.11, «Address replaced: anna@oldfirm.example.» · «Events and tasks that name it are unchanged.» · [Rewrite the addresses], `v0.2.396`; неверное число на экране дубликатов — 03.11, «Match threshold not changed: «7x» is not a whole number from 0 to 1000.» · «It stays 60.», «2 of 6 weights not saved: a weight is a whole number from 0 to 1000.» · «4 saved, 2 unchanged.», `v0.2.396`): уведомления
-        других групп — в CHANGELOG они названы словами исполнителя;
-      - две стороны миниатюры (плитке 240–320 px) — «на будущее»: брать,
-        когда плитки окажутся тяжёлыми на настоящих снимках.
+        других групп — в CHANGELOG они названы словами исполнителя.
 
 Решено владельцем, ждёт кадра:
 
@@ -294,6 +292,14 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
       `publish.go` сейчас его отбрасывают) и поле строки ссылки.
 
 Отложено владельцем — после первой рабочей версии или до его действия:
+
+- [ ] **Второй размер миниатюры** (решение владельца 05.11.2026: отложить
+      до телефона). Сейчас одна миниатюра, `conf.FileThumbSide` = 480 px по
+      большей стороне; её получает и плитка папки (`s-files-5`, 240–320 px),
+      и панель просмотра. Проверка — на этапе 5: владелец открывает на своём
+      телефоне настоящую папку со снимками. Если плитки грузятся тяжело —
+      сделать вторую сторону (около 320 px) со своим адресом и своей
+      записью в кэше; если нет — пункт закрыть.
 
 - [ ] **Carrel узнаёт владельца без карточки** (решение владельца
       01.11.2026, вариант Б вопроса #26): организатор или участник с
