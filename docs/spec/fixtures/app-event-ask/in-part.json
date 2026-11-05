@@ -18,7 +18,7 @@
       "method": "GET"
     }
   ],
-  "alert": "The meeting of 2 February was not made a separate event: it stays in the series, with its change, as it was before you saved.",
+  "alert": "The meeting of 2 February was not made a separate event: it stays in the series as it was before you saved.",
   "blocks": [
     {
       "lines": [

@@ -366,9 +366,9 @@ func (s *Server) askFailed(r *http.Request, c *collectionCtx, uid string, sent *
 	if len(failed) > 1 {
 		which = strconv.Itoa(len(failed)) + " " + nouns[1]
 	}
-	sheet.Alert = text(which + " was not made a separate event: it stays in the series, with its change, as it was before you saved.")
+	sheet.Alert = text(which + " was not made a separate event: it stays in the series as it was before you saved.")
 	if len(failed) > 1 {
-		sheet.Alert = text(which + " were not made separate events: they stay in the series, with their changes, as they were before you saved.")
+		sheet.Alert = text(which + " were not made separate events: they stay in the series as they were before you saved.")
 	}
 	sheet.Note = "Nothing is lost: what could not be written apart is still in the series."
 	address := c.recordPath(uid) + "/edit"

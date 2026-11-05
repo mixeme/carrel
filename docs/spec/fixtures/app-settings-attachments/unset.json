@@ -74,7 +74,7 @@
                 "text": "radicale · vps"
               },
               {
-                "text": " 1 MB. Nothing here raises it."
+                "text": " 1 MB."
               }
             ],
             "kind": "text",
@@ -160,7 +160,7 @@
               "method": "GET",
               "target": "sheet"
             },
-            "hint": "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel.",
+            "hint": "Created on first use. An ordinary folder, readable without Carrel.",
             "kind": "text",
             "label": "Folder in it",
             "mono": true,

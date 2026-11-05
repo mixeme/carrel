@@ -1443,8 +1443,7 @@ func (s *Server) importPreview(ctx context.Context, c *collectionCtx, d *importD
 			// Try again asks the same preview once more, the file kept; no
 			// technical block — there was no answer (Typecase's note 113
 			// p. 8).
-			notices = append(notices, view.Notice{Role: view.NoticeAlert, Runs: join(strongRun(unanswered),
-				", so what is already there cannot be told. Nothing is written; try again, or choose another "+intoNoun[c.spec.kind]+" under «Into»."),
+			notices = append(notices, view.Notice{Role: view.NoticeAlert, Runs: importSilent(unanswered, c.spec.kind),
 				Actions: []view.Action{{ID: "import.again", Label: "Try again", Href: s.importHref(c, "", dest.conn.ID, dest.col.Path), Method: "GET", Enabled: true}}})
 		}
 	}
@@ -1452,6 +1451,13 @@ func (s *Server) importPreview(ctx context.Context, c *collectionCtx, d *importD
 }
 
 // intoNoun is what «Into» chooses, by kind (s-io-17, -19).
+// importSilent is the alert of a preview whose collection did not answer
+// (s-io-19).
+func importSilent(unanswered string, kind view.Kind) view.Runs {
+	return join(strongRun(unanswered+"."),
+		" Nothing is written; try again, or choose another "+intoNoun[kind]+" under «Into».")
+}
+
 var intoNoun = map[view.Kind]string{
 	view.KindContact: "address book", view.KindEvent: "calendar", view.KindTask: "list of tasks", view.KindNote: "notebook",
 }

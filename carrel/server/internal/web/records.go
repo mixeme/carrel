@@ -643,12 +643,16 @@ func (s *Server) readVersion(c *collectionCtx, path, etag string) (*model.Object
 
 // unavailableNotice is a source failure on the screen (C-9.1, S-21): what
 // failed, the server's answer, and a retry of this source only.
+// unavailableBody follows «… is unavailable.» on a list, a card or a folder
+// whose server did not answer (s-conflict-10, states-11, -22, -29, -33).
+const unavailableBody = "The server did not answer as expected."
+
 func (s *Server) unavailableNotice(c *collectionCtx, retry string, err error) view.Notice {
 	c.refused = err // the rail's row of this list says it too (states-11, -22, -29)
 	return view.Notice{
 		Role:  view.NoticeAlert,
 		Title: text(collectionLabel(c.col) + " is unavailable"),
-		Body:  text("The server did not answer as expected, so nothing on this screen comes from it."),
+		Body:  text(unavailableBody),
 		Details: &view.Diagnostic{
 			Summary: text("REPORT " + c.col.Path),
 			Lines:   []view.Text{text(connLabel(c.conn)), text(err.Error())},

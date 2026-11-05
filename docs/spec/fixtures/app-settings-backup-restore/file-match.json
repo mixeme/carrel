@@ -809,7 +809,7 @@
       "whereNote": "nothing is written"
     }
   ],
-  "jobsHint": "verified — the archive was read back from where it was written and the checksum matched. Written and not read back is not verified, and is marked red.",
+  "jobsHint": "verified — the archive was read back from where it was written and the checksum matched; otherwise it is marked red.",
   "look": {
     "compact": false,
     "panel": true,

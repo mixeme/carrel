@@ -45,6 +45,9 @@ const (
 	jumpRowsMost = 8
 )
 
+// tooManySearches follows «Too many searches» (s-find-8).
+var tooManySearches = fmt.Sprintf("This session already runs %d searches and lists. Stop one or wait for one to finish.", conf.MaxLiveFanouts)
+
 func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -96,7 +99,7 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 			page.Notices = append(page.Notices, view.Notice{
 				Role:  view.NoticeAlert,
 				Title: "Too many searches",
-				Body:  text(fmt.Sprintf("This session already runs %d searches and lists. Stop one or wait for one to finish, then search again.", conf.MaxLiveFanouts)),
+				Body:  text(tooManySearches),
 			})
 			page.Subtitle = "not searched" // s-find-8
 			s.writePage(w, r, http.StatusOK, page)

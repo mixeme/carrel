@@ -323,7 +323,7 @@
           "method": "GET"
         }
       ],
-      "body": "The server did not answer as expected, so nothing on this screen comes from it.",
+      "body": "The server did not answer as expected.",
       "details": {
         "lines": [
           "nextcloud",

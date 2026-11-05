@@ -579,7 +579,7 @@ func (s *Server) folderRead(r *http.Request, c *fileCtx, segs []string, folder s
 		notices = append(notices, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: text(collectionLabel(c.col) + " is unavailable"),
-			Body:  text("The server did not answer as expected, so nothing on this screen comes from it."),
+			Body:  text(unavailableBody),
 			Details: &view.Diagnostic{
 				Summary: text("PROPFIND " + folder),
 				Lines:   []view.Text{text(connLabel(c.conn)), text(err.Error())},

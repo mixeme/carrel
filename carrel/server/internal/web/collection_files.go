@@ -141,14 +141,14 @@ func (m *collectionMove) runFiles(ctx context.Context) (string, *view.Notice) {
 	// told which is which.
 	if why := movedWhole(ctx, src, m.col.Path, before, dst, newPath, m.s.cfg.FilesMaxEntries); why != "" {
 		return "", m.kept("Copied, and the original kept",
-			upperFirst(why)+", so "+label+" was not deleted on "+connLabel(m.conn)+". Both are there now: look at them, and delete the one you do not need.", nil)
+			upperFirst(why)+", so "+label+" was not deleted on "+connLabel(m.conn)+".", nil)
 	}
 	if storageRoot(m.conn, m.col) {
 		return m.emptyStorage(ctx, src)
 	}
 	if err := src.Delete(ctx, m.col.Path, ""); err != nil {
 		n := m.kept("Copied, but the original could not be deleted",
-			fmt.Sprintf("Both are there now. Delete %s on %s yourself once the server lets you.", label, connLabel(m.conn)), nil)
+			fmt.Sprintf("Delete %s on %s yourself once the server lets you.", label, connLabel(m.conn)), nil)
 		n.Details = davRefusal(moveCollectionRefusal("", label), m.conn, "DELETE", m.col.Path, err).Details
 		return "", n
 	}
@@ -169,7 +169,7 @@ func (m *collectionMove) emptyStorage(ctx context.Context, src *file.Provider) (
 	entries, err := src.List(ctx, m.col.Path)
 	if err != nil {
 		n := m.kept("Copied, but nothing here was deleted",
-			fmt.Sprintf("%s on %s could not be read again, so nothing in it was deleted. Both are there now.", label, connLabel(m.conn)), nil)
+			fmt.Sprintf("%s on %s could not be read again, so nothing in it was deleted.", label, connLabel(m.conn)), nil)
 		n.Details = refusalDetails("delete", "PROPFIND", m.col.Path, err)
 		return "", n
 	}

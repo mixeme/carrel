@@ -441,7 +441,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		// A job's page and a new job's are the job alone (s-backup-2).
 		if editing == nil {
 			page.Jobs = append(page.Jobs, row)
-			page.JobsHint = "verified — the archive was read back from where it was written and the checksum matched. Written and not read back is not verified, and is marked red."
+			page.JobsHint = verifiedHint
 		}
 	}
 	// A new job (s-backup-19): to WebDAV, into the first file collection
@@ -987,6 +987,9 @@ func (s *Server) jobRow(sess *session.Session, blob sealed.Blob, job sealed.Back
 	row.Triggered = s.users.BackupTriggerOn(sess.AccountID(), job.ID)
 	return row
 }
+
+// verifiedHint stands under the jobs (s-backup-1, -12, -13, -14).
+const verifiedHint = "verified — the archive was read back from where it was written and the checksum matched; otherwise it is marked red."
 
 // verifiedRun is the word of a copy read back from where it was written
 // (s-backup-1); one written and not read back is marked red, and one that

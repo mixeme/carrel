@@ -13,8 +13,8 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// Typecase's notes 169–173 (Р-77, 04.11.2026): the hints say only what the
-// screen does not. These are the words of them no other check reads in the
+// Typecase's notes 169–173 and 175 (Р-77, 04.11.2026): the hints say only
+// what the screen does not. These are the words of them no other check reads in the
 // frames; each must stand in its frame as it is.
 
 var (
@@ -72,6 +72,31 @@ func TestTheFewerWordsStandInTheirFrames(t *testing.T) {
 		{"s-admin-4", outsideCheckNote},
 		{"s-admin-25", outsideCheckNote},
 		{"s-admin-26", outsideCheckNote},
+		// Note 175: the second sentence that repeats the first goes.
+		{"s-conflict-10", "Контакты is unavailable. " + unavailableBody + " Try again"},
+		{"states-11", "Контакты is unavailable. " + unavailableBody + " Try again"},
+		{"states-22", "Дела is unavailable. " + unavailableBody + " Try again"},
+		{"states-29", "Записи is unavailable. " + unavailableBody + " Try again"},
+		{"states-33", "Documents is unavailable. " + unavailableBody + " Try again"},
+		{"s-profile-21", noneAnswering("calendar", []string{"baikal"}) + " Try again"},
+		{"s-profile-11", string(labelTakenText("nextcloud"))},
+		{"s-dup-6", "Nothing is loaded yet. " + dupNotLoadedNote},
+		{"s-io-19", runsText(importSilent("nextcloud · Контакты did not answer", view.KindContact)) + " Try again"},
+		{"s-plan-2", scanCodesNote},
+		{"s-files-17", fileGoneTitle + " " + fileGoneBody},
+		{"s-find-8", tooManySearches},
+		{"s-backup-1", verifiedHint},
+		{"s-backup-12", verifiedHint},
+		{"s-backup-13", verifiedHint},
+		{"s-backup-14", verifiedHint},
+		{"attachments-1", attachPathHint},
+		{"attachments-1", attachFolderHint},
+		{"attachments-5", attachFolderHint},
+		{"attachments-6", attachFolderHint},
+		{"attachments-1", attachMovesNote},
+		{"attachments-6", attachMovesNote},
+		{"attachments-1", "vps 1 MB" + attachLowerEnd + " Folder"},
+		{"appearance-1", datesHint},
 	} {
 		if !strings.Contains(frameSays(t, tc.frame), tc.said) {
 			t.Errorf("%s does not say %q", tc.frame, tc.said)

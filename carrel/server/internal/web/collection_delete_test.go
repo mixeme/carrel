@@ -165,7 +165,7 @@ func TestCollectionDeleteRefusedKeepsIt(t *testing.T) {
 	for i := range page.Notices {
 		n = &page.Notices[i]
 	}
-	if n == nil || n.Title != "Work was not deleted." || !strings.Contains(string(n.Body), "refused: this account can read here but not write. Work is as it was.") ||
+	if n == nil || n.Title != "Work was not deleted." || !strings.HasSuffix(string(n.Body), "refused: this account can read here but not write.") ||
 		n.Details == nil || !strings.Contains(string(n.Details.Summary), "DELETE") {
 		t.Fatalf("notice = %+v", n)
 	}

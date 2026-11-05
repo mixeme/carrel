@@ -17,6 +17,47 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.402 — 2026-11-05
+
+### Changed
+
+- Shorter hints, the frames' words (Р-77, Typecase's note 175): the second
+  sentence that repeats the first goes.
+  - an unavailable list, card or folder (s-conflict-10, states-11, -22,
+    -29, -33): «… is unavailable. The server did not answer as expected.»,
+    without «so nothing on this screen comes from it»;
+  - a refused delete (s-profile-31): «Архив was not deleted. nextcloud
+    refused: this account can read here but not write.», without «Архив is
+    as it was»; a copy that kept its original (s-profile-32): «… so Личный
+    on nextcloud was not deleted.», without «Both are there now» — and so in
+    the same notices of files, of a record and of a storage, which have no
+    frame of their own;
+  - no calendar server answering (s-profile-21): «No server that holds
+    calendars is answering now: baikal.»;
+  - a label taken (s-profile-11): «… Choose another label.»;
+  - duplicates before loading (s-dup-6): «Duplicates are found only among
+    records already read in this session. …»;
+  - an import into a silent address book (s-io-19): «**nextcloud · Контакты
+    did not answer.** Nothing is written; …»;
+  - device codes (s-plan-2): «Scan each code with the phone: DAVx5 fills in
+    the address and the login, and asks for the password shown under the
+    code.»;
+  - a file gone (s-files-17): «**Nothing was attached:** the file was moved
+    or deleted after the tree was read. Choose it again.»;
+  - too many searches (s-find-8): «… Stop one or wait for one to finish.»;
+  - a meeting not split from its series (s-agenda-24, -28): «… it stays in
+    the series as it was before you saved.»;
+  - «verified» (s-backup-1, -12, -13, -14): «… and the checksum matched;
+    otherwise it is marked red.»;
+  - attachments (attachments-1, -5, -6): «Created on first use. An ordinary
+    folder, readable without Carrel.»; the boundary line ends at the sizes;
+    «Changing the folder moves nothing: attachments already written keep
+    working, new ones go to the new place.»; «Nothing here deletes them: an
+    attachment is removed in the record it hangs on.»;
+  - appearance (appearance-1): «Week start and the clock are kept in the
+    account. The time zone is the instance’s, set by the administrator.»
+- Not Carrel's: the mailboxes (s-mailbox-18, -19).
+
 ## v0.2.401 — 2026-11-05
 
 ### Changed

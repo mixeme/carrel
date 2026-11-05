@@ -230,7 +230,7 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 			why += fmt.Sprintf(" with %d", code)
 		}
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, &view.Notice{
-			Role: view.NoticeAlert, Title: text(label + " was not deleted."), Body: text(why + ". " + label + " is as it was."),
+			Role: view.NoticeAlert, Title: text(label + " was not deleted."), Body: text(why + "."),
 			Details: refusalDetails("delete", "DELETE", col.Path, err),
 		}))
 		return

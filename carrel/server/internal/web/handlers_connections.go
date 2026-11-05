@@ -1147,7 +1147,7 @@ func labelTaken(blob sealed.Blob, label, except string) bool {
 }
 
 func labelTakenText(label string) view.Text {
-	return text("There is already a connection called “" + label + "”. Choose another label: it is how your sources are told apart.")
+	return text("There is already a connection called “" + label + "”. Choose another label.")
 }
 
 func connLabel(c sealed.Connection) string {

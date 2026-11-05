@@ -213,9 +213,17 @@ func (s *Server) folderNow(ctx context.Context, sess *session.Session, fc *fileC
 		{Name: "now.files", Label: "Files", Kind: view.InputText, Value: text(files), ReadOnly: true},
 		{Name: "now.oldest", Label: "Oldest", Kind: view.InputText, Value: text(oldest), ReadOnly: true},
 		{Name: "now.path", Label: "Path", Kind: view.InputText, Value: text(fileURI(fc.conn.Server, p)), ReadOnly: true,
-			Hint: "Carrel keeps no index of what points at these files. Nothing here deletes them: an attachment is removed from the record it hangs on, in that record."},
+			Hint: attachPathHint},
 	}}, ""
 }
+
+// The words of the attachments page (attachments-1, -5, -6).
+const (
+	attachPathHint   = "Nothing here deletes them: an attachment is removed in the record it hangs on."
+	attachFolderHint = "Created on first use. An ordinary folder, readable without Carrel."
+	attachMovesNote  = "Changing the folder moves nothing: attachments already written keep working, new ones go to the new place."
+	attachLowerEnd   = "."
+)
 
 func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blob sealed.Blob, f attachForm) view.AttachmentsPage {
 	page := view.AttachmentsPage{Shell: s.settingsShell(sess, "Attachments", "/app/settings/attachments", "/app/settings/attachments"),
@@ -244,7 +252,7 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 		}
 		lower = append(lower, sep, monoRun(connLabel(conn)), " "+sizeText(least))
 	}
-	lower = append(lower, ". Nothing here raises it.")
+	lower = append(lower, attachLowerEnd)
 	small := view.FieldSet{Legend: "Small files stay in the record", Rows: []view.FormRow{
 		{Name: "inline", Label: text("Up to " + sizeText(conf.AttachInlineMax)), Kind: view.InputText, ReadOnly: true,
 			Value: "Written into the event, the task or the note itself, and travels with it."},
@@ -290,7 +298,7 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 		csrfField(sess),
 		collection,
 		{Name: "folder", Label: "Folder in it", Kind: view.InputText, Value: text(shown), Placeholder: text(placeholder), Error: text(f.errors["folder"]), Extra: &browse, Mono: true,
-			Hint: "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel."},
+			Hint: attachFolderHint},
 		{Name: "monthly", Label: "A subfolder per month", Kind: view.InputCheck, Value: text(boolStr(f.monthly)),
 			HintRuns: join(monoRun(thisMonth.AddDate(0, -1, 0).Format("2006-01")), ", ", monoRun(thisMonth.Format("2006-01")),
 				". Off means one flat folder — fine for a hundred files, not for ten thousand.")},
@@ -340,7 +348,7 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 		page.Form.Errors = append(page.Form.Errors, view.FieldError{Name: n, Message: text(f.errors[n])})
 	}
 	if blob.Attachments != nil {
-		page.Note = "Changing the folder moves nothing. Records already written carry the old path and keep working; only new attachments go to the new place."
+		page.Note = attachMovesNote
 	}
 	return page
 }

@@ -1709,7 +1709,7 @@
           },
           {
             "add": null,
-            "error": "There is already a connection called “nextcloud”. Choose another label: it is how your sources are told apart.",
+            "error": "There is already a connection called “nextcloud”. Choose another label.",
             "extra": null,
             "focus": true,
             "hint": "",

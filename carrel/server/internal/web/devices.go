@@ -254,7 +254,7 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 		page.Actions = append(page.Actions, gen)
 		page.Link = s.profileLink(sess, tab)
 	case view.TabAndroid:
-		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "One code for each ticked account. Scan it with the phone: DAVx5 opens with the address and the login filled in, and asks for the password shown under the code."}
+		page.Warning = view.Notice{Role: view.NoticeInfo, Body: scanCodesNote}
 	case view.TabThunderbird:
 		page.Warning = view.Notice{Role: view.NoticeInfo, Body: thunderbirdNote}
 	}
@@ -528,4 +528,7 @@ func newUUID() (string, error) {
 }
 
 // thunderbirdNote is the message of Thunderbird's tab (s-plan-4).
+// scanCodesNote stands over the codes for DAVx5 (s-plan-2).
+const scanCodesNote = "Scan each code with the phone: DAVx5 fills in the address and the login, and asks for the password shown under the code."
+
 const thunderbirdNote = "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. No import file is needed."

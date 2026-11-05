@@ -870,8 +870,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	case holding == 0:
 		sheet.Note = text(fmt.Sprintf("No connected server holds %ss. Connect one that does first.", noun))
 	case len(eligible) == 0:
-		sheet.Note = text(fmt.Sprintf("No server that holds %ss is answering now: %s. Until one does, there is nothing to create there.",
-			noun, strings.Join(silent, ", ")))
+		sheet.Note = text(noneAnswering(noun, silent))
 	}
 
 	action := "/app/collections/new"
@@ -1339,4 +1338,11 @@ func hiddenRows(r view.FormRow) []view.FormRow {
 		return out
 	}
 	return []view.FormRow{{Name: r.Name, Kind: view.InputHidden, Value: r.Value}}
+}
+
+// noneAnswering is the note of a new collection when no server that holds
+// its kind answers (s-profile-21).
+func noneAnswering(noun string, silent []string) string {
+	return fmt.Sprintf("No server that holds %ss is answering now: %s.",
+		noun, strings.Join(silent, ", "))
 }

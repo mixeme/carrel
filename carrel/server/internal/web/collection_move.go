@@ -436,7 +436,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 			return "", m.catalogFailure()
 		}
 		return "", m.kept("Copied, and the original kept",
-			fmt.Sprintf("%s did not keep all of what was copied, so %s on %s was not deleted. Both are there now.", connLabel(m.dest), label, connLabel(m.conn)), lost)
+			fmt.Sprintf("%s did not keep all of what was copied, so %s on %s was not deleted.", connLabel(m.dest), label, connLabel(m.conn)), lost)
 	}
 
 	// The original is deleted only as it was read: a record added or changed
@@ -458,7 +458,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	}
 	if err := m.src.t.Delete(ctx, m.col.Path, ""); err != nil {
 		n := m.kept("Copied, but the original could not be deleted",
-			fmt.Sprintf("Both are there now. Delete %s on %s yourself once the server lets you.", label, connLabel(m.conn)), nil)
+			fmt.Sprintf("Delete %s on %s yourself once the server lets you.", label, connLabel(m.conn)), nil)
 		n.Details = davRefusal(moveCollectionRefusal("", label), m.conn, "DELETE", m.col.Path, err).Details
 		return "", n
 	}

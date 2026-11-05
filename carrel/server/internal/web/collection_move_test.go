@@ -241,7 +241,8 @@ func TestCollectionMoveLossKeepsBoth(t *testing.T) {
 	f.other.Drop = []string{"X-CUSTOM"}
 	page := decode[view.ConnectionsPage](t, f.h.do(confirmCollection(t, f, false)))
 	n := noticeTitled(page.Notices, "Copied, and the original kept")
-	if n == nil || n.Details == nil || !strings.Contains(string(n.Details.Lines[0]), "X-CUSTOM") {
+	if n == nil || n.Details == nil || !strings.Contains(string(n.Details.Lines[0]), "X-CUSTOM") ||
+		!strings.HasSuffix(string(n.Body), "was not deleted.") {
 		t.Fatalf("notices = %+v", page.Notices)
 	}
 	if _, ok := f.srv.Calendar(f.col); !ok {

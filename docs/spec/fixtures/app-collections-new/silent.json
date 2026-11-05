@@ -27,7 +27,7 @@
     "sets": []
   },
   "kind": "event",
-  "note": "No server that holds calendars is answering now: nextcloud, radicale · vps, baikal. Until one does, there is nothing to create there.",
+  "note": "No server that holds calendars is answering now: nextcloud, radicale · vps, baikal.",
   "stamp": "",
   "target": {
     "chosen": "",

@@ -787,7 +787,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		page.Notices = append(page.Notices, view.Notice{
 			Role:  view.NoticeInfo,
 			Title: "Nothing is loaded yet.",
-			Body:  "Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.",
+			Body:  dupNotLoadedNote,
 		})
 	}
 	page.Print = view.Print{Title: page.Title, Range: printRange(plural(st.compared, "record")+" compared", fmt.Sprintf("%d points and above", st.threshold))}
@@ -1244,4 +1244,7 @@ func (s *Server) duplicatesRefresh(sess *session.Session, only view.Kind) view.R
 
 // dupLinkingNote is the screen's message on linking and merging (s-dup-1,
 // -6).
+// dupNotLoadedNote follows «Nothing is loaded yet.» (s-dup-6).
+const dupNotLoadedNote = "Duplicates are found only among records already read in this session. Open a list or a combined view, then come back."
+
 const dupLinkingNote = "Linking changes nothing on any server: the records are shown as one. Merging on the server is a separate, destructive step you confirm."

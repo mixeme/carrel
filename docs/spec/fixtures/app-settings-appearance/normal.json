@@ -160,7 +160,7 @@
             "value": "Europe/Moscow"
           }
         ],
-        "hint": "Week start and the clock are kept in the account: another browser shows the same. The time zone is the instance’s, set by the administrator.",
+        "hint": "Week start and the clock are kept in the account. The time zone is the instance’s, set by the administrator.",
         "legend": "Dates and times",
         "rows": [
           {

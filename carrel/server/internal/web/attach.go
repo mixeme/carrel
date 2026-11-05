@@ -707,8 +707,8 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 	switch {
 	case file.NotFound(err):
 		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, view.Notice{
-			Role: view.NoticeAlert, Title: "Nothing was attached: the file is no longer there.",
-			Body: "It was moved or deleted after the tree was read. Choose it again.",
+			Role: view.NoticeAlert, Title: fileGoneTitle,
+			Body: fileGoneBody,
 		}))
 		return
 	case err != nil:

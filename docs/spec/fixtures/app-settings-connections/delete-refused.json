@@ -1627,7 +1627,7 @@
   "notices": [
     {
       "actions": [],
-      "body": "nextcloud refused: this account can read here but not write. Архив is as it was.",
+      "body": "nextcloud refused: this account can read here but not write.",
       "details": {
         "lines": [
           "[delete]  DELETE /alice/contacts/arhiv/ → 403",

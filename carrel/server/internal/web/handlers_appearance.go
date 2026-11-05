@@ -28,6 +28,9 @@ const lookCookie = "carrel_look"
 var defaultLook = view.Look{Theme: "auto", Panel: true, Source: true}
 
 // lookOf is the Look the request's browser keeps.
+// datesHint stands under «Dates and times» (appearance-1).
+const datesHint = "Week start and the clock are kept in the account. The time zone is the instance’s, set by the administrator."
+
 func lookOf(r *http.Request) view.Look {
 	look := defaultLook
 	if r == nil {
@@ -162,7 +165,7 @@ func (s *Server) appearancePage(sess *session.Session, look view.Look, weekErr, 
 		// The zone stands with the clock as a line of text, not a field: the
 		// administrator's, nothing here changes it (appearance-1, Typecase's
 		// note 104).
-		{Legend: "Dates and times", Hint: "Week start and the clock are kept in the account: another browser shows the same. The time zone is the instance’s, set by the administrator.",
+		{Legend: "Dates and times", Hint: datesHint,
 			Facts: []view.Fact{{Label: "Time zone", Value: text(tf.tz.String()), Aside: "this instance"}}, Rows: []view.FormRow{
 				{Name: "weekStart", Label: "Week starts on", Kind: view.InputSelect, Value: text(week), Error: weekErr,
 					Options: []view.Option{option("monday", "Monday", week), option("sunday", "Sunday", week), option("saturday", "Saturday", week)}},

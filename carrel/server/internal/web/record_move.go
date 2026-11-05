@@ -438,7 +438,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 	if err != nil {
 		dest.noteWrite(dst, sent)
 		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, s.keptNotice(dest, uid, "Copied, and the original kept",
-			"The copy could not be read back to check it, so the "+c.spec.noun+" was not deleted here. Both are there now.")))
+			"The copy could not be read back to check it, so the "+c.spec.noun+" was not deleted here.")))
 		return
 	}
 	dest.noteWrite(got.Path, got)
@@ -458,7 +458,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 			"The "+c.spec.noun+" changed here after Carrel read it. The copy holds the version from before; both are there now.")))
 	case err != nil:
 		n := s.keptNotice(dest, landed, "Copied, but the original could not be deleted",
-			"Both are there now. Delete the original yourself once the server lets you.")
+			"Delete the original yourself once the server lets you.")
 		n.Details = moveFailure(c, "", "DELETE", obj.Path, err).Details
 		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, obj, n))
 	case landed != uid:

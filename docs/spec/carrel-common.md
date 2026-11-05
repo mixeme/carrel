@@ -2145,8 +2145,7 @@ type Under struct {
 // «keep» (s-agenda-24): серия записана, неписавшиеся встречи остались в ней
 // как были; лист — «· saved in part», блоки «Written» и «Not written · 1»
 // (почему — ответ сервера), Alert «The meeting of 2 February was not made a
-// separate event: it stays in the series, with its change, as it was before
-// you saved.», Note «Nothing is lost: …»; ответы — «Try again» (POST
+// separate event: it stays in the series as it was before you saved.», Note «Nothing is lost: …»; ответы — «Try again» (POST
 // `?op=apart` с `etag` и днями `day`, RFC 3339) и «Leave it in the series»
 // (карточка). **До экранов листов у клиента** (решение владельца
 // 15.10.2026) вопрос не задаётся: Save пишет серию, как прежде, встречи
@@ -3409,7 +3408,7 @@ type BackupPage struct {
     Empty      Runs    // без заданий (s-backup-6): «Carrel copies raw ‹.ics›, ‹.vcf› and files …»; с заданиями пусто
     EmptyNote  Runs    // «Already have an archive from another instance? **Restore** takes it from a file — a job is not needed for that.»
     Jobs       []BackupJob // строки списка; на странице задания и у нового пусто
-    JobsHint   Text        // под таблицей заданий: «verified — the archive was read back from where it was written and the checksum matched. Written and not read back is not verified, and is marked red.» (s-backup-1); без заданий пусто
+    JobsHint   Text        // под таблицей заданий: «verified — the archive was read back from where it was written and the checksum matched; otherwise it is marked red.» (s-backup-1); без заданий пусто
     Job        *BackupJob  // открытое задание на своей странице (s-backup-2, Нс61): его форма; на списке nil
     History    []BackupHistoryRow // «History, all jobs» (s-backup-1): прогоны всех заданий, новые первыми; на странице задания пусто
     Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now; наборы по рубрикам — без рубрики Name и «Job is on», «What to copy» (LegendAside — «2 collections and 1 folder chosen · 2.1 GB last time»), «Where to», «How the archive is closed», «When» (Нс57)

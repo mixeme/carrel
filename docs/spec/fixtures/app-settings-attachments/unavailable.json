@@ -74,7 +74,7 @@
                 "text": "radicale · vps"
               },
               {
-                "text": " 1 MB. Nothing here raises it."
+                "text": " 1 MB."
               }
             ],
             "kind": "text",
@@ -149,7 +149,7 @@
               "method": "GET",
               "target": "sheet"
             },
-            "hint": "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel.",
+            "hint": "Created on first use. An ordinary folder, readable without Carrel.",
             "kind": "text",
             "label": "Folder in it",
             "mono": true,
@@ -270,7 +270,7 @@
     "theme": "auto",
     "wide": false
   },
-  "note": "Changing the folder moves nothing. Records already written carry the old path and keep working; only new attachments go to the new place.",
+  "note": "Changing the folder moves nothing: attachments already written keep working, new ones go to the new place.",
   "notices": [],
   "print": {
     "range": "",

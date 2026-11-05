@@ -358,7 +358,7 @@
     },
     {
       "actions": [],
-      "body": "Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.",
+      "body": "Duplicates are found only among records already read in this session. Open a list or a combined view, then come back.",
       "details": null,
       "role": "info",
       "title": "Nothing is loaded yet."

@@ -121,7 +121,7 @@ func TestASeriesSavedInPart(t *testing.T) {
 	restore()
 	if !strings.HasSuffix(string(part.Subject), "· saved in part") || len(part.Blocks) != 2 || part.Blocks[1].Title != "Not written · 1" ||
 		!strings.Contains(string(part.Blocks[1].Lines[0].Aside), "507 Insufficient Storage") ||
-		part.Alert != "The meeting of 2 February was not made a separate event: it stays in the series, with its change, as it was before you saved." {
+		part.Alert != "The meeting of 2 February was not made a separate event: it stays in the series as it was before you saved." {
 		t.Fatalf("saved in part = %+v", part)
 	}
 	// The event written apart is named where it stands, not by the day of

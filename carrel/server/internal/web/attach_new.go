@@ -67,6 +67,12 @@ var lostFilesNotice = view.Notice{
 }
 
 // attachDrafts are the drafts of the session's new forms, the oldest first.
+// A file chosen in the tree that is gone when it is attached (s-files-17).
+const (
+	fileGoneTitle = "Nothing was attached:"
+	fileGoneBody  = "the file was moved or deleted after the tree was read. Choose it again."
+)
+
 func attachDrafts(c *collectionCtx) []attachDraft {
 	data := c.sess.Draft(session.DraftNewAttach)
 	if data == nil {
@@ -370,8 +376,8 @@ func (s *Server) draftFileOfFiles(r *http.Request, c *collectionCtx, d attachDra
 	e, err := src.files.Stat(r.Context(), p)
 	switch {
 	case file.NotFound(err):
-		return draftFile{}, &view.Notice{Role: view.NoticeAlert, Title: "Nothing was attached: the file is no longer there.",
-			Body: "It was moved or deleted after the tree was read. Choose it again."}
+		return draftFile{}, &view.Notice{Role: view.NoticeAlert, Title: fileGoneTitle,
+			Body: fileGoneBody}
 	case err != nil:
 		n := s.fileFailure(src, "Nothing was attached", "PROPFIND", p, err)
 		return draftFile{}, &n

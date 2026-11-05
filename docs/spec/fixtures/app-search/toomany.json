@@ -24,7 +24,7 @@
   "notices": [
     {
       "actions": [],
-      "body": "This session already runs 4 searches and lists. Stop one or wait for one to finish, then search again.",
+      "body": "This session already runs 4 searches and lists. Stop one or wait for one to finish.",
       "details": null,
       "role": "alert",
       "title": "Too many searches"
