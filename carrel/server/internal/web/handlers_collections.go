@@ -971,7 +971,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	if f.kind != view.KindContact || f.kindChoice {
 		colour := paletteRow(f.colour, errs["colour"], "")
 		if !f.kindChoice {
-			colour.HintRuns = join("Written to the server as ", monoRun("calendar-color"), " — DAVx5 and Thunderbird will show the same one.") // s-profile-5 (Кл3)
+			colour.HintRuns = colourHint() // s-profile-5 (Кл3)
 		}
 		rows = append(rows, colour)
 		// Where a collection of one kind shows, in the frame's words: the
@@ -1345,4 +1345,9 @@ func hiddenRows(r view.FormRow) []view.FormRow {
 func noneAnswering(noun string, silent []string) string {
 	return fmt.Sprintf("No server that holds %ss is answering now: %s.",
 		noun, strings.Join(silent, ", "))
+}
+
+// colourHint stands under a new calendar's colour (s-profile-5).
+func colourHint() view.Runs {
+	return join("Written to the server: DAVx5 and Thunderbird show the same one.")
 }

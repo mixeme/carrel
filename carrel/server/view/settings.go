@@ -827,9 +827,9 @@ type RestoreBlock struct {
 	Subtitle Runs `json:"subtitle"`
 	// From — «Where the archive is»: From a job · From a server · From this
 	// computer, ссылки на тот же шаг (?restore=1&from=…), выбранная On;
-	// FromHint — подсказка под ними (s-backup-7, Нс74)
-	From     []Action `json:"from"`
-	FromHint Text     `json:"fromHint"`
+	// подсказки под ними нет — переключатель говорит сам (s-backup-7, Нс74;
+	// записка Typecase 177)
+	From []Action `json:"from"`
 	// Source — форма шага: набор выбранного источника — его Legend рубрика
 	// карточки (From a job · From a server · From this computer) — и набор
 	// «Archive password»; у копий задания — строка на задание (имя, день,
@@ -1005,7 +1005,7 @@ type AccountDeleteSheet struct {
 // карточками в ряд, равноправные, и действующие приглашения под ними.
 type AdminInvitesPage struct {
 	Shell
-	Subtitle  Text        `json:"subtitle"`  // «Three ways, for three situations. There is no global mode: any of them works.»
+	Subtitle  Text        `json:"subtitle"`  // «Any of the three works: there is no global mode.»
 	Invite    AddUserCard `json:"invite"`    // Invitation: Role; Create link · Or send to, Send invitation
 	Temporary AddUserCard `json:"temporary"` // Temporary password: Role, Login, Email (optional), Temporary password; Create user
 	SelfReg   AddUserCard `json:"selfReg"`   // Self-registration: Publish the registration form; Save

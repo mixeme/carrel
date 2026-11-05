@@ -22,6 +22,9 @@ type adminUsersFlash struct {
 	errText string
 }
 
+// invitesSubtitle is the head of Add users (s-admin-1).
+const invitesSubtitle = "Any of the three works: there is no global mode."
+
 func (s *Server) getAdminUsers(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
@@ -577,7 +580,7 @@ func (s *Server) buildAdminInvitesPage(r *http.Request, sess *session.Session, m
 	}
 	page := view.AdminInvitesPage{
 		Shell:    s.withRail(s.buildShell(sess, "Add users"), s.adminRail(sess, "/admin/invites")),
-		Subtitle: "Three ways, for three situations. There is no global mode: any of them works.",
+		Subtitle: invitesSubtitle,
 	}
 	if flash.errText != "" {
 		page.Shell.Notices = append(page.Shell.Notices, view.Notice{Role: view.NoticeAlert, Body: text(flash.errText)})

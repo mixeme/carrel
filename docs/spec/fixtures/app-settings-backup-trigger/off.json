@@ -1041,7 +1041,6 @@
             "method": "GET"
           }
         ],
-        "fromHint": "One archive, one of three. The other two stay empty until you switch.",
         "match": null,
         "note": [
           {

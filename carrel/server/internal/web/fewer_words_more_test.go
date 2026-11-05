@@ -13,7 +13,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// Typecase's notes 169–173 and 175 (Р-77, 04.11.2026): the hints say only
+// Typecase's notes 169–173, 175 and 176 (Р-77, 04.11.2026): the hints say only
 // what the screen does not. These are the words of them no other check reads in the
 // frames; each must stand in its frame as it is.
 
@@ -97,6 +97,16 @@ func TestTheFewerWordsStandInTheirFrames(t *testing.T) {
 		{"attachments-6", attachMovesNote},
 		{"attachments-1", "vps 1 MB" + attachLowerEnd + " Folder"},
 		{"appearance-1", datesHint},
+		// Note 176.
+		{"s-io-3", runsText(importHints[view.KindContact])},
+		{"s-io-17", runsText(importHints[view.KindContact])},
+		{"s-io-18", runsText(importHints[view.KindContact])},
+		{"s-io-15", runsText(importHints[view.KindEvent])},
+		{"s-io-16", runsText(importHints[view.KindTask])},
+		{"s-profile-5", "Colour " + runsText(colourHint()) + " What goes in it"},
+		{"appearance-1", themeHint + " Density"},
+		{"appearance-1", listsHint + " Reset remembered"},
+		{"s-admin-1", "Add users " + invitesSubtitle},
 	} {
 		if !strings.Contains(frameSays(t, tc.frame), tc.said) {
 			t.Errorf("%s does not say %q", tc.frame, tc.said)

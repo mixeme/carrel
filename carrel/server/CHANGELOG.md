@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.403 — 2026-11-05
+
+### Changed
+
+- Shorter hints, the frames' words (Р-77, Typecase's notes 176, 177):
+  - the import formats (s-io-3, -15, -16, -17, -18): «`.vcf` — vCard 2.1,
+    3.0 and 4.0, any number of cards in one file.»; «`.ics` — iCalendar, any
+    number of events in one file; tasks and journal entries in it are
+    skipped and named in the report.», and so for tasks — without «2.0»;
+  - a new calendar's colour (s-profile-5): «Written to the server: DAVx5
+    and Thunderbird show the same one.», without the property's name;
+  - appearance (appearance-1): «“Auto” follows the system. Kept in this
+    browser.» and «Column sets are remembered per section, in this
+    browser.»;
+  - Add users (s-admin-1): «Any of the three works: there is no global
+    mode.»
+- The restore's «Where the archive is» has no hint (s-backup-7, -15, -16,
+  -17; note 177): the switch says it itself. `RestoreBlock.fromHint` is gone;
+  a client that drew it drops it.
+- Not Carrel's: components-22 (Typecase's gallery), the desktop app
+  (desktop-4) and the mailboxes (s-mailbox-10, -15).
+
 ## v0.2.402 — 2026-11-05
 
 ### Changed

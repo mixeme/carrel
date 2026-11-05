@@ -248,7 +248,7 @@
         "text": ".ics"
       },
       {
-        "text": " — iCalendar 2.0. One file holds any number of tasks; events and journal entries in it are skipped and named in the report."
+        "text": " — iCalendar, any number of tasks in one file; events and journal entries in it are skipped and named in the report."
       }
     ],
     "kinds": [

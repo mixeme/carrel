@@ -196,7 +196,6 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run
 		b.From = append(b.From, view.Action{ID: "restore.from." + f.id, Label: text(f.label), Method: "GET", Enabled: true, On: f.id == from,
 			Href: s.route("/app/settings/backup/restore?" + url.Values{"from": {f.id}}.Encode())})
 	}
-	b.FromHint = "One archive, one of three. The other two stay empty until you switch."
 	source := map[string]string{"job": "run", "server": "webdav", "file": "upload"}[from]
 	rows := []view.FormRow{csrfField(sess), {Name: "source", Kind: view.InputHidden, Value: text(source)}}
 	// The source's own card, its rubric the source's name (s-backup-7, -15,

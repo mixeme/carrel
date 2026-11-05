@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.23 — 2026-11-05
+
+Typecase `0510359`, notes 175–177 (Р-77, shorter hints; the pass done);
+server `v0.2.403`. The whole client suite passes.
+
+- The line under «Into» on an import's preview (s-io-6, -7): «Calendars
+  only: a list of tasks is a different collection.» and «Lists of tasks
+  only: a calendar is a different collection.»
+- The restore's «Where the archive is» draws no hint under its switch
+  (s-backup-7, -15, -16, -17): `RestoreBlock.fromHint` is gone from the
+  server.
+
 ## v0.11.22 — 2026-11-05
 
 Typecase `5fe384c`, notes 169–174 (Р-77, shorter hints; the feed panel

@@ -2959,7 +2959,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
   <div class="frame-label"><span>Ход опроса и сообщения</span><span class="frag">компонент</span><i>полоса, сообщение, пустое состояние</i></div>
   <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
   <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="71%"></i></span>Polling · 5 of 7 answered · 12 records · 1 unavailable<span class="tc-push"><button class="tc-btn is-sm" type="button">Stop</button></span></div>
-  <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one.</div>
+  <div class="tc-msg is-accent">Linking changes nothing on any server: the records are shown as one.</div>
   <div class="tc-msg is-alert">baikal — the server replied 401. Check the saved password on the profile page.</div>
   <div class="tc-empty">No contacts in this address book.<button class="tc-btn is-primary" type="button">New contact</button></div>
 </div>
@@ -13336,7 +13336,7 @@ dav: HTTP 503: the server is busy</div>
                 <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".vcf" aria-label="vCard file" data-tc-shows="import-file"></label>
                 <button class="tc-btn is-primary" type="submit">Preview file</button>
               </span></div>
-            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0, any number of cards in one file.</div>
           </div>
         </form>
       </div>
@@ -13396,7 +13396,7 @@ dav: HTTP 503: the server is busy</div>
                 <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".ics" aria-label="iCalendar file" data-tc-shows="import-file"></label>
                 <button class="tc-btn is-primary" type="submit">Preview file</button>
               </span></div>
-            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar 2.0. One file holds any number of events; tasks and journal entries in it are skipped and named in the report.</div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar, any number of events in one file; tasks and journal entries in it are skipped and named in the report.</div>
           </div>
         </form>
       </div>
@@ -13451,7 +13451,7 @@ dav: HTTP 503: the server is busy</div>
                 <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".ics" aria-label="iCalendar file" data-tc-shows="import-file"></label>
                 <button class="tc-btn is-primary" type="submit">Preview file</button>
               </span></div>
-            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar 2.0. One file holds any number of tasks; events and journal entries in it are skipped and named in the report.</div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar, any number of tasks in one file; events and journal entries in it are skipped and named in the report.</div>
           </div>
         </form>
       </div>
@@ -13507,7 +13507,7 @@ dav: HTTP 503: the server is busy</div>
                 <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".vcf" aria-label="vCard file" data-tc-shows="import-file"></label>
                 <button class="tc-btn is-primary" title="Choose under «Into» where the records go." type="submit" disabled>Preview file</button>
               </span></div>
-            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0, any number of cards in one file.</div>
           </div>
         </form>
       </div>
@@ -13564,7 +13564,7 @@ dav: HTTP 503: the server is busy</div>
                 <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".vcf" aria-label="vCard file" data-tc-shows="import-file"></label>
                 <button class="tc-btn is-primary" type="submit">Preview file</button>
               </span></div>
-            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0, any number of cards in one file.</div>
           </div>
         </form>
       </div>
@@ -13844,7 +13844,7 @@ dav: HTTP 503: the server is busy</div>
                 <span class="tc-menu__sep"></span>
                 <a class="tc-menu__item" href="/app/collections/new?kind=event&amp;back=/app/calendar/nextcloud/lichnyj/import" role="menuitem">New calendar</a>
               </div></details>
-              <span class="tc-field__hint">Calendars only. A list of tasks is a different collection and takes different components.</span></div>
+              <span class="tc-field__hint">Calendars only: a list of tasks is a different collection.</span></div>
             <div class="tc-field is-own-line"><label>3 events of this file are already in Личный</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/calendar/nextcloud/lichnyj/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichnyj/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichnyj/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
           </div>
@@ -13930,7 +13930,7 @@ dav: HTTP 503: the server is busy</div>
                 <span class="tc-menu__sep"></span>
                 <a class="tc-menu__item" href="/app/collections/new?kind=task&amp;back=/app/tasks/nextcloud/dela/import" role="menuitem">New task list</a>
               </div></details>
-              <span class="tc-field__hint">Lists of tasks only. A calendar is a different collection: events go there, not here.</span></div>
+              <span class="tc-field__hint">Lists of tasks only: a calendar is a different collection.</span></div>
             <div class="tc-field is-own-line"><label>2 tasks of this file are already in Дела</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
           </div>
@@ -16853,7 +16853,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                   <label data-tc-colour="#8C6239" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#8C6239" aria-label="#8C6239"></label>
                   <label data-tc-colour="#9A9280" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#9A9280" aria-label="#9A9280"></label>
                 </span>
-                <span class="tc-field__hint tc-field__hint--t11-dusty">Written to the server as <span class="tc-mono">calendar-color</span> — DAVx5 and Thunderbird will show the same one.</span></div>
+                <span class="tc-field__hint tc-field__hint--t11-dusty">Written to the server: DAVx5 and Thunderbird show the same one.</span></div>
               <div class="tc-field tc-field--w100"><label>What goes in it</label>
                 <div class="tc-line tc-line--gap-14 tc-card__top2">
                   <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VEVENT" checked><span class="tc-tickrow__tick"></span>Events</label>
@@ -20097,7 +20097,6 @@ jobs:
       <div class="tc-field is-own-line">
         <label>Where the archive is</label>
         <span class="tc-seg tc-seg--start"><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?from=job">From a job</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=server">From a server</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=file">From this computer</a></span>
-        <span class="tc-field__hint tc-field__hint--max580">One archive, one of three. The other two stay empty until you switch.</span>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From a job</div>
@@ -20162,7 +20161,6 @@ jobs:
       <div class="tc-field is-own-line">
         <label>Where the archive is</label>
         <span class="tc-seg tc-seg--start"><a class="tc-seg__opt" href="/app/settings/backup/restore?from=job">From a job</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=server">From a server</a><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?from=file">From this computer</a></span>
-        <span class="tc-field__hint tc-field__hint--max580">One archive, one of three. The other two stay empty until you switch.</span>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From this computer</div>
@@ -20226,7 +20224,6 @@ jobs:
       <div class="tc-field is-own-line">
         <label>Where the archive is</label>
         <span class="tc-seg tc-seg--start"><a class="tc-seg__opt" href="/app/settings/backup/restore?from=job">From a job</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=server">From a server</a><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?from=file">From this computer</a></span>
-        <span class="tc-field__hint tc-field__hint--max580">One archive, one of three. The other two stay empty until you switch.</span>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From this computer</div>
@@ -20291,7 +20288,6 @@ jobs:
       <div class="tc-field is-own-line">
         <label>Where the archive is</label>
         <span class="tc-seg tc-seg--start"><a class="tc-seg__opt" href="/app/settings/backup/restore?from=job">From a job</a><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?from=server">From a server</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=file">From this computer</a></span>
-        <span class="tc-field__hint tc-field__hint--max580">One archive, one of three. The other two stay empty until you switch.</span>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From a server</div>
@@ -22694,7 +22690,7 @@ Read  2 min ago</div>
         <div class="tc-fset tc-fset--lead">
           <div class="tc-rubric">Theme</div>
           <div class="tc-field"><span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="auto" checked>Auto</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="light">Light</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="dark">Dark</label></span>
-            <span class="tc-field__hint tc-field__hint--max580">“Auto” follows the system. Kept in this browser — another device does not see it.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">“Auto” follows the system. Kept in this browser.</span></div>
         </div>
         <div class="tc-fset">
           <div class="tc-rubric">Density</div>
@@ -22708,7 +22704,7 @@ Read  2 min ago</div>
             <label class="tc-check"><input class="tc-check__box" type="checkbox" name="show.the.source.column" value="1" checked><span class="tc-tickrow__tick"></span>Show the source column</label>
             <label class="tc-check"><input class="tc-check__box" type="checkbox" name="open.notes.in.full.width" value="1"><span class="tc-tickrow__tick is-off"></span>Open notes in full width</label>
           </div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Column sets are remembered per section, in this browser — the button below resets them.</span></div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Column sets are remembered per section, in this browser.</span></div>
           <div class="tc-field"><button class="tc-btn" type="submit" formaction="/app/settings/appearance?op=reset">Reset remembered view settings</button></div>
         </div>
         <div class="tc-fset">
@@ -24172,7 +24168,7 @@ Read  2 min ago</div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
-          <div class="tc-head__titles"><div class="tc-head__title">Add users</div><div class="tc-head__sub">Three ways, for three situations. There is no global mode: any of them works.</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title">Add users</div><div class="tc-head__sub">Any of the three works: there is no global mode.</div></div>
         </div>
         <div class="tc-main__cards">
 
@@ -27345,7 +27341,7 @@ Read    2 min ago</div>
           <div class="is-on tc-tree__row tc-tree__row--padl44"><svg><use href="#i-file"/></svg>Сборник</div>
         </div>
         <div class="tc-field tc-field--w100"><label>Saved as</label><input class="tc-in is-mono" type="text" value="2026-09-24 Вёрстка сборника — правки-сборник-v3 (2).pdf" aria-label="Saved as" readonly>
-          <span class="tc-field__hint">Date of the letter, its subject, the file's name — as for attachments of records. <b>(2)</b>: a file with this name is already there; nothing is overwritten.</span></div>
+          <span class="tc-field__hint">Date of the letter, its subject, the file's name. <b>(2)</b>: a file with this name is already there; nothing is overwritten.</span></div>
       </div>
       <div class="tc-sheet__foot">
         <button class="tc-btn is-primary" type="button">Save to Сборник</button><kbd class="tc-kbd">Enter</kbd>
@@ -27761,7 +27757,7 @@ Read    2 min ago</div>
                   <span class="tc-tag">attached</span>
                   <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button></div>
               </div>
-              <div class="tc-field__hint tc-field__hint--top6">home takes letters up to <b>25 MB</b> — its server says so. This one is 3.2 MB.</div>
+              <div class="tc-field__hint tc-field__hint--top6">home takes letters up to <b>25 MB</b>. This one is 3.2 MB.</div>
             </div>
           </div>
           <div class="tc-sheet__foot">
@@ -32693,7 +32689,7 @@ dav: HTTP 503: the server is busy</div></div>
               </span>
               <span class="tc-field__hint">Works while the folder is writable. On a read-only medium the app says so and offers the download instead of installing it.</span></div>
           </div>
-          <div class="tc-msg tc-msg--flush">A portable copy is a full Carrel, local or remote as usual — not a cut-down build.</div>
+          <div class="tc-msg tc-msg--flush">A portable copy is a full Carrel, local or remote as usual.</div>
         </div>
         <div class="mk-status">
           <span class="mk-status__text"><span class="mk-status__dot"></span>portable · <span class="tc-mono">E:\Carrel</span></span>

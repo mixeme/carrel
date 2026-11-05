@@ -100,9 +100,6 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 		from.Options = append(from.Options, bind.SegOption(a))
 	}
 	f := w.Field{Label: whereArchive, Parts: []w.FieldPart{from}, OwnLine: true}
-	if r.FromHint != "" {
-		f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(r.FromHint)}, Variant: w.HintColumn})
-	}
 	d.Items = append(d.Items, f)
 	// A card a set (s-backup-7, -15, -17): the source's, its name its
 	// rubric, a refusal at its top; the archive's password.

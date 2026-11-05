@@ -29,6 +29,12 @@ var defaultLook = view.Look{Theme: "auto", Panel: true, Source: true}
 
 // lookOf is the Look the request's browser keeps.
 // datesHint stands under «Dates and times» (appearance-1).
+// themeHint and listsHint stand under «Theme» and «Lists» (appearance-1).
+const (
+	themeHint = "“Auto” follows the system. Kept in this browser."
+	listsHint = "Column sets are remembered per section, in this browser."
+)
+
 const datesHint = "Week start and the clock are kept in the account. The time zone is the instance’s, set by the administrator."
 
 func lookOf(r *http.Request) view.Look {
@@ -152,12 +158,12 @@ func (s *Server) appearancePage(sess *session.Session, look view.Look, weekErr, 
 	form := view.Form{Action: s.route("/app/settings/appearance"), Method: "POST", Sets: []view.FieldSet{
 		{Rows: []view.FormRow{csrfField(sess)}},
 		{Legend: "Theme", Rows: []view.FormRow{{Name: "theme", Label: "Theme", Kind: view.InputRadio, Value: text(look.Theme),
-			Hint:    "“Auto” follows the system. Kept in this browser — another device does not see it.",
+			Hint:    themeHint,
 			Options: []view.Option{option("auto", "Auto", look.Theme), option("light", "Light", look.Theme), option("dark", "Dark", look.Theme)}}}},
 		{Legend: "Density", Rows: []view.FormRow{{Name: "density", Label: "Density", Kind: view.InputRadio, Value: text(density),
 			Hint:    "List row height: 38 or 32 px. On a phone always 52. This browser.",
 			Options: []view.Option{option("comfortable", "Comfortable", density), option("compact", "Compact", density)}}}},
-		{Legend: "Lists", Hint: "Column sets are remembered per section, in this browser — the button below resets them.", Rows: []view.FormRow{
+		{Legend: "Lists", Hint: listsHint, Rows: []view.FormRow{
 			tick("panel", "Keep the details panel open", look.Panel),
 			tick("source", "Show the source column", look.Source),
 			tick("wide", "Open notes in full width", look.Wide),

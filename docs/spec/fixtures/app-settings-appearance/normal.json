@@ -48,7 +48,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "“Auto” follows the system. Kept in this browser — another device does not see it.",
+            "hint": "“Auto” follows the system. Kept in this browser.",
             "kind": "radio",
             "label": "Theme",
             "name": "theme",
@@ -107,7 +107,7 @@
         "unfold": null
       },
       {
-        "hint": "Column sets are remembered per section, in this browser — the button below resets them.",
+        "hint": "Column sets are remembered per section, in this browser.",
         "legend": "Lists",
         "rows": [
           {

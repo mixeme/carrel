@@ -17,10 +17,13 @@ import (
 // archive's password, with the frame's words.
 func TestRestoreSourceIsTheStep(t *testing.T) {
 	frame := mockupFrame(t, "s-backup-7")
-	hint := regexp.MustCompile(`(?s)From this computer</a></span>\s*<span class="tc-field__hint">(.*?)</span>`).FindStringSubmatch(frame)
 	pw := regexp.MustCompile(`(?s)name="password"[^>]*>(?:</div>)?\s*<span class="[^"]*">(.*?)</span>`).FindStringSubmatch(frame)
-	if hint == nil || pw == nil {
+	if pw == nil {
 		t.Fatal("s-backup-7 reads otherwise: read the frame again")
+	}
+	// The switch says it itself (Typecase's note 177): no hint under it.
+	if regexp.MustCompile(`(?s)From this computer</a></span>\s*<span class="tc-field__hint">`).MatchString(frame) {
+		t.Fatal("s-backup-7 has a hint under «Where the archive is» again: read the frame again")
 	}
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "archive-pw"))
@@ -34,9 +37,8 @@ func TestRestoreSourceIsTheStep(t *testing.T) {
 
 	// A job's copy is there: the step opens on it.
 	b := step("")
-	if len(b.From) != 3 || !b.From[0].On || b.From[0].Label != "From a job" || !strings.Contains(b.From[1].Href, "from=server") ||
-		string(b.FromHint) != frameText(hint[1]) {
-		t.Fatalf("from = %+v, hint %q", b.From, b.FromHint)
+	if len(b.From) != 3 || !b.From[0].On || b.From[0].Label != "From a job" || !strings.Contains(b.From[1].Href, "from=server") {
+		t.Fatalf("from = %+v", b.From)
 	}
 	run := formRow(b.Source, "run")
 	if run == nil || run.Kind != view.InputRadio || len(run.Options) != 1 || string(run.Options[0].Label) != job.Name ||

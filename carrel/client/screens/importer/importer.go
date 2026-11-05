@@ -57,8 +57,8 @@ var fileLabels = map[view.Kind]string{
 // the preview (s-io-3 … -8, -15 … -17).
 var intoHints = map[view.Kind][2]string{
 	view.KindContact: {"Any address book you may write to, on every connected server.", "Any address book you may write to. What is already here is counted against it."},
-	view.KindEvent:   {"Any calendar you may write to, on every connected server.", "Calendars only. A list of tasks is a different collection, and what it holds is named below."},
-	view.KindTask:    {"Any list of tasks you may write to, on every connected server.", "Lists of tasks only. Events in the file are named below and left out."},
+	view.KindEvent:   {"Any calendar you may write to, on every connected server.", "Calendars only: a list of tasks is a different collection."},
+	view.KindTask:    {"Any list of tasks you may write to, on every connected server.", "Lists of tasks only: a calendar is a different collection."},
 	view.KindNote:    {"The notebook the notes are created in. Every source below lands there.", "Any notebook you may write to. A WebDAV folder from the step before lands in this same table."},
 }
 

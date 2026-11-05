@@ -96,14 +96,7 @@
             "hint": "",
             "hintRuns": [
               {
-                "text": "Written to the server as "
-              },
-              {
-                "mark": "mono",
-                "text": "calendar-color"
-              },
-              {
-                "text": " — DAVx5 and Thunderbird will show the same one."
+                "text": "Written to the server: DAVx5 and Thunderbird show the same one."
               }
             ],
             "kind": "radio",

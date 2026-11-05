@@ -438,11 +438,11 @@ var importSteps = []view.Text{"1 · Source", "2 · Preview", "3 · Report"}
 
 // importHints are the line under the file field (s-io-3, -4, -15, -16;
 // Typecase's note 111 pp. 1, 2): each extension the kind takes and what it
-// is, what one file holds, where the rest goes.
+// is, how many one file holds, what in it is skipped.
 var importHints = map[view.Kind]view.Runs{
-	view.KindContact: join(monoRun(".vcf"), " — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take ", monoRun(".ics"), " here instead."),
-	view.KindEvent:   join(monoRun(".ics"), " — iCalendar 2.0. One file holds any number of events; tasks and journal entries in it are skipped and named in the report."),
-	view.KindTask:    join(monoRun(".ics"), " — iCalendar 2.0. One file holds any number of tasks; events and journal entries in it are skipped and named in the report."),
+	view.KindContact: join(monoRun(".vcf"), " — vCard 2.1, 3.0 and 4.0, any number of cards in one file."),
+	view.KindEvent:   join(monoRun(".ics"), " — iCalendar, any number of events in one file; tasks and journal entries in it are skipped and named in the report."),
+	view.KindTask:    join(monoRun(".ics"), " — iCalendar, any number of tasks in one file; events and journal entries in it are skipped and named in the report."),
 	view.KindNote: join(monoRun(".md"), " — Markdown, ", monoRun(".zip"), " — any number of them, ", monoRun(".ics"), " — iCalendar journal entries. Several files at once; events and tasks in an ",
 		monoRun(".ics"), " are skipped and named in the report."),
 }

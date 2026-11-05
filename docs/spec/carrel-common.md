@@ -3522,12 +3522,11 @@ type RestoreBlock struct {
     Subtitle Runs // до архива — «Nothing is written until you have seen what goes where» (s-backup-7); открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
     // From — «Where the archive is»: From a job · From a server · From this
     // computer, ссылки на тот же шаг (/app/settings/backup/restore?from=job|server|file),
-    // выбранная On; FromHint — подсказка под ними (s-backup-7). Source —
+    // выбранная On; подсказки под ними нет (s-backup-7). Source —
     // только поля выбранного: у задания — строка на задание (имя; день,
     // размер, счёт коллекций — Meta), у сервера — хранилище и путь, у
     // компьютера — файл кнопкой; и пароль архива
     From     []Action
-    FromHint Text
     Source  Form // набор источника (Legend — рубрика карточки) и набор «Archive password» (s-backup-7, -15, -17)
     Refusal Runs // отказ шага тревогой наверху карточки источника: «The archive is larger than 16 MB. … choose **From a server**.» (s-backup-16); у архива с этого компьютера, которого страница больше не держит, — «Choose the archive again: Carrel keeps no copy of it.»; пусто — нет
     Ranges  string // у шага «From this computer» — адрес, который живой слой спрашивает, какие куски архива слать вместо файла (FileField.Ranges, s-backup-15; записки Typecase 98, 109): `/app/settings/backup/restore?op=ranges`; у прочих пусто
