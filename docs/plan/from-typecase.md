@@ -5581,6 +5581,37 @@ Typecase — решения владельца 05.11 по проходу Р-77).
    16. **Вид** (`appearance-1`): «Week start and the clock are kept in the
        account. The time zone is the instance’s, set by the administrator.»
 
+Записка 176 от 05.11.2026 (Typecase `8cba2fe`; своя задача Typecase —
+проход Р-77, партия 10, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `8cba2fe`** (570 кадров).
+
+176. **Пояснения короче (Р-77), партия 10.** Тексты дословно из макета:
+   1. **Форматы импорта** (`s-io-3`, `-15`, `-16`, `-17`, `-18`): «`.vcf` —
+      vCard 2.1, 3.0 and 4.0, any number of cards in one file.»; «`.ics` —
+      iCalendar, any number of events in one file; tasks and journal entries
+      in it are skipped and named in the report.» и то же для задач («any
+      number of tasks…; events and journal entries…»). Без «2.0», как у
+      заметок в записке 173.
+   2. **Куда импорт** (`s-io-6`, `-7`): «Calendars only: a list of tasks is a
+      different collection.» и «Lists of tasks only: a calendar is a different
+      collection.»
+   3. **Связывание** (`components-22`): «Linking changes nothing on any
+      server: the records are shown as one.» — как в `s-dup-1`, `-6`.
+   4. **Цвет календаря** (`s-profile-5`): «Written to the server: DAVx5 and
+      Thunderbird show the same one.» — без имени свойства.
+   5. **Вид** (`appearance-1`): «“Auto” follows the system. Kept in this
+      browser.» и «Column sets are remembered per section, in this
+      browser.»
+   6. **Portable** (`desktop-4`): «A portable copy is a full Carrel, local or
+      remote as usual.»
+   7. **Add users** (`s-admin-1`), подзаголовок: «Any of the three works:
+      there is no global mode.»
+   8. **Ответ со своего ящика** (`s-mailbox-15`), вес письма: «home takes letters up to **25 MB**.
+      This one is 3.2 MB.»
+   9. **Сохранить вложение в файлы** (`s-mailbox-10`): «Date of the letter,
+      its subject, the file's name. **(2)**: a file with this name is already
+      there; nothing is overwritten.»
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
