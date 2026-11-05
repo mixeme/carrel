@@ -147,7 +147,7 @@ func TestLargeAttachmentGoesToTheFolder(t *testing.T) {
 		t.Fatalf("the folder holds %+v", folderRows(t, f, "carrel"))
 	}
 	doc := body(t, f, "e1.ics")
-	mustContain(t, doc, "ATTACH;", "FILENAME=report.pdf", "SIZE=2048", "/docs/carrel/2026-08-10%20")
+	mustContain(t, doc, "ATTACH;", "FILENAME=report.pdf", "SIZE=2048", "/docs/carrel/"+want)
 	if strings.Contains(doc, base64.StdEncoding.EncodeToString(data[:16])) {
 		t.Errorf("the file went into the record as well:\n%s", doc)
 	}
