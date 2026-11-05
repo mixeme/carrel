@@ -281,7 +281,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 	}
 	letters := view.FieldSet{Legend: "Letters from users", Rows: []view.FormRow{tick,
 		{Name: "sender", Label: "Sender address", Kind: view.InputRadio, Options: senderOptions(shown),
-			HintRuns: join("Your relay decides which of the two it will let out. The envelope sender stays ", envelope, " either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.")},
+			HintRuns: relaySenderHint(envelope)},
 		{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes)},
 		{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxMessageMB, s.cfg.MailMaxMessageBytes)},
 		{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxRecipients, s.cfg.MailMaxRecipients)},
@@ -342,4 +342,10 @@ func (s *Server) signInTitle() string {
 		return "Sign in to " + name
 	}
 	return "Sign in"
+}
+
+// relaySenderHint is the hint of «Sender address» (s-admin-32), the
+// envelope sender in it.
+func relaySenderHint(envelope any) view.Runs {
+	return join("Your relay decides which of the two it lets out. The envelope sender stays ", envelope, ", so SPF is unaffected; DKIM and DMARC are set up on the relay.")
 }

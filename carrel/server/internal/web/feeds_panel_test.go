@@ -14,8 +14,8 @@ import (
 // subscription is the frame's — the address and its hint, the name here and
 // its hint, the label's colour derived from the address, the tick «This feed
 // asks for a password» with the login and the password shown only while it
-// is ticked, the sections a check found, the warning under the form, and
-// Subscribe with Cancel.
+// is ticked, the sections a check found, no alert under the form (the
+// owner, 05.11.2026; Typecase's note 174), and Subscribe with Cancel.
 func TestTheSubscribePanelIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-profile-10")
 	panel := frame[strings.Index(frame, "Subscribe to a feed</div>"):]
@@ -28,8 +28,7 @@ func TestTheSubscribePanelIsTheFrame(t *testing.T) {
 		}
 	}
 	tickHint := regexp.MustCompile(`(?s)This feed asks for a password</label>\s*<span class="tc-field__hint">(.*?)</span>\s*</div>`).FindStringSubmatch(panel)
-	warn := regexp.MustCompile(`(?s)<div class="tc-msg is-alert[^"]*">(.*?)</div>`).FindStringSubmatch(panel)
-	if len(hints) < 4 || tickHint == nil || warn == nil {
+	if len(hints) < 4 || tickHint == nil || strings.Contains(panel, `tc-msg is-alert`) {
 		t.Fatalf("s-profile-10 reads otherwise: %v", hints)
 	}
 
@@ -54,9 +53,6 @@ func TestTheSubscribePanelIsTheFrame(t *testing.T) {
 		if r := formRow(form, n); r == nil || !r.Hidden || !slices.Equal(r.Changed, []string{"asks"}) {
 			t.Errorf("%s = %+v, want hidden until the tick", n, r)
 		}
-	}
-	if string(page.AddNote) != frameText(warn[1]) {
-		t.Errorf("warning = %q, the frame %q", page.AddNote, frameText(warn[1]))
 	}
 	if actionByID(form.Actions, "feed.cancel") == nil {
 		t.Error("no Cancel")

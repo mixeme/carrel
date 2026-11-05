@@ -46,10 +46,6 @@ type feedForm struct {
 // schemes monospaced.
 var feedHint = join(monoRun("https://"), ", ", monoRun("webcal://"), " and a secret link from another Carrel are all understood.")
 
-// feedReach is the panel's warning under its form (s-profile-10): a feed is
-// read by the server, so what the server cannot reach it cannot read.
-const feedReach = "The feed is fetched by the Carrel server, not by your browser. An address on your local network works only if the server can reach it; a public Carrel cannot, and it says so instead of returning an empty list."
-
 func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 	q := func(op string) string {
 		v := url.Values{"op": {op}}
@@ -75,14 +71,14 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 	// it carries (Нс27).
 	rows := []view.FormRow{csrfField(sess), address,
 		{Name: "name", Label: "Name here", Kind: view.InputText, Value: text(f.Name),
-			Hint: "Taken from the feed; change it if you like — other people’s feed names are often longer than the rail."}}
+			Hint: "Taken from the feed; yours to change."}}
 	if !f.Folder {
 		derived := string(feedColour(f.URL))
 		chosen := f.Colour
 		if chosen == "" {
 			chosen = derived
 		}
-		colour := paletteRow(chosen, "", "A feed sends no colour of its own: Carrel derives one, and hatches the strip so a feed is recognisable among your own collections.")
+		colour := paletteRow(chosen, "", "A feed has no colour of its own: Carrel picks one and hatches the strip.")
 		colour.Label = "Label colour"
 		if chosen == derived {
 			colour.ValueAside = "derived from the address"
@@ -91,13 +87,13 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 	}
 	rows = append(rows,
 		view.FormRow{Name: "asks", Label: "This feed asks for a password", Kind: view.InputCheck, Value: text(boolStr(f.Asks)),
-			Hint: "The login and password are kept the way DAV credentials are: encrypted under your key. A secret link needs no password — the secret is already in the address."},
+			Hint: "Kept encrypted, like DAV credentials. A secret link needs none."},
 		view.FormRow{Name: "login", Label: "Login of the link", Kind: view.InputText, Value: text(f.Login), Hidden: !f.Asks, Changed: []string{"asks"}},
 		view.FormRow{Name: "password", Label: "Password of the link", Kind: view.InputPassword, Hidden: !f.Asks, Changed: []string{"asks"}},
 	)
 	if len(f.Sections) > 0 {
 		sections := view.FormRow{Name: "sections", Label: "Sections", Kind: view.InputSelect, Multiple: true, ReadOnly: true,
-			Hint: "Not a choice: a feed is one file. What it carries decides where it lands, and that is visible before subscribing."}
+			Hint: "A feed is one file: what it carries decides where it lands."}
 		for _, sc := range f.Sections {
 			sections.Options = append(sections.Options, view.Option{Value: sc, Label: text(sc), Selected: true})
 		}
@@ -114,13 +110,12 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 }
 
 // feedPanel opens the panel of a subscription over the page (s-profile-10):
-// its form, the page's message about Check, and under the form what a feed
-// read by the server cannot reach (Нс27).
+// its form and the page's message about Check. The panel has no alert of
+// who fetches the feed (the owner, 05.11.2026; Typecase's note 174): Check
+// asks from the server and shows an address it cannot reach before
+// subscribing.
 func (s *Server) feedPanel(page *view.ConnectionsPage, sess *session.Session, f feedForm) {
 	page.Add, page.Note = s.feedForm(sess, f), feedPanelNote
-	if !f.Folder {
-		page.AddNote = feedReach
-	}
 }
 
 // probeFolder lists a shared folder once: how many entries, how fast.
@@ -556,7 +551,7 @@ func tookText(d time.Duration) string {
 // feedPanelNote is the message of the page while the panel of a
 // subscription is open (s-profile-10): a feed has nothing to synchronise,
 // and Check — the card's button, in bold — asks whether it still replies.
-var feedPanelNote = join("A feed is read again on every visit to the section, so there is nothing here to synchronise and nothing to refresh. ",
+var feedPanelNote = join("A feed is read anew on every visit: there is nothing to refresh. ",
 	strongRun("Check"), " asks whether the address still replies.")
 
 // feedColour is the colour a feed's label is derived from: its address

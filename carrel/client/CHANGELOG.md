@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.22 — 2026-11-05
+
+Typecase `5fe384c`, notes 169–174 (Р-77, shorter hints; the feed panel
+without an alert); server `v0.2.401`. The whole client suite passes.
+
+- `Msg` is no longer a `SidePart` (Typecase, breaking): the panel
+  «Subscribe to a feed» draws no message under its form, and
+  `ConnectionsPage.addNote` is gone from the server.
+- The lines under a folder's list (s-files-1): «Drop files onto the window
+  to upload them here. A name already taken is refused, not overwritten.»;
+  without scripts «Without scripts there is no drop and no queue:
+  **Upload** sends the files. A name already taken is refused, not
+  overwritten.», Upload in bold.
+
 ## v0.11.21 — 2026-11-04
 
 Typecase `09827c3`, note 168 (Р-77, shorter hints); server `v0.2.399`.

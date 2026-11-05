@@ -678,14 +678,7 @@
   },
   "unlockNote": [
     {
-      "text": "Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press "
-    },
-    {
-      "mark": "strong",
-      "text": "Lock now"
-    },
-    {
-      "text": "; every reveal is written to the audit log."
+      "text": "Unlocked everywhere credentials are shown, not only here; every reveal goes to the audit log."
     }
   ],
   "warning": {

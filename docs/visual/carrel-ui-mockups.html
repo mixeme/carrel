@@ -4883,7 +4883,7 @@ Read  2 min ago · not changed on server</div>
     <div class="frame-label"><span>Переписать · итог</span><span class="frag">фрагмент</span><i>сообщение на карточке</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
         <div class="tc-msg"><b>Rewritten in 12 records.</b></div>
-        <div class="tc-msg is-alert"><b>Rewritten in 10 of 12 records.</b> «Созвон с подрядчиком» was not written: it changed after Carrel read it. «Ревью архитектуры» was refused: the server answered 403 Forbidden. Общий · baikal could not be read, and what it holds keeps the old address.</div>
+        <div class="tc-msg is-alert"><b>Rewritten in 10 of 12 records.</b> «Созвон с подрядчиком» was not written: it changed after Carrel read it. «Ревью архитектуры» was refused: 403 Forbidden. Общий · baikal could not be read, so what it holds keeps the old address.</div>
     </div>
   </div>
   <figcaption>Итог без отказов — сообщение без тревоги. С отказами — тревожное, и у каждого отказа своя причина: запись изменилась после чтения, сервер отказал, коллекция не прочиталась. Что сервер не сохранил при переписывании — в подробностях сообщения.</figcaption>
@@ -6542,7 +6542,7 @@ SEQUENCE  2</div>
     <div class="frame-label"><span>Календарь, в который сервер взял не всё</span><span class="frag">фрагмент</span><i>над списками календаря · iCloud</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
-        <div class="tc-msg"><b>The server did not take tasks.</b> The server made «Дом» for events only and said nothing of the tasks you asked for. Tasks need another calendar: make one for them on this server or another. <button class="tc-btn is-sm" type="button">New calendar</button></div>
+        <div class="tc-msg"><b>The server did not take tasks.</b> It made «Дом» for events only. Tasks need another calendar, on this server or another. <button class="tc-btn is-sm" type="button">New calendar</button></div>
       </div></div>
     </div>
   </div>
@@ -10032,8 +10032,8 @@ Read  2 min ago</div>
         </table>
         <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
         <form class="tc-post" id="post-upload" action="/app/files/sftpgo/documents/upload/carrel/attachments" method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="7f3a91de"></form>
-        <div class="tc-msg tc-js">Drop files onto the window to upload them into this folder. A name that is already taken is refused rather than overwritten, and the queue says so.</div>
-        <div class="tc-msg tc-nojs">Dropping files onto the window and the upload queue need scripts, and this page runs none. Upload sends the files; a name that is already taken is refused rather than overwritten.</div>
+        <div class="tc-msg tc-js">Drop files onto the window to upload them here. A name already taken is refused, not overwritten.</div>
+        <div class="tc-msg tc-nojs">Without scripts there is no drop and no queue: <b>Upload</b> sends the files. A name already taken is refused, not overwritten.</div>
         <div class="tc-queue" data-tc-progress="post-upload" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%" hidden><div class="tc-queue__head"><b>Uploading {done} of {count}</b><span class="tc-mono tc-push tc-mono--dusty">{sent}</span><button class="tc-btn is-sm" type="button">Hide</button></div><template data-tc-row><li><div class="tc-queue__row"><span class="tc-queue__name">{name}</span><span class="tc-queue__meta">{size} · {percent}%</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="0%"></i></span></li></template><template data-tc-taken><li><div class="tc-queue__row"><span class="tc-dim--danger">{name}</span><span class="tc-dim--danger">name taken</span></div><div class="tc-line tc-line--gap-6 tc-queue__acts"><button class="tc-btn is-sm" type="button" name="answer" value="keep">Keep both</button><button class="tc-btn is-sm" type="button" name="answer" value="replace">Replace</button><button class="tc-btn is-sm" type="button" name="answer" value="skip">Skip</button></div></li></template><ul class="tc-queue__list"></ul></div>
       </div>
 
@@ -10065,7 +10065,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Два ярлыка в рейле — не «умные папки», а два ответа на вопрос «где это лежало».</b> <b>Attachments</b> — та самая папка, которую выбрали один раз в настройках вложений: Carrel складывает туда вложения заметок и событий, не поместившиеся в саму запись (<a href="#attachments">7.12</a>), и знает её адрес, поэтому ярлык просто открывает её, где бы она ни была. Если папка ещё не выбрана, ярлык ведёт на страницу, где её выбирают. <b>Published</b> — файлы и папки с действующей секретной ссылкой: список известен Carrel из его же токенов, ходить за ним на сервер не нужно. Ярлыка «недавние» здесь нет намеренно: WebDAV не умеет спрашивать «что изменилось», и такой список пришлось бы собирать обходом всего дерева на каждый заход.<br><br><b>Из таблицы получился менеджер.</b> Колонка флажков и выделение строки; у каждой строки — скачивание и меню; операции над одним файлом собраны справа, а не разбросаны по формам внизу страницы. Хлебные крошки стали навигацией, а не подписью. Тип файла несёт иконку тонкой линией — единственное место в редизайне, где иконки появляются в содержимом, а не в хроме: в файловом списке тип узнаётся быстрее по значку, чем по строке <code>image/png</code>, и колонка типа при этом остаётся. Панель свойств честно говорит то, чего Carrel не знает: указателя ссылок на файл у него нет, и удаление ничего не проверяет.<br><br><b>Без сценариев строка под списком другая.</b> Про бросок на окно и очередь сказано только там, где они работают; на странице без сценария на том же месте стоит «Dropping files onto the window and the upload queue need scripts, and this page runs none. Upload sends the files; a name that is already taken is refused rather than overwritten.» — недоступное названо, а не замолчано. В кадре вторая строка есть, но не видна: кадр нарисован со сценарием.</figcaption>
+<figcaption><b>Два ярлыка в рейле — не «умные папки», а два ответа на вопрос «где это лежало».</b> <b>Attachments</b> — та самая папка, которую выбрали один раз в настройках вложений: Carrel складывает туда вложения заметок и событий, не поместившиеся в саму запись (<a href="#attachments">7.12</a>), и знает её адрес, поэтому ярлык просто открывает её, где бы она ни была. Если папка ещё не выбрана, ярлык ведёт на страницу, где её выбирают. <b>Published</b> — файлы и папки с действующей секретной ссылкой: список известен Carrel из его же токенов, ходить за ним на сервер не нужно. Ярлыка «недавние» здесь нет намеренно: WebDAV не умеет спрашивать «что изменилось», и такой список пришлось бы собирать обходом всего дерева на каждый заход.<br><br><b>Из таблицы получился менеджер.</b> Колонка флажков и выделение строки; у каждой строки — скачивание и меню; операции над одним файлом собраны справа, а не разбросаны по формам внизу страницы. Хлебные крошки стали навигацией, а не подписью. Тип файла несёт иконку тонкой линией — единственное место в редизайне, где иконки появляются в содержимом, а не в хроме: в файловом списке тип узнаётся быстрее по значку, чем по строке <code>image/png</code>, и колонка типа при этом остаётся. Панель свойств честно говорит то, чего Carrel не знает: указателя ссылок на файл у него нет, и удаление ничего не проверяет.<br><br><b>Без сценариев строка под списком другая.</b> Про бросок на окно и очередь сказано только там, где они работают; на странице без сценария на том же месте стоит «Without scripts there is no drop and no queue: <b>Upload</b> sends the files. A name already taken is refused, not overwritten.» — недоступное названо, а не замолчано. В кадре вторая строка есть, но не видна: кадр нарисован со сценарием.</figcaption>
 </figure>
 
 <figure style="flex:0 1 300px">
@@ -11598,7 +11598,7 @@ Read  2 min ago</div>
           <div class="tc-head__titles"><div class="tc-head__title">Duplicates</div><div class="tc-head__sub">32 records compared · 2 to look at</div></div>
           <div class="tc-acts tc-acts--stack"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 2</button><button class="tc-seg__opt" type="button">Contacts 1</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 0</button><button class="tc-seg__opt" type="button">Notes 0</button></span><form class="tc-field tc-field--inline" action="/app/duplicates/decide" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="do" value="threshold"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" name="value" aria-label="Match threshold"><button class="tc-btn is-sm" type="button">Weights</button></form></div>
         </div>
-        <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
+        <div class="tc-msg is-accent">Linking changes nothing on any server: the records are shown as one. Merging on the server is a separate, destructive step you confirm.</div>
         <div data-part="results" class="tc-stack tc-stack--gap-10 tc-main__results">
 
           <form class="tc-card" action="/app/duplicates/decide" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="group" value="g1">
@@ -11656,7 +11656,7 @@ Read  2 min ago</div>
                 <span class="tc-row__cell tc-row__source">radicale · vps · Дежурства</span>
               </div>
             </div>
-            <div class="tc-field__hint tc-field__hint--top8">The same event in two calendars, different UIDs. Agenda shows it twice; here you decide whether to keep both or write one and delete the other.</div>
+            <div class="tc-field__hint tc-field__hint--top8">The same event in two calendars, different UIDs: Agenda shows it twice.</div>
             <div class="tc-line tc-line--gap-8 tc-card__acts">
               <button class="tc-btn is-primary" type="submit" name="do" value="link">Link them</button>
               <button class="tc-btn" type="submit" name="do" value="ignore">Not duplicates</button>
@@ -11856,7 +11856,7 @@ Read  2 min ago</div>
 <span class="tc-mono tc-row__date">8 Aug</span><span class="tc-row__cell tc-row__source">nextcloud · Дневник</span>
               </div>
             </div>
-            <div class="tc-field__hint tc-field__hint--top8">Same title and the same date: a note copied into a second notebook. Linked, the two are shown as one row; merging writes one and deletes the other.</div>
+            <div class="tc-field__hint tc-field__hint--top8">Same title and the same date: a note copied into a second notebook.</div>
             <div class="tc-line tc-line--gap-8 tc-card__acts">
               <button class="tc-btn" type="submit" name="do" value="unlink">Unlink</button>
               <button class="tc-btn is-danger tc-push" type="submit" name="do" value="merge">Merge on the server</button>
@@ -12215,7 +12215,7 @@ Read  just now · written by the merge</div>
           <div class="tc-acts"><form class="tc-field tc-field--inline" action="/app/duplicates/decide" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="do" value="threshold"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" name="value" aria-label="Match threshold"><button class="tc-btn is-sm" type="button">Weights</button></form></div>
         </div>
         <div class="tc-notices">
-          <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
+          <div class="tc-msg is-accent">Linking changes nothing on any server: the records are shown as one. Merging on the server is a separate, destructive step you confirm.</div>
           <div class="tc-msg"><b>Nothing is loaded yet.</b> Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.</div>
         </div>
         <div class="tc-stack tc-stack--gap-10 tc-main__results">
@@ -13697,7 +13697,7 @@ dav: HTTP 503: the server is busy</div>
             <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".md,.zip,.ics" aria-label="Markdown, a zip of them, or .ics" data-tc-shows="import-file" multiple></label>
             <button class="tc-btn is-primary" type="submit">Preview file</button>
           </span></div>
-        <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.md</span> — Markdown, <span class="tc-mono">.zip</span> — any number of them, <span class="tc-mono">.ics</span> — iCalendar 2.0 journal entries. Several files may be picked at once; events and tasks in an <span class="tc-mono">.ics</span> are skipped and named in the report.</div>
+        <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.md</span> — Markdown, <span class="tc-mono">.zip</span> — any number of them, <span class="tc-mono">.ics</span> — iCalendar journal entries. Several files at once; events and tasks in an <span class="tc-mono">.ics</span> are skipped and named in the report.</div>
       </div>
       <div class="tc-card tc-card--edge-accent">
         <div class="tc-rubric">From a WebDAV folder</div>
@@ -13708,7 +13708,7 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-tree__row"><svg><use href="#i-file"/></svg>Files <span class="tc-push tc-dim tc-dim--t11">nextcloud</span></div>
         </div>
         <div class="tc-line tc-line--gap-10 tc-card__top8">
-          <span class="tc-field__hint tc-field__hint--flush-fill">Every <span class="tc-mono">.md</span> directly in that folder. Subfolders are not walked, nothing on the server is moved or deleted — the files stay where they were.</span>
+          <span class="tc-field__hint tc-field__hint--flush-fill">Every <span class="tc-mono">.md</span> directly in that folder, without subfolders. Nothing on the server is moved or deleted.</span>
           <button class="tc-btn is-primary" type="button">Preview folder</button>
         </div>
       </div>
@@ -14197,7 +14197,7 @@ dav: HTTP 503: the server is busy</div>
         </form>
         <div class="tc-fset">
           <div class="tc-rubric">Password</div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Changing your password re-wraps your data key only; saved connections stay readable.</span></div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Your saved connections stay readable after the change.</span></div>
           <div class="tc-field"><button class="tc-btn" type="button">Change password</button></div>
         </div>
         <div class="tc-fset">
@@ -14213,7 +14213,7 @@ dav: HTTP 503: the server is busy</div>
         </div>
         <div class="tc-fset">
           <div class="tc-rubric">Key escrow</div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at.</span></div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">No copy of your data key is deposited: if you lose your password, nobody can recover the account.</span></div>
           <div class="tc-field"><button class="tc-btn" type="button">Deposit my key</button></div>
         </div>
       </div>
@@ -14280,9 +14280,8 @@ dav: HTTP 503: the server is busy</div>
             <b class="tc-sheet__title">Deposit my key</b>
           </div>
           <div class="tc-sheet__body">
-            <div class="tc-msg is-alert tc-msg--flush">An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.</div>
-            <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="text" name="password" value="••••••••••" aria-label="Your Carrel password">
-              <span class="tc-field__hint">Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password.</span></div>
+            <div class="tc-msg is-alert tc-msg--flush">With the escrow master password, an administrator will be able to decrypt the DAV credentials you save here, and through them your records. You can withdraw the copy later from Account.</div>
+            <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="text" name="password" value="••••••••••" aria-label="Your Carrel password"></div>
           </div>
           <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Deposit my key</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
         </form>
@@ -14347,7 +14346,7 @@ dav: HTTP 503: the server is busy</div>
           </form>
           <div class="tc-fset">
             <div class="tc-rubric">Password</div>
-            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Changing your password re-wraps your data key only; saved connections stay readable.</span></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Your saved connections stay readable after the change.</span></div>
             <div class="tc-field"><button class="tc-btn" type="button">Change password</button></div>
           </div>
           <div class="tc-fset">
@@ -14363,7 +14362,7 @@ dav: HTTP 503: the server is busy</div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Key escrow</div>
-            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at.</span></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">No copy of your data key is deposited: if you lose your password, nobody can recover the account.</span></div>
             <div class="tc-field"><button class="tc-btn" type="button">Deposit my key</button></div>
           </div>
         </div>
@@ -14459,7 +14458,7 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-form">
           <div class="tc-fset tc-fset--lead">
             <div class="tc-rubric">What a deposit does</div>
-            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">A deposited copy lets an administrator who holds the escrow master password recover this account if you lose your password — and, with it, read the DAV credentials you save here. You can withdraw it at any time.</span></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">With a copy, an administrator with the escrow master password can recover this account if you lose your password, and read the DAV credentials you save here. You can withdraw it at any time.</span></div>
             <div class="tc-field"><button class="tc-btn" type="button">Deposit my key</button></div>
           </div>
         </div>
@@ -14505,7 +14504,7 @@ dav: HTTP 503: the server is busy</div>
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main"><div class="tc-form">
             <div class="tc-fset tc-fset--lead">
               <div class="tc-rubric">Key escrow <span class="tc-badge is-alert">deposited 2026-03-02</span></div>
-              <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">A copy of your data key is deposited on this server. If you lose your password, an administrator who holds the escrow master password can recover the account — and, with it, can read the DAV credentials you save here.</span></div>
+              <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">If you lose your password, an administrator with the escrow master password can recover the account and read the DAV credentials you save here.</span></div>
               <div class="tc-field"><button class="tc-btn is-danger-solid" type="button">Withdraw my deposited key</button></div>
             </div>
       </div></div></div>
@@ -14629,7 +14628,7 @@ dav: HTTP 503: the server is busy</div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max560">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Key escrow</div><div class="tc-head__sub">A copy of your key on this server</div></div></div>
-      <div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580">A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars.</div>
+      <div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580">With the escrow master password, an administrator can decrypt the DAV credentials you save here, and through them your records.</div>
       <dl class="tc-fields tc-fields--bleed">
         <dt>Deposited</dt><dd class="tc-mono">2026-03-02</dd>
         <dt>Last recovery</dt><dd class="tc-mono">never</dd>
@@ -14680,7 +14679,7 @@ dav: HTTP 503: the server is busy</div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max560">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Key escrow</div><div class="tc-head__sub">A copy of your key on this server</div></div></div>
-      <div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580">A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars.</div>
+      <div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580">With the escrow master password, an administrator can decrypt the DAV credentials you save here, and through them your records.</div>
       <dl class="tc-fields tc-fields--bleed">
         <dt>Deposited</dt><dd class="tc-mono">2026-03-02</dd>
         <dt>Recovered</dt><dd><span class="tc-mono">2026-07-11 14:02</span> · olga, administrator: the password was reset</dd>
@@ -16843,7 +16842,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             <div class="tc-sheet__body">
               <div class="tc-field tc-field--w100"><label>On which server</label>
                 <span class="tc-in is-pick"><select class="tc-in__list" name="account" aria-label="On which server"><option value="nextcloud" selected>nextcloud</option></select></span>
-                <span class="tc-field__hint tc-field__hint--t11-dusty">Two of three are listed: <span class="tc-mono">baikal</span> is not answering, and until it does there is nothing to create there.</span></div>
+                <span class="tc-field__hint tc-field__hint--t11-dusty"><span class="tc-mono">baikal</span> is not answering, so it is not listed.</span></div>
               <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Поездки" aria-label="Name"></div>
               <div class="tc-field tc-field--w100"><label>Colour</label>
                 <span class="tc-line tc-line--gap-9 tc-field__swatches">
@@ -16861,10 +16860,10 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                   <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VTODO" checked><span class="tc-tickrow__tick"></span>Tasks</label>
                   <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VJOURNAL"><span class="tc-tickrow__tick is-off"></span>Notes</label>
                 </div>
-                <span class="tc-field__hint tc-field__hint--t11-dusty">Most servers settle this when the collection is made and will not change it afterwards. A collection holding only tasks appears in <b>Tasks</b>, not here — the rail follows what is inside, not where it was made.</span></div>
+                <span class="tc-field__hint tc-field__hint--t11-dusty">Most servers will not change this later. A collection holding only tasks appears in <b>Tasks</b>, not here.</span></div>
               <div class="tc-field tc-field--w100"><label>Address</label>
                 <input class="tc-in is-mono is-ph" type="text" name="address" placeholder="poezdki" aria-label="Address" data-tc-from="name">
-                <span class="tc-field__hint tc-field__hint--t11-dusty"><span class="tc-mono">…/remote.php/dav/calendars/mix/</span><span class="tc-mono" data-tc-slug-of="address">poezdki</span><span class="tc-mono">/</span> — taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show.</span></div>
+                <span class="tc-field__hint tc-field__hint--t11-dusty"><span class="tc-mono">…/remote.php/dav/calendars/mix/</span><span class="tc-mono" data-tc-slug-of="address">poezdki</span><span class="tc-mono">/</span> — taken from the name, yours to change. Other clients and restores go by the address, not the name.</span></div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Create</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
@@ -17517,7 +17516,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           </div>
 
         </div>
-        <div class="tc-msg tc-msg--max580">A feed is read again on every visit to the section, so there is nothing here to synchronise and nothing to refresh. <b>Check</b> asks whether the address still replies.</div>
+        <div class="tc-msg tc-msg--max580">A feed is read anew on every visit: there is nothing to refresh. <b>Check</b> asks whether the address still replies.</div>
       </div>
 
       <div class="tc-side">
@@ -17538,7 +17537,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
 [access]  the server asked for no password</div>
           </div>
           <div class="tc-field tc-field--w100"><label>Name here</label><input class="tc-in" type="text" name="name.here" value="Праздники РФ" aria-label="Name here">
-            <span class="tc-field__hint tc-field__hint--max580">Taken from the feed; change it if you like — other people’s feed names are often longer than the rail.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">Taken from the feed; yours to change.</span></div>
           <div class="tc-field tc-field--w100"><label>Label colour</label>
             <span class="tc-line tc-line--gap-9 tc-field__swatches">
               <label data-tc-colour="#4A6B52" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#4A6B52" aria-label="#4A6B52"></label>
@@ -17549,20 +17548,19 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <label data-tc-colour="#9A9280" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#9A9280" aria-label="#9A9280"></label>
             </span>
             <span class="tc-dim tc-dim--t11">derived from the address</span>
-            <span class="tc-field__hint tc-field__hint--max580">A feed sends no colour of its own: Carrel derives one, and hatches the strip so a feed is recognisable among your own collections.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">A feed has no colour of its own: Carrel picks one and hatches the strip.</span></div>
           <div class="tc-field is-own-line tc-field--w100">
             <label class="tc-check"><input class="tc-check__box" type="checkbox" name="this.feed.asks.for.a.password" value="1"><span class="tc-tickrow__tick is-off"></span>This feed asks for a password</label>
-            <span class="tc-field__hint tc-field__hint--max580">The login and password are kept the way DAV credentials are: encrypted under your key. A secret link needs no password — the secret is already in the address.</span></div>
-          <div class="tc-field tc-field--w100"><label>Sections</label><span class="tc-in tc-in--tags"><span class="tc-tag">Calendar · 3</span><span class="tc-tag">Tasks · 1</span></span><span class="tc-field__hint tc-field__hint--max580">Not a choice: a feed is one file. What it carries decides where it lands, and that is visible before subscribing.</span></div>
+            <span class="tc-field__hint tc-field__hint--max580">Kept encrypted, like DAV credentials. A secret link needs none.</span></div>
+          <div class="tc-field tc-field--w100"><label>Sections</label><span class="tc-in tc-in--tags"><span class="tc-tag">Calendar · 3</span><span class="tc-tag">Tasks · 1</span></span><span class="tc-field__hint tc-field__hint--max580">A feed is one file: what it carries decides where it lands.</span></div>
         </form>
-        <div class="tc-msg is-alert tc-msg--mx20 tc-msg--max580">The feed is fetched by the Carrel server, not by your browser. An address on your local network works only if the server can reach it; a public Carrel cannot, and it says so instead of returning an empty list.</div>
         <div class="tc-formfoot"><button class="tc-btn is-primary" type="submit" form="subscribe">Subscribe</button><button class="tc-btn" type="button">Cancel</button></div>
       </div>
     </div>
   </div>
 </div>
 <figcaption><b>Подписка на календарь — это подписка на файл, а не на события.</b> В <span class="tc-mono">.ics</span> лежат три вида записей, и лента приносит те, что в ней есть: события встанут в календарь, <span class="tc-mono">VTODO</span> — в задачи, <span class="tc-mono">VJOURNAL</span> — в заметки, одной и той же строкой «Подписки» в рейле каждого раздела. <b>Кнопка «Subscribe to a feed» стоит в подвале рейла каждого из этих разделов и в контактах</b> — не только в календаре: иначе адресную книгу подписывают, уходя в чужой раздел. Спрашивать человека, куда положить, нечего — ответ уже в файле, и он показан до подписки. Обратное тоже верно: лента из одних событий не появится в задачах и не будет там мозолить глаза пустой строкой.<br><br><b>Проверка адреса — не «валидация поля», а тот же след, что у discovery:</b> что ответил сервер, сколько это весит, за сколько пришло, что внутри и просили ли пароль. Из ответа же берётся имя ленты (<code>X-WR-CALNAME</code>) и определяется раздел — календарь или адресная книга, — поэтому спрашивать об этом человека не нужно.
-<br><br>Три вещи, которых нет у обычного аккаунта, названы прямо на экране. <b>Password</b> — необязателен и появляется флажком, потому что бо́льшая часть лент открыта, а секретная ссылка носит секрет в себе. <b>Цвет</b> — не приходит с сервера, поэтому его выдумывает Carrel из адреса и даёт поменять, а штриховка полоски отличает чужое от своего в рейле. <b>Кто тянет ленту</b> — сервер, а не браузер: это единственная причина, по которой «у меня в браузере открывается, а Carrel говорит, что нет», и её лучше объяснить до подписки, чем разбирать после.
+<br><br>Две вещи, которых нет у обычного аккаунта, названы прямо на экране. <b>Password</b> — необязателен и появляется флажком, потому что бо́льшая часть лент открыта, а секретная ссылка носит секрет в себе. <b>Цвет</b> — не приходит с сервера, поэтому его выдумывает Carrel из адреса и даёт поменять, а штриховка полоски отличает чужое от своего в рейле. <b>Кто тянет ленту</b> — сервер, а не браузер, но плашки об этом нет (владелец 05.11): проверка адреса идёт с сервера и покажет недоступный адрес до подписки.
 <br><br>Ошибка живёт в строке подписки, как и у аккаунта: «вчера · 401 Unauthorized» вместо пропавших событий. Лента, которая перестала отвечать, не должна выглядеть как лента, в которой ничего не запланировано.</figcaption>
 </figure>
 
@@ -18345,7 +18343,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         </form>
         <div class="tc-fset">
           <div class="tc-rubric">Password</div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Changing your password re-wraps your data key only; saved connections stay readable.</span></div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Your saved connections stay readable after the change.</span></div>
           <div class="tc-field"><button class="tc-btn" type="button">Change password</button></div>
         </div>
         <div class="tc-fset">
@@ -18361,7 +18359,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         </div>
         <div class="tc-fset">
           <div class="tc-rubric">Key escrow</div>
-          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at.</span></div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">No copy of your data key is deposited: if you lose your password, nobody can recover the account.</span></div>
           <div class="tc-field"><button class="tc-btn" type="button">Deposit my key</button></div>
         </div>
       </div>
@@ -18445,7 +18443,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           </tbody>
         </table>
         <div class="tc-msg is-row tc-msg--max580"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside">Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. There is no import file and none is needed.</span></div>
+          <span class="tc-msg__aside">Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. No import file is needed.</span></div>
       </div></div>
     </div>
   </div>
@@ -18518,7 +18516,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           </tbody>
         </table>
         <div class="tc-msg is-row tc-msg--max580"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside">Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press <b>Lock now</b>; every reveal is written to the audit log.</span></div>
+          <span class="tc-msg__aside">Unlocked everywhere credentials are shown, not only here; every reveal goes to the audit log.</span></div>
       </div></div>
     </div>
   </div>
@@ -19533,8 +19531,8 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
           <button class="tc-btn is-primary" type="button" data-tc-copy-from="trigger-script" data-tc-copied="Copied"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy the script</button>
           <button class="tc-btn" type="button" data-tc-save="carrel-personal.sh" data-tc-save-from="trigger-script"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Save as <span class="tc-mono tc-mono--t11">carrel-personal.sh</span></button>
         </div>
-        <div class="tc-card__note">Put it where the password is to live, make it executable, and give <span class="tc-mono">crontab -e</span> one line: <span class="tc-mono">0 3 * * * /usr/local/bin/carrel-personal.sh</span> — the schedule stays a line, the work moves into the file. The date has to live in the script and not in the crontab line: <span class="tc-mono">cron</span> reads <span class="tc-mono">%</span> as a newline, so <span class="tc-mono">date +%F</span> written up there would break the entry.</div>
-        <div class="tc-msg tc-msg--flush-top9">A copy that fails needs no separate check: the download answers with an error, <span class="tc-mono">set -eu</span> stops the script on it, and cron sends the mail. The wait is open-ended on purpose — a copy takes what it takes, and <span class="tc-mono">409</span> until then means «not yet», not «broken».</div>
+        <div class="tc-card__note">Put it where the password is to live, make it executable, and give <span class="tc-mono">crontab -e</span> one line: <span class="tc-mono">0 3 * * * /usr/local/bin/carrel-personal.sh</span>. Keep the date in the script: <span class="tc-mono">cron</span> reads <span class="tc-mono">%</span> as a newline, so <span class="tc-mono">date +%F</span> in the crontab line breaks the entry.</div>
+        <div class="tc-msg tc-msg--flush-top9">A failed copy needs no separate check: the download answers with an error, <span class="tc-mono">set -eu</span> stops the script, and cron sends the mail. The wait has no limit: <span class="tc-mono">409</span> means «not yet», not «broken».</div>
       </div>
     </div></div></div>
   </div>
@@ -19575,8 +19573,8 @@ Authorization: Bearer cbk_7f3a-91de-4402-lamp
 https://carrel.example/api/backup/run?job=personal</textarea>
             <button class="tc-btn is-sm tc-btn--self-start" type="button">Copy</button>
           </div>
-          <div class="tc-card__note">GoSentry is a scheduler of commands, not an HTTP checker: its job dialog asks for <b>Name</b>, <b>Folder</b>, <b>Schedule</b>, <b>Command</b> and <b>Arguments</b> (one argument per line, no quotes). This tab copies those fields, not a URL and a header. Leave <b>Start only, do not wait for exit</b> off — <span class="tc-mono">curl</span> exits when the <span class="tc-mono">202</span> comes back.</div>
-          <div class="tc-msg tc-msg--flush-top9">A second GoSentry job, same form: Command <span class="tc-mono">curl</span>, Arguments a <span class="tc-mono">GET /api/backup/status?job=personal</span>, failing when the last <b>successful</b> copy is older than 26 hours. The first job says the copy was asked for; only the second says it happened.</div>
+          <div class="tc-card__note">GoSentry runs commands, not URL checks: its job dialog asks for <b>Name</b>, <b>Folder</b>, <b>Schedule</b>, <b>Command</b> and <b>Arguments</b> (one per line, no quotes), and this tab gives those fields. Leave <b>Start only, do not wait for exit</b> off: <span class="tc-mono">curl</span> exits when the <span class="tc-mono">202</span> comes back.</div>
+          <div class="tc-msg tc-msg--flush-top9">Add a second GoSentry job, same form: Command <span class="tc-mono">curl</span>, Arguments a <span class="tc-mono">GET /api/backup/status?job=personal</span>, failing when the last <b>successful</b> copy is older than 26 hours. The first job only asks for the copy; the second says it happened.</div>
         </div>
       </div></div></div>
     </div>
@@ -19633,7 +19631,7 @@ jobs:
             <input class="tc-in is-mono tc-in--t11" type="text" aria-label="Its value" value="cbk_7f3a-91de-4402-lamp">
             <button class="tc-btn is-sm" type="button">Copy</button>
           </div>
-          <div class="tc-card__note">Put the file into the repository as <span class="tc-mono">.gitea/workflows/carrel-personal.yaml</span> and the password into its secrets as <span class="tc-mono">CARREL_BACKUP</span>: the workflow names the secret, the password never sits in the file. A job that also <b>downloads</b> gets the script as a step, and the archive is kept with <span class="tc-mono">actions/upload-artifact</span>.</div>
+          <div class="tc-card__note">Put the file into the repository as <span class="tc-mono">.gitea/workflows/carrel-personal.yaml</span> and the password into its secrets as <span class="tc-mono">CARREL_BACKUP</span>: the password never sits in the file. A job that also <b>downloads</b> gets the script as a step and keeps the archive with <span class="tc-mono">actions/upload-artifact</span>.</div>
         </div>
       </div></div></div>
     </div>
@@ -19653,7 +19651,7 @@ jobs:
           <div class="tc-line tc-line--gap-8 tc-card__top8">
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy the line</button>
           </div>
-          <div class="tc-card__note">For anything that can send a <span class="tc-mono">POST</span>: a scheduler of your own, a monitoring service, a hand at the terminal. The line is the whole of it; <span class="tc-mono">GET /api/backup/status?job=personal</span> answers when the last copy went through.</div>
+          <div class="tc-card__note">For anything that can send a <span class="tc-mono">POST</span>: your own scheduler, a monitoring service, a terminal. <span class="tc-mono">GET /api/backup/status?job=personal</span> tells when the last copy went through.</div>
         </div>
       </div></div></div>
     </div>
@@ -21726,7 +21724,7 @@ Read  2 min ago</div>
               <div class="tc-field tc-field--w100"><label>Attachments <span class="tc-plain">2 files · 24.4 MB</span></label>
                 <div class="tc-stack tc-stack--gap-5 tc-card__top2">
                   <label class="tc-check"><input class="tc-check__box" type="checkbox" name="attachments" value="1"><span class="tc-tickrow__tick is-off"></span>Publish them too — each gets its own link</label>
-                  <span class="tc-field__hint">The links are created together with this one, expire with it and are revoked with it. Without this the page says how many files there are, but not their names: a file name gives away more than it looks.</span>
+                  <span class="tc-field__hint">They expire and are revoked with this link. Without it the page shows how many files there are, not their names: a name can give away a lot.</span>
                 </div></div>
               <label class="tc-check"><input class="tc-check__box" type="checkbox" name="download" value="1"><span class="tc-tickrow__tick is-off"></span>Allow <span class="tc-mono">.md</span> download</label>
               <div class="tc-field tc-field--sm"><label>Link lives for</label><details class="tc-drop"><summary class="tc-in is-pick">30 days</summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="7">7 days</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="14">14 days</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="30" checked>30 days</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="never">No expiry</label></div></details></div>
@@ -23555,7 +23553,7 @@ Read  2 min ago</div>
         <div class="tc-sec">
           <div class="tc-field tc-field--w100"><label>Send it as</label>
             <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="format" value="md" checked>Markdown · .md</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="format" value="ics">Source · .ics</label></span>
-            <span class="tc-field__hint">Markdown is what a person opens and reads; it carries the text and links to attachments, not the foreign properties another client wrote. The source <span class="tc-mono">.ics</span> is the faithful copy and needs a client that reads VJOURNAL — jtx Board, Evolution.</span></div>
+            <span class="tc-field__hint">Markdown is for reading: the text and links to attachments, without the properties other clients wrote. The source <span class="tc-mono">.ics</span> keeps everything and needs a client that reads VJOURNAL — jtx Board, Evolution.</span></div>
         </div>
       </div>
       <div class="tc-sheet__foot">
@@ -24846,7 +24844,7 @@ password  4c1-tide-oven</div>
               <span class="tc-field__hint tc-field__hint--max580">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
             <div class="tc-field tc-grow"><label>Sender address</label>
               <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="noreply" checked>carrel@slovo.example</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="login">login@slovo.example</label></span>
-              <span class="tc-field__hint tc-field__hint--max580">Your relay decides which of the two it will let out. The envelope sender stays <span class="tc-mono">carrel@slovo.example</span> either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.</span></div>
+              <span class="tc-field__hint tc-field__hint--max580">Your relay decides which of the two it lets out. The envelope sender stays <span class="tc-mono">carrel@slovo.example</span>, so SPF is unaffected; DKIM and DMARC are set up on the relay.</span></div>
             <div class="tc-field tc-field--xs"><label>Attachment, MB</label><input class="tc-in is-mono" type="text" name="attach" value="2" aria-label="Attachment, MB"></div>
             <div class="tc-field tc-field--xs"><label>Letter, MB</label><input class="tc-in is-mono" type="text" name="letter" value="8" aria-label="Letter, MB"></div>
             <div class="tc-field tc-field--xs"><label>Recipients</label><input class="tc-in is-mono" type="text" name="recipients" value="10" aria-label="Recipients"></div>
@@ -25023,7 +25021,7 @@ password  4c1-tide-oven</div>
           </tbody>
         </table>
         <form class="tc-post" id="install" action="/admin/install" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
-        <div class="tc-msg tc-msg--max580">The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.</div>
+        <div class="tc-msg tc-msg--max580">It sees exactly what a browser or DAVx5 will. Nothing is changed or stored, apart from the audit line that the check was run.</div>
       </div>
     </div>
   </div>
@@ -25075,7 +25073,7 @@ password  4c1-tide-oven</div>
           </div>
         </div>
         <form class="tc-post" id="install" action="/admin/install" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
-        <div class="tc-msg tc-msg--max580">The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.</div>
+        <div class="tc-msg tc-msg--max580">It sees exactly what a browser or DAVx5 will. Nothing is changed or stored, apart from the audit line that the check was run.</div>
       </div>
     </div>
   </div>
@@ -25126,7 +25124,7 @@ password  4c1-tide-oven</div>
         </div>
         <div class="tc-msg is-alert tc-msg--max580">Give the address people open Carrel at, like https://carrel.example.org.</div>
         <form class="tc-post" id="install" action="/admin/install" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
-        <div class="tc-msg tc-msg--max580">The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.</div>
+        <div class="tc-msg tc-msg--max580">It sees exactly what a browser or DAVx5 will. Nothing is changed or stored, apart from the audit line that the check was run.</div>
       </div>
     </div>
   </div>
@@ -27143,7 +27141,7 @@ Read    2 min ago</div>
     <div class="frame-label"><span>Письмо · текст обрезан, кодировка неизвестна</span><span class="frag">отложена</span><i>колонка текста письма</i></div>
     <div class="tc-root tc-root--on-surface">
       <div class="tc-doc">
-        <div class="tc-msg tc-msg--flush-bot12">The letter says its charset is <span class="tc-mono">x-mac-ukrainian</span>, and Carrel does not know it. The text is shown as it came, so some letters may be wrong. <b>Download .eml</b> opens it in a mail program that knows the charset.</div>
+        <div class="tc-msg tc-msg--flush-bot12">The letter says its charset is <span class="tc-mono">x-mac-ukrainian</span>, and Carrel does not know it: some characters may be wrong. <b>Download .eml</b> opens it in a mail program that knows the charset.</div>
         <div class="tc-prose tc-prose--lead">Добрий день! Надсилаю звіт за ї»ень — таблиця у вкладенні, підсумки в кінці листа…
 
 …</div>
@@ -27871,7 +27869,7 @@ DATA                → 550 5.7.1 Daily sending limit reached
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-stack tc-stack--gap-10">
         <div class="tc-msg is-accent tc-msg--flush"><b>The letter went out</b> to 2 recipients from mix@home.example.</div>
-        <div class="tc-msg tc-msg--flush">Its copy did not reach <b>Sent</b>: the server answered <span class="tc-mono">APPEND → NO [OVERQUOTA] Quota exceeded</span>. The recipients have the letter; only your own copy is missing. Free some space in the mailbox — Carrel does not keep a copy to put there later.</div>
+        <div class="tc-msg tc-msg--flush">Its copy did not reach <b>Sent</b>: the server answered <span class="tc-mono">APPEND → NO [OVERQUOTA] Quota exceeded</span>. The recipients have the letter. Free some space in the mailbox: Carrel keeps no copy to put there later.</div>
         <div class="tc-line tc-line--gap-8"><button class="tc-btn" type="button">Close</button></div>
       </div>
     </div>
@@ -28312,7 +28310,7 @@ SMTP  smtp.yandex.ru:465  TLS
           <div class="tc-field tc-field--md"><label>Name in From</label><input class="tc-in" type="text" value="Михаил Енученко" aria-label="Name in From"><span class="tc-field__hint">Recipients see «Михаил Енученко &lt;mix@home.example&gt;». Your profile name until you change it here.</span></div>
           <div class="tc-field tc-field--full"><label>Signature</label><textarea class="tc-in is-area is-focus" aria-label="Signature">Михаил Енученко
 вёрстка и допечатная подготовка</textarea>
-            <span class="tc-field__hint">Goes under your text in every letter from home, above the quote, after a line «-- » that mail programs recognise and fold. Plain text, like the letter. Empty — no signature.</span></div>
+            <span class="tc-field__hint">Goes under your text in every letter from home, above the quote, after the line «-- ». Plain text. Empty — no signature.</span></div>
           <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-ph" type="text" placeholder="leave blank to keep the current one" aria-label="Password"></div>
           <div class="tc-fset tc-grow">
             <div class="tc-rubric">Servers</div>
@@ -28408,8 +28406,8 @@ SMTP  mail.home.example:465  TLS
           <div class="tc-fset">
             <div class="tc-rubric">Users' own mailboxes <span class="tc-badge">off</span></div>
             <div class="tc-field is-own-line tc-grow"><button class="tc-check is-focus" type="button"><span class="tc-tickrow__tick is-off"></span>Let users connect their own mailboxes over IMAP and SMTP</button>
-              <span class="tc-field__hint">Carrel then keeps each person's mailbox password — usually the most valuable password they have. Their mail server decides what goes out and how much; the relay and its limits above are not used for it.</span></div>
-            <div class="tc-msg tc-msg--flush tc-grow">When off, there is no mail section, no mail in search or timelines, and the mail pages answer as if they did not exist. Mailboxes people already connected are kept: turning this back on brings them back.</div>
+              <span class="tc-field__hint">Carrel then keeps each person's mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above.</span></div>
+            <div class="tc-msg tc-msg--flush tc-grow">When off, there is no mail anywhere in Carrel. Connected mailboxes are kept and come back when it is on again.</div>
           </div>
         </div>
       </div>
@@ -32683,7 +32681,7 @@ dav: HTTP 503: the server is busy</div></div>
           <div class="tc-form tc-form--gap12-16-pad0">
             <div class="tc-field tc-grow"><label>Everything lives here</label>
               <input class="tc-in is-mono tc-in--t11-5" type="text" value="E:\Carrel\ — app, carrel.exe, data\state.enc" aria-label="Everything lives here">
-              <span class="tc-field__hint">The same folder on any computer: plug the stick in, run, sign in with your password. The data folder cannot be moved away from the app in this mode — that is what makes it portable.</span></div>
+              <span class="tc-field__hint">The same folder on any computer: plug the stick in, run, sign in. In this mode the data folder always sits next to the app.</span></div>
             <div class="tc-field tc-grow tc-field--gap7">
               <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span><span class="tc-dim">Start at sign-in — not available in a portable copy</span></button>
               <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Closing the window hides to the tray</button>
@@ -33145,7 +33143,7 @@ dav: HTTP 503: the server is busy</div></div>
         <div class="mk-titlebar"><span class="mk-titlebar__title">Carrel</span><span class="mk-winbtns"><span class="mk-winbtns__btn"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
         <div class="tc-msg is-accent is-row tc-msg--flush-r0">
           <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-download"/></svg>
-          <span class="tc-msg__aside"><b>Carrel 0.8.0 is ready to install.</b> It will be applied the next time the app closes, or now — the window reopens where it was.</span>
+          <span class="tc-msg__aside"><b>Carrel 0.8.0 is ready to install.</b> It is applied when the app closes, or now: the window reopens where it was.</span>
           <span class="tc-push">
             <button class="tc-btn is-primary" type="button">Install and restart</button>
             <button class="tc-btn" type="button">What’s new</button>
@@ -33156,14 +33154,14 @@ dav: HTTP 503: the server is busy</div></div>
           <div class="tc-form tc-form--gap12-16-pad0">
             <div class="tc-field tc-grow"><label>Installed</label>
               <input class="tc-in is-mono tc-in--t11-5" type="text" value="app 0.8.0 · server 0.8.0 — both run inside this app" aria-label="Installed">
-              <span class="tc-field__hint">In local mode the server is part of the app, so one update covers both. Your data folder is untouched by an update: connections and settings stay where they are.</span></div>
+              <span class="tc-field__hint">In local mode one update covers the app and the server. Connections and settings stay as they are.</span></div>
             <div class="tc-field tc-grow"><label>Downloaded</label>
               <span class="tc-line tc-line--gap-9">
                 <span class="tc-meter tc-meter--max260-fill"><i class="tc-meter__bar" data-tc-width="100%"></i></span>
                 <span class="tc-mono tc-mono--t11-dusty">0.8.0 · 14.2 MB · signature checked</span>
               </span></div>
           </div>
-          <div class="tc-msg tc-msg--flush">Nothing installs itself while you work: an update waits for the app to close, or for this button. You are seeing this banner because automatic checking was turned on — out of the box it is off, and the app never goes looking.</div>
+          <div class="tc-msg tc-msg--flush">You see this because automatic checking is on; out of the box the app never goes looking.</div>
         </div>
       </div>
     </div>
@@ -33180,12 +33178,12 @@ dav: HTTP 503: the server is busy</div></div>
         <div class="tc-stack tc-stack--gap-12 tc-win__body--pad16-20">
           <div class="tc-msg is-alert is-row tc-msg--flush">
             <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-            <span class="tc-msg__aside"><b>The app is newer than the server.</b> This app is 0.8.0, <span class="tc-mono">carrel.example</span> runs 0.6.4. Everything that both versions know still works; what is newer than the server simply is not there.</span>
+            <span class="tc-msg__aside"><b>The app is newer than the server.</b> This app is 0.8.0, <span class="tc-mono">carrel.example</span> runs 0.6.4. What both know works; what is newer than the server is not there.</span>
           </div>
           <div class="tc-form tc-form--gap12-16-pad0">
             <div class="tc-field tc-grow"><label>What to do</label>
               <input class="tc-in is-ph" type="text" placeholder="Update the server where it runs — this app cannot do it" aria-label="What to do">
-              <span class="tc-field__hint">The server is somebody’s machine: yours, a friend’s, a hosting account. An app that could update it from the outside would be a way in, and Carrel does not build such ways.</span></div>
+              <span class="tc-field__hint">The app does not update a server from outside: that would be a way in. The server’s administrator has to update it.</span></div>
           </div>
           <div class="tc-line tc-line--gap-8">
             <button class="tc-btn" type="button">How to update a server</button>

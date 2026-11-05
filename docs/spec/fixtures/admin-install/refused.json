@@ -63,7 +63,7 @@
     "theme": "auto",
     "wide": false
   },
-  "note": "The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.",
+  "note": "It sees exactly what a browser or DAVx5 will. Nothing is changed or stored, apart from the audit line that the check was run.",
   "notices": [
     {
       "actions": [],

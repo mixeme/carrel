@@ -1,5 +1,5 @@
 {
-  "alert": "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
+  "alert": "With the escrow master password, an administrator will be able to decrypt the DAV credentials you save here, and through them your records. You can withdraw the copy later from Account.",
   "for": "deposit",
   "form": {
     "action": "/app/settings/escrow",
@@ -58,7 +58,7 @@
             "error": "",
             "extra": null,
             "focus": true,
-            "hint": "Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password.",
+            "hint": "",
             "kind": "password",
             "label": "Your Carrel password",
             "name": "password",
@@ -137,7 +137,7 @@
         "covered": false,
         "deposited": "",
         "lastRecovery": "",
-        "note": "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at."
+        "note": "No copy of your data key is deposited: if you lose your password, nobody can recover the account."
       },
       "look": {
         "compact": false,
@@ -147,7 +147,7 @@
         "wide": false
       },
       "notices": [],
-      "passwordNote": "Changing your password re-wraps your data key only; saved connections stay readable.",
+      "passwordNote": "Your saved connections stay readable after the change.",
       "print": {
         "range": "",
         "taken": "",

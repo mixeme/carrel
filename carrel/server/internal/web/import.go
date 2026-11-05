@@ -443,12 +443,12 @@ var importHints = map[view.Kind]view.Runs{
 	view.KindContact: join(monoRun(".vcf"), " — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take ", monoRun(".ics"), " here instead."),
 	view.KindEvent:   join(monoRun(".ics"), " — iCalendar 2.0. One file holds any number of events; tasks and journal entries in it are skipped and named in the report."),
 	view.KindTask:    join(monoRun(".ics"), " — iCalendar 2.0. One file holds any number of tasks; events and journal entries in it are skipped and named in the report."),
-	view.KindNote: join(monoRun(".md"), " — Markdown, ", monoRun(".zip"), " — any number of them, ", monoRun(".ics"), " — iCalendar 2.0 journal entries. Several files may be picked at once; events and tasks in an ",
+	view.KindNote: join(monoRun(".md"), " — Markdown, ", monoRun(".zip"), " — any number of them, ", monoRun(".ics"), " — iCalendar journal entries. Several files at once; events and tasks in an ",
 		monoRun(".ics"), " are skipped and named in the report."),
 }
 
 // importFolderHint is the line under the tree of folders (s-io-4).
-var importFolderHint = join("Every ", monoRun(".md"), " directly in that folder. Subfolders are not walked, nothing on the server is moved or deleted — the files stay where they were.")
+var importFolderHint = join("Every ", monoRun(".md"), " directly in that folder, without subfolders. Nothing on the server is moved or deleted.")
 
 // importNoteFirst is the message of the first step of notes (s-io-4); the
 // other first steps and the previews have none (note 135).

@@ -156,12 +156,11 @@ func (s *Server) depositSheet(sess *session.Session, errText view.Text) view.Unl
 	sheet := view.UnlockSheet{
 		Purpose: "Deposit my key", For: view.UnlockForDeposit,
 		// What the deposit hands over, in alarm before the field (account-2).
-		Alert: "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
+		Alert: "With the escrow master password, an administrator will be able to decrypt the DAV credentials you save here, and through them your records. You can withdraw the copy later from Account.",
 		Form: focused(withPrimary(s.plainForm("/app/settings/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "deposit"},
-			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText,
-				Hint: "Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password."},
+			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText},
 		), "escrow.deposit", "Deposit my key",
 			view.Action{ID: "escrow.deposit.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}), "password"),
 	}
@@ -198,9 +197,9 @@ func (s *Server) escrowStatus(sess *session.Session, u *store.User, onAccount bo
 		if len(status.Recoveries) > 0 {
 			status.LastRecovery = ""
 		}
-		status.Note = "A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars."
+		status.Note = "With the escrow master password, an administrator can decrypt the DAV credentials you save here, and through them your records."
 		if onAccount {
-			status.Note = "A copy of your data key is deposited on this server. If you lose your password, an administrator who holds the escrow master password can recover the account — and, with it, can read the DAV credentials you save here."
+			status.Note = "If you lose your password, an administrator with the escrow master password can recover the account and read the DAV credentials you save here."
 		}
 		status.ActionNote = escrowWithdrawNote
 		status.Actions = []view.Action{{
@@ -214,9 +213,9 @@ func (s *Server) escrowStatus(sess *session.Session, u *store.User, onAccount bo
 	}
 	// The escrow page says what a deposit gives and what it costs before
 	// its button (account-12).
-	status.Note = "A deposited copy lets an administrator who holds the escrow master password recover this account if you lose your password — and, with it, read the DAV credentials you save here. You can withdraw it at any time."
+	status.Note = "With a copy, an administrator with the escrow master password can recover this account if you lose your password, and read the DAV credentials you save here. You can withdraw it at any time."
 	if onAccount {
-		status.Note = "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at."
+		status.Note = "No copy of your data key is deposited: if you lose your password, nobody can recover the account."
 	}
 	status.Actions = []view.Action{{
 		ID: "escrow.deposit", Label: "Deposit my key",

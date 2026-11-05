@@ -138,7 +138,7 @@ var frameServerHint = regexp.MustCompile(`(?s)<label>On which server</label>.*?<
 // request is sent to find out when the sheet opens.
 func TestNewCollectionListsOnlyServersThatAnswer(t *testing.T) {
 	hint := frameServerHint.FindStringSubmatch(mockupFrame(t, "s-profile-5"))
-	if hint == nil || !strings.Contains(frameText(hint[1]), "Two of three are listed: baikal ") {
+	if hint == nil || frameText(hint[1]) != "baikal is not answering, so it is not listed." {
 		t.Fatalf("s-profile-5 hint = %v: read it again", hint)
 	}
 	f := contactsFixture(t, false)
@@ -167,13 +167,13 @@ func TestNewCollectionListsOnlyServersThatAnswer(t *testing.T) {
 		return row, ids
 	}
 	row, ids := servers()
-	want := strings.Replace(strings.Replace(frameText(hint[1]), "Two of three are", "One of two is", 1), "baikal", "office", 1)
+	want := strings.Replace(frameText(hint[1]), "baikal", "office", 1)
 	// In pieces, the server's name in mono (Кл3): read as the frame's words.
 	said := ""
 	for _, r := range row.HintRuns {
 		said += string(r.Text)
 	}
-	if !equalStrings(ids, []string{f.id}) || said != want || len(row.HintRuns) != 3 || row.HintRuns[1].Mark != view.RunMono {
+	if !equalStrings(ids, []string{f.id}) || said != want || len(row.HintRuns) != 2 || row.HintRuns[0].Mark != view.RunMono {
 		t.Errorf("silent office: options %v, hint %+v\nwant %v, %q", ids, row.HintRuns, []string{f.id}, want)
 	}
 

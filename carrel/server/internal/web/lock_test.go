@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -37,8 +38,9 @@ func TestLockNowEndsTheUnlockNotTheSignIn(t *testing.T) {
 		t.Errorf("the connections' message = %+v", page.Note)
 	}
 	other := decode[view.DevicesPage](t, f.h.do(get("/app/settings/devices?tab=other", f.sess)))
-	if got := plainRuns(other.UnlockNote); got != "Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press Lock now; every reveal is written to the audit log." ||
-		!hasRun(other.UnlockNote, "Lock now", view.RunStrong) {
+	// How long and Lock now are the head's (s-plan-5, Typecase's note 172).
+	if got := plainRuns(other.UnlockNote); got != "Unlocked everywhere credentials are shown, not only here; every reveal goes to the audit log." ||
+		!strings.Contains(mockupFrame(t, "s-plan-5"), got) {
 		t.Errorf("the devices' message = %+v", other.UnlockNote)
 	}
 	if other.Top.Lock == nil {

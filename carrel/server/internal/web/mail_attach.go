@@ -178,8 +178,7 @@ func (s *Server) attachSheet(r *http.Request, sess *session.Session, k attachKin
 		rows = append(rows, view.FormRow{Name: "format", Label: "Send it as", Kind: view.InputRadio, Value: text(format), Options: []view.Option{
 			{Value: "md", Label: "Markdown · .md", Selected: format == "md"},
 			{Value: "ics", Label: "Source · .ics", Selected: format == "ics"},
-		}, HintRuns: join("Markdown is what a person opens and reads; it carries the text and links to attachments, not the foreign properties another client wrote. The source ",
-			monoRun(".ics"), " is the faithful copy and needs a client that reads VJOURNAL — jtx Board, Evolution.")})
+		}, HintRuns: notesFormatHint})
 	}
 	sheet.Form = s.plainForm("/app/mail/attach", "POST", append([]view.FormRow{csrfField(sess)}, rows...)...)
 	sheet.Form.Action = s.postQuery("/app/mail/attach", ident)
@@ -701,3 +700,7 @@ func spanOf(p mailPart) string {
 	}
 	return "whole"
 }
+
+// notesFormatHint is the hint of the export format of notes (s-mail-5).
+var notesFormatHint = join("Markdown is for reading: the text and links to attachments, without the properties other clients wrote. The source ",
+	monoRun(".ics"), " keeps everything and needs a client that reads VJOURNAL — jtx Board, Evolution.")

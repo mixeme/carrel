@@ -64,7 +64,7 @@
     "covered": true,
     "deposited": "2026-03-02",
     "lastRecovery": "never",
-    "note": "A copy of your data key is deposited on this server. If you lose your password, an administrator who holds the escrow master password can recover the account — and, with it, can read the DAV credentials you save here."
+    "note": "If you lose your password, an administrator with the escrow master password can recover the account and read the DAV credentials you save here."
   },
   "look": {
     "compact": false,
@@ -74,7 +74,7 @@
     "wide": false
   },
   "notices": [],
-  "passwordNote": "Changing your password re-wraps your data key only; saved connections stay readable.",
+  "passwordNote": "Your saved connections stay readable after the change.",
   "print": {
     "range": "",
     "taken": "",

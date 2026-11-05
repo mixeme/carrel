@@ -170,7 +170,7 @@
     "covered": false,
     "deposited": "",
     "lastRecovery": "",
-    "note": "A deposited copy lets an administrator who holds the escrow master password recover this account if you lose your password — and, with it, read the DAV credentials you save here. You can withdraw it at any time."
+    "note": "With a copy, an administrator with the escrow master password can recover this account if you lose your password, and read the DAV credentials you save here. You can withdraw it at any time."
   },
   "subtitle": "No copy of your data key is deposited",
   "title": "Key escrow",

@@ -210,7 +210,7 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 			page.Profile.Sets[i].LegendAside = page.Email.Aside
 		}
 	}
-	page.PasswordNote = "Changing your password re-wraps your data key only; saved connections stay readable."
+	page.PasswordNote = "Your saved connections stay readable after the change."
 	page.Escrow = s.escrowStatus(sess, u, true)
 	page.Actions = []view.Action{
 		{ID: "account.password", Label: "Change password", Href: s.route("/app/password"), Method: "GET", Enabled: true},

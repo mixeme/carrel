@@ -553,9 +553,6 @@ func feedPanel(p *view.ConnectionsPage) *w.Side {
 			Acts: &w.Acts{Items: []w.ActsPart{w.Close{Label: closePanel, Href: cancelHref(f.Actions)}}}, Pad: w.HeadPadBottom8},
 		form,
 	}}
-	if p.AddNote != "" {
-		side.Items = append(side.Items, w.Msg{Column: true, Parts: []w.MsgPart{w.Text(p.AddNote)}, Tone: w.MsgAlert, Space: w.MsgInset20})
-	}
 	foot := w.FormFoot{}
 	for _, a := range f.Actions {
 		switch {

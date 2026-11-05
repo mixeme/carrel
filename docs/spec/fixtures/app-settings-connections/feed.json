@@ -1742,7 +1742,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Taken from the feed; change it if you like — other people’s feed names are often longer than the rail.",
+            "hint": "Taken from the feed; yours to change.",
             "kind": "text",
             "label": "Name here",
             "name": "name",
@@ -1755,7 +1755,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "A feed sends no colour of its own: Carrel derives one, and hatches the strip so a feed is recognisable among your own collections.",
+            "hint": "A feed has no colour of its own: Carrel picks one and hatches the strip.",
             "kind": "radio",
             "label": "Label colour",
             "name": "colour",
@@ -1800,7 +1800,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "The login and password are kept the way DAV credentials are: encrypted under your key. A secret link needs no password — the secret is already in the address.",
+            "hint": "Kept encrypted, like DAV credentials. A secret link needs none.",
             "kind": "check",
             "label": "This feed asks for a password",
             "name": "asks",
@@ -1847,7 +1847,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Not a choice: a feed is one file. What it carries decides where it lands, and that is visible before subscribing.",
+            "hint": "A feed is one file: what it carries decides where it lands.",
             "kind": "select",
             "label": "Sections",
             "multiple": true,
@@ -1873,7 +1873,6 @@
       }
     ]
   },
-  "addNote": "The feed is fetched by the Carrel server, not by your browser. An address on your local network works only if the server can reach it; a public Carrel cannot, and it says so instead of returning an empty list.",
   "details": null,
   "dialogSubtitle": "",
   "dialogTitle": "",
@@ -1887,7 +1886,7 @@
   },
   "note": [
     {
-      "text": "A feed is read again on every visit to the section, so there is nothing here to synchronise and nothing to refresh. "
+      "text": "A feed is read anew on every visit: there is nothing to refresh. "
     },
     {
       "mark": "strong",

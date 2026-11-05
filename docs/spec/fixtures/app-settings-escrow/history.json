@@ -184,7 +184,7 @@
     "covered": true,
     "deposited": "2026-03-02",
     "lastRecovery": "",
-    "note": "A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars.",
+    "note": "With the escrow master password, an administrator can decrypt the DAV credentials you save here, and through them your records.",
     "recoveries": [
       {
         "at": "2026-07-11 14:02",

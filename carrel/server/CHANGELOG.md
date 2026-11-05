@@ -17,6 +17,51 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.401 — 2026-11-05
+
+### Changed
+
+- Shorter hints, the frames' words (Р-77, Typecase's notes 169–174):
+  - key escrow on the user's side (account-1, -2, -4, -7, -12, -15, -16,
+    s-mail-9): «No copy of your data key is deposited: if you lose your
+    password, nobody can recover the account.»; under Password «Your saved
+    connections stay readable after the change.»; the deposit sheet's alert
+    «With the escrow master password, an administrator will be able to
+    decrypt the DAV credentials you save here, and through them your
+    records. You can withdraw the copy later from Account.», and its
+    password field has no hint; the deposited copy and «What a deposit
+    does» no longer repeat their subtitle;
+  - a rewritten address (s-contacts-21): a server's answer is its code and
+    text, «… was refused: 403 Forbidden.», and «… could not be read, so what
+    it holds keeps the old address.» (the sheet, s-contacts-15, keeps «and
+    what»);
+  - the export format of notes (s-mail-5), the outside check (s-admin-4,
+    -25, -26: «It sees exactly what a browser or DAVx5 will. …»), links to
+    attachments (s-publish-4), the relay's sender (s-admin-32), unlocked
+    credentials (s-plan-5: «Unlocked everywhere credentials are shown, not
+    only here; every reveal goes to the audit log.» — how long and Lock now
+    are the head's), Thunderbird (s-plan-4), importing notes (s-io-4),
+    duplicates (s-dup-1, -6: the hints no longer retell linking and
+    merging);
+  - a new calendar (s-profile-5): «`baikal` is not answering, so it is not
+    listed.», without a count of those listed; «Most servers will not
+    change this later. A collection holding only tasks appears in
+    **Tasks**, not here.» (s-profile-29, without a kind, keeps its longer
+    sentence); «… Other clients and restores go by the address, not the
+    name.»;
+  - a calendar without tasks (s-agenda-11): «**The server did not take
+    tasks.** It made «Дом» for events only. Tasks need another calendar, on
+    this server or another.»;
+  - subscribing to a feed (s-profile-10): the page's message, the name, the
+    colour, the password and the sections say less.
+- The panel «Subscribe to a feed» has no alert (the owner, 05.11.2026;
+  Typecase's note 174): Check asks from the server and shows an address it
+  cannot reach before subscribing. `ConnectionsPage.addNote` is gone; a
+  client that drew it drops it.
+- Not Carrel's: the hints of the trigger tabs (s-backup-3, -4, -10, -11 —
+  the sheet draws the line and its note, not these), the desktop app
+  (desktop-4, -14, -15) and the mailboxes (s-mailbox-8, -20, -27, -29).
+
 ## v0.2.400 — 2026-11-05
 
 ### Fixed

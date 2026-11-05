@@ -49,14 +49,11 @@
             "hint": "",
             "hintRuns": [
               {
-                "text": "Two of three are listed: "
-              },
-              {
                 "mark": "mono",
                 "text": "baikal"
               },
               {
-                "text": " is not answering, and until it does there is nothing to create there."
+                "text": " is not answering, so it is not listed."
               }
             ],
             "kind": "select",
@@ -155,14 +152,14 @@
             "hint": "",
             "hintRuns": [
               {
-                "text": "Most servers settle this when the collection is made and will not change it afterwards. A collection holding only tasks appears in "
+                "text": "Most servers will not change this later. A collection holding only tasks appears in "
               },
               {
                 "mark": "strong",
                 "text": "Tasks"
               },
               {
-                "text": ", not here — the rail follows what is inside, not where it was made."
+                "text": ", not here."
               }
             ],
             "kind": "check",
@@ -209,7 +206,7 @@
                 "text": "/"
               },
               {
-                "text": " — taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show."
+                "text": " — taken from the name, yours to change. Other clients and restores go by the address, not the name."
               }
             ],
             "kind": "text",

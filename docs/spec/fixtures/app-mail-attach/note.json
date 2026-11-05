@@ -59,14 +59,14 @@
             "hint": "",
             "hintRuns": [
               {
-                "text": "Markdown is what a person opens and reads; it carries the text and links to attachments, not the foreign properties another client wrote. The source "
+                "text": "Markdown is for reading: the text and links to attachments, without the properties other clients wrote. The source "
               },
               {
                 "mark": "mono",
                 "text": ".ics"
               },
               {
-                "text": " is the faithful copy and needs a client that reads VJOURNAL — jtx Board, Evolution."
+                "text": " keeps everything and needs a client that reads VJOURNAL — jtx Board, Evolution."
               }
             ],
             "kind": "radio",

@@ -603,7 +603,7 @@
   "unlockNote": [],
   "warning": {
     "actions": [],
-    "body": "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. There is no import file and none is needed.",
+    "body": "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. No import file is needed.",
     "details": null,
     "role": "info",
     "title": ""

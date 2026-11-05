@@ -269,14 +269,14 @@
             "hint": "",
             "hintRuns": [
               {
-                "text": "Your relay decides which of the two it will let out. The envelope sender stays "
+                "text": "Your relay decides which of the two it lets out. The envelope sender stays "
               },
               {
                 "mark": "mono",
                 "text": "noreply@carrel.example"
               },
               {
-                "text": " either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here."
+                "text": ", so SPF is unaffected; DKIM and DMARC are set up on the relay."
               }
             ],
             "kind": "radio",

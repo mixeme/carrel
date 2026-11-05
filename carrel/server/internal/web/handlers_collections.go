@@ -499,12 +499,11 @@ func (s *Server) droppedNotice(sess *session.Session, connID string, col sealed.
 	if len(dropped) == 0 {
 		return nil
 	}
-	body := "The server made «" + collectionLabel(col) + "»"
+	body := "It made «" + collectionLabel(col) + "»"
 	if len(kept) > 0 {
 		body += " for " + wordList(kept) + " only"
 	}
-	body += " and said nothing of the " + wordList(dropped) + " you asked for. " +
-		upperFirst(wordList(dropped)) + " need another calendar: make one for them on this server or another."
+	body += ". " + upperFirst(wordList(dropped)) + " need another calendar, on this server or another."
 	return &view.Notice{Role: view.NoticeInfo, Title: text("The server did not take " + wordList(dropped) + "."), Body: text(body),
 		Actions: []view.Action{{ID: "collection.new", Label: "New calendar", Href: s.postQuery("/app/collections/new", sheet), Method: "GET", Enabled: true}}}
 }
@@ -925,13 +924,9 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	// says so (s-profile-5): a row whose choice would end in an error ten
 	// seconds later is no choice.
 	if len(silent) > 0 && len(eligible) > 0 {
-		verb := "are"
-		if len(eligible) == 1 {
-			verb = "is"
-		}
-		listed := countWord(len(eligible))
-		// The servers' names in mono, as the frame sets them (Кл3).
-		parts := []any{fmt.Sprintf("%s of %s %s listed: ", strings.ToUpper(listed[:1])+listed[1:], countWord(holding), verb)}
+		// The servers' names in mono, as the frame sets them (Кл3); no
+		// count of those listed (Typecase's note 172).
+		var parts []any
 		for i, name := range silent {
 			switch {
 			case i == 0:
@@ -942,9 +937,9 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 			}
 			parts = append(parts, monoRun(name))
 		}
-		tail := " is not answering, and until it does there is nothing to create there."
+		tail := " is not answering, so it is not listed."
 		if len(silent) > 1 {
-			tail = " are not answering, and until they do there is nothing to create there."
+			tail = " are not answering, so they are not listed."
 		}
 		parts = append(parts, tail)
 		server.HintRuns = join(parts...)
@@ -987,10 +982,11 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 			elsewhere, section = "events", "Calendar"
 		}
 		parts := view.FormRow{Name: "components", Label: "What goes in it", Kind: view.InputCheck, Error: errs["components"],
-			HintRuns: join("Most servers settle this when the collection is made and will not change it afterwards. A collection holding only "+elsewhere+" appears in ",
-				strongRun(section), ", not here — the rail follows what is inside, not where it was made.")}
+			HintRuns: join("Most servers will not change this later. A collection holding only "+elsewhere+" appears in ",
+				strongRun(section), ", not here.")}
 		if f.kindChoice {
-			// Without a kind there is no section to name (s-profile-29).
+			// Without a kind there is no section to name (s-profile-29,
+			// which keeps the longer sentence).
 			parts.HintRuns = join("Most servers settle this when the collection is made and will not change it afterwards.")
 		}
 		for _, p := range calendarParts {
@@ -1010,7 +1006,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	if strings.TrimSpace(f.name) != "" {
 		address.Placeholder = text(collectionSlug(f.name))
 	}
-	said := " — taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show."
+	said := " — taken from the name, yours to change. Other clients and restores go by the address, not the name."
 	address.HintRuns = join(strings.TrimPrefix(said, " — "))
 	if home := homeFor(chosen, f.kind); home != "" {
 		// The path from the server's root, its start an ellipsis (s-profile-5,

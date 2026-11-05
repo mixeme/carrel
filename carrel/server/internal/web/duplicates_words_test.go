@@ -72,7 +72,7 @@ func TestAGroupOfEventsSaysWhatItMeans(t *testing.T) {
 		f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(col)+"?from=2026-08-10", f.sess))
 	}
 	g := onlyGroup(t, decode[view.DuplicatesPage](t, f.h.do(get("/app/duplicates", f.sess))))
-	if g.Hint != "The same event in two calendars, different UIDs. Agenda shows it twice; here you decide whether to keep both or write one and delete the other." {
+	if g.Hint != "The same event in two calendars, different UIDs: Agenda shows it twice." {
 		t.Errorf("hint %q", g.Hint)
 	}
 

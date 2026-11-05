@@ -340,10 +340,6 @@ type ConnectionsPage struct {
 	// — что ленту читают на каждом визите и что делает **Check**
 	// (s-profile-10); без панели пусто
 	Note Runs `json:"note"`
-	// AddNote — тревожное сообщение под формой панели подписки: ленту
-	// читает сервер Carrel, не браузер (s-profile-10, Нс27); без панели
-	// пусто
-	AddNote Text `json:"addNote"`
 }
 type ConnectionCard struct {
 	AccountID string       `json:"accountID"`

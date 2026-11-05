@@ -330,7 +330,7 @@
           }
         ]
       },
-      "hint": "The same event in two calendars, different UIDs. Agenda shows it twice; here you decide whether to keep both or write one and delete the other.",
+      "hint": "The same event in two calendars, different UIDs: Agenda shows it twice.",
       "id": "group",
       "kind": "event",
       "points": "70 points · same title, same start",
@@ -1298,7 +1298,7 @@
           }
         ]
       },
-      "hint": "Same title and the same date: a note copied into a second notebook. Linked, the two are shown as one row; merging writes one and deletes the other.",
+      "hint": "Same title and the same date: a note copied into a second notebook.",
       "id": "g-crdt",
       "kind": "note",
       "points": "70 points · same title, same date",
@@ -1451,7 +1451,7 @@
   "notices": [
     {
       "actions": [],
-      "body": "Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.",
+      "body": "Linking changes nothing on any server: the records are shown as one. Merging on the server is a separate, destructive step you confirm.",
       "details": null,
       "role": "accent",
       "title": ""

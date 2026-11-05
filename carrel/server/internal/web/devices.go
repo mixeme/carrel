@@ -129,8 +129,9 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	}
 	if unlocked && tab == view.TabOther {
 		// Under the rows while the window is open (s-plan-5).
-		page.UnlockNote = join("Credentials are unlocked for "+durationWords(s.cfg.UnlockTTL)+" — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press ",
-			strongRun("Lock now"), "; every reveal is written to the audit log.")
+		// The badge and Lock now in the head say how long (Typecase's
+		// note 172).
+		page.UnlockNote = join("Unlocked everywhere credentials are shown, not only here; every reveal goes to the audit log.")
 	}
 	here := "/app/settings/devices?tab=" + string(tab)
 	unlock := s.unlockHref(unlockProfile, here)
@@ -255,7 +256,7 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	case view.TabAndroid:
 		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "One code for each ticked account. Scan it with the phone: DAVx5 opens with the address and the login filled in, and asks for the password shown under the code."}
 	case view.TabThunderbird:
-		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. There is no import file and none is needed."}
+		page.Warning = view.Notice{Role: view.NoticeInfo, Body: thunderbirdNote}
 	}
 	// Anything else says nothing under its rows but the window (s-plan-5,
 	// Нс44): a WebDAV address is what the person came for.
@@ -525,3 +526,6 @@ func newUUID() (string, error) {
 	u[8] = u[8]&0x3f | 0x80
 	return strings.ToUpper(fmt.Sprintf("%x-%x-%x-%x-%x", u[0:4], u[4:6], u[6:8], u[8:10], u[10:16])), nil
 }
+
+// thunderbirdNote is the message of Thunderbird's tab (s-plan-4).
+const thunderbirdNote = "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. No import file is needed."

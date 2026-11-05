@@ -430,7 +430,8 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 	if m := frameLabel.FindStringSubmatch(sheetPart); m == nil || string(pw.Label) != frameText(m[1]) || pw.Kind != view.InputPassword {
 		t.Errorf("password row = %+v", pw)
 	}
-	if hints := frameAll(regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>`), sheetPart, 1); len(hints) != 1 || string(pw.Hint) != hints[0] {
+	// The password has no hint (Typecase's note 169).
+	if hints := frameAll(regexp.MustCompile(`(?s)<span class="tc-field__hint[^"]*">(.*?)</span>`), sheetPart, 1); len(hints) != 0 || pw.Hint != "" {
 		t.Errorf("password hint = %q, the frame draws %v", pw.Hint, hints)
 	}
 	var foot []string

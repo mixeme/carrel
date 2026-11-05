@@ -303,7 +303,7 @@
         "text": ".md"
       },
       {
-        "text": " directly in that folder. Subfolders are not walked, nothing on the server is moved or deleted — the files stay where they were."
+        "text": " directly in that folder, without subfolders. Nothing on the server is moved or deleted."
       }
     ],
     "hint": [
@@ -326,7 +326,7 @@
         "text": ".ics"
       },
       {
-        "text": " — iCalendar 2.0 journal entries. Several files may be picked at once; events and tasks in an "
+        "text": " — iCalendar journal entries. Several files at once; events and tasks in an "
       },
       {
         "mark": "mono",

@@ -740,7 +740,12 @@ type rewriteOutcome struct {
 // read-only records and the collections that could not be read —, a
 // sentence each: the sheet's line over its note (s-contacts-15) and the
 // outcome's message say them alike.
-func (p *rewritePlan) keptSentences() []string {
+func (p *rewritePlan) keptSentences() []string { return p.keptSaid(", and what") }
+
+// keptSaid is keptSentences with the unread collections' sentences joined
+// by join: the sheet says «…could not be read, and what it holds…»
+// (s-contacts-15), the outcome «…, so what it holds…» (s-contacts-21).
+func (p *rewritePlan) keptSaid(join string) []string {
 	var out []string
 	for _, g := range p.kept() {
 		if g.n == 1 {
@@ -750,7 +755,7 @@ func (p *rewritePlan) keptSentences() []string {
 		}
 	}
 	for _, u := range p.Unread {
-		out = append(out, u.Label+" could not be read, and what it holds keeps the old address.")
+		out = append(out, u.Label+" could not be read"+join+" it holds keeps the old address.")
 	}
 	return out
 }
@@ -763,7 +768,7 @@ func (o rewriteOutcome) notice(p *rewritePlan, a rewriteAnswer) view.Notice {
 	if o.written != chosen {
 		n.Title = text(fmt.Sprintf("Rewritten in %d of %s.", o.written, plural(chosen, "record")))
 	}
-	parts := append(append([]string(nil), o.refused...), p.keptSentences()...)
+	parts := append(append([]string(nil), o.refused...), p.keptSaid(", so what")...)
 	n.Body = text(strings.Join(parts, " "))
 	if len(o.refused) > 0 || len(o.lost) > 0 || len(p.Unread) > 0 {
 		n.Role = view.NoticeAlert
@@ -860,11 +865,15 @@ func (s *Server) applyRewrite(ctx context.Context, sess *session.Session, p *rew
 	return out
 }
 
-// clause is why, as the end of a sentence: «the server answered 403
-// Forbidden.»
+// clause is why, as the end of a sentence: a server's answer by its code
+// and text, «403 Forbidden.» (s-contacts-21, Typecase's note 171).
 func clause(err error, fallback string) string {
 	why := fallback
-	if err != nil {
+	var se *dav.StatusError
+	switch {
+	case errors.As(err, &se):
+		return fmt.Sprintf("%d %s.", se.Code, http.StatusText(se.Code))
+	case err != nil:
 		why = refusalReason(err)
 	}
 	return lowerClause(why)

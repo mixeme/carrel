@@ -351,7 +351,7 @@
   "notices": [
     {
       "actions": [],
-      "body": "Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.",
+      "body": "Linking changes nothing on any server: the records are shown as one. Merging on the server is a separate, destructive step you confirm.",
       "details": null,
       "role": "accent",
       "title": ""

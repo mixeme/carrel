@@ -84,8 +84,9 @@ const (
 	selected     = " selected"
 	items        = " items"
 	oneItem      = " item"
-	dropHint     = "Drop files onto the window to upload them into this folder. A name that is already taken is refused rather than overwritten, and the queue says so."
-	noDropHint   = "Dropping files onto the window and the upload queue need scripts, and this page runs none. Upload sends the files; a name that is already taken is refused rather than overwritten."
+	dropHint     = "Drop files onto the window to upload them here. A name already taken is refused, not overwritten."
+	noDropHint   = "Without scripts there is no drop and no queue: "
+	noDropUpload = " sends the files. A name already taken is refused, not overwritten."
 	closePanel   = "Close the panel"
 	links        = "Links"
 	linksNote    = "Notes or events may hold it as an attachment: Carrel does not look through the records."
@@ -173,7 +174,7 @@ func Screen(p *view.FilesPage) w.Shell {
 		// line is not there (Msg.ScriptOnly, Typecase's task 90).
 		// Without it, what a page with none does instead (s-files-1).
 		main = append(main, w.Msg{Parts: []w.MsgPart{w.Text(dropHint)}, ScriptOnly: true},
-			w.Msg{Parts: []w.MsgPart{w.Text(noDropHint)}, NoScript: true})
+			w.Msg{Parts: []w.MsgPart{w.Text(noDropHint), w.Strong(upload), w.Text(noDropUpload)}, NoScript: true})
 	}
 	up, live := action(p.Bar.Actions, uploadID)
 	live = live && up.Enabled && up.Method == "POST" && p.View != view.FileTiles && !p.Unread

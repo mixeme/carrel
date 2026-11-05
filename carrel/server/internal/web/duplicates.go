@@ -465,11 +465,10 @@ func groupHint(g dupGroup) view.Text {
 		if g.decision == view.DecisionLinked {
 			return ""
 		}
-		return text(fmt.Sprintf("The same event in %s calendars, different UIDs. Agenda shows it %s; here you decide whether to keep %s or write one and delete the %s.",
-			countWord(n), pick("twice", strconv.Itoa(n)+" times"), pick("both", "them all"), pick("other", "others")))
+		return text(fmt.Sprintf("The same event in %s calendars, different UIDs: Agenda shows it %s.",
+			countWord(n), pick("twice", strconv.Itoa(n)+" times")))
 	case view.KindNote:
-		return text(fmt.Sprintf("Same title and the same date: a note copied into %s. Linked, the %s are shown as one row; merging writes one and deletes the %s.",
-			pick("a second notebook", "other notebooks"), countWord(n), pick("other", "others")))
+		return text("Same title and the same date: a note copied into " + pick("a second notebook", "other notebooks") + ".")
 	}
 	return ""
 }
@@ -782,7 +781,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	}
 	page.Notices = append(page.Notices, view.Notice{
 		Role: view.NoticeAccent,
-		Body: "Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.",
+		Body: dupLinkingNote,
 	})
 	if st.compared == 0 {
 		page.Notices = append(page.Notices, view.Notice{
@@ -1242,3 +1241,7 @@ func (s *Server) duplicatesRefresh(sess *session.Session, only view.Kind) view.R
 	r.Answered = tf.formatWhen(oldest, true, tf.now)
 	return r
 }
+
+// dupLinkingNote is the screen's message on linking and merging (s-dup-1,
+// -6).
+const dupLinkingNote = "Linking changes nothing on any server: the records are shown as one. Merging on the server is a separate, destructive step you confirm."

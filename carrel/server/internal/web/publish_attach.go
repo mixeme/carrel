@@ -92,8 +92,7 @@ func attachmentsSet(files []noteFile) view.FieldSet {
 	}
 	return view.FieldSet{Legend: "Attachments", LegendAside: text(aside), Rows: []view.FormRow{{
 		Name: "attachments", Label: "Publish them too — each gets its own link", Kind: view.InputCheck,
-		Hint: "The links are created together with this one, expire with it and are revoked with it. " +
-			"Without this the page says how many files there are, but not their names: a file name gives away more than it looks.",
+		Hint: attachLinksHint,
 	}}}
 }
 
@@ -284,3 +283,7 @@ func visitorNotes(objs []*model.Object) []*model.Object {
 	}
 	return out
 }
+
+// attachLinksHint is the hint of «Publish them too» (s-publish-4).
+const attachLinksHint = "They expire and are revoked with this link. " +
+	"Without it the page shows how many files there are, not their names: a name can give away a lot."

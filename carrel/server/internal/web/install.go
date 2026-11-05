@@ -171,8 +171,7 @@ func (s *Server) installPage(sess *session.Session, publicURL string, rows []vie
 		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Body: text(note)})
 	}
 	// What the check does, under the table and without it (s-admin-4, -25, -26).
-	page.Note = "The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. " +
-		"Nothing is changed and nothing is stored, apart from the audit line saying the check was run."
+	page.Note = outsideCheckNote
 	return page
 }
 
@@ -410,3 +409,7 @@ func (zeros) Read(p []byte) (int, error) {
 	clear(p)
 	return len(p), nil
 }
+
+// outsideCheckNote is what the check does (s-admin-4, -25, -26).
+const outsideCheckNote = "It sees exactly what a browser or DAVx5 will. " +
+	"Nothing is changed or stored, apart from the audit line that the check was run."

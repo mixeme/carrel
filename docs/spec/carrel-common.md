@@ -3200,8 +3200,7 @@ type ConnectionsPage struct {
     // возвращается. nil — проверки не было
     Trace         *DiagnosticTrace
     Actions       []Action // Connect account (→ `?op=add`) · Subscribe to a feed
-    Note          Runs     // с открытой панелью подписки — «A feed is read again on every visit … **Check** asks whether the address still replies.» (s-profile-10); без панели пусто
-    AddNote       Text     // тревожное сообщение под формой панели подписки: ленту читает сервер Carrel, не браузер (s-profile-10); без панели пусто
+    Note          Runs     // с открытой панелью подписки — «A feed is read anew on every visit: there is nothing to refresh. **Check** asks whether the address still replies.» (s-profile-10); без панели пусто. Плашки под формой панели нет (владелец 05.11.2026, записка Typecase 174)
 }
 type ConnectionCard struct {
     AccountID   string

@@ -61,7 +61,7 @@
     "wide": false
   },
   "notices": [],
-  "passwordNote": "Changing your password re-wraps your data key only; saved connections stay readable.",
+  "passwordNote": "Your saved connections stay readable after the change.",
   "print": {
     "range": "",
     "taken": "",
