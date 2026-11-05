@@ -45,7 +45,7 @@
     "label": "Download .ics first",
     "method": "GET"
   },
-  "exportNote": "4 events, one file, straight to you",
+  "exportNote": "5 events, one file, straight to you",
   "form": {
     "action": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj",
     "actions": [],
@@ -230,7 +230,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 4,
+              "objects": 5,
               "path": "/alice/calendars/lichnyj/",
               "pick": "a-nc-home|/alice/calendars/lichnyj/",
               "readOnly": false,

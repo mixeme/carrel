@@ -442,7 +442,7 @@ func TestAttachmentNamesAreChosen(t *testing.T) {
 		}
 	}
 	upload("one.pdf")
-	if _, ok := f.srv.File(attachFiles + "carrel/2026-08-10 one.pdf"); !ok {
+	if _, ok := f.srv.File(attachFiles + "carrel/2026-08-10-one.pdf"); !ok {
 		t.Errorf("by date: the folder holds %+v", folderRows(t, f, "carrel"))
 	}
 

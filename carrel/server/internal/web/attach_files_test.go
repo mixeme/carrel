@@ -167,7 +167,7 @@ func TestAttachFromFilesFollowsTheRule(t *testing.T) {
 	if strings.Contains(doc, base64.StdEncoding.EncodeToString([]byte(big[:48]))) {
 		t.Errorf("the large file went into the record:\n%s", doc)
 	}
-	if _, ok := f.srv.File(attachFiles + "carrel/2026-08-10 big report.pdf"); ok {
+	if _, ok := f.srv.File(attachFiles + "carrel/2026-08-10-big report.pdf"); ok {
 		t.Errorf("the large file was copied into the attachment folder")
 	}
 	page = eventAt(t, f, "e1")

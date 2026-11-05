@@ -73,7 +73,7 @@ type TimelineRow struct {
 	When   Text   `json:"when"`
 	Title  Text   `json:"title"`
 	Stamp  Stamp  `json:"stamp"`
-	Why    Text   `json:"why"` // «attendee · accepted», «organiser», «related to this person», «name in the file name» — колонка обязательна
+	Why    Text   `json:"why"` // «attendee · accepted», «organiser», «related to this person», «in the file name» — колонка обязательна
 	// From — у Related связанной записи: коллекция копии, где одной стоит
 	// связь (Р-78); nil — связь у всех копий или запись одна
 	From *FieldFrom `json:"from"`

@@ -3519,7 +3519,7 @@ type RestoreReportRow struct { Name Text; Colour Colour; Into Text; Created int;
 type RestoreBlock struct {
     Open    bool // страница восстановления (/app/settings/backup/restore, s-backup-7, -8); на списке заданий false
     Title   Text // заголовок диалога: «Restore» (s-backup-7), открытого архива — «Restore from 2026-08-14» (s-backup-8)
-    Subtitle Runs // до архива — «Nothing is written until you have seen what goes where» (s-backup-7); открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
+    Subtitle Runs // до архива — «Nothing is written until you have seen what goes where» (s-backup-7); открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 147 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
     // From — «Where the archive is»: From a job · From a server · From this
     // computer, ссылки на тот же шаг (/app/settings/backup/restore?from=job|server|file),
     // выбранная On; подсказки под ними нет (s-backup-7). Source —
@@ -3548,7 +3548,7 @@ type RestoreMatch struct {
     Form     Form       // POST `/app/settings/backup/restore/match`: скрытый _csrf; кнопки — «Restore 3 collections» (по отмеченным строкам, основная) и полосы: Restore into, Skip, Select all
     Selected int        // «3 selected» на полосе
     // Existing — вопрос над полосой, поле своей строкой (s-backup-8, -20):
-    // Note — «5 records of the archive are already here and differ», у
+    // Note — «2 records of the archive are already here and differ», у
     // несчитанного архива — «Records of the archive that are already here
     // and differ»; Options — Skip them (без ответа) · Replace them · Import
     // as copies, ссылки GET `/app/settings/backup/restore?existing=skip|replace|copy`,

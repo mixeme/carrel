@@ -83,10 +83,10 @@ func TestAttachOfSeveralFilesFollowsTheRuleForEach(t *testing.T) {
 	if resp.Code != http.StatusSeeOther {
 		t.Fatalf("attach: %d %s", resp.Code, resp.Body.String())
 	}
-	if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10 scan.pdf"); got != big {
+	if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10-scan.pdf"); got != big {
 		t.Errorf("the first large file is not in the folder as it was sent: %+v", folderRows(t, f, "carrel"))
 	}
-	if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10 scan-2.pdf"); got != other {
+	if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10-scan-2.pdf"); got != other {
 		t.Errorf("the second large file is not beside the first: %+v", folderRows(t, f, "carrel"))
 	}
 	rows := eventAt(t, f, "e1").Attach
@@ -138,16 +138,16 @@ func TestAttachOfSeveralFilesAttachesWhatItCan(t *testing.T) {
 		if string(n.Body) != "second.pdf: this server needs the size of a file before it writes it." {
 			t.Errorf("body = %q", n.Body)
 		}
-		if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10 first.pdf"); got != big {
+		if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10-first.pdf"); got != big {
 			t.Errorf("the first file is not in the folder: %+v", folderRows(t, f, "carrel"))
 		}
-		if got := attachNames(eventAt(t, f, "e1").Attach); got != "2026-08-10 first.pdf" {
+		if got := attachNames(eventAt(t, f, "e1").Attach); got != "2026-08-10-first.pdf" {
 			t.Errorf("attachments = %s, want the link to the first", got)
 		}
 	})
 	t.Run("the server's code", func(t *testing.T) {
 		f := attachFixture(t, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
-		f.srv.RefuseAt("PUT", attachFiles+"carrel/2026-08-10 scan.pdf", http.StatusInsufficientStorage, "")
+		f.srv.RefuseAt("PUT", attachFiles+"carrel/2026-08-10-scan.pdf", http.StatusInsufficientStorage, "")
 		href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
 		page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"notes.txt", "notes"}, upload{"report.txt", "report"}, upload{"scan.pdf", big})))
 		n := mustNotice(t, page.Notices, "2 of 3 files attached.")
@@ -204,7 +204,7 @@ func TestAttachNamesAFileItCouldNotTakeBack(t *testing.T) {
 	f.srv.RefuseAt("DELETE", attachFiles, http.StatusForbidden, "")
 	href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
 	page := decode[view.EventPage](t, f.h.do(attachForm(href, f.sess, nil, upload{"scan.pdf", strings.Repeat("x", 2048)})))
-	if !strings.Contains(noticeBodies(page.Notices), "Nothing was attached. 2026-08-10 scan.pdf stays in ") ||
+	if !strings.Contains(noticeBodies(page.Notices), "Nothing was attached. 2026-08-10-scan.pdf stays in ") ||
 		!strings.Contains(noticeBodies(page.Notices), " / carrel: 403 Forbidden: this account has no write access here.") {
 		t.Errorf("bodies = %q, want the file that stays and where", noticeBodies(page.Notices))
 	}
@@ -217,7 +217,7 @@ func TestAttachNamesAFileItCouldNotTakeBack(t *testing.T) {
 	if !strings.Contains(details, "DELETE ") {
 		t.Errorf("details = %q, want the DELETE that was refused", details)
 	}
-	if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10 scan.pdf"); got == "" {
+	if got, _ := f.srv.File(attachFiles + "carrel/2026-08-10-scan.pdf"); got == "" {
 		t.Errorf("the file is not in the folder, yet the notice says it stays")
 	}
 }

@@ -29,14 +29,15 @@ func timelineRows(p view.ContactTimelinePage) map[string]view.TimelineRow {
 
 // S-15.4: the person's timeline is a search for one person over the ticked
 // sources. A record matches by an address of the card in ATTENDEE or
-// ORGANIZER, or by RELATED-TO its UID; a file by the person's name in its
-// name; nothing by a name in the text. 12 months back to 3 ahead, widened
+// ORGANIZER, or by RELATED-TO its UID; a file by the person's family name
+// in its name (s-contacts-7: «ковалёва-обложка-v2.pdf · in the file name»,
+// Typecase's note 178 p. 3); nothing by a name in the text. 12 months back to 3 ahead, widened
 // back 3 months at a time; newest first, by month, the undated last.
 func TestContactTimeline(t *testing.T) {
 	now := time.Now()
 	srv := searchServer(t)
 	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
-	srv.Seed(searchBook+"ann.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ann\nFN:Anna Kovaleva\nEMAIL:anna@example.com\nEMAIL:a.k@work.example\nEND:VCARD\n")
+	srv.Seed(searchBook+"ann.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ann\nFN:Anna Kovaleva\nN:Kovaleva;Anna;;;\nEMAIL:anna@example.com\nEMAIL:a.k@work.example\nEND:VCARD\n")
 	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work", SupportedComponentSet: []string{"VEVENT", "VTODO", "VJOURNAL"}})
 	ev := func(uid, extra string, at time.Time) string {
 		return ics("BEGIN:VEVENT\nUID:" + uid + "\nDTSTAMP:20260101T000000Z\nDTSTART:" + icsDay(at) + "\nDTEND:" + icsDay(at.Add(time.Hour)) + "\n" + extra + "END:VEVENT")
@@ -48,6 +49,7 @@ func TestContactTimeline(t *testing.T) {
 	srv.Seed(searchWork+"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Send Anna the slides\nRELATED-TO:ann\nEND:VTODO"))
 	srv.Seed(searchWork+"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nDTSTART:"+icsDay(now.AddDate(0, -2, 0))+"\nSUMMARY:Call notes\nRELATED-TO:ann\nEND:VJOURNAL"))
 	srv.SeedFile(searchDocs+"Anna Kovaleva contract.pdf", "pdf")
+	srv.SeedFile(searchDocs+"kovaleva-cover-v2.pdf", "pdf")
 	srv.SeedFile(searchDocs+"unrelated.txt", "x")
 	f := connectFixture(t, srv, searchBook, nil)
 	tickAll(t, f.h, f.sess, sealed.Collection{AccountID: f.id, Path: searchDocs, Name: "Docs", Kinds: []view.Kind{view.KindFile}})
@@ -76,7 +78,8 @@ func TestContactTimeline(t *testing.T) {
 		"Planning ahead":             "organiser",
 		"Send Anna the slides":       "related to this person",
 		"Call notes":                 "related to this person",
-		"Anna Kovaleva contract.pdf": "name in the file name",
+		"Anna Kovaleva contract.pdf": "in the file name",
+		"kovaleva-cover-v2.pdf":      "in the file name",
 	}
 	for title, why := range want {
 		if r, ok := rows[title]; !ok || string(r.Why) != why {
@@ -113,7 +116,7 @@ func TestContactTimeline(t *testing.T) {
 	for _, o := range frameSegments(t, "s-contacts-7", 0) {
 		names = append(names, frameCount.FindStringSubmatch(o.text)[1])
 	}
-	if want := fmt.Sprintf("%s 5|%s 2|%s 1|%s 1|%s 1", names[0], names[1], names[2], names[3], names[4]); len(names) != 5 || strings.Join(segments, "|") != want {
+	if want := fmt.Sprintf("%s 6|%s 2|%s 1|%s 1|%s 2", names[0], names[1], names[2], names[3], names[4]); len(names) != 5 || strings.Join(segments, "|") != want {
 		t.Errorf("segments = %v, want %s", segments, want)
 	}
 	if all := page.Bar.Segments[0].Href; all != card+"/timeline" {

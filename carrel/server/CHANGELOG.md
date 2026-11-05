@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.404 — 2026-11-05
+
+### Changed
+
+- A dated attachment is named with a hyphen after the date:
+  `2026-08-10-sync-board.png`, as the files of the set are (attachments-1,
+  -5, -6; Typecase's note 179 p. 2). «Date, then the original name» shows the
+  same example.
+- The timeline looks for files by the family name of the card's `N` (three
+  letters or more), else by the whole name: «ковалёва-обложка-v2.pdf» is Анна
+  Ковалёва's (s-contacts-7; note 178 p. 3). A file named with the whole name
+  holds the family name too. The row says «in the file name».
+
+### Fixtures
+
+- The settings count all a collection holds (note 178 p. 1, 8): the
+  connections and the sheets of a collection are shot with «Поездка в
+  Казань» in «Личный» and the copy of «Собрать чемодан» in «Работа» —
+  Objects «Личный 5», «Работа 6» (s-profile-1), «5 events, one file»
+  (s-profile-9). TestObjectsAreWhatTheCollectionsHold compares them with the
+  frames.
+- The timeline of Анна Ковалёва is shot on a stand of its own, with the note
+  «Про сроки по сборнику» (`RELATED-TO` her card) and the file
+  «ковалёва-обложка-v2.pdf»: All 5 · Events 2 · Tasks 1 · Notes 1 · Files 1
+  (s-contacts-7).
+- The restore's numbers in the frames (s-backup-8, -18, -20: 147 records)
+  are Typecase's archive; the fixtures keep the archive the set makes.
+
 ## v0.2.403 — 2026-11-05
 
 ### Changed

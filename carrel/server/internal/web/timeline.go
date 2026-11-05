@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dupes"
@@ -54,8 +55,12 @@ type timelineTask struct {
 
 // timelinePerson is what a record is matched by.
 type timelinePerson struct {
-	uid    string
-	name   string
+	uid  string
+	name string
+	// file is what a file's name holds to be the person's: the family name
+	// of N, of three letters or more, else the name — «ковалёва-обложка-
+	// v2.pdf» is Анна Ковалёва's (s-contacts-7; Typecase's note 178 p. 3)
+	file   string
 	emails map[string]bool // lower case, without mailto:
 	first  string          // the first address of the card, for New event
 	// addresses are the card's addresses in its order, as the bar says them
@@ -171,7 +176,7 @@ func (ts *timelineSource) Run(ctx context.Context, q fanout.Query) ([]fanout.Ite
 // name to look for — takes no slot at all: it asks nobody.
 func (ts *timelineSource) askKind(ctx context.Context, k view.Kind, q fanout.Query) ([]fanout.Item, error) {
 	c := ts.collectionSource
-	if k == view.KindContact || (k == view.KindFile && ts.person.name == "") {
+	if k == view.KindContact || (k == view.KindFile && ts.person.file == "") {
 		return nil, nil
 	}
 	release, err := fanout.Slot(ctx)
@@ -181,7 +186,7 @@ func (ts *timelineSource) askKind(ctx context.Context, k view.Kind, q fanout.Que
 	defer release()
 
 	if k == view.KindFile {
-		found, err := c.findFiles(ctx, fanout.Query{Text: ts.person.name})
+		found, err := c.findFiles(ctx, fanout.Query{Text: ts.person.file})
 		for i := range found {
 			if at := found[i].FileModified; !at.IsZero() && (at.Before(*q.From) || at.After(*q.To)) {
 				found[i] = fanout.Item{}
@@ -321,6 +326,10 @@ func timelineWhen(k view.Kind, obj *model.Object, tz *time.Location) time.Time {
 
 func personOf(uid string, obj *model.Object) timelinePerson {
 	p := timelinePerson{uid: uid, name: contactName(obj), emails: map[string]bool{}}
+	p.file = p.name
+	if family := strings.TrimSpace(strings.Split(firstValue(obj, "N"), ";")[0]); utf8.RuneCountInString(family) >= 3 {
+		p.file = family
+	}
 	for _, e := range obj.PropText("EMAIL") {
 		if e = strings.ToLower(strings.TrimSpace(e)); e != "" {
 			if !p.emails[e] {
@@ -495,7 +504,7 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 		var body string
 		replace := -1
 		if it.Kind == view.KindFile {
-			row.Title, row.Href, row.Why = text(it.FileName), s.route(foundFileHref(it)), "name in the file name"
+			row.Title, row.Href, row.Why = text(it.FileName), s.route(foundFileHref(it)), "in the file name"
 			at = it.FileModified
 		} else {
 			why, when, ok := person.match(it.Kind, it.Object, tf.tz)

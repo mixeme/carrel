@@ -822,7 +822,7 @@ type RestoreBlock struct {
 	// Subtitle — до архива: «Nothing is written until you have seen what
 	// goes where» (s-backup-7); строка под заголовком открытого архива (s-backup-8):
 	// задание, что в манифесте, и где архив лежит — моноширинно; «Job
-	// «Личное» · manifest read · 4 collections · 1 214 records ·
+	// «Личное» · manifest read · 4 collections · 147 records ·
 	// ‹carrel-backup/2026-08-14T09-12.zip›»; архив не открыт — пусто
 	Subtitle Runs `json:"subtitle"`
 	// From — «Where the archive is»: From a job · From a server · From this
@@ -895,7 +895,7 @@ type RestoreMatch struct {
 	Form     Form `json:"form"`
 	Selected int  `json:"selected"` // «3 selected»
 	// Existing — вопрос над полосой (s-backup-8, -20; владелец, 26.10):
-	// «5 records of the archive are already here and differ», у архива,
+	// «2 records of the archive are already here and differ», у архива,
 	// который сравнят лишь при восстановлении, — «Records of the archive
 	// that are already here and differ»; ответы — ссылки GET
 	// ?existing=skip|replace|copy, выбранный On (без ответа — Skip them),

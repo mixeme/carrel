@@ -63,7 +63,7 @@ func attachNamesOf(blob sealed.Blob) string {
 // choice makes of sync-board.png attached to «Sync-up» of 10 August
 // (attachments-1 draws the first).
 var attachNames = []struct{ value, label, example string }{
-	{sealed.AttachNamesDated, "Date, then the original name", "2026-08-10 sync-board.png"},
+	{sealed.AttachNamesDated, "Date, then the original name", "2026-08-10-sync-board.png"},
 	{sealed.AttachNamesOriginal, "The original name", "sync-board.png"},
 	{sealed.AttachNamesTitled, "Record title, then the original name", "Sync-up - sync-board.png"},
 }

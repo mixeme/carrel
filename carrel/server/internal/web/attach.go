@@ -77,7 +77,7 @@ func attachHref(account, colPath string, segs []string) string {
 }
 
 // File names of large attachments, as the person chose them (S-20,
-// attachments-3): "2026-08-10 report.pdf" by default, "report.pdf", or
+// attachments-3): "2026-08-10-report.pdf" by default, "report.pdf", or
 // "Sync-up - report.pdf" — readable in the folder without Carrel. The title is
 // cut to attachTitleRunes and attachTitleBytes, the whole name to
 // attachNameBytes: many servers and file systems take no more than 255 bytes.
@@ -108,7 +108,7 @@ func attachmentFileName(names string, day time.Time, title, original string) str
 			head = title + " - "
 		}
 	default:
-		head = day.Format("2006-01-02") + " "
+		head = day.Format("2006-01-02") + "-"
 	}
 	return head + cutName(stem, -1, attachNameBytes-len(head)-len(ext)) + ext
 }

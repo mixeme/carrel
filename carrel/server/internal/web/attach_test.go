@@ -142,7 +142,7 @@ func TestLargeAttachmentGoesToTheFolder(t *testing.T) {
 	if resp := f.h.do(uploadRequest(href, f.sess, true, "report.pdf", data)); resp.Code != http.StatusSeeOther {
 		t.Fatalf("attach: %d %s", resp.Code, resp.Body.String())
 	}
-	const want = "2026-08-10 report.pdf"
+	const want = "2026-08-10-report.pdf"
 	if got, ok := f.srv.File(attachFiles + "carrel/" + want); !ok || len(got) != len(data) {
 		t.Fatalf("the folder holds %+v", folderRows(t, f, "carrel"))
 	}
@@ -167,7 +167,7 @@ func TestLargeAttachmentGoesToTheFolder(t *testing.T) {
 	if resp := f.h.do(uploadRequest(href, f.sess, false, "report.pdf", data)); resp.Code != http.StatusSeeOther {
 		t.Fatalf("second attach: %d %s", resp.Code, resp.Body.String())
 	}
-	if got, ok := f.srv.File(attachFiles + "carrel/2026-08-10 report-2.pdf"); !ok || len(got) != len(data) {
+	if got, ok := f.srv.File(attachFiles + "carrel/2026-08-10-report-2.pdf"); !ok || len(got) != len(data) {
 		t.Errorf("the second file is not beside the first: %+v", folderRows(t, f, "carrel"))
 	}
 	if got, _ := f.srv.File(attachFiles + "carrel/" + want); len(got) != len(data) {
@@ -273,7 +273,7 @@ func TestForeignAttachmentsAreLeftAsStored(t *testing.T) {
 	if !strings.Contains(doc, "FILENAME=tiny.txt") || !strings.Contains(doc, "/docs/carrel/") {
 		t.Errorf("the new attachment did not go to the folder:\n%s", doc)
 	}
-	if _, ok := f.srv.File(attachFiles + "carrel/2026-08-10 tiny.txt"); !ok {
+	if _, ok := f.srv.File(attachFiles + "carrel/2026-08-10-tiny.txt"); !ok {
 		t.Errorf("the folder holds %+v", folderRows(t, f, "carrel"))
 	}
 }

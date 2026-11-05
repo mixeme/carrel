@@ -376,6 +376,10 @@ var All = []Screen{
 			"s-publish-31", "s-publish-33", "s-publish-34", "s-publish-35", "s-publish-36", "s-publish-37", "s-publish-38", "s-publish-39"},
 		Draw:  func(model any) Root { return guest.Screen(model.(*view.PublishedPage)) },
 		Title: func(model any) string { return string(model.(*view.PublishedPage).Title) },
+		Waits: []Wait{
+			{Row: 45, Fixture: "p-token/whole"},    // ждёт библиотеку: U-5.5 #45
+			{Row: 45, Fixture: "p-token/filtered"}, // ждёт библиотеку: U-5.5 #45
+		},
 	},
 	{
 		Model:  func() any { return new(view.OfflinePage) },

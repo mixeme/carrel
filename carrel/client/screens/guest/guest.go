@@ -210,7 +210,7 @@ func body(p *view.PublishedPage) []w.MainPart {
 		list := w.List{}
 		for _, r := range d.Rows {
 			t := w.TimeRow{Mark: w.Mark{Colour: string(r.Colour)}, Time: string(r.Time), Title: []w.Inline{w.Text(r.Summary)},
-				Detail: string(r.Location), Past: r.Past, Href: r.Href}
+				Detail: string(r.Location), Past: r.Past, Single: true, Href: r.Href}
 			for _, b := range r.Badges {
 				t.Badges = append(t.Badges, bind.Badge(b))
 			}
@@ -222,7 +222,7 @@ func body(p *view.PublishedPage) []w.MainPart {
 		list := w.List{}
 		for _, r := range g.Rows {
 			list.Rows = append(list.Rows, w.FaceRow{Mark: w.Mark{Colour: string(r.Colour)}, Avatar: bind.Avatar(r.Avatar),
-				Title: []w.Inline{w.Text(r.Name)}, Subtitle: or(r.Phone), Detail: or(r.Email), Caption: or(r.Org), Href: r.Href})
+				Title: []w.Inline{w.Text(r.Name)}, Subtitle: or(r.Phone), Detail: or(r.Email), Caption: or(r.Org), Single: true, Href: r.Href})
 		}
 		out = append(out, group(g.Rubric, g.Count), list)
 	}

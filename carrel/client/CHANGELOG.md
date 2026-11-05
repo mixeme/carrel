@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.24 — 2026-11-05
+
+Typecase `664db01`, notes 178, 179 (sample data agree with the set); server
+`v0.2.404`. The whole client suite passes.
+
+- A public page draws its events and cards without a source column
+  (`Single`, s-publish-6, -7), as its tasks and notes did. s-publish-24 and
+  -39 still draw an empty source cell: U-5.5 #45 waits for Typecase's task
+  258.
+- The timeline of Анна Ковалёва has the note and the file the frame draws
+  (s-contacts-7).
+
 ## v0.11.23 — 2026-11-05
 
 Typecase `0510359`, notes 175–177 (Р-77, shorter hints; the pass done);

@@ -29,7 +29,7 @@ func TestRestoreAsksAboutWhatIsAlreadyHere(t *testing.T) {
 	for _, m := range frameSegLink.FindAllStringSubmatch(q[2], -1) {
 		frameOpts = append(frameOpts, m)
 	}
-	if len(frameOpts) != 3 || frameOpts[0][1] == "" || !strings.HasPrefix(frameText(q[1]), "5 records of the archive") {
+	if len(frameOpts) != 3 || frameOpts[0][1] == "" || !regexp.MustCompile(`^\d+ records of the archive`).MatchString(frameText(q[1])) {
 		t.Fatalf("s-backup-8 asks %q with %q: read the frame again", q[1], frameOpts)
 	}
 	report := mockupFrame(t, "s-backup-18")

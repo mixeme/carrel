@@ -175,7 +175,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 4,
+              "objects": 5,
               "path": "/alice/calendars/lichnyj/",
               "pick": "a-nc-home|/alice/calendars/lichnyj/",
               "readOnly": false,
@@ -334,7 +334,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 5,
+              "objects": 6,
               "path": "/alice/calendars/rabota/",
               "pick": "a-nc-home|/alice/calendars/rabota/",
               "readOnly": false,

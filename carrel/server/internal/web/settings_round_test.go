@@ -419,7 +419,7 @@ func TestAttachmentsFolderIsTheFrame(t *testing.T) {
 	if resp := f.h.do(uploadRequest(href, f.sess, false, "big.pdf", make([]byte, 2048))); resp.Code != http.StatusSeeOther {
 		t.Fatalf("attach: %d %s", resp.Code, resp.Body)
 	}
-	if _, ok := f.srv.File(attachFiles + "carrel/2026-08/2026-08-10 big.pdf"); !ok {
+	if _, ok := f.srv.File(attachFiles + "carrel/2026-08/2026-08-10-big.pdf"); !ok {
 		t.Errorf("the month's folder holds %+v", folderRows(t, f, "carrel"))
 	}
 
@@ -598,7 +598,7 @@ func TestAttachmentsInThisFolderNowIsTheFrame(t *testing.T) {
 	}
 	folder := "/app/files/" + f.id + "/" + url.PathEscape(attachFiles) + "/carrel/"
 	q := decode[view.FilesPage](t, f.h.do(get(folder, f.sess))).Queue
-	if q == nil || !strings.Contains(string(q.Note), "2026-08-10 big-2.pdf") {
+	if q == nil || !strings.Contains(string(q.Note), "2026-08-10-big-2.pdf") {
 		t.Errorf("the queue says %+v", q)
 	}
 }

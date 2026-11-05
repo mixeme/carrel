@@ -1558,13 +1558,42 @@ func linkMockupEvent(t *testing.T, app *mockupApp) {
 // The copy lives in the tests alone.
 func linkMockupTask(t *testing.T, app *mockupApp) {
 	t.Helper()
-	linkMockupCopy(t, app, view.KindTask, "g-chemodan", mockupRecord{"nextcloud", "dela", "aa11-2d09-5f84", "nextcloud-home/dela.ics"},
-		mockupRecord{"nextcloud", "rabota", "cc11-5a20-7e94", ""}, func(rec string) string {
-			rec = bareCopy(rec) // the file and the trip are «Дела»'s (s-tasks-17)
-			rec = strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;VALUE=DATE:20260812", 1)
-			return strings.Replace(rec, "PRIORITY:5", "PRIORITY:3", 1)
-		})
+	linkMockupCopy(t, app, view.KindTask, "g-chemodan", chemodan, chemodanCopy.rec, chemodanCopy.edit)
 	chooseMockup(t, app, "g-chemodan", "PRIORITY", "cc11-5a20-7e94")
+}
+
+// chemodan and chemodanCopy are «Собрать чемодан» of «Дела» and its copy in
+// «Работа»: due on the day without a time, of priority 3, without the file
+// and the trip, which are «Дела»'s (s-tasks-17).
+var (
+	chemodan     = mockupRecord{"nextcloud", "dela", "aa11-2d09-5f84", "nextcloud-home/dela.ics"}
+	chemodanCopy = mockupCopy{rec: mockupRecord{"nextcloud", "rabota", "cc11-5a20-7e94", ""}, edit: func(rec string) string {
+		rec = bareCopy(rec)
+		rec = strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;VALUE=DATE:20260812", 1)
+		return strings.Replace(rec, "PRIORITY:5", "PRIORITY:3", 1)
+	}}
+)
+
+// seedMockupWhole puts into the collections what they hold beyond what the
+// lists of the frames draw: «Поездка в Казань» in «Личный» and the copy of
+// «Собрать чемодан» in «Работа», unlinked. The settings count them — Личный
+// 5, Работа 6 (s-profile-1), «5 events, one file» (s-profile-9; Typecase's
+// note 178 p. 1); the agenda's week and the lists draw neither.
+func seedMockupWhole(t *testing.T, app *mockupApp) {
+	t.Helper()
+	seedMockupTrip(t, app)
+	body, err := os.ReadFile(filepath.Join(mockupRoot(t), filepath.FromSlash(chemodan.file)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rec := range splitRecords(string(body)) {
+		if strings.Contains(rec, "UID:"+chemodan.uid) {
+			rec = chemodanCopy.edit(strings.Replace(rec, "UID:"+chemodan.uid, "UID:"+chemodanCopy.rec.uid, 1))
+			app.servers[chemodanCopy.rec.account].Seed(davtest.CalendarHome+chemodanCopy.rec.slug+"/"+chemodanCopy.rec.uid+".ics", rec)
+			return
+		}
+	}
+	t.Fatalf("%s is not in %s", chemodan.uid, chemodan.file)
 }
 
 // bareCopy is a copy of a record of the set without its attachments and
@@ -2294,6 +2323,7 @@ func adminState(t *testing.T, app *mockupApp) {
 // that its last answer was a refusal (Нс23).
 func TestFixtureConnections(t *testing.T) {
 	app := newMockupApp(t)
+	seedMockupWhole(t, app)
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	// Over the instance of the settings' frames: the rail's foot of each
 	// (s-profile-1).
@@ -2635,6 +2665,39 @@ func steadyInstall(rec *httptest.ResponseRecorder, live, dataDir string) {
 	rec.Body.WriteString(s)
 }
 
+// C-14.2: the timeline of Анна Ковалёва (s-contacts-7). The timeline is a
+// search over one person: it is gathered when the screen is opened, and the
+// screen is taken once it has answered. Beside what the set holds, the
+// frame draws a file with her name in its own («ковалёва-обложка-v2.pdf», 6
+// Aug, sftpgo · vps · Documents) and a note related to her card («Про сроки
+// по сборнику», 21 Jul, nextcloud · Записи; Typecase's note 178 p. 3). The
+// lists of notes and the folder do not draw them, so the stand of this
+// screen alone holds them.
+func TestFixtureContactTimeline(t *testing.T) {
+	app := newMockupApp(t)
+	cover := davtest.FileRoot + "Documents/ковалёва-обложка-v2.pdf"
+	app.servers["sftpgo · vps"].SeedFile(cover, "%PDF-1.4 a stub of the cover")
+	app.servers["sftpgo · vps"].SetModified(cover, mockupDayAt(t, "2026-08-06 16:20"))
+	app.servers["nextcloud"].Seed(davtest.CalendarHome+"zapisi/6d93-21b4-c517.ics", ics(strings.Join([]string{
+		"BEGIN:VJOURNAL",
+		"UID:6d93-21b4-c517",
+		"DTSTAMP:20260721T090000Z",
+		"DTSTART;VALUE=DATE:20260721",
+		"SUMMARY:Про сроки по сборнику",
+		"DESCRIPTION:Анна просит две недели на вёрстку после сдачи текста.",
+		"RELATED-TO:4f2b-9c31-a0e7",
+		"END:VJOURNAL"}, "\n")))
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	anna := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+	first := decode[view.ContactTimelinePage](t, app.h.do(get(anna+"/timeline", app.sess)))
+	if first.Poll.TaskID == "" {
+		t.Fatal("the timeline gathered nothing")
+	}
+	waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
+	app.compare(t, "app-contact-timeline/normal.json", app.h.do(get(anna+"/timeline", app.sess)))
+}
+
 // C-14.2: the screens of one record that are neither its card nor its form,
 // and the screens the shell opens over a list.
 func TestFixtureMoreOfTheShell(t *testing.T) {
@@ -2643,16 +2706,6 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	book := app.listPath(t, "contacts", "kontakty")
 	anna := book + "/4f2b-9c31-a0e7"
-	// The timeline is a search over one person: it is gathered when the
-	// screen is opened, and the screen is taken once it has answered.
-	t.Run("app-contact-timeline", func(t *testing.T) {
-		first := decode[view.ContactTimelinePage](t, app.h.do(get(anna+"/timeline", app.sess)))
-		if first.Poll.TaskID == "" {
-			t.Fatal("the timeline gathered nothing")
-		}
-		waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
-		app.compare(t, "app-contact-timeline/normal.json", app.h.do(get(anna+"/timeline", app.sess)))
-	})
 	// The combined notebook was read: the rails of the sheets after count
 	// its notes (the quick sheets have a set of their own,
 	// TestFixtureQuickSheets).
@@ -2973,7 +3026,10 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 	// schedules — moved and deleted. The calendar was read first, so its
 	// count is known and «baikal» refused the saved password — the move
 	// closes it, «password · 401», and chooses radicale, the one server that
-	// suits.
+	// suits. The sheets count all the collection holds (s-profile-7, -8,
+	// -9): what the searches and the publish sheets above did not draw is
+	// put in now.
+	seedMockupWhole(t, app)
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	for sheet, slug := range map[string]string{"rename": "dni-rozhdeniya", "move": "lichnyj"} {
 		t.Run("app-collections-"+sheet, func(t *testing.T) {
@@ -3029,6 +3085,7 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 // (-31) and the move that kept the original (-32).
 func TestFixtureCollectionSheets(t *testing.T) {
 	app := newMockupApp(t)
+	seedMockupWhole(t, app)
 	settings := "/app/settings/connections"
 	// From the account's card before any list was read: no server is
 	// known to be silent, so the server field has no line under it

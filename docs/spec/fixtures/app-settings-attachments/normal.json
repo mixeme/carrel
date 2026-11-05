@@ -202,7 +202,7 @@
             "hintRuns": [
               {
                 "mark": "mono",
-                "text": "2026-08-10 sync-board.png"
+                "text": "2026-08-10-sync-board.png"
               },
               {
                 "text": ". A name already taken is never overwritten: a counter is added."

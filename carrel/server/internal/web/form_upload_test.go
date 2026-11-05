@@ -261,7 +261,7 @@ func TestFormSaveNamesLargeFilesAfterTheFinalFields(t *testing.T) {
 			if r.Code != http.StatusSeeOther {
 				t.Fatalf("Save: %d %s", r.Code, r.Body.String())
 			}
-			want := attachFiles + "carrel/2026-11/2026-11-23 a.bin"
+			want := attachFiles + "carrel/2026-11/2026-11-23-a.bin"
 			if names == sealed.AttachNamesTitled {
 				want = attachFiles + "carrel/2026-11/After - a.bin"
 			}
