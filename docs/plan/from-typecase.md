@@ -5530,6 +5530,57 @@ Typecase — решения владельца 05.11 по проходу Р-77).
       not update a server from outside: that would be a way in. The server’s
       administrator has to update it.»
 
+Записка 175 от 05.11.2026 (Typecase `993c821`; своя задача Typecase —
+проход Р-77, партия 9, без показа владельцу по его правилу 04.11).
+**Последний коммит Typecase, который она описывает, — `993c821`** (570 кадров).
+
+175. **Пояснения короче (Р-77), партия 9.** Уходит вторая фраза, которая
+   повторяет первую. Тексты дословно из макета:
+   1. **Сервер недоступен** (`s-conflict-10`, `states-11`, `-22`, `-29`,
+      `-33`): «**Контакты is unavailable.** The server did not answer as
+      expected.» и Try again — без «so nothing on this screen comes from it».
+   2. **Удаление, сервер отказал** (`s-profile-31`): «**Архив was not
+      deleted.** nextcloud refused: this account can read here but not
+      write.» — без «Архив is as it was».
+   3. **Копия без удаления оригинала** (`s-profile-32`): «… so Личный on
+      nextcloud was not deleted.» и Open the copy — без «Both are there now».
+   4. **Нет календарных серверов** (`s-profile-21`): «No server that holds
+      calendars is answering now: baikal.»
+   5. **Метка занята** (`s-profile-11`): «There is already a connection
+      called “nextcloud”. Choose another label.»
+   6. **Дубликаты до загрузки** (`s-dup-6`): «**Nothing is loaded yet.**
+      Duplicates are found only among records already read in this session.
+      Open a list or a combined view, then come back.»
+   7. **Импорт, адресная книга молчит** (`s-io-19`): «**nextcloud · Контакты
+      did not answer.** Nothing is written; try again, or choose another
+      address book under «Into».»
+   8. **Коды устройств** (`s-plan-2`): «Scan each code with the phone: DAVx5
+      fills in the address and the login, and asks for the password shown
+      under the code.»
+   9. **Видео ссылкой** (`s-mailbox-18`): «home takes letters up to **25 MB**,
+      and the video alone is 38 MB. It goes as a link for 30 days; revoke it
+      in **Published links**.»
+   10. **Сервер почты не принял письмо** (`s-mailbox-19`): «The mail server
+       of **home** did not take the letter; nothing was sent. Its answer:»
+   11. **Файл пропал** (`s-files-17`): «**Nothing was attached:** the file
+       was moved or deleted after the tree was read. Choose it again.»
+   12. **Слишком много поисков** (`s-find-8`): «… Stop one or wait for one
+       to finish.» — без «then search again».
+   13. **Встреча не отделена** (`s-agenda-24`, `-28`): «… it stays in the
+       series as it was before you saved.»
+   14. **Проверено** (`s-backup-1`, `-12`, `-13`, `-14`): «verified — the
+       archive was read back from where it was written and the checksum
+       matched; otherwise it is marked red.»
+   15. **Папка вложений** (`attachments-1`, `-5`, `-6`): «Created on first
+       use. An ordinary folder, readable without Carrel.»; граница —
+       «… lowers the boundary for itself: `nextcloud` 2 MB, `radicale · vps`
+       1 MB.»; смена папки — «Changing the folder moves nothing: attachments
+       already written keep working, new ones go to the new place.»; у
+       `attachments-1` ещё — «Nothing here deletes them: an attachment is
+       removed in the record it hangs on.»
+   16. **Вид** (`appearance-1`): «Week start and the clock are kept in the
+       account. The time zone is the instance’s, set by the administrator.»
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
