@@ -1,8 +1,5 @@
 # План: сервер
 
-Актуальная [передача сессии от 01.11.2026](session-handoff.md): новые
-записки Typecase уже в main; результаты ниже относятся к прежней сборке.
-
 Что открыто и что сделано. Как устроен код — [architecture.md](../architecture.md),
 как работаем — [development.md](../development.md), безопасность —
 [security.md](../security.md), особенности серверов — [servers.md](../servers.md).
