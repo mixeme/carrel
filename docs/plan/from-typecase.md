@@ -5747,6 +5747,41 @@ Typecase — решения владельца 05.11 по проходу Р-77).
       `s-publish-1`, `-17`, `-20`, `s-mail-4`: `смета-подрядчик.pdf`) — адрес
       `…/attachments/2026-08/…`.
 
+Записка 181 от 06.11.2026 (Typecase `1211b96`; задачи Carrel 254, 255, 256,
+258; 257 ждёт ответа владельца).
+**Последний коммит Typecase, который она описывает, — `1211b96`** (573 кадра).
+
+181. **Задачи 258, 256, 255, 254.**
+   1. **258** (`s-publish-24`, `-39`): строки событий — `tc-row--single`, без
+      ячейки `tc-row__source`, как `s-publish-6`, `-7`; приглушённая строка
+      `s-publish-39` осталась приглушённой (`tc-row--timecols--op-7`).
+   2. **256 — новые кадры** «Событие · новое, файлы больше не хранятся»
+      (`s-agenda-32`, `data-part="files-gone"`) и «Контакт · новый, фото больше
+      не хранится» (`s-contacts-38`, `data-part="photo-gone"`). Тревога —
+      `tc-msg is-alert` под шапкой, перед формой (как сведение `states-17`),
+      набранное на месте:
+      - событие: «**Nothing was saved:** the files attached here are no longer
+        kept — newer forms took their place. Attach them again, or save
+        without them.» Строки пропавших файлов остаются в Attachments с
+        бейджем `is-alert` «not kept» и Remove; повторный Save — без них. Так
+        же у новой задачи и заметки;
+      - карточка: «**Nothing was saved:** the photo chosen here was replaced
+        by one chosen for another new card. Add it again, or save without
+        it.» Место фото пустое.
+   3. **255 — фрагмент** «Строка ссылки · не все записи в ссылке»
+      (`s-publish-40`): строка книги «Контакты» (address book) с бейджем
+      рядом с именем, как «no longer there», но спокойным: «**1 record not in
+      the link**», подсказка бейджа — «Carrel could not read it: invalid
+      vCard. Unchanged on the server.» Какая запись — строка не называет (её
+      называет список книги); ссылка работает, кнопки те же. У календаря —
+      «invalid iCalendar».
+   4. **254** (`s-notes-32`): у связанной заметки раздел «Kept as the server
+      sent them» — свёрнут, «Show 4», с тем же пояснением, после «Where this
+      note is kept», как у `s-notes-2`.
+   5. **257 не закрыта:** многодневного события агенда в макете ещё не
+      рисовала, а правка счётов задевает около 90 кадров — вопрос у
+      владельца. До ответа Carrel снимает как сейчас.
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
