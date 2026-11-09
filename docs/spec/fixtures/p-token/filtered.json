@@ -11,30 +11,6 @@
       "count": 1,
       "rows": [
         {
-          "badges": [],
-          "changed": "20 Jul 12:00",
-          "colour": "#4a6b52",
-          "href": "/p/link-lichnyj-whole-token?uid=a907-3e51-6c20",
-          "kind": "event",
-          "location": "",
-          "menu": [],
-          "on": false,
-          "past": true,
-          "sources": [],
-          "stamp": "",
-          "state": "ok",
-          "summary": "Синк-ап с подрядчиком",
-          "tags": [],
-          "time": "11:00",
-          "uid": "a907-3e51-6c20"
-        }
-      ],
-      "rubric": "Monday · 27 July"
-    },
-    {
-      "count": 1,
-      "rows": [
-        {
           "badges": [
             {
               "label": "repeats weekly",
@@ -57,30 +33,7 @@
           "uid": "8f1c-4a02-b7d3"
         }
       ],
-      "rubric": "Monday · 17 August"
-    },
-    {
-      "count": 1,
-      "rows": [
-        {
-          "badges": [],
-          "changed": "9 Aug 12:00",
-          "colour": "#4a6b52",
-          "href": "/p/link-lichnyj-whole-token?uid=ae05-71d2-9b44",
-          "kind": "event",
-          "location": "",
-          "menu": [],
-          "on": false,
-          "sources": [],
-          "stamp": "",
-          "state": "ok",
-          "summary": "Синк-ап: итоги квартала",
-          "tags": [],
-          "time": "15:00",
-          "uid": "ae05-71d2-9b44"
-        }
-      ],
-      "rubric": "Thursday · 3 September"
+      "rubric": "Monday · 10 August"
     }
   ],
   "empty": "",
@@ -123,13 +76,42 @@
   "kind": "event",
   "lede": [
     {
-      "text": "3 events with «синк»"
+      "text": "10 – 16 August 2026 · 1 of 3 events"
     }
   ],
   "note": null,
   "notes": [],
   "notices": [],
-  "range": null,
+  "range": {
+    "form": null,
+    "from": "10 August 2026",
+    "presets": [
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token?filter=%D1%81%D0%B8%D0%BD%D0%BA\u0026from=2026-08-03",
+        "icon": "i-back",
+        "id": "range.previous",
+        "label": "Previous week",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token?filter=%D1%81%D0%B8%D0%BD%D0%BA",
+        "id": "range.current",
+        "label": "Today",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/p/link-lichnyj-whole-token?filter=%D1%81%D0%B8%D0%BD%D0%BA\u0026from=2026-08-17",
+        "icon": "i-next",
+        "id": "range.next",
+        "label": "Next week",
+        "method": "GET"
+      }
+    ],
+    "to": "16 August 2026"
+  },
   "readOnly": true,
   "strip": null,
   "tasks": [],

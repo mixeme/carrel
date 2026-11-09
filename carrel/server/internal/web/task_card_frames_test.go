@@ -61,7 +61,6 @@ func TestTaskCardIsTheFrame(t *testing.T) {
 
 	app := newMockupApp(t)
 	linkMockupTask(t, app)
-	seedMockupTrip(t, app)
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	openList(t, app, "/app/tasks")
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))

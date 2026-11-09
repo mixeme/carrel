@@ -127,6 +127,10 @@ func table(rows []view.PublishedRow) w.Table {
 		what := []w.CellPart{name}
 		state := w.RowPlain
 		expires := w.TableCell{Parts: []w.CellPart{w.Text(r.Expires)}, Mono: true}
+		if r.Missing != "" {
+			// What the last guest was not given, why in the hint (s-publish-40).
+			what = append(what, w.Badge{Label: string(r.Missing), Title: string(r.MissingHint)})
+		}
 		if r.Gone != "" {
 			// No term of its own: «—» muted (s-publish-21).
 			what, state = append(what, w.Badge{Label: goneWord, Tone: w.BadgeAlert, Title: string(r.Gone)}), w.RowOff

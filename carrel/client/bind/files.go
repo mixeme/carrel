@@ -79,8 +79,8 @@ type TreeWords struct {
 
 // FileTree is the tree a sheet chooses a folder or a file in (FileTree, C-6;
 // s-files-4, s-notes-11, s-files-16) as the rows of a tree, depth first: each
-// node its icon, its name, its depth as its indent (one level, two, three
-// and more), a link to the same sheet
+// node its icon, its name, its depth as its indent (one level, two, three,
+// four and more — the files of 2026-08 in s-files-16), a link to the same sheet
 // with it chosen (FileTreeNode.Href) — a node that cannot be chosen is
 // unavailable with the screen's badge —; to its right the storage's
 // connection at a root (Stamp), a file's size and where it lands, the
@@ -98,8 +98,10 @@ func FileTree(t view.FileTree, words TreeWords) w.Tree {
 				row.Indent = w.TreeLevel22
 			case 2:
 				row.Indent = w.TreeLevel40
-			default:
+			case 3:
 				row.Indent = w.TreeLevel58
+			default:
+				row.Indent = w.TreeLevel76
 			}
 			if n.File {
 				row.Icon = words.File

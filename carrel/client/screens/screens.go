@@ -376,10 +376,6 @@ var All = []Screen{
 			"s-publish-31", "s-publish-33", "s-publish-34", "s-publish-35", "s-publish-36", "s-publish-37", "s-publish-38", "s-publish-39"},
 		Draw:  func(model any) Root { return guest.Screen(model.(*view.PublishedPage)) },
 		Title: func(model any) string { return string(model.(*view.PublishedPage).Title) },
-		Waits: []Wait{
-			{Row: 45, Fixture: "p-token/whole"},    // ждёт библиотеку: U-5.5 #45
-			{Row: 45, Fixture: "p-token/filtered"}, // ждёт библиотеку: U-5.5 #45
-		},
 	},
 	{
 		Model:  func() any { return new(view.OfflinePage) },
@@ -447,7 +443,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.ContactEditPage) },
-		Frames: []string{"s-contacts-3", "s-contacts-4", "s-contacts-27", "states-12"},
+		Frames: []string{"s-contacts-3", "s-contacts-4", "s-contacts-27", "s-contacts-38", "states-12"},
 		Draw:   func(model any) Root { return contactedit.Screen(model.(*view.ContactEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.ContactEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contactedit.Forms(model.(*view.ContactEditPage)) },
@@ -481,7 +477,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.EventEditPage) },
-		Frames: []string{"s-agenda-3", "s-agenda-15", "states-17", "states-36"},
+		Frames: []string{"s-agenda-3", "s-agenda-15", "s-agenda-32", "states-17", "states-36"},
 		Draw:   func(model any) Root { return eventedit.Screen(model.(*view.EventEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
@@ -490,6 +486,7 @@ var All = []Screen{
 			{Row: 26, Fixture: "app-event-edit/loss"},      // ждёт библиотеку: U-5.5 #26
 			{Row: 26, Fixture: "app-event-edit/loss-days"}, // ждёт библиотеку: U-5.5 #26
 			{Row: 44, Fixture: "app-event-new/normal"},     // ждёт библиотеку: U-5.5 #44
+			{Row: 44, Fixture: "app-event-new/files-gone"}, // ждёт библиотеку: U-5.5 #44
 		},
 	},
 	{
@@ -533,7 +530,12 @@ var All = []Screen{
 			return notes.Screen(model.(*view.NotesPage))
 		},
 		Title: func(model any) string { return string(model.(*view.NotesPage).Title) },
-		Forms: func(model any) []widget.PostForm { return notes.Forms(model.(*view.NotesPage)) },
+		Forms: func(model any) []widget.PostForm {
+			if p := model.(*view.NotesPage); !p.Print.Paper {
+				return notes.Forms(p)
+			}
+			return nil // nothing on paper is pressed, as the tasks'
+		},
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },
@@ -913,8 +915,19 @@ func over(u *view.Under, sheet widget.Sheet) Root {
 }
 
 // underForms are the forms the screen under a sheet prints at its end: what
-// its top's menu submits (Sign out) stands under the scrim as well.
+// its top's menu submits (Sign out) stands under the scrim as well. The
+// zones of a page under a sheet are not named — the sheet is what is open —
+// so its forms ask none: the rail's goes the plain way.
 func underForms(u *view.Under) []widget.PostForm {
+	forms := pageForms(u)
+	for i := range forms {
+		forms[i].Target = ""
+	}
+	return forms
+}
+
+// pageForms are the forms of the page under a sheet as its screen prints them.
+func pageForms(u *view.Under) []widget.PostForm {
 	switch {
 	case u == nil:
 		return nil

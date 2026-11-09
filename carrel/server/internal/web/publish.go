@@ -687,6 +687,15 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
 		send := view.Action{ID: "publish.mail", Label: "Send", Method: "GET", Enabled: true,
 			Href: s.postQuery("/app/mail/link", url.Values{"id": {l.ID}}), Target: render.TargetSheet}
+		if l.Missing > 0 {
+			// What the last guest was not given, by the name (Б3; s-publish-40).
+			it := "it"
+			if l.Missing > 1 {
+				it = "them"
+			}
+			row.Missing = text(plural(l.Missing, "record") + " not in the link")
+			row.MissingHint = text("Carrel could not read " + it + ": invalid " + l.MissingFormat + ". Unchanged on the server.")
+		}
 		if l.Gone {
 			// What it opened is no longer there and Carrel could not follow
 			// it (Б41; s-publish-21): no term, nothing to copy or send — the
@@ -1111,10 +1120,13 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 	}
 	switch c.spec.kind {
 	case view.KindContact:
-		objs, err := c.contactsAll(ctx)
+		// A card Carrel could not read is not the guest's, and the owner's
+		// list says how many (Б3; s-publish-40).
+		objs, bad, err := c.exportRecords(ctx, nil, nil)
 		if err != nil {
 			return err
 		}
+		_ = s.users.NoteLinkMissing(link.ID, len(bad), "vCard")
 		all := len(objs)
 		sort.SliceStable(objs, func(i, j int) bool {
 			return strings.ToLower(contactName(objs[i])) < strings.ToLower(contactName(objs[j]))
@@ -1150,47 +1162,64 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		if fixed != nil {
 			from, to = fixed[0], fixed[1]
 		}
-		if q != "" {
-			// With a word the days are all found in the calendar — within
-			// the link's days when it has them —, each series once at its
-			// next time (s-publish-39).
-			return s.publicFound(r, c, link, token, q, fixed, page)
-		}
-		objs, _, err := c.calQuery(ctx, c.spec.component, &from, &to)
+		objs, bad, err := c.calQuery(ctx, c.spec.component, &from, &to)
 		if err != nil {
 			return err
 		}
+		_ = s.users.NoteLinkMissing(link.ID, len(bad), "iCalendar")
 		objs = visitorRecords(objs, link.Target)
 		page.Days, _, _ = s.agendaDays(tf, kindedAll(c.listed(objs), view.KindEvent), from, to, c.spec.segment, false, nil)
-		guestDays(page, link, open)
-		// The days in one phrase (Пс5; s-publish-6, -24).
+		// The days in one phrase (Пс5; s-publish-6, -24); a word narrows what
+		// they show, and the line says how many are left (s-publish-39;
+		// Typecase's note 185).
 		page.Lede = line(tf.window(from, to))
-		filter(1)
+		shown := len(page.Days)
+		if q != "" {
+			all := eventsIn(page.Days)
+			page.Days = siftDays(page.Days, q)
+			page.Lede = line(tf.window(from, to) + " · " + strconv.Itoa(eventsIn(page.Days)) + " of " + plural(all, "event"))
+		}
+		guestDays(page, link, open)
+		filter(shown)
 		if fixed == nil {
 			// The whole calendar steps by weeks, as the owner's (s-publish-24):
-			// ← Today →, the arrows saying where they go.
-			week := func(t time.Time) string {
-				return s.postQuery(here, url.Values{"from": {t.Format("2006-01-02")}})
+			// ← Today →, the arrows saying where they go, with the word.
+			week := func(at *time.Time) string {
+				v := url.Values{}
+				if at != nil {
+					v.Set("from", at.Format("2006-01-02"))
+				}
+				if q != "" {
+					v.Set("filter", q)
+				}
+				return s.postQuery(here, v)
 			}
+			back := from.AddDate(0, 0, -7)
 			page.Range = &view.Range{
 				From: text(tf.date(from)), To: text(tf.date(to.AddDate(0, 0, -1))),
 				Presets: []view.Action{
-					{ID: "range.previous", Label: "Previous week", Icon: "i-back", Href: week(from.AddDate(0, 0, -7)), Method: "GET", Enabled: true},
-					{ID: "range.current", Label: "Today", Href: s.route(here), Method: "GET", Enabled: true},
-					{ID: "range.next", Label: "Next week", Icon: "i-next", Href: week(to), Method: "GET", Enabled: true},
+					{ID: "range.previous", Label: "Previous week", Icon: "i-back", Href: week(&back), Method: "GET", Enabled: true},
+					{ID: "range.current", Label: "Today", Href: week(nil), Method: "GET", Enabled: true},
+					{ID: "range.next", Label: "Next week", Icon: "i-next", Href: week(&to), Method: "GET", Enabled: true},
 				},
 			}
-			if len(page.Days) == 0 {
+			switch {
+			case len(page.Days) == 0 && q != "":
+				page.Empty = text("Nothing with «" + q + "» this week.")
+			case len(page.Days) == 0:
 				page.Empty, page.Filter = "No events this week.", nil // s-publish-25
 			}
+		} else if len(page.Days) == 0 && q != "" {
+			page.Empty = text("Nothing with «" + q + "» these days.")
 		} else if len(page.Days) == 0 {
 			page.Empty = "No events these days."
 		}
 	case view.KindTask:
-		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
+		objs, bad, err := c.calQuery(ctx, c.spec.component, nil, nil)
 		if err != nil {
 			return err
 		}
+		_ = s.users.NoteLinkMissing(link.ID, len(bad), "iCalendar")
 		objs = visitorRecords(objs, link.Target)
 		all := len(objs)
 		// Open, then done, under their rubrics with the count (s-publish-28).
@@ -1222,10 +1251,11 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			page.Empty = "This list is empty."
 		}
 	default:
-		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
+		objs, bad, err := c.calQuery(ctx, c.spec.component, nil, nil)
 		if err != nil {
 			return err
 		}
+		_ = s.users.NoteLinkMissing(link.ID, len(bad), "iCalendar")
 		all := len(objs)
 		// By month, the newest first, as the owner's notebook (s-publish-29).
 		sort.SliceStable(objs, func(i, j int) bool { return noteTime(objs[i], tf.tz).After(noteTime(objs[j], tf.tz)) })
@@ -1278,32 +1308,6 @@ func guestDays(page *view.PublishedPage, link user.OpenLink, open func(string) s
 			row.Colour = linkColour(link.Target)
 		}
 	}
-}
-
-// publicFound is a published calendar sifted by a word (s-publish-39): what
-// it holds with the word — within the link's days when it has them —, by
-// day; a series once, at its next time from today, with «repeats weekly»;
-// what has passed muted. «N events with «word»» under the title, no ←
-// Today →.
-func (s *Server) publicFound(r *http.Request, c *collectionCtx, link user.OpenLink, token, q string, fixed *[2]time.Time, page *view.PublishedPage) error {
-	var from, to *time.Time
-	if fixed != nil {
-		from, to = &fixed[0], &fixed[1]
-	}
-	objs, _, err := c.calQuery(r.Context(), c.spec.component, from, to)
-	if err != nil {
-		return err
-	}
-	objs = visitorRecords(objs, link.Target)
-	page.Days = s.foundDays(c.tf, kindedAll(c.listed(objs), view.KindEvent), q, c.spec.segment, false, from, to)
-	n := 0
-	for _, d := range page.Days {
-		n += len(d.Rows)
-	}
-	guestDays(page, link, func(uid string) string { return s.postQuery("/p/"+token, url.Values{"uid": {uid}}) })
-	page.Lede = line(plural(n, "event") + " with «" + q + "»")
-	page.Filter = s.publicFilter("/p/"+token, "Filter by word", q, "")
-	return nil
 }
 
 // publicFoot is the foot of a public page, one phrase on every page (note
@@ -1374,10 +1378,16 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 		var obj *model.Object
 		obj, err = c.find(ctx, uid)
 		objs = []*model.Object{obj}
-	} else if w := publishedWindow(s.timeFor(nil), link); w != nil {
-		objs, _, err = c.exportRecords(ctx, &w[0], &w[1])
 	} else {
-		objs, _, err = c.exportRecords(ctx, nil, nil)
+		var bad []cal.Unreadable
+		if w := publishedWindow(s.timeFor(nil), link); w != nil {
+			objs, bad, err = c.exportRecords(ctx, &w[0], &w[1])
+		} else {
+			objs, bad, err = c.exportRecords(ctx, nil, nil)
+		}
+		if err == nil {
+			_ = s.users.NoteLinkMissing(link.ID, len(bad), map[bool]string{true: "vCard", false: "iCalendar"}[c.card != nil])
+		}
 	}
 	if err != nil {
 		page := view.PublishedPage{Plain: view.Plain{Title: text(link.Target.Title), Notices: []view.Notice{publicTrouble()}}, Kind: c.spec.kind, ReadOnly: true}

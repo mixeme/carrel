@@ -150,6 +150,12 @@ func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int
 		}
 		return r.json.Fragment(w, req, status, target, body, extra)
 	}
+	if rail, ok := body.(view.Rail); ok && target == render.TargetRail {
+		if out, ok := r.railAnswer(rail, extra); ok {
+			return writeHTML(w, status, out)
+		}
+		return r.json.Fragment(w, req, status, target, body, extra)
+	}
 	if q, ok := queueOf(body); ok && target == render.TargetQueue {
 		if out, ok := r.queueAnswer(q, extra); ok {
 			return writeHTML(w, status, out)
@@ -326,6 +332,32 @@ func (r *Renderer) pollAnswer(p *view.PollBar, extra []render.OOB) (string, bool
 	return f.Render(), ok
 }
 
+// railAnswer is a rail answered alone, a tick's answer (Typecase's note
+// 186): the rail as its section draws it (screens.RailOf), the form its ticks
+// send, and out of band the poll and the list that changed with it
+// (outOfBand); false when the rail is no section's, or something out of band
+// is not one the screens draw alone.
+func (r *Renderer) railAnswer(rail view.Rail, extra []render.OOB) (string, bool) {
+	parts, form := screens.RailOf(rail)
+	if parts == nil {
+		return "", false
+	}
+	f := page.Fragment{}
+	for _, part := range parts {
+		p, ok := part.(page.Part)
+		if !ok {
+			return "", false
+		}
+		f.Body = append(f.Body, p)
+	}
+	if form != nil {
+		f.Forms = []w.PostForm{*form}
+	}
+	more, ok := r.outOfBand(extra)
+	f.Extra = more
+	return f.Render(), ok
+}
+
 // queueAnswer is a queue of transfers answered alone (an upload's answer,
 // C-7.3): the zone queue as the folder draws it (screens.QueueOf), the forms
 // of its answers about a name taken after it, and out of band the folder
@@ -363,6 +395,12 @@ func (r *Renderer) outOfBand(extra []render.OOB) ([]page.ZonePart, bool) {
 			if form != nil {
 				z.Forms = []w.PostForm{*form}
 			}
+		case render.TargetPoll:
+			p, ok := pollOf(x.Body)
+			if !ok {
+				return nil, false
+			}
+			z.Body, z.Forms = []page.Part{document.PollZone(screens.PollBar(p), p)}, bind.PollForms(p)
 		case render.TargetMain:
 			scr, model, ok := r.screenOf(x.Body)
 			if !ok || zone.KindOf(model) != zone.ShellPage {

@@ -356,7 +356,7 @@
         }
       ]
     },
-    "loaded": 6,
+    "loaded": 7,
     "range": {
       "form": {
         "action": "/app/calendar",
@@ -554,7 +554,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/delete?etag=e18",
+              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/delete?etag=e19",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete event",
@@ -830,7 +830,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/delete?etag=e17",
+              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/delete?etag=e18",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete event",
@@ -1026,6 +1026,287 @@
         }
       ],
       "rubric": "Tuesday · 11 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "day 1 of 3",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Aug 12:00",
+          "colour": "#4a6b52",
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-nc-home%2Flichnyj%2F3e6b-71d4-a209\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?uid=3e6b-71d4-a209",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=3e6b-71d4-a209",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/delete?etag=e13",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Личный",
+          "state": "ok",
+          "summary": "Поездка в Казань",
+          "tags": [],
+          "target": "details",
+          "time": "all day",
+          "uid": "3e6b-71d4-a209"
+        }
+      ],
+      "rubric": "Wednesday · 12 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "day 2 of 3",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Aug 12:00",
+          "colour": "#4a6b52",
+          "continues": true,
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-nc-home%2Flichnyj%2F3e6b-71d4-a209\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?uid=3e6b-71d4-a209",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=3e6b-71d4-a209",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/delete?etag=e13",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Личный",
+          "state": "ok",
+          "summary": "Поездка в Казань",
+          "tags": [],
+          "target": "details",
+          "time": "all day",
+          "uid": "3e6b-71d4-a209"
+        }
+      ],
+      "rubric": "Thursday · 13 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "day 3 of 3",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Aug 12:00",
+          "colour": "#4a6b52",
+          "continues": true,
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-nc-home%2Flichnyj%2F3e6b-71d4-a209\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?uid=3e6b-71d4-a209",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=3e6b-71d4-a209",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209/delete?etag=e13",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Личный",
+          "state": "ok",
+          "summary": "Поездка в Казань",
+          "tags": [],
+          "target": "details",
+          "time": "all day",
+          "uid": "3e6b-71d4-a209"
+        }
+      ],
+      "rubric": "Friday · 14 August"
     }
   ],
   "details": null,
@@ -1070,7 +1351,7 @@
     "sources": [
       {
         "colour": "#4a6b52",
-        "count": 2,
+        "count": 3,
         "fromCache": false,
         "message": "",
         "retry": null,
@@ -1135,7 +1416,7 @@
     "stream": "/app/search/progress/t-task?from=2026-08-10",
     "summary": [
       {
-        "text": "Polled 5 of 6 sources · 6 events"
+        "text": "Polled 5 of 6 sources · 7 events"
       }
     ],
     "taskID": "t-task"
@@ -1144,7 +1425,7 @@
     "foot": "Carrel · agenda · 2026-08-10 – 2026-08-16 · captured 2026-08-10 17:04 · 5 of 6 sources",
     "heading": "Agenda · 10 – 16 August 2026",
     "paper": true,
-    "range": "6 calendars · 10 August 2026 – 16 August 2026 · 6 events",
+    "range": "6 calendars · 10 August 2026 – 16 August 2026 · 7 events",
     "sources": "nextcloud · Личный, Работа · radicale · vps · Проекты, Дежурства · feeds.example · Праздники РФ",
     "taken": "10 August 2026, 17:04",
     "title": "Combined calendar"
@@ -1197,7 +1478,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -1216,7 +1497,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -1252,7 +1533,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 9,
+            "count": 10,
             "detail": "",
             "feed": false,
             "href": "/app/calendar",
@@ -1271,7 +1552,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 4,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",
@@ -1460,7 +1741,7 @@
       "text": "Europe/Moscow"
     },
     {
-      "text": " · 6 events"
+      "text": " · 7 events"
     }
   ],
   "title": "Combined calendar",

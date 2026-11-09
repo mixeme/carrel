@@ -86,6 +86,10 @@ type PublishedLink struct {
 	LastSeen  *time.Time
 	Opens     int // how many times it was opened: stored, and since in memory
 	Gone      bool
+	// Missing is how many records the last guest's read left out, not valid
+	// MissingFormat (s-publish-40)
+	Missing       int
+	MissingFormat string
 }
 
 // OpenLink is a live link opened for a reader without a session.
@@ -319,7 +323,7 @@ func (s *Service) PublishedLinks(viewerID string) []PublishedLink {
 		}
 		id := publish.ID(l.Hash)
 		out = append(out, PublishedLink{ID: id, Target: targetOf(l), CreatedAt: l.CreatedAt, ExpiresAt: l.ExpiresAt, LastSeen: l.LastSeen,
-			Opens: l.Opens + s.opens.peek(id), Gone: l.Gone})
+			Opens: l.Opens + s.opens.peek(id), Gone: l.Gone, Missing: l.Missing, MissingFormat: l.MissingFormat})
 	}
 	return out
 }
@@ -477,6 +481,28 @@ func (s *Service) MarkPublishedGone(viewerID string, at Place) error {
 
 // MarkLinkGone says of one link, by its ID, that what it opens is no
 // longer there — a guest found it so (Б41).
+// NoteLinkMissing keeps how many records a guest's read of the link left
+// out, Carrel unable to read them as format (Б3; s-publish-40): the owner's
+// list says so. A read like the last writes nothing.
+func (s *Service) NoteLinkMissing(id string, n int, format string) error {
+	if n == 0 {
+		format = ""
+	}
+	for _, l := range s.st.Snapshot().Published {
+		if publish.ID(l.Hash) == id && l.Missing == n && l.MissingFormat == format {
+			return nil
+		}
+	}
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		for i := range st.Published {
+			if l := &st.Published[i]; publish.ID(l.Hash) == id {
+				l.Missing, l.MissingFormat = n, format
+			}
+		}
+		return nil, nil
+	})
+}
+
 func (s *Service) MarkLinkGone(id string) error {
 	// Read first: a guest opening a dead link again writes nothing.
 	for _, l := range s.st.Snapshot().Published {

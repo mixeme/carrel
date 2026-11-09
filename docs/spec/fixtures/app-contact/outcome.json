@@ -32,7 +32,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e36",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e38",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -42,7 +42,7 @@
   ],
   "avatar": {
     "colour": "#8c6239",
-    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e36",
+    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e38",
     "initials": "АК"
   },
   "books": [
@@ -250,7 +250,7 @@
       "title": "Rewritten in 10 of 11 records."
     }
   ],
-  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e36",
+  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e38",
   "photoNote": "",
   "print": {
     "foot": "Carrel · contact · captured 2026-08-10 17:06",
@@ -382,7 +382,7 @@
       "why": "attendee · accepted"
     }
   ],
-  "timelineCount": 11,
+  "timelineCount": 13,
   "title": "Анна Ковалёва",
   "top": {
     "lock": null,

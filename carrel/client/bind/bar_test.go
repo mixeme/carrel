@@ -79,3 +79,12 @@ func TestColumns(t *testing.T) {
 		},
 	})
 }
+
+// A filter that is a form narrows the page's main as one types (Typecase's
+// note 185); one that sends nothing names nothing.
+func TestNarrows(t *testing.T) {
+	same(t, "a form", bind.Narrows(w.Filter{Action: "/app/calendar"}, "list-main").Swap, "list-main")
+	same(t, "no form", bind.Narrows(w.Filter{}, "list-main").Swap, "")
+	same(t, "the main of a list with a form", bind.MainID(&view.Form{}, "list-main"), "list-main")
+	same(t, "the main of a list without", bind.MainID(nil, "list-main"), "")
+}

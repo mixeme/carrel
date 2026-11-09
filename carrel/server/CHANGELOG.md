@@ -17,6 +17,63 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.405 — 2026-11-09
+
+Typecase `911c960`, notes 180–188.
+
+### Changed
+
+- An event of several days stands in each day of the agenda it takes, with
+  the badge «day 1 of 3» and on, and the week counts it once: «Поездка в
+  Казань», all day 12–14 August, is a row on Wednesday, Thursday and Friday
+  (s-agenda-1, -17; note 182, task 257). A row of a later day carries
+  `AgendaRow.Continues`; one that began before the window stands in the
+  window's days too.
+- «Filter by word» narrows what the agenda shows and keeps the window: the
+  week (day, month, range) keeps the rows whose title, place or badges hold
+  the word, «… · 1 of 3 events», ← Today → page with the word, nothing left
+  is «Nothing with «синк» this week.» (s-agenda-31; the owner, 07.11, note
+  185). The same on the combined calendar and on a public calendar
+  («10 – 16 August 2026 · 1 of 3 events», s-publish-39). The search over the
+  whole calendar is the head's. `AgendaRow.Past` is gone.
+- A tick of the rail on the combined view answers the rail, the poll and the
+  list after it (zone `main`), which the live layer puts in place without
+  loading the page (components-43; the owner, 07.11, note 186). On a list
+  of one collection the answer stays the rail and the poll.
+- A published book or calendar gives the guest what Carrel could read and
+  leaves out the rest: one card that is not valid vCard no longer turns the
+  guest's page into «The source did not answer» (the owner's decision of
+  04.11, Б3). The owner's list says how many by the link's name, «1 record
+  not in the link», why in the badge's hint — «Carrel could not read it:
+  invalid vCard. Unchanged on the server.» (`PublishedRow.Missing`,
+  `MissingHint`; s-publish-40, note 181 p. 3, task 255). The count is of
+  the last guest's read; the records themselves are not kept.
+- A new event, task or note whose files newer forms pushed out names them
+  on its refused Save: the rows stay with «not kept» (`AttachRow.State`
+  `unavailable`) and a Remove that takes them off the page; Save again
+  writes the record without them. Its alert and the lost photo's of a new
+  card are the frames' words: «Nothing was saved: the files attached here
+  are no longer kept — newer forms took their place. Attach them again, or
+  save without them.», «Nothing was saved: the photo chosen here was
+  replaced by one chosen for another new card. Add it again, or save
+  without it.» (s-agenda-32, s-contacts-38; note 181 p. 2, task 256).
+- The linked note shows «Kept as the server sent them», folded, as the note
+  does; «Show 4» of a linked note and of a linked contact opens them on the
+  linked record (`?foreign=1`), not on one of its copies (s-notes-32; note
+  181 p. 4, task 254).
+- The quick sheet of a task has «At» under «Custom…»: a due date without a
+  time is the whole day (s-notes-10, -35; note 187, task 156).
+
+### Set
+
+- The August attachments lie in `Documents/carrel/attachments/2026-08`; the
+  folder screens and their sheets open it (note 180). The public folder
+  page is August's folder with «скриншоты» in it (s-publish-12, -30).
+- «Поездка в Казань» lies in `lichnyj.ics`, the note «Про сроки по
+  сборнику» in `zapisi.ics`, «ковалёва-обложка-v2.pdf» at the root of
+  Documents (note 182 p. 5). `lichnyj-poezdka.ics` is gone.
+- «Синк-ап по релизу» reminds 10 minutes and 2 days before (note 187).
+
 ## v0.2.404 — 2026-11-05
 
 ### Changed

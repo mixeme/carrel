@@ -60,16 +60,26 @@ func TestFixturePublicPages(t *testing.T) {
 	sftp.SeedFolder(docs + "carrel/черновики/")
 	// The note's recording beside its board (s-publish-8: two files).
 	attachMockupRecording(t, app)
-	// The folder in the folder holds six, as s-publish-30 draws it.
-	sftp.SeedFile(docs+"carrel/attachments/2026-07/whiteboard-2.jpg", "\xff\xd8\xff")
-	sftp.SetModified(docs+"carrel/attachments/2026-07/whiteboard-2.jpg", mockupDayAt(t, "2026-07-14 16:22"))
+	// The published folder is August's of the attachments (note 180 of
+	// Typecase), with a folder of six screenshots in it, as s-publish-12 and
+	// -30 draw them.
+	for name, at := range map[string]string{
+		"2026-08-10-sync-board.png": "2026-08-10 11:07", "2026-08-10-timeline.png": "2026-08-10 11:05",
+		"export-dialog.png": "2026-08-09 17:40", "import-wizard.png": "2026-08-09 17:32",
+		"publish-sheet.png": "2026-08-09 17:20", "search-results.png": "2026-08-09 17:10",
+	} {
+		shot := docs + "carrel/attachments/2026-08/скриншоты/" + name
+		sftp.SeedFile(shot, pngSignature)
+		sftp.SetModified(shot, mockupDayAt(t, at))
+	}
+	sftp.SetModified(docs+"carrel/attachments/2026-08/скриншоты", mockupDayAt(t, "2026-08-10 11:07"))
 	sftp.SeedFile(docs+"carrel/отчёт-июль.pdf", "%PDF-1.4\n")
 	gone := file("report", "carrel/отчёт-июль.pdf", false)
 	sftp.RemoveFile(docs + "carrel/отчёт-июль.pdf")
 	// The whole of «Личный», as the sheet stands (s-publish-24): the title
 	// and the time, no .ics, no end.
 	whole := record("lichnyj-whole", "calendar", "lichnyj", "", "how", "whole", "lives", "never", "title", "on")
-	folder := file("attachments", "carrel/attachments", true)
+	folder := file("august", "carrel/attachments/2026-08", true)
 	for _, one := range []struct{ state, token string }{
 		// «Личный» for 10–31 August with Location and Attendees ticked and
 		// its .ics (s-publish-6).
@@ -87,17 +97,17 @@ func TestFixturePublicPages(t *testing.T) {
 		{"event", record("sync", "calendar", "lichnyj", "8f1c-4a02-b7d3", "lives", "30", "title", "on", "location", "on", "description", "on", "attendees", "on", "download", "on")},
 		{"contact", record("anna", "contacts", "kontakty", "4f2b-9c31-a0e7", "lives", "30", "name", "on", "phones", "on", "emails", "on", "note", "on")},
 		{"task", record("mfc", "tasks", "dela", "aa10-77bc-0e31", "lives", "30", "title", "on", "location", "on", "description", "on")},
-		{"tasks", record("dela", "tasks", "dela", "", "lives", "30", "title", "on")}, // s-publish-28
-		{"notebook", record("zapisi", "notes", "zapisi", "", "lives", "30")},         // s-publish-29: no .md
-		{"pdf", file("smeta-page", "carrel/attachments/смета-подрядчик.pdf", false)}, // s-publish-33
-		{"text-large", file("server-log", "carrel/server-log-august.txt", false)},    // s-publish-34
-		{"subfolder", folder + "?in=2026-07"},                      // s-publish-30
-		{"folder-empty", file("drafts", "carrel/черновики", true)}, // s-publish-36
+		{"tasks", record("dela", "tasks", "dela", "", "lives", "30", "title", "on")},         // s-publish-28
+		{"notebook", record("zapisi", "notes", "zapisi", "", "lives", "30")},                 // s-publish-29: no .md
+		{"pdf", file("smeta-page", "carrel/attachments/2026-08/смета-подрядчик.pdf", false)}, // s-publish-33
+		{"text-large", file("server-log", "carrel/server-log-august.txt", false)},            // s-publish-34
+		{"subfolder", folder + "?in=" + url.QueryEscape("скриншоты")},                        // s-publish-30
+		{"folder-empty", file("drafts", "carrel/черновики", true)},                           // s-publish-36
 		{"gone", gone}, // s-publish-38
 		{"note", record("zametka", "notes", "zapisi", "5c81-77aa-0d64", "lives", "30", "download", "on", "attachments", "on")}, // s-publish-8: its files too
 		{"note-files-kept", record("zametka-kept", "notes", "zapisi", "5c81-77aa-0d64")},                                       // s-publish-23: how many, not which
-		{"image", file("sync-board", "carrel/attachments/2026-08-10-sync-board.png", false)},                                   // s-publish-9
-		{"text", file("checklist", "carrel/attachments/release-checklist.md", false)},                                          // s-publish-10
+		{"image", file("sync-board", "carrel/attachments/2026-08/2026-08-10-sync-board.png", false)},                           // s-publish-9
+		{"text", file("checklist", "carrel/attachments/2026-08/release-checklist.md", false)},                                  // s-publish-10
 		{"download", file("panorama", "carrel/attachments/2026-07/панорама.tif", false)},                                       // s-publish-11
 		{"folder", folder}, // s-publish-12
 	} {

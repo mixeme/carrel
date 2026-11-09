@@ -8,6 +8,10 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
+// listMain is the ID of the main the filter narrows as one types (Typecase's
+// note 185).
+const listMain = "list-main"
+
 // The words of the list of people (U-1.3): the filter's, the badges of a
 // row, the escrow cell of an account without a copy, the row's «⋯».
 const (
@@ -57,14 +61,18 @@ func Users(p *view.AdminUsersPage) w.Shell {
 	main := []w.MainPart{h}
 	main = append(main, bind.ColumnMsgs(bind.Notices(p.Notices, w.MsgSpacePage))...)
 	main = append(main, usersBar(p.Bar), usersTable(p))
-	return shell(p.Top, p.Rail, main)
+	s := shell(p.Top, p.Rail, main)
+	body := s.Body.(w.ShellBody)
+	body.Main.ID = bind.MainID(p.Bar.FilterForm, listMain)
+	s.Body = body
+	return s
 }
 
 // usersBar is the bar over the list: the filter, the segments, the columns.
 func usersBar(b view.ListBar) w.Bar {
 	var items []w.BarPart
 	if b.FilterForm != nil {
-		f := bind.Filter(b, filterLogin)
+		f := bind.Narrows(bind.Filter(b, filterLogin), listMain)
 		f.Variant = w.FilterH26W200
 		items = append(items, f)
 	}

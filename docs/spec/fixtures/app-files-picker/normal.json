@@ -58,20 +58,19 @@
                 "children": [
                   {
                     "children": [],
-                    "expanded": true,
-                    "fresh": true,
-                    "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-08%2F",
-                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
-                    "label": "2026-08",
+                    "expanded": false,
+                    "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+                    "label": "2026-07",
                     "readOnly": false,
                     "stamp": ""
                   },
                   {
                     "children": [],
-                    "expanded": false,
-                    "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
-                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
-                    "label": "2026-07",
+                    "expanded": true,
+                    "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-08%2F",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
+                    "label": "2026-08",
                     "readOnly": false,
                     "stamp": ""
                   }

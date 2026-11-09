@@ -1,5 +1,5 @@
 {
-  "attachments": true,
+  "attachments": false,
   "bar": {
     "actions": [
       {
@@ -8,7 +8,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
             "icon": "i-doc",
             "id": "file.upload",
             "label": "Files",
@@ -19,7 +19,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
             "icon": "i-file",
             "id": "file.upload.folder",
             "label": "Folder",
@@ -30,7 +30,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
+        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
         "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
@@ -41,7 +41,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
         "icon": "i-plus",
         "id": "folder.new",
         "label": "New folder",
@@ -51,7 +51,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/",
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/",
         "icon": "i-download",
         "id": "file.download",
         "label": "Download",
@@ -61,7 +61,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=rename",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?op=rename",
         "icon": "i-pencil",
         "id": "file.rename",
         "label": "Rename",
@@ -72,7 +72,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=move",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?op=move",
         "icon": "i-move",
         "id": "file.move",
         "label": "Move",
@@ -83,7 +83,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=copy",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?op=copy",
         "icon": "i-dup",
         "id": "file.copy",
         "label": "Copy",
@@ -95,7 +95,7 @@
         "csrf": "csrf",
         "danger": true,
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=delete",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?op=delete",
         "icon": "i-trash",
         "id": "file.delete",
         "label": "Delete",
@@ -105,7 +105,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?details=0\u0026select=2026-08-10-sync-board.png",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?details=0\u0026select=2026-08-10-sync-board.png",
         "icon": "i-panel",
         "id": "files.details",
         "label": "Details",
@@ -114,7 +114,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?print=1",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?print=1",
         "icon": "i-print",
         "id": "list.print",
         "label": "Print",
@@ -123,12 +123,12 @@
     ],
     "columns": {
       "form": {
-        "action": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/?select=2026-08-10-sync-board.png",
+        "action": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png",
         "actions": [
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/?select=2026-08-10-sync-board.png",
+            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png",
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
@@ -137,7 +137,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/?select=2026-08-10-sync-board.png",
+            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png",
             "id": "columns.default",
             "label": "Reset to defaults",
             "method": "POST"
@@ -201,7 +201,7 @@
     "drop": null,
     "filter": "",
     "filterForm": {
-      "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
       "actions": [],
       "errors": [],
       "method": "GET",
@@ -227,12 +227,12 @@
         }
       ]
     },
-    "loaded": 5,
+    "loaded": 4,
     "range": null,
     "segments": [
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-08-10-sync-board.png\u0026view=list",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png\u0026view=list",
         "icon": "i-menu",
         "id": "files.view.list",
         "label": "List",
@@ -241,7 +241,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-08-10-sync-board.png\u0026view=tiles",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png\u0026view=tiles",
         "icon": "i-grid",
         "id": "files.view.tiles",
         "label": "Tiles",
@@ -249,7 +249,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-08-10-sync-board.png\u0026sort=name",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png\u0026sort=name",
         "id": "files.sort.name",
         "label": "Name",
         "method": "GET",
@@ -257,14 +257,14 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-08-10-sync-board.png\u0026sort=size",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png\u0026sort=size",
         "id": "files.sort.size",
         "label": "Size",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-08-10-sync-board.png\u0026sort=changed",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?select=2026-08-10-sync-board.png\u0026sort=changed",
         "id": "files.sort.changed",
         "label": "Changed",
         "method": "GET"
@@ -273,9 +273,9 @@
     "selected": 1,
     "selectedSize": "412 KB",
     "size": "4.4 MB",
-    "total": 5
+    "total": 4
   },
-  "count": "5 items",
+  "count": "4 items",
   "crumbs": [
     {
       "href": "/app/files/a-sftp-vps/Documents/",
@@ -286,15 +286,19 @@
       "label": "carrel"
     },
     {
-      "href": "",
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
       "label": "attachments"
+    },
+    {
+      "href": "",
+      "label": "2026-08"
     }
   ],
   "details": {
     "actions": [
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-10-sync-board.png",
         "icon": "i-download",
         "id": "file.download",
         "label": "Download",
@@ -303,7 +307,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?inline=1",
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-10-sync-board.png?inline=1",
         "id": "file.view",
         "label": "Open",
         "method": "GET"
@@ -311,7 +315,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026op=rename",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026op=rename",
         "icon": "i-pencil",
         "id": "file.rename",
         "label": "Rename",
@@ -321,7 +325,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026op=move",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026op=move",
         "icon": "i-move",
         "id": "file.move",
         "label": "Move",
@@ -332,7 +336,7 @@
         "csrf": "csrf",
         "danger": true,
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026op=delete",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026op=delete",
         "icon": "i-trash",
         "id": "file.delete",
         "label": "Delete",
@@ -345,7 +349,7 @@
     "avatar": null,
     "body": "",
     "books": [],
-    "close": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "close": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
     "date": "",
     "deleteNote": "",
     "fields": [
@@ -382,7 +386,7 @@
         "href": "",
         "label": "Path",
         "mono": true,
-        "value": "/alice/files/Documents/carrel/attachments/2026-08-10-sync-board.png"
+        "value": "/alice/files/Documents/carrel/attachments/2026-08/2026-08-10-sync-board.png"
       }
     ],
     "foreign": [],
@@ -390,7 +394,7 @@
     "late": "",
     "menu": [],
     "preview": {
-      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?thumb=1\u0026v=18ca6326aee5680067000",
+      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-10-sync-board.png?thumb=1\u0026v=18ca6326aee5680067000",
       "icon": "i-img"
     },
     "related": [],
@@ -420,12 +424,12 @@
   },
   "notices": [],
   "print": {
-    "foot": "Carrel · files · 5 items · 4.4 MB · captured 2026-08-10 17:06",
-    "heading": "Files · Documents / carrel / attachments",
-    "range": "sftpgo · vps · Documents · 5 items",
+    "foot": "Carrel · files · 4 items · 4.4 MB · captured 2026-08-10 17:06",
+    "heading": "Files · Documents / carrel / attachments / 2026-08",
+    "range": "sftpgo · vps · Documents · 4 items",
     "sources": "sftpgo · vps · Documents",
     "taken": "10 August 2026, 17:06",
-    "title": "attachments"
+    "title": "2026-08"
   },
   "queue": null,
   "rail": {
@@ -442,7 +446,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
         "icon": "i-plus",
         "id": "rail.folder.new",
         "label": "New folder",
@@ -477,7 +481,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -495,7 +499,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -606,7 +610,6 @@
         "id": "files.attachments",
         "label": "Attachments",
         "method": "GET",
-        "on": true,
         "place": "Documents / carrel"
       },
       {
@@ -654,7 +657,7 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "/app/files/a-sftp-vps/Documents/carrel/attachments/"
+              "value": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/"
             }
           ],
           "unfold": null
@@ -666,105 +669,13 @@
   "readOnly": false,
   "rows": [
     {
-      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
-      "icon": "i-file",
-      "isDir": true,
-      "menu": [
-        {
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
-          "icon": "i-file",
-          "id": "file.open",
-          "label": "Open",
-          "method": "GET"
-        },
-        {
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/?zip=1",
-          "icon": "i-download",
-          "id": "file.download.zip",
-          "label": "Download as .zip",
-          "method": "GET"
-        },
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-07\u0026op=rename",
-          "icon": "i-pencil",
-          "id": "file.rename",
-          "label": "Rename",
-          "method": "POST",
-          "target": "sheet"
-        },
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-07\u0026op=move",
-          "icon": "i-move",
-          "id": "file.move",
-          "label": "Move",
-          "method": "POST",
-          "target": "sheet"
-        },
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-07\u0026op=copy",
-          "icon": "i-dup",
-          "id": "file.copy",
-          "label": "Copy",
-          "method": "POST",
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026dir=1\u0026f=carrel%2Fattachments%2F2026-07\u0026k=files",
-          "icon": "i-link",
-          "id": "publish",
-          "label": "Publish a link",
-          "method": "GET",
-          "target": "sheet"
-        },
-        {
-          "csrf": "csrf",
-          "danger": true,
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-07\u0026op=delete",
-          "icon": "i-trash",
-          "id": "file.delete",
-          "label": "Delete",
-          "method": "POST",
-          "separator": true,
-          "target": "sheet"
-        }
-      ],
-      "modified": "",
-      "name": "2026-07",
-      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
-      "selected": false,
-      "size": "",
-      "thumb": "",
-      "type": "folder",
-      "upload": {
-        "csrf": "csrf",
-        "enabled": true,
-        "file": "file",
-        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/",
-        "icon": "i-upload",
-        "id": "folder.upload",
-        "label": "Upload into 2026-07",
-        "method": "POST",
-        "target": "queue"
-      }
-    },
-    {
-      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-04-whiteboard.jpg",
+      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-04-whiteboard.jpg",
       "icon": "i-img",
       "isDir": false,
       "menu": [
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-04-whiteboard.jpg",
+          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/2026-08-04-whiteboard.jpg",
           "icon": "i-doc",
           "id": "file.open",
           "label": "Open",
@@ -772,7 +683,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-04-whiteboard.jpg",
+          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-04-whiteboard.jpg",
           "icon": "i-download",
           "id": "file.download",
           "label": "Download",
@@ -781,7 +692,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=rename",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-04-whiteboard.jpg\u0026op=rename",
           "icon": "i-pencil",
           "id": "file.rename",
           "label": "Rename",
@@ -791,7 +702,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=move",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-04-whiteboard.jpg\u0026op=move",
           "icon": "i-move",
           "id": "file.move",
           "label": "Move",
@@ -801,7 +712,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=copy",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-04-whiteboard.jpg\u0026op=copy",
           "icon": "i-dup",
           "id": "file.copy",
           "label": "Copy",
@@ -810,7 +721,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2F2026-08-04-whiteboard.jpg\u0026k=files",
+          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2F2026-08%2F2026-08-04-whiteboard.jpg\u0026k=files",
           "icon": "i-link",
           "id": "publish",
           "label": "Publish a link",
@@ -821,7 +732,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=delete",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-04-whiteboard.jpg\u0026op=delete",
           "icon": "i-trash",
           "id": "file.delete",
           "label": "Delete",
@@ -832,22 +743,22 @@
       ],
       "modified": "2026-08-04 17:03",
       "name": "2026-08-04-whiteboard.jpg",
-      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-04-whiteboard.jpg",
+      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/2026-08-04-whiteboard.jpg",
       "selected": false,
       "size": "2.8 MB",
-      "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-04-whiteboard.jpg?thumb=1\u0026v=18c89f188a41c8002ccccd",
+      "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-04-whiteboard.jpg?thumb=1\u0026v=18c89f188a41c8002ccccd",
       "type": "image/jpeg",
       "upload": null
     },
     {
       "dimensions": "1920×1080",
-      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
+      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-10-sync-board.png",
       "icon": "i-img",
       "isDir": false,
       "menu": [
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-10-sync-board.png",
+          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/2026-08-10-sync-board.png",
           "icon": "i-doc",
           "id": "file.open",
           "label": "Open",
@@ -855,7 +766,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
+          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-10-sync-board.png",
           "icon": "i-download",
           "id": "file.download",
           "label": "Download",
@@ -864,7 +775,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026op=rename",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026op=rename",
           "icon": "i-pencil",
           "id": "file.rename",
           "label": "Rename",
@@ -874,7 +785,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026op=move",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026op=move",
           "icon": "i-move",
           "id": "file.move",
           "label": "Move",
@@ -884,7 +795,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026op=copy",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026op=copy",
           "icon": "i-dup",
           "id": "file.copy",
           "label": "Copy",
@@ -893,7 +804,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2F2026-08-10-sync-board.png\u0026k=files",
+          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2F2026-08%2F2026-08-10-sync-board.png\u0026k=files",
           "icon": "i-link",
           "id": "publish",
           "label": "Publish a link",
@@ -904,7 +815,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026op=delete",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026op=delete",
           "icon": "i-trash",
           "id": "file.delete",
           "label": "Delete",
@@ -915,21 +826,21 @@
       ],
       "modified": "2026-08-10 11:07",
       "name": "2026-08-10-sync-board.png",
-      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-10-sync-board.png",
+      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/2026-08-10-sync-board.png",
       "selected": true,
       "size": "412 KB",
-      "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?thumb=1\u0026v=18ca6326aee5680067000",
+      "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-10-sync-board.png?thumb=1\u0026v=18ca6326aee5680067000",
       "type": "image/png",
       "upload": null
     },
     {
-      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/release-checklist.md",
+      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/release-checklist.md",
       "icon": "i-doc",
       "isDir": false,
       "menu": [
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/release-checklist.md",
+          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/release-checklist.md",
           "icon": "i-doc",
           "id": "file.open",
           "label": "Open",
@@ -937,7 +848,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/release-checklist.md",
+          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/release-checklist.md",
           "icon": "i-download",
           "id": "file.download",
           "label": "Download",
@@ -946,7 +857,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=release-checklist.md\u0026op=rename",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=release-checklist.md\u0026op=rename",
           "icon": "i-pencil",
           "id": "file.rename",
           "label": "Rename",
@@ -956,7 +867,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=release-checklist.md\u0026op=move",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=release-checklist.md\u0026op=move",
           "icon": "i-move",
           "id": "file.move",
           "label": "Move",
@@ -966,7 +877,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=release-checklist.md\u0026op=copy",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=release-checklist.md\u0026op=copy",
           "icon": "i-dup",
           "id": "file.copy",
           "label": "Copy",
@@ -975,7 +886,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2Frelease-checklist.md\u0026k=files",
+          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2F2026-08%2Frelease-checklist.md\u0026k=files",
           "icon": "i-link",
           "id": "publish",
           "label": "Publish a link",
@@ -986,7 +897,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=release-checklist.md\u0026op=delete",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=release-checklist.md\u0026op=delete",
           "icon": "i-trash",
           "id": "file.delete",
           "label": "Delete",
@@ -997,7 +908,7 @@
       ],
       "modified": "2026-08-09 18:44",
       "name": "release-checklist.md",
-      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/release-checklist.md",
+      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/release-checklist.md",
       "selected": false,
       "size": "3 KB",
       "thumb": "",
@@ -1005,13 +916,13 @@
       "upload": null
     },
     {
-      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
       "icon": "i-doc",
       "isDir": false,
       "menu": [
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
           "icon": "i-doc",
           "id": "file.open",
           "label": "Open",
@@ -1019,7 +930,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+          "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
           "icon": "i-download",
           "id": "file.download",
           "label": "Download",
@@ -1028,7 +939,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=rename",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=rename",
           "icon": "i-pencil",
           "id": "file.rename",
           "label": "Rename",
@@ -1038,7 +949,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=move",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=move",
           "icon": "i-move",
           "id": "file.move",
           "label": "Move",
@@ -1048,7 +959,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=copy",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=copy",
           "icon": "i-dup",
           "id": "file.copy",
           "label": "Copy",
@@ -1057,7 +968,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2F%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026k=files",
+          "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=carrel%2Fattachments%2F2026-08%2F%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026k=files",
           "icon": "i-link",
           "id": "publish",
           "label": "Publish a link",
@@ -1068,7 +979,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=delete",
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf\u0026op=delete",
           "icon": "i-trash",
           "id": "file.delete",
           "label": "Delete",
@@ -1079,7 +990,7 @@
       ],
       "modified": "2026-08-05 14:20",
       "name": "смета-подрядчик.pdf",
-      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+      "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
       "selected": false,
       "size": "1.2 MB",
       "thumb": "",
@@ -1088,11 +999,11 @@
     }
   ],
   "select": {
-    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/",
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/",
     "actions": [
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-07\u0026select=2026-08-04-whiteboard.jpg\u0026select=2026-08-10-sync-board.png\u0026select=release-checklist.md\u0026select=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?select=2026-08-04-whiteboard.jpg\u0026select=2026-08-10-sync-board.png\u0026select=release-checklist.md\u0026select=%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
         "icon": "i-selectall",
         "id": "files.select.all",
         "label": "Select all",
@@ -1100,7 +1011,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
         "icon": "i-close",
         "id": "files.select.clear",
         "label": "Clear selection",
@@ -1134,7 +1045,7 @@
   },
   "selectField": "item",
   "subtitle": "sftpgo · vps",
-  "title": "attachments",
+  "title": "2026-08",
   "top": {
     "lock": null,
     "new": {
@@ -1209,7 +1120,7 @@
     "refresh": {
       "action": {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
         "icon": "i-refresh",
         "id": "folder.refresh",
         "label": "Refresh",

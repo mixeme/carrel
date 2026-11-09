@@ -317,8 +317,8 @@ func (s *Server) newCardPhoto(c *collectionCtx, uid string) ([]byte, error) {
 
 // lostPhotoNotice: the form names a photo the session no longer holds — a
 // photo chosen for another card took its place. Nothing was saved; saving
-// again saves the card without it.
+// again saves the card without it (s-contacts-38; Typecase's task 256).
 var lostPhotoNotice = view.Notice{
-	Role: view.NoticeAlert, Title: "Nothing was saved",
-	Body: "The photo of this form was replaced by a photo chosen for another card. Add it again, or save without it.",
+	Role: view.NoticeAlert, Title: "Nothing was saved:",
+	Body: "the photo chosen here was replaced by one chosen for another new card. Add it again, or save without it.",
 }

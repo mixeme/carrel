@@ -247,7 +247,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 4,
+              "objects": 5,
               "path": "/alice/calendars/lichnyj/",
               "pick": "a-nc-home|/alice/calendars/lichnyj/",
               "readOnly": false,
@@ -564,7 +564,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 2,
+              "objects": 3,
               "path": "/alice/calendars/zapisi/",
               "pick": "a-nc-home|/alice/calendars/zapisi/",
               "readOnly": false,

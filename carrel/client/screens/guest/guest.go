@@ -14,6 +14,10 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
+// listMain is the ID of the main the filter narrows as one types (Typecase's
+// note 185).
+const listMain = "list-main"
+
 // The screen's words (U-1.3): the badge of what the visitor may do, what
 // Copy says once it copied, «How to mount», the rubrics of a record, the
 // heads of a folder's columns, the dash of a value there is none of, what
@@ -75,7 +79,7 @@ func Screen(p *view.PublishedPage) w.Shell {
 	if len(p.Foot) > 0 {
 		main = append(main, w.MainFoot{Text: bind.Words(p.Foot)})
 	}
-	return w.Shell{Body: w.ShellBody{Main: w.Main{Items: main}}}
+	return w.Shell{Body: w.ShellBody{Main: w.Main{Items: main, ID: bind.MainID(p.Filter, listMain)}}}
 }
 
 // stage says a file is shown by what it is, not by itself: the browser
@@ -184,8 +188,9 @@ func filter(f view.Form) w.Filter {
 			out.Query.Placeholder, out.Waiting = string(r.Label), true
 		}
 	}
-	// The cross while it holds a word (Typecase's note 129 p. 2).
-	out.Clear = f.Clear
+	// The cross while it holds a word (Typecase's note 129 p. 2); as one
+	// types, the page's main narrows (Typecase's note 185).
+	out.Clear, out.Swap = f.Clear, listMain
 	return out
 }
 
@@ -210,7 +215,7 @@ func body(p *view.PublishedPage) []w.MainPart {
 		list := w.List{}
 		for _, r := range d.Rows {
 			t := w.TimeRow{Mark: w.Mark{Colour: string(r.Colour)}, Time: string(r.Time), Title: []w.Inline{w.Text(r.Summary)},
-				Detail: string(r.Location), Past: r.Past, Single: true, Href: r.Href}
+				Detail: string(r.Location), Single: true, Href: r.Href}
 			for _, b := range r.Badges {
 				t.Badges = append(t.Badges, bind.Badge(b))
 			}

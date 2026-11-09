@@ -395,7 +395,7 @@
         "method": "GET"
       },
       {
-        "count": 10,
+        "count": 11,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",

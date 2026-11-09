@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026op=rename",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?go=1\u0026item=2026-08-10-sync-board.png\u0026op=rename",
       "id": "file.rename.confirm",
       "label": "Rename",
       "method": "POST",
@@ -12,7 +12,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
       "id": "file.op.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -21,7 +21,7 @@
   "alert": [],
   "failure": null,
   "form": {
-    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026op=rename",
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?go=1\u0026item=2026-08-10-sync-board.png\u0026op=rename",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -67,7 +67,7 @@
   ],
   "op": "rename",
   "servers": [],
-  "subject": "Documents / carrel / attachments",
+  "subject": "Documents / carrel / attachments / 2026-08",
   "target": null,
   "title": "Rename",
   "warning": [

@@ -122,6 +122,8 @@ type Users interface {
 	FollowPublished(viewerID string, from, to user.Place, conn sealed.Connection) (int, error)
 	MarkPublishedGone(viewerID string, at user.Place) error
 	MarkLinkGone(id string) error
+	// NoteLinkMissing keeps how many records a guest's read left out (Б3).
+	NoteLinkMissing(id string, n int, format string) error
 	// Subscriptions (S-25.2): feeds in the blob, renamed only here.
 	Subscribe(viewerID string, dataKey [32]byte, f sealed.Subscription) (string, error)
 	Unsubscribe(viewerID string, dataKey [32]byte, id string) error

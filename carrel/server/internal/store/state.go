@@ -130,6 +130,12 @@ type PublishedLink struct {
 	// known, a collection removed (Б41). The link stays until it expires or
 	// is revoked; the owner's list says it is dead.
 	Gone bool `json:"gone,omitempty"`
+	// Missing is how many records of the collection the last guest's read
+	// left out: Carrel could not read them, and a guest is not given them
+	// (the owner's decision of 04.11.2026, Б3); MissingFormat is the format
+	// they are not valid in, «vCard» or «iCalendar». A count, not the records.
+	Missing       int    `json:"missing,omitempty"`
+	MissingFormat string `json:"missingFormat,omitempty"`
 	// Parent is the publish.ID of the link this one was made with: an
 	// attachment of a published note (Пб3, s-publish-4). It expires with
 	// that link, is revoked with it and is not a row of the owner's list;

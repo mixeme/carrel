@@ -8,7 +8,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
             "icon": "i-doc",
             "id": "file.upload",
             "label": "Files",
@@ -19,7 +19,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
             "icon": "i-file",
             "id": "file.upload.folder",
             "label": "Folder",
@@ -30,7 +30,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
+        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
         "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
@@ -41,7 +41,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
         "icon": "i-plus",
         "id": "folder.new",
         "label": "New folder",
@@ -58,7 +58,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?print=1",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/?print=1",
         "icon": "i-print",
         "id": "list.print",
         "label": "Print",
@@ -67,12 +67,12 @@
     ],
     "columns": {
       "form": {
-        "action": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/",
+        "action": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
         "actions": [
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/",
+            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
@@ -81,7 +81,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/",
+            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
             "id": "columns.default",
             "label": "Reset to defaults",
             "method": "POST"
@@ -145,7 +145,7 @@
     "drop": null,
     "filter": "",
     "filterForm": {
-      "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
+      "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
       "actions": [],
       "errors": [],
       "method": "GET",
@@ -176,7 +176,7 @@
     "segments": [
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?view=list",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/?view=list",
         "icon": "i-menu",
         "id": "files.view.list",
         "label": "List",
@@ -185,7 +185,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?view=tiles",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/?view=tiles",
         "icon": "i-grid",
         "id": "files.view.tiles",
         "label": "Tiles",
@@ -193,7 +193,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?sort=name",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/?sort=name",
         "id": "files.sort.name",
         "label": "Name",
         "method": "GET",
@@ -201,14 +201,14 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?sort=size",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/?sort=size",
         "id": "files.sort.size",
         "label": "Size",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?sort=changed",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/?sort=changed",
         "id": "files.sort.changed",
         "label": "Changed",
         "method": "GET"
@@ -232,8 +232,12 @@
       "label": "attachments"
     },
     {
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+      "label": "2026-07"
+    },
+    {
       "href": "",
-      "label": "2026-08"
+      "label": "черновики"
     }
   ],
   "details": null,
@@ -243,7 +247,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
+        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
         "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
@@ -254,7 +258,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
         "icon": "i-plus",
         "id": "folder.new",
         "label": "New folder",
@@ -277,11 +281,11 @@
   "notices": [],
   "print": {
     "foot": "Carrel · files · 0 items · captured 2026-08-10 17:06",
-    "heading": "Files · Documents / carrel / attachments / 2026-08",
+    "heading": "Files · Documents / carrel / attachments / 2026-07 / черновики",
     "range": "sftpgo · vps · Documents · 0 items",
     "sources": "sftpgo · vps · Documents",
     "taken": "10 August 2026, 17:06",
-    "title": "2026-08"
+    "title": "черновики"
   },
   "queue": null,
   "rail": {
@@ -298,7 +302,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
         "icon": "i-plus",
         "id": "rail.folder.new",
         "label": "New folder",
@@ -333,7 +337,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -351,7 +355,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -509,7 +513,7 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/"
+              "value": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/"
             }
           ],
           "unfold": null
@@ -521,7 +525,7 @@
   "readOnly": false,
   "rows": [],
   "select": {
-    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/",
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -550,7 +554,7 @@
   },
   "selectField": "item",
   "subtitle": "sftpgo · vps",
-  "title": "2026-08",
+  "title": "черновики",
   "top": {
     "lock": null,
     "new": {
@@ -625,7 +629,7 @@
     "refresh": {
       "action": {
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
         "icon": "i-refresh",
         "id": "folder.refresh",
         "label": "Refresh",

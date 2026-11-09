@@ -183,7 +183,7 @@ func nameLine(f view.Form) w.Line {
 // -11, -13); the one chosen on.
 func nodes(t view.FileTree) w.Tree {
 	out := w.Tree{}
-	indents := []w.TreeIndent{w.TreeLevel0, w.TreeLevel22, w.TreeLevel40, w.TreeLevel58}
+	indents := []w.TreeIndent{w.TreeLevel0, w.TreeLevel22, w.TreeLevel40, w.TreeLevel58, w.TreeLevel76}
 	var walk func(ns []view.FileTreeNode, depth int)
 	walk = func(ns []view.FileTreeNode, depth int) {
 		for _, n := range ns {

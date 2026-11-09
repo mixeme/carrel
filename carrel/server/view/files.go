@@ -318,8 +318,16 @@ type PublishedRow struct {
 	// коллекция удалена; строка — подсказка плашки «no longer there»
 	// (s-publish-21), Expires — «—», Copy и Send выключены с причиной;
 	// пусто — ссылка жива
-	Gone  Text `json:"gone,omitempty"`
-	Opens int  `json:"opens"`
+	Gone Text `json:"gone,omitempty"`
+	// Missing — сколько записей коллекции не вошло в ссылку при последнем
+	// чтении гостем: Carrel их не разобрал, и гостю они не отдаются (решение
+	// владельца 04.11.2026, Б3) — бейдж рядом с именем, «1 record not in the
+	// link»; MissingHint — его подсказка, «Carrel could not read it: invalid
+	// vCard. Unchanged on the server.» (s-publish-40, задача Typecase 255);
+	// пусто — вошли все или ссылку ещё не открывали
+	Missing     Text `json:"missing,omitempty"`
+	MissingHint Text `json:"missingHint,omitempty"`
+	Opens       int  `json:"opens"`
 	// ID — номер ссылки (не её секрет): значение `id` кнопки Revoke, которая
 	// отправляет общую форму списка `POST /app/publish?op=revoke`
 	// (s-publish-1, записка Typecase 110)

@@ -53,7 +53,6 @@ func TestTaskListIsTheFrame(t *testing.T) {
 
 	app := newMockupApp(t)
 	linkMockupTask(t, app)
-	seedMockupTrip(t, app)
 	app.lastUsed(t, "dela", view.KindTask)
 	// The calendar was read: the panel's Related names the trip.
 	openList(t, app, "/app/calendar?from=2026-08-10")

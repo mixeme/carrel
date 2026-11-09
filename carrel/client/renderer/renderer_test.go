@@ -121,3 +121,32 @@ func TestTheQueueIsItsZone(t *testing.T) {
 		}
 	}
 }
+
+// A tick of the rail asks the rail's zone (Typecase's note 186,
+// components-43): the answer is the rail as its section draws it, the forms
+// it sends, and out of band the poll and the list after it — each in its
+// template, which the live layer puts in place, the page kept.
+func TestTheRailIsItsZone(t *testing.T) {
+	rd := renderer.New("")
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	rail := view.Rail{Nav: []view.NavRow{{ID: "nav.calendar", Label: "Calendar", On: true}},
+		Ticks: &view.Form{Action: "/app/sources/calendar", Method: "POST", Target: render.TargetRail}}
+	list := view.AgendaPage{Shell: view.Shell{Title: "Combined calendar", Rail: rail}, Days: []view.AgendaDay{}}
+	rec := httptest.NewRecorder()
+	if err := rd.Fragment(rec, req, http.StatusOK, render.TargetRail, rail,
+		[]render.OOB{{Target: render.TargetPoll, Body: view.PollBar{TaskID: "t1"}}, {Target: render.TargetMain, Body: list}}); err != nil {
+		t.Fatal(err)
+	}
+	got := rec.Body.String()
+	if ct := rec.Header().Get("Content-Type"); !strings.HasPrefix(ct, "text/html") {
+		t.Fatalf("the rail's answer is %q: %s", ct, got)
+	}
+	poll, main := strings.Index(got, `<template data-tc-zone="poll">`), strings.Index(got, `<template data-tc-zone="main">`)
+	form := strings.Index(got, `action="/app/sources/calendar"`)
+	if !strings.Contains(got, "Calendar") || form < 0 || poll < form || main < poll || !strings.Contains(got[main:], "Combined calendar") {
+		t.Errorf("the rail's answer = %s", got)
+	}
+	if !strings.Contains(got[:poll], `data-tc-target="rail"`) {
+		t.Errorf("the rail's form does not ask the rail's zone: %s", got[:poll])
+	}
+}

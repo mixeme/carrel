@@ -6,7 +6,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 34,
+    "loaded": 36,
     "range": null,
     "segments": [
       {
@@ -1458,7 +1458,7 @@
     }
   ],
   "print": {
-    "range": "34 records compared · 60 points and above",
+    "range": "36 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -1484,7 +1484,7 @@
         "method": "GET"
       },
       {
-        "count": 11,
+        "count": 12,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -1502,7 +1502,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -1575,7 +1575,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "",
@@ -1659,7 +1659,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "",
@@ -1690,7 +1690,7 @@
     "tags": [],
     "ticks": null
   },
-  "subtitle": "34 records compared · 2 to look at",
+  "subtitle": "36 records compared · 2 to look at",
   "threshold": {
     "default": 60,
     "form": {

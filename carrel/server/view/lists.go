@@ -163,9 +163,10 @@ type AgendaDay struct {
 type AgendaRow struct {
 	Kind Kind   `json:"kind"` // event: календарь показывает только события (Typecase Р-56)
 	Href string `json:"href"`
-	// Past — прошедшее в ленте найденного по слову: строка приглушена
-	// (s-agenda-31, s-publish-39); в неделе — false
-	Past bool `json:"past,omitempty"`
+	// Continues — строка не первого из дней события на несколько дней в
+	// этом списке («day 2 of 3», записка Typecase 182): рисуется так же, в
+	// счёт событий не идёт — неделя считает событие один раз
+	Continues bool `json:"continues,omitempty"`
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
 	Target   string `json:"target,omitempty"`

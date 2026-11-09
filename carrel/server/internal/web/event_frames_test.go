@@ -55,8 +55,8 @@ func TestEventByItsFrames(t *testing.T) {
 	if repeats == nil || repeats.Value != "Weekly on Mon" || repeats.Badge.Label != "until 28 December" {
 		t.Errorf("Repeats = %+v", repeats)
 	}
-	// Both reminders in one line, as the frame says them (Typecase's note
-	// 40: «10 minutes before · 1 day before»).
+	// Both reminders in one line, as the frame says them (Typecase's notes
+	// 40, 187: «10 minutes before · 2 days before»).
 	said := regexp.MustCompile(`<dt>Reminders</dt><dd>([^<]*)</dd>`).FindStringSubmatch(mockupFrame(t, "s-agenda-2"))
 	if said == nil || !strings.Contains(said[1], " · ") {
 		t.Fatalf("s-agenda-2 says %v of its reminders: read the frame again", said)
@@ -153,7 +153,9 @@ func TestEventPanelHasTheCardsOrder(t *testing.T) {
 	if got := fieldLabels(page.Details.Fields); got != strings.Join(want, ", ") {
 		t.Errorf("panel fields = %s, want %q", got, want)
 	}
-	if r := fieldOf(page.Details.Fields, "Reminders"); r == nil || r.Value != "10 minutes before · 1 day before" {
+	// As the card's (s-agenda-1: «10 minutes before · 2 days before»;
+	// Typecase's note 187).
+	if r := fieldOf(page.Details.Fields, "Reminders"); r == nil || r.Value != "10 minutes before · 2 days before" {
 		t.Errorf("panel Reminders = %+v", r)
 	}
 }

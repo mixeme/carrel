@@ -492,7 +492,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 2,
+              "objects": 3,
               "path": "/alice/calendars/zapisi/",
               "pick": "a-nc-home|/alice/calendars/zapisi/",
               "readOnly": false,

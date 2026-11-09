@@ -46,7 +46,7 @@
   "kind": "note",
   "lede": [
     {
-      "text": "2 notes"
+      "text": "3 notes"
     }
   ],
   "note": null,
@@ -88,6 +88,28 @@
         }
       ],
       "rubric": "August 2026"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "",
+          "colour": "",
+          "date": "21 Jul",
+          "excerpt": "Анна просит две недели на вёрстку после сдачи текста.",
+          "href": "/p/link-zapisi-token?uid=6d93-21b4-c517",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "tags": [],
+          "title": "Про сроки по сборнику",
+          "uid": "6d93-21b4-c517"
+        }
+      ],
+      "rubric": "July 2026"
     }
   ],
   "notices": [],

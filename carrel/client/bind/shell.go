@@ -546,13 +546,15 @@ func Refusals(p *view.PollBar) w.Drop {
 }
 
 // RailForm is the rail's form (Rail.Ticks) as the PostForm its ticks submit,
-// printed at the page's end under the screen's ID; nil when the rail sends
-// no choice.
+// printed at the page's end under the screen's ID, asking the zone its target
+// names — the rail, whose answer puts the list in place too (Typecase's note
+// 186); nil when the rail sends no choice.
 func RailForm(r view.Rail, id string) *w.PostForm {
 	if r.Ticks == nil {
 		return nil
 	}
 	f := PostForm(*r.Ticks, id)
+	f.Target = r.Ticks.Target
 	return &f
 }
 

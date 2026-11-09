@@ -442,19 +442,19 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		sift := strings.TrimSpace(r.URL.Query().Get("filter"))
 		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.calendarFilter(base, sift)
 		if sift != "" {
-			// With a word: all that is found, by day; no week, no ← Today →
-			// (s-agenda-31).
-			page.Days = s.foundDays(tf, rows, sift, spec.segment, true, nil, nil)
+			// A word narrows what the week shows; the week stays (s-agenda-31;
+			// Typecase's note 185).
+			events := eventsIn(page.Days)
+			page.Days = siftDays(page.Days, sift)
 			page.Bar.Loaded = eventsIn(page.Days)
-			page.Subtitle = foundSubtitle(combinedSubtitle(page.Rail, spec, nil), page.Days, sift)
+			if st.snap != nil && !st.snap.Running {
+				page.Subtitle = siftedSubtitle(tf, combinedSubtitle(page.Rail, spec, nil), from, to, page.Bar.Loaded, events)
+			}
 		}
 		page.Details = s.openInAgenda(r, sess, base, rows, page.Days)
 		page.Bar.Range = s.agendaRange(tf, base, filter.tag, kind, from, to, r.URL.Query())
 		page.Bar.Segments = []view.Action{}
 		page.Bar.Compact = s.compactForm(r, spec.segment, base)
-		if sift != "" {
-			page.Bar.Range, page.Bar.Compact = nil, nil // the filter and Columns (s-agenda-31)
-		}
 		page.Bar.Columns = columns()
 		page.Bar.Actions = append(actions, s.agendaPrintAction(base, query))
 		page.Bar.Drop = drop
@@ -467,7 +467,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
 			page.Subtitle = view.Runs{{Text: text(combinedSubtitle(page.Rail, spec, nil))}}
 		case st.snap != nil && !st.snap.Running && len(page.Days) == 0 && len(page.Notices) == 0 && sift != "":
-			page.Empty = foundEmpty(sift)
+			page.Empty = siftedEmpty(kind, sift)
 		case st.snap != nil && !st.snap.Running && len(page.Days) == 0 && len(page.Notices) == 0:
 			page.Empty = windowEmpty(tf, kind, "the ticked calendars", from, to)
 		}
@@ -1181,12 +1181,48 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetRail, s.filesRail(sess, s.catalogOf(sess), nil), nil)
 		return
 	}
+	if back, ok := pageReturn(r.FormValue("back"), spec.segment); !ok || back == "/app/"+spec.segment {
+		// The combined view lists what is ticked: the answer is the rail,
+		// the poll and the list after it, which the live layer puts in
+		// place, the page kept (Typecase's note 186, components-43).
+		list := r.Clone(r.Context())
+		list.Method, list.URL, list.Form, list.PostForm = http.MethodGet, &url.URL{Path: "/app/" + spec.segment}, nil, nil
+		page, err := s.combinedPage(list, sess, s.catalogOf(sess), spec)
+		if err != nil {
+			http.Error(w, "could not start the list", http.StatusInternalServerError)
+			return
+		}
+		rail, poll := combinedRailPoll(page)
+		extra := []render.OOB{{Target: render.TargetMain, Body: page}}
+		if poll != nil {
+			extra = append([]render.OOB{{Target: render.TargetPoll, Body: *poll}}, extra...)
+		}
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetRail, rail, extra)
+		return
+	}
+	// A list of one collection is that collection whatever is ticked: the
+	// rail and the poll.
 	st, err := s.readCombined(r, sess, s.catalogOf(sess), spec)
 	if err != nil {
 		http.Error(w, "could not start the list", http.StatusInternalServerError)
 		return
 	}
 	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetRail, st.shell.Rail, []render.OOB{{Target: render.TargetPoll, Body: *st.poll}})
+}
+
+// combinedRailPoll are the rail and the poll of a combined view's page.
+func combinedRailPoll(page any) (view.Rail, *view.PollBar) {
+	switch p := page.(type) {
+	case view.ContactsListPage:
+		return p.Rail, p.Poll
+	case view.AgendaPage:
+		return p.Rail, p.Poll
+	case view.TasksPage:
+		return p.Rail, p.Poll
+	case view.NotesPage:
+		return p.Rail, p.Poll
+	}
+	return view.Rail{}, nil
 }
 
 // timelineReturn is the way back an Apply may take: only to a person's

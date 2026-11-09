@@ -188,6 +188,16 @@
     {
       "avatar": null,
       "colour": "#4a6b52",
+      "detail": "Анна просит две недели на вёрстку после сдачи текста.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d93-21b4-c517\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Про сроки по сборнику",
+      "when": "21 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
       "detail": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
       "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d92-13ef-b408\u0026what=note",
       "kind": "note",

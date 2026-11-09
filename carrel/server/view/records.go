@@ -275,7 +275,11 @@ type AttachRow struct {
 	// где лежит она, как её называет рейл файлов, «Documents / carrel»;
 	// иначе в Files — хранилище и папки; у данных внутри записи и у ссылки
 	// вне каталога пусто
-	Place   Text        `json:"place,omitempty"`
+	Place Text `json:"place,omitempty"`
+	// State — у новой формы unavailable: файла сессия больше не держит,
+	// его вытеснили формы новее; строка с бейджем «not kept» и Remove без
+	// адреса, который убирает её со страницы (s-agenda-32, записка Typecase
+	// 181 п. 2)
 	State   RecordState `json:"state"`
 	Actions []Action    `json:"actions"`
 	// From — у связанной записи: коллекция копии, где одной лежит вложение

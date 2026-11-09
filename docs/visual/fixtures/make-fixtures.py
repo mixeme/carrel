@@ -267,8 +267,9 @@ sinkap = [
     u'SEQUENCE:2',
     u'X-MOZ-GENERATION:3',
     u'X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:AUTOMATIC',
-    # Напоминания за 10 минут и за день (s-agenda-1, -2: «Reminders · 10
-    # minutes before · 1 day before»; s-agenda-3 — оба в правке).
+    # Напоминания за 10 минут и за 2 дня (s-agenda-1, -2: «Reminders · 10
+    # minutes before · 2 days before»; s-agenda-3 — оба в правке, второе —
+    # «Custom…», 2, «days before»; записка Typecase 187, задача 156).
     u'BEGIN:VALARM',
     u'ACTION:DISPLAY',
     u'DESCRIPTION:Синк-ап по релизу',
@@ -277,7 +278,7 @@ sinkap = [
     u'BEGIN:VALARM',
     u'ACTION:DISPLAY',
     u'DESCRIPTION:Синк-ап по релизу',
-    u'TRIGGER:-P1D',
+    u'TRIGGER:-P2D',
     u'END:VALARM',
     u'END:VEVENT']
 
@@ -314,8 +315,20 @@ sinkap_quarter = [
     u'LOCATION:Переговорная 2',
     u'END:VEVENT']
 
+# «Поездка в Казань» — весь день 12–14 августа: агенда недели рисует её
+# строкой в каждом её дне, «day 1 of 3», и считает один раз (записка
+# Typecase 182); с ней связана «Собрать чемодан» (s-tasks-1, -2, -10).
+trip = [
+    u'BEGIN:VEVENT',
+    u'UID:3e6b-71d4-a209',
+    u'DTSTAMP:20260801T090000Z',
+    u'DTSTART;VALUE=DATE:20260812',
+    u'DTEND;VALUE=DATE:20260815',
+    u'SUMMARY:Поездка в Казань',
+    u'END:VEVENT']
+
 write(u'nextcloud-home/lichnyj.ics',
-      cal(u'Личный', sinkap + mfc + sinkap_past + sinkap_quarter, zones=(VTZ_MSK, VTZ_YEKB)))
+      cal(u'Личный', sinkap + mfc + sinkap_past + sinkap_quarter + trip, zones=(VTZ_MSK, VTZ_YEKB)))
 
 # «Работа» — nextcloud · home
 sozvon = [
@@ -428,19 +441,6 @@ def boarding_pass():
     return head + body
 
 
-# «Поездка в Казань» — событие, с которым связана «Собрать чемодан»
-# (s-tasks-1, -2, -10: «Поездка в Казань · event · 12 Aug»). Кадры агенды
-# его не рисуют, и в «Личный» его кладут сами проверки задач — файл лежит
-# отдельно и в коллекцию набора не входит (README).
-write(u'nextcloud-home/lichnyj-poezdka.ics', cal(u'Личный', [
-    u'BEGIN:VEVENT',
-    u'UID:3e6b-71d4-a209',
-    u'DTSTAMP:20260801T090000Z',
-    u'DTSTART;VALUE=DATE:20260812',
-    u'DTEND;VALUE=DATE:20260815',
-    u'SUMMARY:Поездка в Казань',
-    u'END:VEVENT']))
-
 write(u'nextcloud-home/dela.ics', cal(u'Дела',
       # Правка задачи (s-tasks-3): описание, приоритет «High · 1»,
       # напоминание за день, связь с событием «Забрать документы» и три
@@ -551,6 +551,16 @@ write(u'nextcloud-home/zapisi.ics', cal(u'Записи',
        u'DESCRIPTION:%s' % esc(u'Кляйн, глава 5; статья Шапиро 2011; '
                                u'демка automerge — посмотреть, как они '
                                u'решают конфликт двух правок одного поля.'),
+       u'END:VJOURNAL'] +
+      # Связана с карточкой Анны Ковалёвой: её хронология (s-contacts-7) и
+      # списки заметок группой «July 2026» (записки Typecase 178, 182).
+      [u'BEGIN:VJOURNAL',
+       u'UID:6d93-21b4-c517',
+       u'DTSTAMP:20260721T090000Z',
+       u'DTSTART;VALUE=DATE:20260721',
+       u'SUMMARY:Про сроки по сборнику',
+       u'DESCRIPTION:%s' % esc(u'Анна просит две недели на вёрстку после сдачи текста.'),
+       u'RELATED-TO:4f2b-9c31-a0e7',
        u'END:VJOURNAL']))
 
 # Копии двух заметок «Записей» в «Дневнике», каждая под своим UID:

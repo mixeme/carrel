@@ -1146,7 +1146,7 @@
       "rows": [
         {
           "colour": "#4a6b52",
-          "count": 4,
+          "count": 5,
           "danger": false,
           "here": 2,
           "into": {
@@ -1554,7 +1554,7 @@
     },
     "subtitle": [
       {
-        "text": "Job «Личное на домашний диск» · manifest read · 4 collections · 12 records · "
+        "text": "Job «Личное на домашний диск» · manifest read · 4 collections · 13 records · "
       },
       {
         "mark": "mono",

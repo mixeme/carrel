@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?etag=18ca6326aee5680067000\u0026etag=18ca2d8254f28000c00\u0026etag=18c89f188a41c8002ccccd\u0026go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=delete",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?etag=18ca6326aee5680067000\u0026etag=18ca2d8254f28000c00\u0026etag=18c89f188a41c8002ccccd\u0026go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=delete",
       "id": "file.delete.confirm",
       "label": "Delete",
       "method": "POST",
@@ -12,7 +12,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
       "id": "file.op.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -32,7 +32,7 @@
   ],
   "op": "delete",
   "servers": [],
-  "subject": "Documents / carrel / attachments",
+  "subject": "Documents / carrel / attachments / 2026-08",
   "target": null,
   "title": "Delete 3 items",
   "warning": [

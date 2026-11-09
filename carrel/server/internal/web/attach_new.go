@@ -60,10 +60,81 @@ const attachDraftsKept = 4
 
 // lostFilesNotice: the form names files the session no longer holds — newer
 // forms took their place, or the session is another. Nothing was saved;
-// saving again saves the record without them.
+// saving again saves the record without them (s-agenda-32; Typecase's
+// task 256).
 var lostFilesNotice = view.Notice{
-	Role: view.NoticeAlert, Title: "Nothing was saved",
-	Body: "The files attached to this form are no longer kept: forms started later took their place. Attach them again, or save without them.",
+	Role: view.NoticeAlert, Title: "Nothing was saved:",
+	Body: "the files attached here are no longer kept — newer forms took their place. Attach them again, or save without them.",
+}
+
+// lostDraft is what a draft pushed out by newer forms held: the files' names,
+// types and sizes, without them (s-agenda-32). Its Save names them once;
+// past attachDraftsKept the oldest goes, as the drafts' own.
+type lostDraft struct {
+	Account string
+	Col     string
+	UID     string
+	Files   []draftFile
+}
+
+func lostDrafts(c *collectionCtx) []lostDraft {
+	var ls []lostDraft
+	if data := c.sess.Draft(session.DraftLostAttach); data == nil || gob.NewDecoder(bytes.NewReader(data)).Decode(&ls) != nil {
+		return nil
+	}
+	return ls
+}
+
+func keepLostDrafts(c *collectionCtx, ls []lostDraft) {
+	if len(ls) > attachDraftsKept {
+		ls = ls[len(ls)-attachDraftsKept:]
+	}
+	var buf bytes.Buffer
+	if len(ls) == 0 || gob.NewEncoder(&buf).Encode(ls) != nil {
+		c.sess.SetDraft(session.DraftLostAttach, nil)
+		return
+	}
+	c.sess.SetDraft(session.DraftLostAttach, buf.Bytes())
+}
+
+// lose keeps of the drafts pushed out what their Save will name.
+func lose(c *collectionCtx, gone []attachDraft) {
+	ls := lostDrafts(c)
+	for _, d := range gone {
+		l := lostDraft{Account: d.Account, Col: d.Col, UID: d.UID}
+		for _, f := range d.Files {
+			size := f.Size
+			if f.Data != nil {
+				size = int64(len(f.Data))
+			}
+			l.Files = append(l.Files, draftFile{Name: f.Name, Type: f.Type, Size: size})
+		}
+		if len(l.Files) > 0 {
+			ls = append(ls, l)
+		}
+	}
+	keepLostDrafts(c, ls)
+}
+
+// takeLost is what the form of uid lost, taken once: the rows of its files,
+// each «not kept» (RecordUnavailable) with a Remove that takes the row off
+// the page, nothing else (s-agenda-32) — Save again writes without them.
+func (s *Server) takeLost(c *collectionCtx, uid string) []view.AttachRow {
+	ls := lostDrafts(c)
+	var rows []view.AttachRow
+	kept := ls[:0]
+	for _, l := range ls {
+		if l.Account != c.conn.ID || l.Col != c.col.Path || l.UID != uid {
+			kept = append(kept, l)
+			continue
+		}
+		for _, f := range l.Files {
+			rows = append(rows, view.AttachRow{Name: text(f.Name), Type: text(fileType(f.Name, f.Type)), Size: formatSize(f.Size),
+				State: view.RecordUnavailable, Actions: []view.Action{{ID: "attach.forget", Label: "Remove", Danger: true, Enabled: true}}})
+		}
+	}
+	keepLostDrafts(c, kept)
+	return rows
 }
 
 // attachDrafts are the drafts of the session's new forms, the oldest first.
@@ -123,6 +194,7 @@ func saveAttachDraft(c *collectionCtx, d attachDraft) {
 	}
 	kept = append(kept, d)
 	if len(kept) > attachDraftsKept {
+		lose(c, kept[:len(kept)-attachDraftsKept])
 		kept = kept[len(kept)-attachDraftsKept:]
 	}
 	keepAttachDrafts(c, kept)

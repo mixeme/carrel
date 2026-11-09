@@ -163,7 +163,8 @@ func Screen(p *view.ContactEditPage) w.Shell {
 	if p.UID != "" {
 		main = append(main, w.Runbar{Progress: formID, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}})
 	}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	// Under the head, before the form (s-contacts-38; Typecase's note 181).
+	main = append(main, bind.Notices(p.Notices, w.MsgFlushTop2)...)
 	if p.Loss != nil {
 		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2)...)
 	}

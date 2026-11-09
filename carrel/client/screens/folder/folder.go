@@ -15,6 +15,10 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
+// listMain is the ID of the main the filter narrows as one types (Typecase's
+// note 185).
+const listMain = "list-main"
+
 // The IDs of the page's forms: the rail's (its ticks submit it), the
 // selection's (each row's tick and the column's submit it).
 const (
@@ -194,7 +198,7 @@ func Screen(p *view.FilesPage) w.Shell {
 			Fold:   queue.Fold,
 		}))
 	}
-	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
+	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main, ID: bind.MainID(p.Bar.FilterForm, listMain)}}
 	if p.Queue != nil {
 		body.Main.Variant = w.MainRoomy
 	}
@@ -480,7 +484,7 @@ func selection(p *view.FilesPage) w.Bar {
 func bar(b view.ListBar) w.Bar {
 	var parts []w.BarPart
 	if b.FilterForm != nil {
-		f := bind.Filter(b, filter)
+		f := bind.Narrows(bind.Filter(b, filter), listMain)
 		f.Variant = w.FilterH26W190
 		parts = append(parts, f)
 	}

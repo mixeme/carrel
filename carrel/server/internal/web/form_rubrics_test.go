@@ -106,7 +106,9 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 			"DTEND;TZID=Europe/Moscow:20260810T110000\nSUMMARY:Sync-up\nLOCATION:Room 2\nSTATUS:CONFIRMED\n"+
 			"RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z\n"+
 			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-PT10M\nDESCRIPTION:x\nEND:VALARM\n"+
-			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-P1D\nDESCRIPTION:x\nEND:VALARM\nEND:VEVENT"))
+			// Two days before is none of the six steps: «Custom…», How long,
+			// Unit (s-agenda-3; Typecase's note 187, task 156).
+			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-P2D\nDESCRIPTION:x\nEND:VALARM\nEND:VEVENT"))
 	page := decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/e1/edit", f.sess)))
 	// «Related to» is every kind's (the owner's word of 12.10.2026): in the
 	// group «Other» before the attachments, as the task's (Typecase's task

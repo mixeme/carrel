@@ -12,6 +12,10 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
+// listMain is the ID of the main the filter narrows as one types (Typecase's
+// note 185).
+const listMain = "list-main"
+
 // The IDs of the page's forms: the rail's (its ticks submit it) and the
 // card's deletion.
 const (
@@ -116,7 +120,7 @@ func Screen(p *view.ContactTimelinePage) w.Shell {
 	if !p.CardClosed {
 		panel = side(p.Card)
 	}
-	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}, Side: panel}}
+	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main, ID: bind.MainID(p.Bar.FilterForm, listMain)}, Side: panel}}
 }
 
 // Forms are the page's forms: the rail's, the retries of its sources, the
@@ -165,7 +169,7 @@ func bar(p *view.ContactTimelinePage) w.Bar {
 	if p.Bar.FilterForm != nil {
 		// «Filter by word» first, as the agenda's (s-contacts-7; Typecase's
 		// note 154): it keeps the window and the kind.
-		f := bind.Filter(p.Bar, filter)
+		f := bind.Narrows(bind.Filter(p.Bar, filter), listMain)
 		f.Variant = w.FilterH26W200
 		items = append(items, f)
 	}

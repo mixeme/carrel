@@ -33,6 +33,25 @@ func Filter(b view.ListBar, words string) w.Filter {
 	return f
 }
 
+// Narrows is a filter that is a form narrowing the page's main as one types
+// (Typecase's note 185): the live layer asks the form's address and puts the
+// element named id in place, the main the screen names so (MainID).
+func Narrows(f w.Filter, id string) w.Filter {
+	if f.Action != "" {
+		f.Swap = id
+	}
+	return f
+}
+
+// MainID is the ID of a list's main: the one its filter narrows (Narrows)
+// where the filter is a form (ListBar.FilterForm), else none.
+func MainID(filter *view.Form, id string) string {
+	if filter == nil {
+		return ""
+	}
+	return id
+}
+
 // CheckForm is a tick of the bar that is a form (ListBar.Compact, GET, «Compact
 // rows»): each option of its rows a check, ticked where it is selected, its
 // hidden rows sent with it; apply is the screen's word for the button that

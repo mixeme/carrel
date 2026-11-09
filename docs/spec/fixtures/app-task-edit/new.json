@@ -3040,6 +3040,13 @@
               },
               {
                 "colour": "#4a6b52",
+                "label": "Поездка в Казань",
+                "meta": "event · 12 Aug",
+                "selected": false,
+                "value": "3e6b-71d4-a209"
+              },
+              {
+                "colour": "#4a6b52",
                 "label": "Забрать документы",
                 "meta": "event · 11 Aug",
                 "selected": false,

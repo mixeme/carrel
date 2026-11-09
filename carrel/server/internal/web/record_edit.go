@@ -2787,6 +2787,11 @@ type editState struct {
 	// the next Add keeps it
 	formUID  string
 	typedUID string
+	// lost are the rows of the files a new form no longer has (s-agenda-32)
+	lost []view.AttachRow
+	// noCaret: the form comes back under an alert that is what to read
+	// first — no field has the caret (s-agenda-32, s-contacts-38)
+	noCaret bool
 }
 
 func (s *Server) editAction(c *collectionCtx, st editState) string {
@@ -2884,7 +2889,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Form: form, Loss: st.loss, Delete: del,
 			Attendees: s.attendeeField(c, st), Source: c.source()}
 		if newAttach {
-			page.Attach = s.draftRows(c, draft)
+			page.Attach = append(s.draftRows(c, draft), st.lost...)
 		}
 		if st.obj != nil {
 			if cal.HasRecurrence(st.obj) && del != nil {
@@ -2919,7 +2924,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 			}
 		}
 		if newAttach {
-			page.Attach = s.draftRows(c, draft)
+			page.Attach = append(s.draftRows(c, draft), st.lost...)
 		}
 		return page
 	default:
@@ -2930,7 +2935,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 			a := s.newAttachAction(c, st.formUID)
 			page.Doc.Bar = append(page.Doc.Bar, a)
 			page.Meta.Actions = shown(&a)
-			page.Meta.Attach = s.draftRows(c, draft)
+			page.Meta.Attach = append(s.draftRows(c, draft), st.lost...)
 		}
 		return page
 	}
@@ -3341,6 +3346,12 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			// step is chosen (s-agenda-19).
 			rows := shownRows(vals, full)
 			allDay := formAllDay(c.spec.kind, st.values)
+			if !full && c.spec.kind == view.KindTask && triple(st.values["due"])[1] == "" {
+				// The task's quick sheet has no All day: a due date without
+				// a time is the whole day, so «Custom…» has its hour too
+				// (s-notes-10, -35; Typecase's note 187, task 156).
+				allDay = true
+			}
 			for i, v := range rows {
 				name := fmt.Sprintf("%s.%d", f.name, i)
 				count, unit, at, custom := customNumbers(v, rowAt(st.values[f.name+".custom"], i), allDay)
@@ -3412,6 +3423,9 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	sort.Strings(names)
 	for _, name := range names {
 		form.Errors = append(form.Errors, view.FieldError{Name: name, Message: text(st.errors[name])})
+	}
+	if st.noCaret {
+		return focused(form, "")
 	}
 	return focused(form, caretField[c.spec.kind])
 }
@@ -4702,13 +4716,14 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 	if c.card != nil && formUID == "" && r.FormValue("uid") != "" {
 		// The form shows a photo the session no longer holds: saving
 		// without it is the person's choice, not a silent one.
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notices: []view.Notice{lostPhotoNotice}, filesChosen: upload.chosen}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notices: []view.Notice{lostPhotoNotice}, filesChosen: upload.chosen, noCaret: true}))
 		return
 	}
 	if c.cal != nil && formUID == "" && issuedUID(r.FormValue("uid")) != "" {
 		// The same with the files of a new event, task or note (Б7 of the
 		// audit of 11.10.2026): newer forms took their place.
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notebook: newNotebook(c, r), notices: []view.Notice{lostFilesNotice}, filesChosen: upload.chosen}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notebook: newNotebook(c, r), notices: []view.Notice{lostFilesNotice}, filesChosen: upload.chosen,
+			lost: s.takeLost(c, issuedUID(r.FormValue("uid"))), noCaret: true}))
 		return
 	}
 	s.createRecord(w, r, c, want, formUID)

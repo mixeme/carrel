@@ -347,7 +347,7 @@
             }
           ]
         },
-        "loaded": 1,
+        "loaded": 2,
         "range": null,
         "segments": [
           {
@@ -391,9 +391,10 @@
           }
         ],
         "selected": 0,
-        "total": 1
+        "size": "1.6 MB",
+        "total": 2
       },
-      "count": "1 item",
+      "count": "2 items",
       "crumbs": [
         {
           "href": "",
@@ -411,9 +412,9 @@
       },
       "notices": [],
       "print": {
-        "foot": "Carrel · files · 1 item · captured 2026-08-10 17:06",
+        "foot": "Carrel · files · 2 items · 1.6 MB · captured 2026-08-10 17:06",
         "heading": "Files · Documents",
-        "range": "sftpgo · vps · Documents · 1 item",
+        "range": "sftpgo · vps · Documents · 2 items",
         "sources": "sftpgo · vps · Documents",
         "taken": "10 August 2026, 17:06",
         "title": "Documents"
@@ -468,7 +469,7 @@
             "method": "GET"
           },
           {
-            "count": 10,
+            "count": 11,
             "enabled": true,
             "href": "/app/calendar",
             "icon": "i-cal",
@@ -746,6 +747,88 @@
             "method": "POST",
             "target": "queue"
           }
+        },
+        {
+          "href": "/app/files/a-sftp-vps/Documents/download/%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf",
+          "icon": "i-doc",
+          "isDir": false,
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf",
+              "icon": "i-doc",
+              "id": "file.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/download/%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf",
+              "icon": "i-download",
+              "id": "file.download",
+              "label": "Download",
+              "method": "GET"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/op/?item=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf\u0026op=rename",
+              "icon": "i-pencil",
+              "id": "file.rename",
+              "label": "Rename",
+              "method": "POST",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/op/?item=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf\u0026op=move",
+              "icon": "i-move",
+              "id": "file.move",
+              "label": "Move",
+              "method": "POST",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/op/?item=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf\u0026op=copy",
+              "icon": "i-dup",
+              "id": "file.copy",
+              "label": "Copy",
+              "method": "POST",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026f=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf\u0026k=files",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/op/?item=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf\u0026op=delete",
+              "icon": "i-trash",
+              "id": "file.delete",
+              "label": "Delete",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "modified": "2026-08-06 16:20",
+          "name": "ковалёва-обложка-v2.pdf",
+          "open": "/app/files/a-sftp-vps/Documents/%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf",
+          "selected": false,
+          "size": "1.6 MB",
+          "thumb": "",
+          "type": "application/pdf",
+          "upload": null
         }
       ],
       "select": {

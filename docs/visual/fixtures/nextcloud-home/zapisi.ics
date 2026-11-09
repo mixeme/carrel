@@ -7754,4 +7754,13 @@ DESCRIPTION:Кляйн\, глава 5\; статья Шапиро 2011\; д
  емка automerge — посмотреть\, как они решают 
  конфликт двух правок одного поля.
 END:VJOURNAL
+BEGIN:VJOURNAL
+UID:6d93-21b4-c517
+DTSTAMP:20260721T090000Z
+DTSTART;VALUE=DATE:20260721
+SUMMARY:Про сроки по сборнику
+DESCRIPTION:Анна просит две недели на вёрстку 
+ после сдачи текста.
+RELATED-TO:4f2b-9c31-a0e7
+END:VJOURNAL
 END:VCALENDAR

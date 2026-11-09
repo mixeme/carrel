@@ -57,6 +57,92 @@
         }
       ],
       "rubric": "Tuesday · 11 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "day 1 of 3",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Aug 12:00",
+          "colour": "#4a6b52",
+          "href": "/p/link-lichnyj-whole-token?uid=3e6b-71d4-a209",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Поездка в Казань",
+          "tags": [],
+          "time": "all day",
+          "uid": "3e6b-71d4-a209"
+        }
+      ],
+      "rubric": "Wednesday · 12 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "day 2 of 3",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Aug 12:00",
+          "colour": "#4a6b52",
+          "continues": true,
+          "href": "/p/link-lichnyj-whole-token?uid=3e6b-71d4-a209",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Поездка в Казань",
+          "tags": [],
+          "time": "all day",
+          "uid": "3e6b-71d4-a209"
+        }
+      ],
+      "rubric": "Thursday · 13 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "day 3 of 3",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Aug 12:00",
+          "colour": "#4a6b52",
+          "continues": true,
+          "href": "/p/link-lichnyj-whole-token?uid=3e6b-71d4-a209",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Поездка в Казань",
+          "tags": [],
+          "time": "all day",
+          "uid": "3e6b-71d4-a209"
+        }
+      ],
+      "rubric": "Friday · 14 August"
     }
   ],
   "empty": "",

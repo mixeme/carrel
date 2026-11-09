@@ -58,6 +58,10 @@ const (
 	// DraftPageNotice is a line the next page says once (s-mail-16: «The
 	// letter went to 2 recipients.» over the screen the letter closed to).
 	DraftPageNotice
+	// DraftLostAttach is what the new forms pushed out of DraftNewAttach
+	// held — names, types and sizes, not the files (s-agenda-32): their
+	// Save names the files it no longer has, once.
+	DraftLostAttach
 	numDraftSlots
 )
 

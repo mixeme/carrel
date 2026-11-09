@@ -1280,12 +1280,13 @@ func agendaSubtitle(tf timeFmt, where string, from, to time.Time, events *int) v
 }
 
 // eventsIn counts the events of an agenda's days: the tasks due and the
-// notes the bar may put among them are not events.
+// notes the bar may put among them are not events, and an event of several
+// days counts once (AgendaRow.Continues; Typecase's note 182).
 func eventsIn(days []view.AgendaDay) int {
 	n := 0
 	for _, d := range days {
 		for _, r := range d.Rows {
-			if r.Kind == view.KindEvent {
+			if r.Kind == view.KindEvent && !r.Continues {
 				n++
 			}
 		}
@@ -1353,17 +1354,12 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	page.Bar.Compact = s.compactForm(r, c.spec.segment, c.listPath())
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 
-	// «Filter by word» first in the bar (s-agenda-17): with a word the
-	// calendar is read whole and what is found stands by day, the week and
-	// ← Today → gone (s-agenda-31).
+	// «Filter by word» first in the bar (s-agenda-17): a word narrows what
+	// the week shows, and the week stays the week (s-agenda-31; the owner,
+	// 07.11, Typecase's note 185).
 	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
 	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.calendarFilter(c.listPath(), sift)
-	window := [2]*time.Time{&from, &to}
-	if sift != "" {
-		// The bar is the filter and Columns (s-agenda-31).
-		window, page.Bar.Range, page.Bar.Compact = [2]*time.Time{}, nil, nil
-	}
-	objs, bad, err := c.calQuery(r.Context(), c.spec.component, window[0], window[1])
+	objs, bad, err := c.calQuery(r.Context(), c.spec.component, &from, &to)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
@@ -1373,19 +1369,18 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	// tasks and notes live in their own sections.
 	shown := kindedAll(s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), view.KindEvent)
 	var more []unreadable
+	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false, filter.tags)
+	events := eventsIn(page.Days)
+	page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to, &events)
 	if sift != "" {
-		page.Days = s.foundDays(tf, shown, sift, c.spec.segment, false, nil, nil)
+		page.Days = siftDays(page.Days, sift)
 		page.Bar.Loaded = eventsIn(page.Days)
-		page.Subtitle = foundSubtitle(connLabel(c.conn), page.Days, sift)
-		if len(page.Days) == 0 && len(page.Notices) == 0 {
-			page.Empty = foundEmpty(sift)
-		}
-	} else {
-		page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false, filter.tags)
-		events := eventsIn(page.Days)
-		page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to, &events)
-		if len(page.Days) == 0 && len(page.Notices) == 0 {
-			page.Empty = windowEmpty(tf, kind, collectionLabel(c.col), from, to)
+		page.Subtitle = siftedSubtitle(tf, connLabel(c.conn), from, to, page.Bar.Loaded, events)
+	}
+	if len(page.Days) == 0 && len(page.Notices) == 0 {
+		page.Empty = windowEmpty(tf, kind, collectionLabel(c.col), from, to)
+		if sift != "" {
+			page.Empty = siftedEmpty(kind, sift)
 		}
 	}
 	page.Details = s.openInAgenda(r, c.sess, c.listPath(), shown, page.Days)
@@ -1414,15 +1409,47 @@ func (s *Server) calendarFilter(base, q string) *view.Form {
 	return s.filterForm(base, q, view.FormRow{Name: "filter", Label: "Filter by word", Kind: view.InputText, Value: text(q)})
 }
 
-// foundSubtitle is the line under a calendar sifted by a word: where, and
-// how many were found — «nextcloud · 3 events with «синк»» (s-agenda-31).
-func foundSubtitle(where string, days []view.AgendaDay, q string) view.Runs {
-	return view.Runs{{Text: text(where + " · " + plural(eventsIn(days), "event") + " with «" + q + "»")}}
+// siftedSubtitle is the line under a calendar a word narrows: where, the
+// window, the zone, and how many of the window's events are left — «nextcloud
+// · 10 – 16 August 2026 · Europe/Moscow · 1 of 3 events» (s-agenda-31).
+func siftedSubtitle(tf timeFmt, where string, from, to time.Time, kept, all int) view.Runs {
+	line := agendaSubtitle(tf, where, from, to, nil)
+	return append(line, view.Run{Text: text(" · " + strconv.Itoa(kept) + " of " + plural(all, "event"))})
 }
 
-// foundEmpty is a calendar where nothing holds the word.
-func foundEmpty(q string) *view.Notice {
-	return &view.Notice{Role: view.NoticeInfo, Title: text("No events with «" + q + "».")}
+// siftedEmpty is a window where nothing holds the word: «Nothing with «синк»
+// this week.» (s-agenda-31's caption), this day, this month, in this range.
+func siftedEmpty(kind, q string) *view.Notice {
+	when := map[string]string{agendaDay: "this day", agendaMonth: "this month", agendaRange: "in this range"}[kind]
+	if when == "" {
+		when = "this week"
+	}
+	return &view.Notice{Role: view.NoticeInfo, Title: text("Nothing with «" + q + "» " + when + "."), Actions: []view.Action{}}
+}
+
+// siftDays keeps of an agenda's days the rows that hold the word, without
+// regard to case, in what they show — the title, the place, the badges
+// (s-agenda-31, s-publish-39; Typecase's note 185) —, and the days that keep
+// any; each day counts what it keeps.
+func siftDays(days []view.AgendaDay, q string) []view.AgendaDay {
+	needle := strings.ToLower(strings.TrimSpace(q))
+	out := []view.AgendaDay{}
+	for _, d := range days {
+		var rows []view.AgendaRow
+		for _, r := range d.Rows {
+			shown := []string{string(r.Summary), string(r.Location)}
+			for _, b := range r.Badges {
+				shown = append(shown, string(b.Label))
+			}
+			if strings.Contains(strings.ToLower(strings.Join(shown, "\n")), needle) {
+				rows = append(rows, r)
+			}
+		}
+		if len(rows) > 0 {
+			out = append(out, view.AgendaDay{Rubric: d.Rubric, Count: len(rows), Rows: rows})
+		}
+	}
+	return out
 }
 
 // agendaDays expands series into the window and lays an instance another
@@ -1443,88 +1470,8 @@ func kindedAll(items []listed, k view.Kind) []kinded {
 	return out
 }
 
-// foundDays is a calendar sifted by a word (s-agenda-31, s-publish-39):
-// every event whose title, place or description holds it — within the
-// window when there is one —, by day. A series stands once, at its next
-// time from now (its first in the window, its last when it has ended); what
-// has passed is muted (AgendaRow.Past). The rows are agendaDays' own.
-func (s *Server) foundDays(tf timeFmt, items []kinded, q, segment string, mark bool, from, to *time.Time) []view.AgendaDay {
-	needle := strings.ToLower(strings.TrimSpace(q))
-	now := tf.now
-	type found struct {
-		at  time.Time
-		row view.AgendaRow
-	}
-	var all []found
-	for _, it := range items {
-		o := it.obj
-		hay := strings.ToLower(strings.Join([]string{cal.Text(it.pick("SUMMARY"), "SUMMARY"), cal.Text(o, "LOCATION"), cal.Description(o)}, "\n"))
-		if needle == "" || !strings.Contains(hay, needle) {
-			continue
-		}
-		at, ok := foundAt(tf, o, from, to, now)
-		if !ok {
-			continue
-		}
-		days, _, _ := s.agendaDays(tf, []kinded{it}, at, at.Add(time.Second), segment, mark, nil)
-		if len(days) == 0 || len(days[0].Rows) == 0 {
-			continue
-		}
-		row := days[0].Rows[0]
-		row.Past = at.Before(now)
-		all = append(all, found{at: at, row: row})
-	}
-	sort.SliceStable(all, func(i, j int) bool { return all[i].at.Before(all[j].at) })
-	out := []view.AgendaDay{}
-	for _, f := range all {
-		rubric := text(tf.dayRubric(f.at))
-		if n := len(out); n > 0 && out[n-1].Rubric == rubric {
-			out[n-1].Rows, out[n-1].Count = append(out[n-1].Rows, f.row), out[n-1].Count+1
-			continue
-		}
-		out = append(out, view.AgendaDay{Rubric: rubric, Count: 1, Rows: []view.AgendaRow{f.row}})
-	}
-	return out
-}
-
-// foundAt is the time an event stands at in foundDays: its start; a
-// series' next time from now within the window, its first in the window
-// when all are past, its last when it has ended.
-func foundAt(tf timeFmt, o *model.Object, from, to *time.Time, now time.Time) (time.Time, bool) {
-	tm, err := cal.TimingOf(o, tf.tz)
-	if err != nil || tm.Start.IsZero() {
-		return time.Time{}, false
-	}
-	lo, hi := tm.Start, now.AddDate(5, 0, 0)
-	if from != nil {
-		lo, hi = *from, *to
-	}
-	if !cal.HasRecurrence(o) {
-		if tm.Start.Before(lo) || !tm.Start.Before(hi) {
-			return time.Time{}, false
-		}
-		return tm.Start, true
-	}
-	instants, err := cal.Expand(o, lo, hi, tf.tz)
-	if err != nil || len(instants) == 0 {
-		return time.Time{}, false
-	}
-	for _, at := range instants {
-		if !at.Before(now) {
-			return at, true
-		}
-	}
-	return instants[len(instants)-1], true
-}
-
 func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segment string, mark bool, tags func([]string) []view.Tag) ([]view.AgendaDay, int, []unreadable) {
 	tz := tf.tz
-	type occurrence struct {
-		at     time.Time
-		allDay bool
-		order  string
-		row    view.AgendaRow
-	}
 	var occs []occurrence
 	var bad []unreadable
 	for _, it := range items {
@@ -1532,9 +1479,15 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 		uid := cal.UID(o)
 		summary := titleOr(cal.Text(o, "SUMMARY"), "Untitled event")
 		tm, err := cal.TimingOf(o, tz)
+		// An occurrence lasts as long as the first: one that began before
+		// the window and goes on into it stands in the window's days too.
+		var last time.Duration
+		if err == nil && tm.End.After(tm.Start) {
+			last = tm.End.Sub(tm.Start)
+		}
 		var instants []time.Time
 		if err == nil {
-			instants, err = cal.Expand(o, from, to, tz)
+			instants, err = cal.Expand(o, from.Add(-last), to, tz)
 		}
 		var overrides []cal.Override
 		if err == nil {
@@ -1562,7 +1515,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 			changed = text(tf.shortStamp(at))
 		}
 		for _, at := range instants {
-			if at.Before(from) || !at.Before(to) {
+			if !at.Before(to) || !at.Add(last).After(from) && at.Before(from) {
 				continue
 			}
 			occ := occurrence{at: at, allDay: tm.AllDay, order: string(it.from.stamp()) + "\x00" + it.from.listPath(segment), row: view.AgendaRow{
@@ -1601,7 +1554,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 					occ.row.Badges = append([]view.Badge{{Label: "Cancelled", Role: view.BadgeAlert}}, occ.row.Badges...)
 				}
 			}
-			occs = append(occs, occ)
+			occs = append(occs, spanDays(tf, occ, last, from, to)...)
 		}
 	}
 
@@ -1630,12 +1583,64 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 		byDay[k] = append(byDay[k], o.row)
 	}
 	days := []view.AgendaDay{}
+	events := 0
 	for day := from; day.Before(to); day = day.AddDate(0, 0, 1) {
 		if rows := byDay[tf.dayKey(day)]; len(rows) > 0 {
 			days = append(days, view.AgendaDay{Rubric: text(tf.dayRubric(day)), Count: len(rows), Rows: rows})
 		}
 	}
-	return days, len(occs), bad
+	for _, o := range occs {
+		if !o.row.Continues {
+			events++
+		}
+	}
+	return days, events, bad
+}
+
+// occurrence is one time an event stands in an agenda: when, whether all
+// day, the order of its sources, and its row.
+type occurrence struct {
+	at     time.Time
+	allDay bool
+	order  string
+	row    view.AgendaRow
+}
+
+// spanDays lays an occurrence that lasts into further days in each day of
+// the window it takes (Typecase's note 182, task 257: «Поездка в Казань»,
+// all day 12–14 August, on Wednesday, Thursday and Friday): the first of
+// them at its own time, the others at the start of their day, each with its
+// badge «day k of n»; the rows after the list's first continue it
+// (AgendaRow.Continues). A day ends where the next begins: an all-day event
+// to 15 August takes the 12th to the 14th.
+func spanDays(tf timeFmt, occ occurrence, last time.Duration, from, to time.Time) []occurrence {
+	start := occ.at.In(tf.tz)
+	day := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, tf.tz)
+	n := 1
+	if last > 0 {
+		end := start.Add(last - time.Nanosecond)
+		for d := day.AddDate(0, 0, 1); !d.After(end); d = d.AddDate(0, 0, 1) {
+			n++
+		}
+	}
+	if n == 1 {
+		return []occurrence{occ}
+	}
+	var out []occurrence
+	for k := range n {
+		d := day.AddDate(0, 0, k)
+		if !d.Before(to) || !d.AddDate(0, 0, 1).After(from) {
+			continue
+		}
+		one := occ
+		one.row.Badges = append(slices.Clone(occ.row.Badges), view.Badge{Label: text("day " + strconv.Itoa(k+1) + " of " + strconv.Itoa(n)), Role: view.BadgeNeutral})
+		one.row.Continues = len(out) > 0
+		if k > 0 {
+			one.at = d
+		}
+		out = append(out, one)
+	}
+	return out
 }
 
 // agendaBadges are the badges of an event's row, the first of them the one

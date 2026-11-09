@@ -188,6 +188,13 @@
           },
           {
             "colour": "#4a6b52",
+            "label": "Поездка в Казань",
+            "meta": "event · 12 Aug",
+            "selected": false,
+            "value": "3e6b-71d4-a209"
+          },
+          {
+            "colour": "#4a6b52",
             "label": "Забрать документы",
             "meta": "event · 11 Aug",
             "selected": false,
@@ -283,6 +290,13 @@
             "meta": "note · 3 Aug",
             "selected": false,
             "value": "7f03-5b26-cc19"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Про сроки по сборнику",
+            "meta": "note · 21 Jul",
+            "selected": false,
+            "value": "6d93-21b4-c517"
           },
           {
             "colour": "#4a6b52",
@@ -495,7 +509,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/zapisi",

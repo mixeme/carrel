@@ -339,7 +339,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -376,7 +376,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "/app/notes",
@@ -395,7 +395,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 3,
             "detail": "The server answered 503 Service Unavailable.",
             "feed": false,
             "href": "/app/notes/a-nc-home/zapisi",

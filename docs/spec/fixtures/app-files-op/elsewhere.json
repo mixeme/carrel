@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
       "id": "file.move.confirm",
       "label": "Move",
       "method": "POST",
@@ -21,7 +21,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
       "id": "file.op.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -30,7 +30,7 @@
   "alert": [],
   "failure": null,
   "form": {
-    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -65,24 +65,24 @@
   "op": "move",
   "servers": [
     {
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026server=a-nc-home",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026server=a-nc-home",
       "label": "nextcloud",
       "on": true
     },
     {
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026server=a-sftp-vps",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026server=a-sftp-vps",
       "label": "sftpgo · vps",
       "on": false
     }
   ],
-  "subject": "from Documents / carrel / attachments",
+  "subject": "from Documents / carrel / attachments / 2026-08",
   "target": {
     "chosen": "/app/files/a-nc-home/Files/",
     "field": "to",
     "name": null,
     "new": {
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026new=1\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026new=1\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
       "icon": "i-plus",
       "id": "files.tree.new",
       "label": "New folder",
@@ -93,7 +93,7 @@
       {
         "children": [],
         "expanded": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,

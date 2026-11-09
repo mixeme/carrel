@@ -264,7 +264,7 @@
         }
       ]
     },
-    "loaded": 3,
+    "loaded": 4,
     "range": null,
     "segments": [
       {
@@ -609,7 +609,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e28",
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e30",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -709,7 +709,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e24",
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e25",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -799,7 +799,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e27",
+              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e29",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -825,6 +825,93 @@
         }
       ],
       "rubric": "August 2026"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "21 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "21 Jul",
+          "excerpt": "Анна просит две недели на вёрстку после сдачи текста.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d93-21b4-c517\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d93-21b4-c517",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d93-21b4-c517",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/delete?etag=e26",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Про сроки по сборнику",
+          "uid": "6d93-21b4-c517"
+        }
+      ],
+      "rubric": "July 2026"
     }
   ],
   "look": {
@@ -866,7 +953,7 @@
     "sources": [
       {
         "colour": "#4a6b52",
-        "count": 2,
+        "count": 3,
         "fromCache": false,
         "message": "",
         "retry": null,
@@ -886,15 +973,15 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 2 of 2 sources · 3 notes"
+        "text": "Polled 2 of 2 sources · 4 notes"
       }
     ],
     "taskID": "t-task"
   },
   "print": {
-    "foot": "Carrel · notes · 3 notes · captured 2026-08-10 17:04 · 2 of 2 notebooks",
+    "foot": "Carrel · notes · 4 notes · captured 2026-08-10 17:04 · 2 of 2 notebooks",
     "heading": "Notes · Combined notebook",
-    "range": "2 notebooks · 3 notes",
+    "range": "2 notebooks · 4 notes",
     "sources": "nextcloud · Записи, Дневник",
     "taken": "10 August 2026, 17:04",
     "title": "Combined notebook"
@@ -947,7 +1034,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -965,7 +1052,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -1002,7 +1089,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "/app/notes",
@@ -1021,7 +1108,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/zapisi",
@@ -1129,7 +1216,7 @@
       "target": "rail"
     }
   },
-  "subtitle": "2 of 3 notebooks · 3 notes · VJOURNAL",
+  "subtitle": "2 of 3 notebooks · 4 notes · VJOURNAL",
   "title": "Combined notebook",
   "top": {
     "lock": null,

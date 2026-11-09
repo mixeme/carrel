@@ -401,7 +401,7 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже, с теми же параметрами: `?print=1`, `?open=`, `?filter=`, `?compact=`, у календаря окно и роды |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?filter=` — «Filter by word» по всему календарю (s-agenda-31), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?filter=` — «Filter by word»: сужает показанное окно (неделю, день, месяц, диапазон) до строк со словом в названии, месте или бейджах (s-agenda-31; записка Typecase 185), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `calendar`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом, `Doc.Bar`); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у события и задачи `?op=apart` с `day` — «Try again» вопроса перед записью серии (AskSheet, C-6); у всех `etag` показанной версии; POST правки серии, оставляющей встречи без дня, отвечает листом вопроса `AskSheet` (C-6; s-agenda-22…-24) поверх правки с набранным; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же; правка записи, которую удалили на сервере (Р-67), хранится, как отказанная, и POST ведёт на `…/conflict` |
@@ -1247,7 +1247,7 @@ type AgendaDay struct { Rubric Text; Count int; Rows []AgendaRow } // Rubric —
 type AgendaRow struct {
     Kind      Kind // event: календарь показывает только события (решение владельца 11.10.2026, Typecase Р-56); задачи и заметки — в своих разделах
     Href      string
-    Past      bool // прошедшее в ленте найденного по слову — строка приглушена (s-agenda-31); в неделе — false
+    Continues bool // строка не первого из дней события на несколько дней в этом списке («day 2 of 3», записка Typecase 182): рисуется так же, в счёт событий не идёт
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
     UID       string
     Colour    Colour
@@ -1625,7 +1625,7 @@ type AttachRow struct {
     // carrel»; в другом месте Files — хранилище и папки над файлом; у данных
     // внутри записи и у ссылки вне каталога пусто, ключа нет
     Place   Text
-    State   RecordState
+    State   RecordState // у новой формы unavailable — файла сессия больше не держит: строка с бейджем «not kept» и Remove без адреса, убирающим её со страницы (s-agenda-32)
     Actions []Action // только на правке (s-agenda-3): Remove — «Remove link, keep the file» у ссылки; в карточке и панели действий у вложения нет
     From    *FieldFrom // у связанной записи: коллекция копии, где одной лежит вложение (Р-78, записка Typecase 123 п. 10); nil — у всех копий или запись одна
 }
@@ -2873,6 +2873,8 @@ type PublishedRow struct {
     LastSeen When
     Unopened bool // ссылку ни разу не открывали: LastSeen приглушён
     Gone     Text // то, что ссылка открывала, ушло, и Carrel не смог за ним последовать (Б41): запись удалена или перенесена под неизвестным UID, коллекция удалена; пусто — ссылка жива. Строка — подсказка плашки «no longer there» (s-publish-21): «Deleted, or moved where Carrel could not follow it»; у мёртвой Expires — «—», Copy и Send выключены с причиной «It is no longer there», Revoke стоит. Запись, перенесённая и слитая Carrel, и коллекция, перенесённая им, ссылку уносят с собой
+    Missing     Text // сколько записей коллекции не вошло в ссылку при последнем чтении гостем — Carrel их не разобрал, гостю они не отдаются (решение владельца 04.11.2026, Б3): бейдж рядом с именем «1 record not in the link» (s-publish-40); пусто — вошли все или ссылку ещё не открывали
+    MissingHint Text // подсказка бейджа: «Carrel could not read it: invalid vCard. Unchanged on the server.», у календаря — «invalid iCalendar»
     Opens    int      // сколько раз открыли: так видно, что ссылка ушла дальше, чем думали
     ID       string   // номер ссылки, не секрет: значение `id` кнопки Revoke — она отправляет общую форму списка `POST /app/publish?op=revoke` (s-publish-1, записка Typecase 110); Send — ссылка `/app/mail/link?id=`
     Actions  []Action // Copy · Send (с почтой) · Revoke (s-publish-1)
@@ -3875,12 +3877,12 @@ type AboutPage struct { // rest-3: Title «Carrel», Lede — первая ст�
 // Владельца страница не называет (S-25.1). Строки календаря и книги несут
 // цвет опубликованной коллекции (Colour), какой он был при выдаче ссылки.
 type PublishedPage struct { // записка Typecase 122: строка списка открывает свою запись в той же ссылке (?uid=)
-    Plain    // Lede — дни календаря («10 – 31 August 2026»), счёт списка («13 contacts»), у события и задачи когда и где («Due Friday, 7 August 2026 · МФЦ»), у контакта организация и должность; со словом — «3 events with «синк»»
+    Plain    // Lede — дни календаря («10 – 31 August 2026»), счёт списка («13 contacts»), у события и задачи когда и где («Due Friday, 7 August 2026 · МФЦ»), у контакта организация и должность; у календаря со словом — сколько осталось из показанного: «10 – 16 August 2026 · 1 of 3 events» (s-publish-39)
     Kind     Kind
     ReadOnly bool // метка read-only рядом с логотипом
     Range    *Range         // весь календарь — ← Today → неделями (s-publish-24); у ссылки на диапазон и со словом — nil
     Contacts []ContactGroup // по букве, как книга в приложении (s-publish-7)
-    Days     []AgendaDay    // со словом — всё найденное по дням, серия одной строкой (s-publish-39)
+    Days     []AgendaDay    // со словом — строки показанной недели (дней ссылки), в которых оно есть; ← Today → несут слово (s-publish-39; записка Typecase 185)
     Tasks    []TaskGroup    // «Open», «Done» со счётом (s-publish-28)
     Notes    []NoteGroup    // по месяцам, от новых к старым (s-publish-29)
     Avatar   *Avatar        // контакт: инициалы в шапке (s-publish-26)

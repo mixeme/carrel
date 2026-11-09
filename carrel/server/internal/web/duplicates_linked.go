@@ -399,10 +399,9 @@ func (s *Server) linkedPage(sess *session.Session, spec kindSpec, lr linkedRecor
 				p.Meta.TagsFrom = lr.tagsFrom(q)
 			}
 		}
+		// «Kept as the server sent them» stays, folded, as the note's own
+		// (s-notes-32; Typecase's task 254).
 		p.Doc.Bar, p.Meta.Actions, p.Meta.Menu, p.Source = actions, nil, menu, view.SourceBlock{}
-		// «Kept as the server sent them» waits for its frame: s-notes-32
-		// does not draw it (Typecase's task 254), though Р-78 shows it.
-		p.Meta.Foreign, p.Meta.ForeignShow = nil, nil
 		return p
 	default:
 		return p
@@ -431,7 +430,32 @@ func (s *Server) getLinkedRecord(w http.ResponseWriter, r *http.Request, kind st
 		s.notFound(w, r)
 		return
 	}
-	s.writePage(w, r, http.StatusOK, s.linkedPage(sess, spec, lr))
+	s.writePage(w, r, http.StatusOK, s.linkedForeign(s.linkedPage(sess, spec, lr), spec.segment, r))
+}
+
+// linkedForeign points «Show 3» of the kept properties at the linked record
+// itself (?foreign=1), not at the copy whose card it came from, and opens
+// them on that address (s-contacts-33, s-notes-32; Typecase's task 254).
+func (s *Server) linkedForeign(page any, segment string, r *http.Request) any {
+	open := r.URL.Query().Get("foreign") == "1"
+	here := s.route("/app/" + segment + "/linked/" + url.PathEscape(r.PathValue("uid")) + "?foreign=1")
+	point := func(a *view.Action) *view.Action {
+		if a == nil || open {
+			return nil
+		}
+		one := *a
+		one.Href = here
+		return &one
+	}
+	switch p := page.(type) {
+	case view.ContactPage:
+		p.ForeignShow = point(p.ForeignShow)
+		return p
+	case view.NotePage:
+		p.Meta.ForeignShow = point(p.Meta.ForeignShow)
+		return p
+	}
+	return page
 }
 
 // linkedByUID is the linked group of the kind with a member of this UID.

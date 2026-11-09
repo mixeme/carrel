@@ -483,7 +483,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -538,7 +538,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 9,
+            "count": 10,
             "detail": "",
             "feed": false,
             "href": "/app/calendar",
@@ -557,7 +557,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 4,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",

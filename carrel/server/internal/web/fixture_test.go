@@ -222,13 +222,17 @@ var mockupFileShapes = []struct {
 	{slug: "Documents", rel: "carrel/attachments/2026-07/панорама.tif", size: 88122982, at: "2026-07-20 13:10"},
 	{slug: "Public", rel: "прайс-2026.pdf", size: 1153434, at: "2026-07-28 10:15"},
 	{slug: "Public", rel: "схема-проезда.png", size: 4404019, at: "2026-06-02 16:40"},
-	{slug: "Documents", rel: "carrel/attachments/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07", head: pngHead(1920, 1080)},
+	{slug: "Documents", rel: "carrel/attachments/2026-08/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07", head: pngHead(1920, 1080)},
 	// The checklist is the frame's Markdown in the set, 3 KB as it stands
 	// (s-publish-10): a public page reads it as its body.
-	{slug: "Documents", rel: "carrel/attachments/release-checklist.md", at: "2026-08-09 18:44"},
-	{slug: "Documents", rel: "carrel/attachments/смета-подрядчик.pdf", size: 1258291, at: "2026-08-05 14:20"},
-	{slug: "Documents", rel: "carrel/attachments/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03", head: jpegHead4032x3024},
+	{slug: "Documents", rel: "carrel/attachments/2026-08/release-checklist.md", at: "2026-08-09 18:44"},
+	{slug: "Documents", rel: "carrel/attachments/2026-08/смета-подрядчик.pdf", size: 1258291, at: "2026-08-05 14:20"},
+	{slug: "Documents", rel: "carrel/attachments/2026-08/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03", head: jpegHead4032x3024},
 	{slug: "Documents", rel: "carrel/attachments/2026-07", at: "2026-07-01 09:12"},
+	{slug: "Documents", rel: "ковалёва-обложка-v2.pdf", size: 1677722, at: "2026-08-06 16:20"},
+	// August's folder, changed when its last file came (s-publish-5:
+	// «2026-08 · folder · 4 items · 2026-08-10 11:07»; note 180).
+	{slug: "Documents", rel: "carrel/attachments/2026-08", at: "2026-08-10 11:07"},
 }
 
 // jpegHead4032x3024 is the start of a JPEG and its baseline frame header:
@@ -405,7 +409,7 @@ func mockupPublished(t *testing.T, h *harness, sess *session.Session, ids, paths
 	at("2026-08-10 11:05")
 	file := give(url.Values{
 		"k": {"files"}, "a": {ids["sftpgo · vps"]}, "c": {paths["Documents"]},
-		"f": {"carrel/attachments/смета-подрядчик.pdf"}, "lives": {"never"},
+		"f": {"carrel/attachments/2026-08/смета-подрядчик.pdf"}, "lives": {"never"},
 	})
 	h.srv.SetClock(mockupNow(t))
 	h.users.SetClock(mockupNow(t))
@@ -1581,7 +1585,6 @@ var (
 // note 178 p. 1); the agenda's week and the lists draw neither.
 func seedMockupWhole(t *testing.T, app *mockupApp) {
 	t.Helper()
-	seedMockupTrip(t, app)
 	body, err := os.ReadFile(filepath.Join(mockupRoot(t), filepath.FromSlash(chemodan.file)))
 	if err != nil {
 		t.Fatal(err)
@@ -1654,8 +1657,10 @@ func attachMockupRecording(t *testing.T, app *mockupApp) {
 	t.Helper()
 	sftp := app.servers["sftpgo · vps"]
 	at := davtest.FileRoot + "Documents/carrel/attachments/2026-08/"
-	sftp.SeedFolder(at)
 	sftp.SeedFile(at+"запись-встречи.m4a", "a stub of the recording")
+	// Made after the meeting, not when the stand is loaded: August's
+	// folder lists it (s-publish-12; note 180).
+	sftp.SetModified(at+"запись-встречи.m4a", mockupDayAt(t, "2026-08-10 11:20"))
 	nc := app.servers["nextcloud"]
 	p := davtest.CalendarHome + "zapisi/5c81-77aa-0d64.ics"
 	body, _, ok := nc.Object(p)
@@ -1738,20 +1743,6 @@ func linkMockupCopies(t *testing.T, app *mockupApp, kind view.Kind, group string
 	}
 }
 
-// seedMockupTrip puts «Поездка в Казань» into «Личный»: the event «Собрать
-// чемодан» is related to (s-tasks-1, -2, -10). The agenda frames do not draw
-// it, so the set keeps it in a file of its own (README).
-func seedMockupTrip(t *testing.T, app *mockupApp) {
-	t.Helper()
-	body, err := os.ReadFile(filepath.Join(mockupRoot(t), "nextcloud-home", "lichnyj-poezdka.ics"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, rec := range splitRecords(string(body)) {
-		app.servers["nextcloud"].Seed(davtest.CalendarHome+"lichnyj/3e6b-71d4-a209.ics", rec)
-	}
-}
-
 // lastUsed makes the collection of the set the one a record of kind was
 // last made in: New's arrow says «last used» by it (s-tasks-5, s-notes-13).
 func (a *mockupApp) lastUsed(t *testing.T, slug string, kind view.Kind) {
@@ -1775,7 +1766,6 @@ func (a *mockupApp) lastUsed(t *testing.T, slug string, kind view.Kind) {
 func TestFixtureTaskList(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupTask(t, app)
-	seedMockupTrip(t, app)
 	// The calendar was read: the panel's Related names the trip.
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	// Both task lists are counted in the frame (s-tasks-1): the combined
@@ -1795,7 +1785,6 @@ func TestFixtureTaskList(t *testing.T) {
 func TestFixtureCombinedTasks(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupTask(t, app)
-	seedMockupTrip(t, app)
 	app.lastUsed(t, "dela", view.KindTask)
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	page := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
@@ -1880,7 +1869,7 @@ func TestFixtureCombinedNotes(t *testing.T) {
 	paperAt := onPaper("/app/notes?task=" + page.Poll.TaskID)
 	paper := decode[view.NotesPage](t, app.h.do(get(paperAt, app.sess))).Print
 	if !paper.Paper || paper.Heading != "Notes · Combined notebook" || paper.Sources != "nextcloud · Записи, Дневник" ||
-		!strings.HasPrefix(string(paper.Foot), "Carrel · notes · 3 notes · captured ") || !strings.HasSuffix(string(paper.Foot), " · 2 of 2 notebooks") {
+		!strings.HasPrefix(string(paper.Foot), "Carrel · notes · 4 notes · captured ") || !strings.HasSuffix(string(paper.Foot), " · 2 of 2 notebooks") {
 		t.Errorf("the notes on paper = %+v", paper)
 	}
 	app.compare(t, "app-notes-all/print.json", app.h.do(get(paperAt, app.sess)))
@@ -1892,7 +1881,6 @@ func TestFixtureCombinedNotes(t *testing.T) {
 func TestFixtureTaskCard(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupTask(t, app)
-	seedMockupTrip(t, app)
 	// The calendar was read: Related names the trip.
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	// The lists were opened before the record: that is where the counts
@@ -1910,7 +1898,6 @@ func TestFixtureTaskCard(t *testing.T) {
 func TestFixtureCopiesSheets(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupTask(t, app)
-	seedMockupTrip(t, app)
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	list := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
@@ -2667,26 +2654,12 @@ func steadyInstall(rec *httptest.ResponseRecorder, live, dataDir string) {
 
 // C-14.2: the timeline of Анна Ковалёва (s-contacts-7). The timeline is a
 // search over one person: it is gathered when the screen is opened, and the
-// screen is taken once it has answered. Beside what the set holds, the
-// frame draws a file with her name in its own («ковалёва-обложка-v2.pdf», 6
-// Aug, sftpgo · vps · Documents) and a note related to her card («Про сроки
-// по сборнику», 21 Jul, nextcloud · Записи; Typecase's note 178 p. 3). The
-// lists of notes and the folder do not draw them, so the stand of this
-// screen alone holds them.
+// screen is taken once it has answered. The file with her name in its own
+// («ковалёва-обложка-v2.pdf», 6 Aug, sftpgo · vps · Documents) and the note
+// related to her card («Про сроки по сборнику», 21 Jul, nextcloud · Записи)
+// are the set's (Typecase's notes 178 p. 3, 182 p. 5).
 func TestFixtureContactTimeline(t *testing.T) {
 	app := newMockupApp(t)
-	cover := davtest.FileRoot + "Documents/ковалёва-обложка-v2.pdf"
-	app.servers["sftpgo · vps"].SeedFile(cover, "%PDF-1.4 a stub of the cover")
-	app.servers["sftpgo · vps"].SetModified(cover, mockupDayAt(t, "2026-08-06 16:20"))
-	app.servers["nextcloud"].Seed(davtest.CalendarHome+"zapisi/6d93-21b4-c517.ics", ics(strings.Join([]string{
-		"BEGIN:VJOURNAL",
-		"UID:6d93-21b4-c517",
-		"DTSTAMP:20260721T090000Z",
-		"DTSTART;VALUE=DATE:20260721",
-		"SUMMARY:Про сроки по сборнику",
-		"DESCRIPTION:Анна просит две недели на вёрстку после сдачи текста.",
-		"RELATED-TO:4f2b-9c31-a0e7",
-		"END:VJOURNAL"}, "\n")))
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	anna := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
@@ -3396,28 +3369,26 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		part, _ = w.CreateFormFile("file", "архив-2025.zip")
 		_, _ = part.Write([]byte("zip"))
 		_ = w.Close()
-		req := httptest.NewRequest(http.MethodPost, app.filesAt(t, "Documents", "upload", "carrel", "attachments"), &buf)
+		req := httptest.NewRequest(http.MethodPost, app.filesAt(t, "Documents", "upload", "carrel", "attachments", "2026-08"), &buf)
 		req.Header.Set("Content-Type", w.FormDataContentType())
 		req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: app.sess.ID()})
 		if rec := app.h.do(req); rec.Code >= 400 {
 			t.Fatalf("upload: %d %s", rec.Code, rec.Body)
 		}
 		for _, name := range []string{"отчёт-июль.pdf", "плакат.png"} {
-			srv.SetModified(app.realPath(t, "Documents")+"carrel/attachments/"+name, mockupNow(t))
+			srv.SetModified(app.realPath(t, "Documents")+"carrel/attachments/2026-08/"+name, mockupNow(t))
 		}
 		// Over the three chosen of s-files-2, the frame of the queue under a
 		// selection (its refused row is the fragment s-files-24).
 		three := []string{"2026-08-10-sync-board.png", "release-checklist.md", "2026-08-04-whiteboard.jpg"}
-		app.compare(t, "app-files-folder/refused.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments")+"?"+url.Values{"select": three}.Encode(), app.sess)))
+		app.compare(t, "app-files-folder/refused.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-08")+"?"+url.Values{"select": three}.Encode(), app.sess)))
 	})
 	t.Run("app-files-picker", func(t *testing.T) {
-		// «Upload files» of the menu (s-notes-11) with the folder New folder
-		// of its tree has just made: «2026-08» in the attachment folder,
-		// chosen, «just created», first among the folders beside it. Last
-		// here: the folder stays on the stand.
-		made := "/app/files/picker?" + url.Values{"for": {"upload"}, "mkcol": {"1"},
-			"to": {app.filesAt(t, "Documents", "", "carrel", "attachments")}}.Encode()
-		app.compare(t, "app-files-picker/normal.json", app.h.do(postForm(made, app.sess, url.Values{"name": {"2026-08"}})))
+		// «Upload files» of the menu (s-notes-11) over August's folder of the
+		// attachments, which is there since 4 August (note 180 of Typecase).
+		at := "/app/files/picker?" + url.Values{"for": {"upload"},
+			"to": {app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-08")}}.Encode()
+		app.compare(t, "app-files-picker/normal.json", app.h.do(get(at, app.sess)))
 	})
 }
 
@@ -3437,7 +3408,8 @@ func openSections(t *testing.T, app *mockupApp) {
 func readFolders(t *testing.T, app *mockupApp) {
 	t.Helper()
 	for _, at := range []string{
-		app.filesAt(t, "Documents", "", "carrel", "attachments"), app.filesAt(t, "Documents", ""),
+		app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-08"), app.filesAt(t, "Documents", "", "carrel", "attachments"),
+		app.filesAt(t, "Documents", ""),
 		app.filesAt(t, "Public", ""), app.filesAt(t, "Files", ""),
 	} {
 		if rec := app.h.do(get(at, app.sess)); rec.Code != 200 {
@@ -3472,16 +3444,18 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	openSections(t, app)
 	readFolders(t, app)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// The attachments' folders are by month (note 180 of Typecase): the
+	// screens open August's, where the four files of the month lie.
 	attachments := app.filesAt(t, "Documents", "", "carrel", "attachments")
-	op := app.filesAt(t, "Documents", "op", "carrel", "attachments")
+	august := app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-08")
+	op := app.filesAt(t, "Documents", "op", "carrel", "attachments", "2026-08")
 	three := []string{"2026-08-10-sync-board.png", "release-checklist.md", "2026-08-04-whiteboard.jpg"}
 	sheet := func(name string, form url.Values) {
 		t.Helper()
 		app.compare(t, "app-files-op/"+name+".json", app.h.do(postForm(op+"?"+form.Encode(), app.sess, url.Values{})))
 	}
 
-	app.compare(t, "app-files-folder/normal.json", app.h.do(get(attachments+"?select="+url.QueryEscape(three[0]), app.sess)))
-	app.compare(t, "app-files-folder/print.json", app.h.do(get(onPaper(attachments), app.sess))) // print-6
+	app.compare(t, "app-files-folder/normal.json", app.h.do(get(august+"?select="+url.QueryEscape(three[0]), app.sess)))
 	// states-34 draws «Public» ticked with the other two, «3 of 3»: ticked
 	// for this one answer — the other frames draw it unticked.
 	app.tickFiles(t, "Documents", "Public", "Files")
@@ -3494,7 +3468,9 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	sheet("elsewhere", url.Values{"op": {"move"}, "item": three, "to": {app.filesAt(t, "Files", "")}})
 	sheet("rename", url.Values{"op": {"rename"}, "item": three[:1]})
 	sheet("delete", url.Values{"op": {"delete"}, "item": three})
-	sheet("delete-folder", url.Values{"op": {"delete"}, "item": {"2026-07"}}) // s-files-27
+	// July's folder is deleted from where it lies, the attachments (s-files-27).
+	app.compare(t, "app-files-op/delete-folder.json", app.h.do(postForm(app.filesAt(t, "Documents", "op", "carrel", "attachments")+"?"+
+		url.Values{"op": {"delete"}, "item": {"2026-07"}}.Encode(), app.sess, url.Values{})))
 	// New folder of the tree with a name taken in the chosen folder.
 	app.compare(t, "app-files-op/refused.json", app.h.do(postForm(op+"?"+url.Values{"op": {"move"}, "item": three, "mkcol": {"1"},
 		"to": {app.filesAt(t, "Documents", "", "carrel", "attachments")}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))
@@ -3503,7 +3479,7 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	app.compare(t, "app-files-op/new.json", app.h.do(postForm(app.filesAt(t, "Documents", "mkcol", "carrel", "attachments"), app.sess, url.Values{"name": {"2026-07"}})))
 
 	from := "/app/files/picker?" + url.Values{"for": {"attach"}, "k": {"tasks"}, "a": {app.realAccount(t, "dela")}, "c": {app.realPath(t, "dela")},
-		"uid": {"aa11-2d09-5f84"}, "to": {attachments}}.Encode()
+		"uid": {"aa11-2d09-5f84"}, "to": {august}}.Encode()
 	app.compare(t, "app-files-picker/attach.json", app.h.do(get(from, app.sess)))
 	app.compare(t, "app-files-picker/refused.json", app.h.do(postForm("/app/files/picker?"+url.Values{"for": {"upload"}, "mkcol": {"1"},
 		"to": {attachments}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))
@@ -3514,7 +3490,7 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	// its way there, an answer of the server has every file's end).
 	sftp := app.servers["sftpgo · vps"]
 	sftp.RefuseUnsizedPUT = true
-	rec := app.h.do(sizedUpload(app.filesAt(t, "Documents", "upload", "carrel", "attachments"), app.sess,
+	rec := app.h.do(sizedUpload(app.filesAt(t, "Documents", "upload", "carrel", "attachments", "2026-08"), app.sess,
 		upload{"отчёт-июль.pdf", strings.Repeat(".", 4300000)}, upload{"плакат.png", strings.Repeat(".", 8700000)},
 		upload{"release-checklist.md", "# again"}, upload{"архив-2025.zip", ""}))
 	sftp.RefuseUnsizedPUT = false
@@ -3523,20 +3499,20 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	}
 	// The stand stamps what arrives with the wall clock; the set's day stands.
 	for _, name := range []string{"отчёт-июль.pdf", "плакат.png"} {
-		app.servers["sftpgo · vps"].SetModified(app.realPath(t, "Documents")+"carrel/attachments/"+name, mockupNow(t))
+		app.servers["sftpgo · vps"].SetModified(app.realPath(t, "Documents")+"carrel/attachments/2026-08/"+name, mockupNow(t))
 	}
-	app.compare(t, "app-files-folder/long.json", app.h.do(get(attachments+"?"+url.Values{"select": three}.Encode(), app.sess)))
+	app.compare(t, "app-files-folder/long.json", app.h.do(get(august+"?"+url.Values{"select": three}.Encode(), app.sess)))
 
-	// An empty folder (states-32): August's, under the attachments — on a
-	// stand of its own: the frames of the attachments do not draw it, and
-	// the uploads' queue is not its.
+	// An empty folder (states-32): «черновики» of July's, under the
+	// attachments (note 180 of Typecase) — on a stand of its own: the trees
+	// of the sheets draw July's folder without folders in it.
 	t.Run("empty", func(t *testing.T) {
 		app := newMockupApp(t)
 		openSections(t, app)
 		readFolders(t, app)
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-		app.servers["sftpgo · vps"].SeedFolder(app.realPath(t, "Documents") + "carrel/attachments/2026-08/")
-		app.compare(t, "app-files-folder/empty.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-08"), app.sess)))
+		app.servers["sftpgo · vps"].SeedFolder(app.realPath(t, "Documents") + "carrel/attachments/2026-07/черновики/")
+		app.compare(t, "app-files-folder/empty.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-07", "черновики"), app.sess)))
 	})
 
 	// A storage that did not answer (states-33): Documents, opened at its
@@ -3593,6 +3569,8 @@ func TestFixtureFilesTiles(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	// The chosen tile is drawn without the panel: Details off.
 	app.compare(t, "app-files-folder/tiles.json", app.h.do(get(at+"?view=tiles&details=0&select=whiteboard.jpg", app.sess)))
+	// The same folder on paper, its folders first (print-6; note 180).
+	app.compare(t, "app-files-folder/print.json", app.h.do(get(onPaper(at), app.sess)))
 }
 
 // C-14.2: the one page of every dead secret link (rest-1). What the link
@@ -3795,7 +3773,7 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		u, _ := url.Parse(events.Rows[0].Href)
 		attach(u.Query())
 		docs := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
-		attach(url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel/attachments"}, "path": {"carrel/attachments/смета-подрядчик.pdf"}})
+		attach(url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel/attachments/2026-08"}, "path": {"carrel/attachments/2026-08/смета-подрядчик.pdf"}})
 		attach(url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel"}})
 		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
 
@@ -3889,14 +3867,26 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 			t.Fatal(err)
 		}
 		for name, size := range map[string]int{"carrel/Подряд/акт-смета-подрядчика.pdf": 4400 << 10, "carrel/Подряд/договор-подряда.pdf": 840 << 10,
-			"carrel/Подряд/объект-фасад.jpg": 1600 << 10, "carrel/attachments/акт-1.pdf": 180 << 10, "carrel/attachments/реквизиты.txt": 2 << 10} {
+			"carrel/Подряд/объект-фасад.jpg": 1600 << 10} {
 			sftp.SeedFile(root+name, strings.Repeat(".", size))
 			sftp.SetModified(root+name, mockupNow(t))
 		}
 		app.compare(t, "app-mail-attach/file.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"],
 			"dir": {"carrel/Подряд"}, "path": {"carrel/Подряд/акт-смета-подрядчика.pdf"}}.Encode(), app.sess)))
+		// A folder of a folder of Documents with a folder and six files in
+		// it, the first of its folder, as s-mail-13 draws «Договор подряда»:
+		// the attachments' folders are by month since note 180, a level
+		// deeper than the frame's.
+		deal := root + "carrel/agreement/"
+		sftp.SeedFolder(deal + "Сканы/")
+		sftp.SetModified(deal+"Сканы", mockupNow(t))
+		for name, size := range map[string]int{"договор-подряда.pdf": 840 << 10, "приложение-1-смета.pdf": 4200 << 10, "приложение-2-график.pdf": 210 << 10,
+			"акт-1.pdf": 180 << 10, "реквизиты.txt": 2 << 10, "объект-1.jpg": 1600 << 10} {
+			sftp.SeedFile(deal+name, strings.Repeat(".", size))
+			sftp.SetModified(deal+name, mockupNow(t))
+		}
 		app.compare(t, "app-mail-attach/folder.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"],
-			"dir": {"carrel/attachments"}}.Encode(), app.sess)))
+			"dir": {"carrel/agreement"}}.Encode(), app.sess)))
 	})
 }
 

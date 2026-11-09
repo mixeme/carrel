@@ -169,7 +169,12 @@ func TestNewContactPhoto(t *testing.T) {
 	values.Set("fn", "Lost Photo")
 	values.Set("uid", uid)
 	page2 := decode[view.ContactEditPage](t, f.h.do(postForm(list+"/new", f.sess, values)))
-	if !hasNotice(page2.Notices, "Nothing was saved") || formRow(page2.Form, "uid") != nil {
+	// In the words of s-contacts-38 (Typecase's task 256).
+	const lostTitle, lostBody = "Nothing was saved:", "the photo chosen here was replaced by one chosen for another new card. Add it again, or save without it."
+	if !strings.Contains(mockupFrame(t, "s-contacts-38"), "<b>"+lostTitle+"</b> "+lostBody) {
+		t.Fatal("s-contacts-38 does not draw the lost photo's alert: read the frame again")
+	}
+	if len(page2.Notices) != 1 || page2.Notices[0].Title != lostTitle || page2.Notices[0].Body != lostBody || formRow(page2.Form, "uid") != nil {
 		t.Errorf("a lost photo: %+v", page2.Notices)
 	}
 	if n := f.srv.CountRequests("PUT", f.col) - puts; n != 0 {

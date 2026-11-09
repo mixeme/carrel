@@ -17,7 +17,6 @@ func TestFixtureLinkedRecords(t *testing.T) {
 	linkMockupTask(t, app)
 	// «Поездка в Казань», which the task is related to (s-tasks-17: «·
 	// event · 12 Aug», as its card s-tasks-2), read with the calendar.
-	seedMockupTrip(t, app)
 	// The recording in the attachment folder, the note's second file
 	// (s-notes-32, as s-notes-2).
 	attachMockupRecording(t, app)

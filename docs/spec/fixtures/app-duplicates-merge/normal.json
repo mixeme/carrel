@@ -82,7 +82,7 @@
         "method": "GET"
       },
       {
-        "count": 9,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -100,7 +100,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -173,7 +173,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "",
@@ -257,7 +257,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "",

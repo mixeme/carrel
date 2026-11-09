@@ -134,7 +134,7 @@ states = {"source","folder-cut","book-empty","panel-one","whole","whole-empty","
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
           "calendar","event","link-never","gone","note-files-kept","contact","unanswered","account","none","storage","delete-refused","move-kept",
-          "running","stopped","nothing","noquery","noanswer","toomany","unticked","print","typed"}
+          "running","stopped","nothing","noquery","noanswer","toomany","unticked","print","typed","files-gone","photo-gone"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -332,6 +332,10 @@ SERVER_TODO = {}
 # кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1. Шаги страниц
 # вне оболочки названы по data-part своего кадра (C-14.3).
 STATE_FRAME = {
+    # Новая форма, файлов или фото которой сессия больше не держит: Save
+    # ничего не записал (записка Typecase 181 п. 2, задача 256).
+    "app-event-new/files-gone": "s-agenda-32",
+    "app-contact-new/photo-gone": "s-contacts-38",
     # davloom (Нс52): диалог добавления и выданный пароль — фрагменты-диалоги
     # над списком.
     "app-settings-davloom/add": "s-davloom-2",

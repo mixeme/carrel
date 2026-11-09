@@ -64,6 +64,7 @@ const (
 	sep      = " · "
 	inside   = "in the event"
 	nothing  = "Nothing attached"
+	notKept  = "not kept"
 	attachID = "attach.add"
 )
 
@@ -164,8 +165,10 @@ func Screen(p *view.EventEditPage) w.Shell {
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
-	main := []w.MainPart{h, w.Runbar{Progress: id, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
-	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	// The alerts stand under the head, before the form and its bar of
+	// saving (s-agenda-32; Typecase's note 181 p. 2).
+	main := append([]w.MainPart{h}, bind.Notices(p.Notices, w.MsgFlushTop2)...)
+	main = append(main, w.Runbar{Progress: id, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}})
 	if p.Loss != nil {
 		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2)...)
 	}
@@ -406,7 +409,11 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 	}
 	for _, a := range rows {
 		parts := []w.LinePart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}}}
-		if a.Inline {
+		switch {
+		case a.State == view.RecordUnavailable:
+			// The session no longer keeps it (s-agenda-32).
+			parts = append(parts, w.Text(" "), w.Badge{Label: notKept, Tone: w.BadgeAlert})
+		case a.Inline:
 			parts = append(parts, w.Text(" "), w.Badge{Label: inside})
 		}
 		items = append(items, w.Faced{Face: w.FaceLarge, Items: parts})
@@ -416,6 +423,9 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 			if act.Danger {
 				b.Kind = w.ButtonDanger
 			}
+			// A row with nothing to send — a file the session no longer
+			// keeps — goes off the page (s-agenda-32).
+			b.Removes = act.Href == "" && !act.Submits
 			items = append(items, b)
 		}
 	}

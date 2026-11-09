@@ -55,20 +55,6 @@
     ],
     "rows": [
       {
-        "href": "/p/link-july-token/file/whiteboard-2.jpg",
-        "icon": "i-img",
-        "isDir": false,
-        "menu": [],
-        "modified": "2026-07-14 16:22",
-        "name": "whiteboard-2.jpg",
-        "open": "/p/link-july-token?file=whiteboard-2.jpg",
-        "selected": false,
-        "size": "3 B",
-        "thumb": "",
-        "type": "image/jpeg",
-        "upload": null
-      },
-      {
         "href": "/p/link-july-token/file/whiteboard.jpg",
         "icon": "i-img",
         "isDir": false,
@@ -95,9 +81,23 @@
         "thumb": "",
         "type": "image/tiff",
         "upload": null
+      },
+      {
+        "href": "/p/link-july-token/file/%D1%81%D0%BC%D0%B5%D1%82%D0%B0.pdf",
+        "icon": "i-doc",
+        "isDir": false,
+        "menu": [],
+        "modified": "2026-07-09 15:45",
+        "name": "смета.pdf",
+        "open": "/p/link-july-token?file=%D1%81%D0%BC%D0%B5%D1%82%D0%B0.pdf",
+        "selected": false,
+        "size": "1.2 MB",
+        "thumb": "",
+        "type": "application/pdf",
+        "upload": null
       }
     ],
-    "total": "6 items · 89.4 MB"
+    "total": "5 items · 89.4 MB"
   },
   "foot": [
     {
@@ -114,7 +114,7 @@
       "body": "Filter by name, download the folder or mount it to get all of them.",
       "details": null,
       "role": "info",
-      "title": "Showing 3 of 6."
+      "title": "Showing 3 of 5."
     }
   ],
   "range": null,

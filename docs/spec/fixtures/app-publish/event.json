@@ -395,7 +395,7 @@
           "href": "",
           "label": "Reminders",
           "mono": false,
-          "value": "10 minutes before · 1 day before"
+          "value": "10 minutes before · 2 days before"
         },
         {
           "from": null,
@@ -517,7 +517,7 @@
             "rows": [
               {
                 "colour": "#4a6b52",
-                "count": 5,
+                "count": 6,
                 "detail": "",
                 "feed": false,
                 "href": "/app/calendar/a-nc-home/lichnyj",

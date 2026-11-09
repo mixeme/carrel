@@ -3046,12 +3046,12 @@
               },
               {
                 "label": "1 day before",
-                "selected": true,
+                "selected": false,
                 "value": "-P1D"
               },
               {
                 "label": "Custom…",
-                "selected": false,
+                "selected": true,
                 "shows": "reminder.1.count reminder.1.unit",
                 "value": "custom"
               },
@@ -3064,13 +3064,12 @@
             ],
             "readOnly": false,
             "required": false,
-            "value": "-P1D"
+            "value": "custom"
           },
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hidden": true,
             "hint": "",
             "kind": "number",
             "label": "How long",
@@ -3079,13 +3078,12 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "2"
           },
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hidden": true,
             "hint": "",
             "kind": "select",
             "label": "Unit",
@@ -3093,7 +3091,7 @@
             "options": [
               {
                 "label": "minutes before",
-                "selected": true,
+                "selected": false,
                 "value": "minutes"
               },
               {
@@ -3103,7 +3101,7 @@
               },
               {
                 "label": "days before",
-                "selected": false,
+                "selected": true,
                 "value": "days"
               },
               {
@@ -3114,7 +3112,7 @@
             ],
             "readOnly": false,
             "required": false,
-            "value": "minutes"
+            "value": "days"
           },
           {
             "add": null,
@@ -3287,6 +3285,13 @@
                 "label": "5c81-77aa-0d64",
                 "selected": true,
                 "value": "5c81-77aa-0d64"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Поездка в Казань",
+                "meta": "event · 12 Aug",
+                "selected": false,
+                "value": "3e6b-71d4-a209"
               },
               {
                 "colour": "#4a6b52",
@@ -3553,7 +3558,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 4,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",

@@ -4,6 +4,29 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.25 — 2026-11-09
+
+Typecase `911c960`, notes 180–188; server `v0.2.405`. The whole client
+suite passes.
+
+- An agenda row of a day an event goes on into says it — «day 1 of 3» —,
+  and on paper a row prints its badges between the place and the source
+  (print-1; notes 182, 183).
+- A filter that is a form narrows the page's main as one types: the filter
+  names `list-main`, the main of its screen has that ID (agenda, contacts,
+  timeline, tasks, notes, folder, users, public pages; note 185).
+- The rail's form asks the rail's zone; its answer is drawn as the rail, the
+  form, and the poll and the list in their templates. Under a sheet and on
+  paper the page's forms ask no zone (note 186).
+- A file a new form no longer has is a row with «not kept» and a Remove that
+  takes it off the page; the alert of a refused new form stands under the
+  head (s-agenda-32, s-contacts-38; note 181).
+- A published link that left records out says «1 record not in the link»
+  by its name, why in the hint (s-publish-40).
+- A tree goes four levels down (`TreeLevel76`, s-files-16; note 180).
+- U-5.5 #45 is closed: s-publish-24 and -39 draw single rows (Typecase task
+  258). s-agenda-32 waits with s-agenda-15 under U-5.5 #44 («Related to»).
+
 ## v0.11.24 — 2026-11-05
 
 Typecase `664db01`, notes 178, 179 (sample data agree with the set); server
