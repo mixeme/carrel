@@ -99,7 +99,7 @@ func jobsTable(jobs []view.BackupJob) w.Table {
 		if a := j.Toggle; a != nil && a.Enabled && a.Method == "POST" {
 			pick.Send = w.Send{Form: bind.TickID(*a)}
 		}
-		copies := w.Line{Gap: w.LineGap3}
+		copies := w.Line{Gap: w.LineGapTight}
 		for _, c := range j.Marks {
 			copies.Items = append(copies.Items, w.Mark{Colour: string(c)})
 		}
@@ -295,7 +295,7 @@ func jobSet(set view.FieldSet) []w.FormPart {
 			f.OwnLine, f.Place = true, w.Grown
 			items = append(items, f)
 			if len(r.HintRuns) > 0 {
-				after = append(after, w.Msg{Column: true, Parts: bind.MsgParts(r.HintRuns), Space: w.MsgFlushTop4, Place: w.Grown})
+				after = append(after, w.Msg{Column: true, Parts: bind.MsgParts(r.HintRuns), Space: w.MsgFlushAboveTight, Place: w.Grown})
 			}
 		case r.Kind == view.InputSelect:
 			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{destPick(r)}, Width: w.FieldLG})
@@ -316,7 +316,7 @@ func jobSet(set view.FieldSet) []w.FormPart {
 		case r.Extra != nil:
 			in := bind.Input(r)
 			in.Variant = w.InputFill
-			line := w.Line{Items: []w.LinePart{in, bind.Button(*r.Extra, "")}, Gap: w.LineGap8}
+			line := w.Line{Items: []w.LinePart{in, bind.Button(*r.Extra, "")}, Gap: w.LineGapNormal}
 			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{line}, Width: w.FieldLG})
 		case r.Kind == view.InputNumber:
 			items = append(items, w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Input(r)}, Width: w.FieldXS})
@@ -328,7 +328,7 @@ func jobSet(set view.FieldSet) []w.FormPart {
 		}
 	}
 	if len(set.HintRuns) > 0 {
-		after = append(after, w.Msg{Column: true, Parts: bind.MsgParts(set.HintRuns), Space: w.MsgFlushTop4, Place: w.Grown})
+		after = append(after, w.Msg{Column: true, Parts: bind.MsgParts(set.HintRuns), Space: w.MsgFlushAboveTight, Place: w.Grown})
 	}
 	items = append(items, after...)
 	if set.Legend == "" {
@@ -409,7 +409,7 @@ func destPick(r view.FormRow) w.Drop {
 // signinField is the copy at sign-in (s-backup-2): its tick and its days
 // on one line.
 func signinField(r view.FormRow, rows []view.FormRow) w.Field {
-	line := w.Line{Items: []w.LinePart{bind.Check(r)}, Gap: w.LineGap7, Block: true}
+	line := w.Line{Items: []w.LinePart{bind.Check(r)}, Gap: w.LineGapNormal, Block: true}
 	for _, d := range rows {
 		if d.Kind == view.InputNumber && d.Name == "signin" {
 			in := bind.Input(d)

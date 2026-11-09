@@ -262,7 +262,7 @@ func read(p *view.NotePage) []w.MainPart {
 		if f := p.Meta.TagsFrom; f != nil {
 			tags = append(tags, w.Text(" "), w.Dim{Mark: &w.Mark{Colour: string(f.Colour), Size: w.MarkH11Inline}, Parts: []w.Inline{w.Text(f.Name)}})
 		}
-		secs = append(secs, w.DocmetaSec{Title: title, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGap4, Items: tags}}})
+		secs = append(secs, w.DocmetaSec{Title: title, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGapTight, Items: tags}}})
 	}
 	// The note's link, as an event's and a task's card shows it (Р8 of the
 	// kinds-parity list): a reference the note points at, drawn as Related

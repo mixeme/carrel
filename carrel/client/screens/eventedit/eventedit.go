@@ -404,7 +404,7 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 		row := w.Line{Items: []w.LinePart{
 			w.Faced{Face: w.FaceLarge, Items: []w.LinePart{w.Text("{name} "), w.Dim{Parts: []w.Inline{w.Text("{size}")}}}},
 			w.Button{Label: "Remove", Kind: w.ButtonDanger, Small: true, Removes: true},
-		}, Gap: w.LineGap8}
+		}, Gap: w.LineGapNormal}
 		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.EditFiles(attach.Arrow, "event-attachments", "size", row), Width: w.MenuWidth212, Pop: w.MenuUnder}})
 	}
 	for _, a := range rows {
@@ -432,7 +432,7 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 	if len(rows) == 0 {
 		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap, Empty: true})
 	}
-	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGap8, Block: true, Place: w.Grown, ID: "event-attachments"}}}
+	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGapNormal, Block: true, Place: w.Grown, ID: "event-attachments"}}}
 }
 
 // railParts is the rail of return: the way back — to the card, or to the

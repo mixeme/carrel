@@ -24,13 +24,13 @@ func DavloomScopeSheet(p *view.DavloomScopeSheet) w.Sheet {
 		s.Title = string(r.Label)
 		fs.Items = append(fs.Items, sourceGrid(r))
 		if r.Error != "" {
-			fs.Items = append(fs.Items, w.Msg{Parts: []w.MsgPart{w.Text(r.Error)}, Tone: w.MsgAlert, Space: w.MsgFlushTop4, Place: w.Grown})
+			fs.Items = append(fs.Items, w.Msg{Parts: []w.MsgPart{w.Text(r.Error)}, Tone: w.MsgAlert, Space: w.MsgFlushAboveTight, Place: w.Grown})
 		}
 	}
 	s.Body = []w.SheetPart{w.Form{Variant: w.FormFlush, Items: []w.FormPart{fs}}}
 	for _, a := range p.Form.Actions {
 		if a.Method == "GET" {
-			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 			continue
 		}
 		b := bind.Submit(a)
@@ -52,7 +52,7 @@ func DavloomTreeSheet(p *view.DavloomTreeSheet) w.Sheet {
 	}
 	s.Body = []w.SheetPart{proxyTree(p.Tree)}
 	for _, a := range p.Actions {
-		s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+		s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	}
 	return s
 }

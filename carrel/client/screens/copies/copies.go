@@ -66,7 +66,7 @@ func Sheet(p *view.CopiesSheet) w.Sheet {
 			foot = append(foot, b, w.Kbd{Keys: enter})
 			continue
 		}
-		foot = append(foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+		foot = append(foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	}
 	return w.Sheet{
 		Icon: icon, Title: string(p.Title),
@@ -97,5 +97,5 @@ func line(r view.FormRow, o view.Option) w.Line {
 	if aside != "" {
 		items = append(items, w.Dim{Parts: []w.Inline{w.Text(aside)}, Size: w.Dim11_5})
 	}
-	return w.Line{Items: items, Gap: w.LineGap8, Block: true}
+	return w.Line{Items: items, Gap: w.LineGapNormal, Block: true}
 }

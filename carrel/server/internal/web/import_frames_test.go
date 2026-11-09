@@ -54,7 +54,7 @@ func TestImportWizardByFrames(t *testing.T) {
 	if len(page.Subtitle) != 0 {
 		t.Errorf("the first step has a line under the title: %q", saidRuns(page.Subtitle))
 	}
-	hint := regexp.MustCompile(`(?s)<div class="tc-field__hint tc-field__hint--top8">(.*?)</div>`).FindStringSubmatch(mockupFrame(t, "s-io-3"))
+	hint := regexp.MustCompile(`(?s)<div class="tc-field__hint tc-field__hint--above-normal">(.*?)</div>`).FindStringSubmatch(mockupFrame(t, "s-io-3"))
 	if hint == nil {
 		t.Fatal("s-io-3 draws no line under the file: read the frame again")
 	}

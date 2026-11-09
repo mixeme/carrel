@@ -61,7 +61,7 @@ func Sheet(p *view.ExportSheet) w.Sheet {
 		}
 	}
 	if len(days) > 0 {
-		body = append(body, w.Line{Items: days, Gap: w.LineGap10, Block: true})
+		body = append(body, w.Line{Items: days, Gap: w.LineGapNormal, Block: true})
 	}
 	var foot []w.SheetFootPart
 	for _, a := range p.Actions {
@@ -69,7 +69,7 @@ func Sheet(p *view.ExportSheet) w.Sheet {
 			foot = append(foot, download(a), w.Kbd{Keys: enter})
 			continue
 		}
-		foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+		foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	}
 	s := w.Sheet{
 		Icon: "export", Title: string(p.Title),

@@ -41,7 +41,7 @@ func UnlockSheet(p *view.UnlockSheet) w.Sheet {
 	}
 	for _, a := range p.Form.Actions {
 		if a.Method == "GET" {
-			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 			continue
 		}
 		b := bind.Submit(a)

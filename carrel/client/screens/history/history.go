@@ -25,7 +25,7 @@ const (
 // history says so (Empty).
 func Screen(p *view.PasswordHistoryPage) w.Page {
 	items := []w.DialogPart{
-		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap8},
+		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapNormal},
 		w.Prose{Parts: bind.Inlines(p.Lede), Variant: w.ProseMutedClose},
 	}
 	if len(p.Rows) > 0 {

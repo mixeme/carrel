@@ -750,7 +750,7 @@ func KeptSec(rubric string, books []view.Field, lead string) w.Sec {
 	}
 	return w.Sec{Items: []w.SecPart{
 		w.Rubric{Text: rubric, Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(books)), Tone: w.BadgeLinked}}},
-		w.SecList{Items: lines, Gap: 5},
+		w.SecList{Items: lines, Gap: w.StackGapTight},
 	}}
 }
 

@@ -25,7 +25,7 @@ func ResetSheet(p *view.PasswordResetSheet) w.Sheet {
 	s := w.Sheet{Icon: "shield", Tone: w.SheetIconDanger, Title: string(p.Title), Width: w.SheetWidth480}
 	if iss := p.Issued; iss != nil {
 		secret := "login     " + string(iss.Login) + "\npassword  " + string(iss.Password)
-		row := w.CardRow{Kind: w.CardTop8, Gap: 8, Items: []w.CardRowPart{
+		row := w.CardRow{Kind: w.CardTop8, Gap: w.LineGapNormal, Items: []w.CardRowPart{
 			w.Button{Label: string(iss.Copy.Label), Icon: "dup", Kind: w.ButtonPrimary, CopyFrom: issuedID, Copied: copied},
 		}}
 		if iss.Note != "" {
@@ -77,7 +77,7 @@ func sheetFoot(actions []view.Action, f view.Form) []w.SheetFootPart {
 	var foot []w.SheetFootPart
 	for _, a := range actions {
 		if a.Method == "GET" {
-			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 			continue
 		}
 		foot = append(foot, submit(a, f))

@@ -109,7 +109,7 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 		}
 		card := w.Card{Items: []w.CardPart{w.Rubric{Text: string(set.Legend)}}}
 		if len(r.Refusal) > 0 && set.Legend != archivePw {
-			card.Items = append(card.Items, w.Msg{Parts: bind.MsgParts(r.Refusal), Tone: w.MsgAlert, Space: w.MsgFlushBottom12})
+			card.Items = append(card.Items, w.Msg{Parts: bind.MsgParts(r.Refusal), Tone: w.MsgAlert, Space: w.MsgFlushBelowWide})
 		}
 		fields := w.CardFields{Wide: true, Top: true}
 		for _, row := range set.Rows {
@@ -134,13 +134,13 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 				// (FileField.Ranges, Typecase's notes 98, 109).
 				b := w.Button{Label: chooseFile, File: &w.FileField{Name: row.Name, Accept: row.Accept, Label: string(row.Label), Ranges: r.Ranges}}
 				fields.Items = append(fields.Items, w.Field{Label: string(row.Label), Width: sourceWidths[row.Name],
-					Parts: []w.FieldPart{w.Line{Items: []w.LinePart{b}, Gap: w.LineGap8}}})
+					Parts: []w.FieldPart{w.Line{Items: []w.LinePart{b}, Gap: w.LineGapNormal}}})
 			case row.Extra != nil:
 				// The archive's path with Browse (s-backup-17).
 				in := bind.Input(row)
 				in.Variant = w.InputFill
 				fields.Items = append(fields.Items, w.Field{Label: string(row.Label), Width: sourceWidths[row.Name],
-					Parts: append([]w.FieldPart{w.Line{Items: []w.LinePart{in, bind.Button(*row.Extra, "")}, Gap: w.LineGap8}}, bind.Hint(row)...)})
+					Parts: append([]w.FieldPart{w.Line{Items: []w.LinePart{in, bind.Button(*row.Extra, "")}, Gap: w.LineGapNormal}}, bind.Hint(row)...)})
 			default:
 				// In the card: its hints are not the page's column (s-backup-16).
 				fields.Items = append(fields.Items, bind.Field(row, sourceWidths[row.Name]))

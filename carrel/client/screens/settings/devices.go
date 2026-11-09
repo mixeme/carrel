@@ -147,7 +147,7 @@ func appleForm(p *view.DevicesPage, generate *view.Action) w.Form {
 		if l.Hint != "" {
 			card.Items = append(card.Items, w.CardHint{Parts: []w.CardTextPart{w.Text(l.Hint)}})
 		}
-		row := w.CardRow{Kind: w.CardTop9, Gap: 6}
+		row := w.CardRow{Kind: w.CardTop9, Gap: w.LineGapNormal}
 		for _, a := range l.Actions {
 			b := bind.Button(a, bind.TickID(a))
 			if a.Danger {
@@ -193,7 +193,7 @@ func androidForm(p *view.DevicesPage) w.Form {
 		card := w.Card{Items: []w.CardPart{w.Rubric{Text: string(a.Title)}, qr}}
 		if a.Password.Shown {
 			in := w.Input{Value: string(a.Password.Value), Label: passwordLabel, Mono: true, ReadOnly: true, Variant: w.InputFill}
-			line := w.Line{Items: []w.LinePart{in}, Gap: w.LineGap6}
+			line := w.Line{Items: []w.LinePart{in}, Gap: w.LineGapNormal}
 			if copyPw != nil {
 				line.Items = append(line.Items, copyButton(*copyPw, string(a.Password.Value)))
 			}
@@ -222,7 +222,7 @@ func copyButton(a view.Action, text string) w.Button {
 func addressTable(accounts []view.DeviceAccount) w.Table {
 	t := w.Table{Cols: []w.TableCol{{Label: colCollection}, {Label: colType, Main: true}, {Label: colURL, Rank: w.Rank3}, {Width: w.ColNum, Rank: w.Rank4}}}
 	for _, a := range accounts {
-		line := w.Line{Gap: w.LineGap8, Items: []w.LinePart{w.Strong(a.Label), w.Dim{Parts: []w.Inline{w.Text(loginWord)}}, w.Mono{Text: string(a.Login)}}}
+		line := w.Line{Gap: w.LineGapNormal, Items: []w.LinePart{w.Strong(a.Label), w.Dim{Parts: []w.Inline{w.Text(loginWord)}}, w.Mono{Text: string(a.Login)}}}
 		if a.Refused != "" {
 			// Its row alone, in alarm (s-plan-4, -5).
 			line.Items = append(line.Items, w.Faced{Face: w.FaceDanger, Items: []w.LinePart{w.Text(a.Refused)}})

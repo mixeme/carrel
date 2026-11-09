@@ -78,7 +78,7 @@ func Sheet(p *view.RecordDeleteSheet) w.Sheet {
 					continue
 				}
 				// A copy: its mark, its tick, what it holds.
-				line := w.Line{Items: []w.LinePart{w.Mark{Colour: string(o.Colour), Size: w.MarkH11}, c}, Gap: w.LineGap8}
+				line := w.Line{Items: []w.LinePart{w.Mark{Colour: string(o.Colour), Size: w.MarkH11}, c}, Gap: w.LineGapNormal}
 				if o.Meta != "" {
 					line.Items = append(line.Items, w.Dim{Parts: []w.Inline{w.Text(o.Meta)}, Size: w.Dim11_5})
 				}
@@ -88,7 +88,7 @@ func Sheet(p *view.RecordDeleteSheet) w.Sheet {
 	}
 	for _, a := range p.Actions {
 		if a.Method == "GET" {
-			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 			continue
 		}
 		s.Foot = append(s.Foot, bind.Submit(a))
@@ -99,7 +99,7 @@ func Sheet(p *view.RecordDeleteSheet) w.Sheet {
 // block is a list under its rubric: each thing in bold, what becomes of it
 // muted.
 func block(title string, refs []view.Reference) w.SheetBlock {
-	b := w.SheetBlock{Title: w.Rubric{Text: title, Variant: w.RubricBottom7}}
+	b := w.SheetBlock{Title: w.Rubric{Text: title, Variant: w.RubricBelow}}
 	for _, r := range refs {
 		b.Items = append(b.Items, w.SheetLine{Name: string(r.What), Note: w.Dim{Parts: []w.Inline{w.Text("— " + string(r.Then))}}})
 	}

@@ -222,7 +222,7 @@ func cardButtons(actions []view.Action, reveal *view.SecretField, ids []string) 
 	if reveal != nil {
 		by[revealID] = reveal.Reveal
 	}
-	line := w.Line{Gap: w.LineGap6}
+	line := w.Line{Gap: w.LineGapNormal}
 	for _, id := range ids {
 		a, ok := by[id]
 		if !ok {
@@ -266,7 +266,7 @@ func serverCard(c view.ConnectionCard, narrow bool) w.Card {
 		// edge (s-profile-4).
 		id := "pw-" + c.AccountID
 		in := w.Input{Value: string(pw.Value), Label: passwordLabel, Mono: true, ReadOnly: true, Variant: w.InputKeySmFill, ID: id}
-		card.Items = append(card.Items, w.CardRow{Kind: w.CardTop8, Gap: 8,
+		card.Items = append(card.Items, w.CardRow{Kind: w.CardTop8, Gap: w.LineGapNormal,
 			Items: []w.CardRowPart{in, w.Button{Label: copyWord, Small: true, CopyFrom: id, Copied: copiedWord}}})
 		card.Variant = w.CardChosen
 	}

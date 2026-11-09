@@ -264,7 +264,7 @@ func side(c view.Details) *w.Side {
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{
 			w.Rubric{Text: "The same person in other books", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(c.Books)), Tone: w.BadgeLinked}}},
-			w.SecList{Items: lines, Gap: 6},
+			w.SecList{Items: lines, Gap: w.StackGapTight},
 			w.SecHint{Text: "Linked on the duplicates screen. The records stay on their own servers; here they are shown as one person.", Apart: true},
 		}})
 	}

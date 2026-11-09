@@ -73,7 +73,7 @@ func Davloom(p *view.DavloomPage) w.Shell {
 	main = append([]w.MainPart{h}, main...)
 	if p.Address != "" {
 		in := w.Input{Value: string(p.Address), Label: addressLabel, Mono: true, ReadOnly: true, Variant: w.Input11_5Fill}
-		line := w.Line{Items: []w.LinePart{in, copyButton(view.Action{Label: copyWord, Enabled: true}, string(p.Address))}, Gap: w.LineGap8}
+		line := w.Line{Items: []w.LinePart{in, copyButton(view.Action{Label: copyWord, Enabled: true}, string(p.Address))}, Gap: w.LineGapNormal}
 		if p.Sees.ID != "" {
 			// The tree is a sheet behind it (s-davloom-9).
 			b := bind.Button(p.Sees, "")
@@ -108,7 +108,7 @@ func devicesTable(devices []view.ProxyDevice) w.Table {
 		{Label: colDevice}, {Label: colScope, Main: true}, {Label: colCreated, Rank: w.Rank4, Secondary: true}, {Label: colLastRequest, Secondary: true}, {Width: w.Col90},
 	}}
 	for _, d := range devices {
-		marks := w.Line{Gap: w.LineGap3}
+		marks := w.Line{Gap: w.LineGapTight}
 		words := scopeWords(d.Scope)
 		if words == allKinds {
 			marks.Items = []w.LinePart{w.Mark{Kind: w.MarkMulti}}
@@ -218,7 +218,7 @@ func deviceDialog(d *view.DeviceDialog) w.Dialog {
 		in := w.Input{Value: string(pw.Value), Label: string(pw.Label), Mono: true, ReadOnly: true, Variant: w.InputKeyFill, ID: id}
 		card := w.Card{Variant: w.CardChosen, Items: []w.CardPart{
 			w.Rubric{Text: string(pw.Label)},
-			w.CardRow{Kind: w.CardTop2, Gap: 8, Items: []w.CardRowPart{in, w.Button{Label: string(pw.Copy.Label), CopyFrom: id, Copied: copiedWord}}},
+			w.CardRow{Kind: w.CardTop2, Gap: w.LineGapNormal, Items: []w.CardRowPart{in, w.Button{Label: string(pw.Copy.Label), CopyFrom: id, Copied: copiedWord}}},
 		}}
 		if pw.Warning != "" {
 			card.Items = append(card.Items, w.CardText{Kind: w.CardWarn, Parts: []w.CardTextPart{w.Text(pw.Warning)}})

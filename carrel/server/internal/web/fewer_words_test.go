@@ -16,7 +16,7 @@ import (
 var (
 	frameFieldHint = regexp.MustCompile(`(?s)<span class="tc-field__hint[^"]*">(.*?)</span>`)
 	frameAside     = regexp.MustCompile(`(?s)<span class="tc-msg__aside">(.*?)</span>\s*</div>`)
-	frameModeMsg   = regexp.MustCompile(`(?s)<div class="tc-msg tc-grow tc-msg--flush-top4[^"]*">(.*?)</div>`)
+	frameModeMsg   = regexp.MustCompile(`(?s)<div class="tc-msg tc-grow tc-msg--flush-above-tight[^"]*">(.*?)</div>`)
 	// frameText puts a space where a tag closed: «<b>two steps</b>.».
 	frameBeforeMark = regexp.MustCompile(` ([.,:;])`)
 )

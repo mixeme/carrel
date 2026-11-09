@@ -24,7 +24,7 @@ func Screen(p *view.DeadLinkPage) w.Page {
 				Dialog: w.Dialog{
 					Items: []w.DialogPart{
 						w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo48}, Wide: true},
-						w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap6},
+						w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapNormal},
 						w.Prose{Parts: bind.Inlines(p.Lede), Variant: w.ProseMuted},
 						w.FormFoot{Items: []w.FormFootPart{bind.Button(p.SignIn, "")}, Variant: w.FormFootFlush},
 					},

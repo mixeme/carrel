@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.406 — 2026-11-10
+
+Typecase `2406c87`, notes 189–193.
+
+### For consumers
+
+Nothing changes in what the server sends. The checks read the frames' new
+class names of gaps (`tc-line--normal`, `tc-field__hint--above-normal`,
+`tc-msg--flush-above-tight`), and «Objects» of «Записи» is checked against
+the settings frames again: they count 3 since note 193 (task 259).
+
 ## v0.2.405 — 2026-11-09
 
 Typecase `911c960`, notes 180–188.

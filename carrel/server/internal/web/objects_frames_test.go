@@ -21,7 +21,8 @@ func TestObjectsAreWhatTheCollectionsHold(t *testing.T) {
 		n, _ := strconv.Atoi(m[2])
 		want[html.UnescapeString(m[1])] = n
 	}
-	if want["Личный"] != 5 || want["Работа"] != 6 {
+	// «Записи 3» since Typecase's notes 182, 193 (task 259).
+	if want["Личный"] != 5 || want["Работа"] != 6 || want["Записи"] != 3 {
 		t.Fatalf("s-profile-1 counts %v: read the frame again", want)
 	}
 	got := map[string]int{}
@@ -44,12 +45,6 @@ func TestObjectsAreWhatTheCollectionsHold(t *testing.T) {
 		}
 	}
 	walk(loadFixture(t, "app-settings-connections/normal.json"))
-	// «Записи» holds three notes since Typecase's note 182 (the note «Про
-	// сроки по сборнику» is the set's), its lists count them; the tables of
-	// the settings still count two — Typecase's task 259.
-	if want["Записи"] == 2 {
-		delete(want, "Записи")
-	}
 	for name, n := range want {
 		if g, ok := got[name]; ok && g != n {
 			t.Errorf("%s: the fixture counts %d, the frame %d", name, g, n)

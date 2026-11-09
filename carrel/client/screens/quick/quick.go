@@ -153,7 +153,7 @@ func foot(actions []view.Action, keys string) []w.SheetFootPart {
 	for _, a := range actions {
 		switch {
 		case a.Method == "GET" && !a.Primary:
-			out = append(out, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+			out = append(out, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 		case a.Method == "POST":
 			b := bind.Submit(a)
 			b.To = a.Href

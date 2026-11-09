@@ -39,9 +39,9 @@ func Screen(p *view.ForgotPage) w.Page {
 	if len(rows) > 0 {
 		lede.Variant, variant = w.ProseMutedClose, w.DialogPage440
 	}
-	items := []w.DialogPart{w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap8}, lede}
+	items := []w.DialogPart{w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapNormal}, lede}
 	for _, n := range p.Notices {
-		items = append(items, bind.Msg(n, w.MsgFlushBottom12))
+		items = append(items, bind.Msg(n, w.MsgFlushBelowWide))
 	}
 	var foot []w.FormFootPart
 	switch {

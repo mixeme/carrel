@@ -43,7 +43,7 @@ func Screen(p *view.ForgotWipePage) w.Page {
 				w.Auth{
 					Dialog: w.Dialog{
 						Items: []w.DialogPart{
-							w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap8},
+							w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapNormal},
 							w.Prose{Parts: bind.Inlines(p.Lede), Variant: w.ProseMuted},
 							w.FormFoot{Items: foot, Variant: w.FormFootFlush},
 						},
@@ -54,11 +54,11 @@ func Screen(p *view.ForgotWipePage) w.Page {
 		}
 	}
 	items := []w.DialogPart{
-		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap4},
+		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapTight},
 		w.DialogSub{Parts: bind.Inlines(p.Lede)},
 	}
 	for _, n := range p.Notices {
-		items = append(items, bind.Msg(n, w.MsgFlushBottom12))
+		items = append(items, bind.Msg(n, w.MsgFlushBelowWide))
 	}
 	var fields []w.FormPart
 	for _, r := range bind.Rows(p.Form) {

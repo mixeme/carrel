@@ -26,11 +26,11 @@ const formID = "invite"
 // (Primary). A dead link is not this page: it is DeadLinkPage's.
 func Screen(p *view.InvitePage) w.Page {
 	items := []w.DialogPart{
-		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap4},
+		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapTight},
 		w.DialogSub{Parts: bind.Inlines(p.Lede)},
 	}
 	for _, n := range p.Notices {
-		items = append(items, bind.Msg(n, w.MsgFlushBottom12))
+		items = append(items, bind.Msg(n, w.MsgFlushBelowWide))
 	}
 	var fields []w.FormPart
 	for _, r := range bind.Rows(p.Form) {

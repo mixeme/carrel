@@ -174,7 +174,7 @@ func foot(actions []view.Action, keyed bool) []w.SheetFootPart {
 	var out []w.SheetFootPart
 	for _, a := range actions {
 		if a.Method == "GET" && !a.Primary {
-			out = append(out, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+			out = append(out, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 			continue
 		}
 		b := bind.Submit(a)
@@ -224,7 +224,7 @@ func Delete(p *view.CollectionDeleteSheet) w.Sheet {
 		s.Body = append(s.Body, w.Msg{Parts: msgParts(p.Warning), Tone: w.MsgAlert, Space: w.MsgFlush})
 	}
 	if len(p.References) > 0 {
-		b := w.SheetBlock{Title: w.Rubric{Text: pointing, Variant: w.RubricBottom7}}
+		b := w.SheetBlock{Title: w.Rubric{Text: pointing, Variant: w.RubricBelow}}
 		for _, r := range p.References {
 			b.Items = append(b.Items, w.SheetLine{Name: string(r.What), Note: w.Dim{Parts: []w.Inline{w.Text("— " + string(r.Then))}}})
 		}
@@ -234,7 +234,7 @@ func Delete(p *view.CollectionDeleteSheet) w.Sheet {
 		s.Body = append(s.Body, w.Msg{Parts: msgParts(p.Archive), Space: w.MsgFlush})
 	}
 	if p.Export != nil {
-		line := w.Line{Items: []w.LinePart{exportButton(*p.Export)}, Gap: w.LineGap8, Block: true}
+		line := w.Line{Items: []w.LinePart{exportButton(*p.Export)}, Gap: w.LineGapNormal, Block: true}
 		if p.ExportNote != "" {
 			line.Items = append(line.Items, w.Dim{Parts: []w.Inline{w.Text(p.ExportNote)}, Size: w.Dim11_5, Variant: w.DimWrap})
 		}

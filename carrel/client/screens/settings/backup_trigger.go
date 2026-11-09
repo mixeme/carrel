@@ -61,7 +61,7 @@ func TriggerSheet(p *view.BackupTriggerSheet) w.Sheet {
 	}
 	for _, a := range p.Form.Actions {
 		if a.Method == "GET" {
-			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 			continue
 		}
 		s.Foot = append(s.Foot, bind.Button(a, ""))
@@ -81,14 +81,14 @@ func passwordCard(pw *view.TriggerPassword) w.Card {
 		in := w.Input{Value: string(pw.Value), Label: pwRubric, Mono: true, ReadOnly: true, Variant: w.InputKeySmFill, ID: triggerPwID}
 		return w.Card{Variant: w.CardFlush, Items: []w.CardPart{
 			w.Rubric{Text: pwRubric, Items: []w.RubricPart{w.Mono{Text: onlyNow, Variant: w.MonoTightDanger}}},
-			w.Line{Items: []w.LinePart{in, w.Button{Label: copyWord, CopyFrom: triggerPwID, Copied: copiedWord}}, Gap: w.LineGap8, Block: true},
+			w.Line{Items: []w.LinePart{in, w.Button{Label: copyWord, CopyFrom: triggerPwID, Copied: copiedWord}}, Gap: w.LineGapNormal, Block: true},
 		}}
 	}
-	row := w.Line{Gap: w.LineGap8, Block: true, Items: []w.LinePart{w.Mono{Text: string(pw.Masked)}}}
+	row := w.Line{Gap: w.LineGapNormal, Block: true, Items: []w.LinePart{w.Mono{Text: string(pw.Masked)}}}
 	if len(pw.Use) > 0 {
 		row.Items = append(row.Items, w.Dim{Parts: bind.Inlines(pw.Use), Size: w.Dim11_5})
 	}
-	acts := w.Line{Gap: w.LineGap7, Place: w.Pushed}
+	acts := w.Line{Gap: w.LineGapNormal, Place: w.Pushed}
 	for _, a := range pw.Actions {
 		b := bind.Button(a, "")
 		if a.Danger {
@@ -142,7 +142,7 @@ func lineCard(l *view.TriggerBlock, local bool) w.Card {
 	case tabGitea:
 		card.Items = append(card.Items, w.Diag{Text: string(l.Gitea), Variant: w.DiagInk, ID: triggerLineID})
 		if l.Shown {
-			card.Items = append(card.Items, w.CardRow{Kind: w.CardTop8, Gap: 8, Items: []w.CardRowPart{
+			card.Items = append(card.Items, w.CardRow{Kind: w.CardTop8, Gap: w.LineGapNormal, Items: []w.CardRowPart{
 				w.Button{Label: copyWorkflow, Icon: "dup", Kind: w.ButtonPrimary, CopyFrom: triggerLineID, Copied: copiedWord},
 				w.Button{Label: saveAs + string(l.GiteaFile), Icon: "download", SaveAs: baseName(string(l.GiteaFile)), SaveFrom: triggerLineID},
 			}})
@@ -174,7 +174,7 @@ func lineCard(l *view.TriggerBlock, local bool) w.Card {
 
 // copyRow is the card's Copy of its block (the line, the script).
 func copyRow(label string) w.CardRow {
-	return w.CardRow{Kind: w.CardTop8, Gap: 8, Items: []w.CardRowPart{
+	return w.CardRow{Kind: w.CardTop8, Gap: w.LineGapNormal, Items: []w.CardRowPart{
 		w.Button{Label: label, Icon: "dup", Kind: w.ButtonPrimary, CopyFrom: triggerLineID, Copied: copiedWord},
 	}}
 }

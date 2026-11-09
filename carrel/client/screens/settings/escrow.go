@@ -68,7 +68,7 @@ func depositedDialog(p *view.EscrowPage) w.Dialog {
 		in := w.Input{Value: string(l.Address), Label: historyLabel, Mono: true, ReadOnly: true, Variant: w.InputFill}
 		cp := copyButton(l.Copy, string(l.Address))
 		cp.Icon = bind.Icon(l.Copy.Icon)
-		f := w.Field{Label: historyLabel, Parts: []w.FieldPart{w.Line{Items: []w.LinePart{in, cp}, Gap: w.LineGap6}}, Width: w.FieldFull}
+		f := w.Field{Label: historyLabel, Parts: []w.FieldPart{w.Line{Items: []w.LinePart{in, cp}, Gap: w.LineGapNormal}}, Width: w.FieldFull}
 		if l.Note != "" {
 			f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(l.Note)}, Variant: w.HintColumn})
 		}
@@ -103,7 +103,7 @@ func WithdrawSheet(p *view.EscrowWithdrawSheet) w.Sheet {
 	}
 	for _, a := range p.Actions {
 		if a.Method == "GET" {
-			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+			s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 			continue
 		}
 		b := bind.Submit(a)

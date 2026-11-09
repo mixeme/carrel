@@ -32,7 +32,7 @@ func Screen(p *view.RegisterPage) w.Page {
 					Dialog: w.Dialog{
 						Items: []w.DialogPart{
 							w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo48}, Wide: true},
-							w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap6},
+							w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapNormal},
 							w.Prose{Parts: bind.Inlines(p.Lede), Variant: w.ProseMuted},
 							w.FormFoot{Items: []w.FormFootPart{bind.Button(p.SignIn, "")}, Variant: w.FormFootFlush},
 						},
@@ -43,11 +43,11 @@ func Screen(p *view.RegisterPage) w.Page {
 		}
 	}
 	items := []w.DialogPart{
-		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap4},
+		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGapTight},
 		w.DialogSub{Parts: bind.Inlines(p.Lede)},
 	}
 	for _, n := range p.Notices {
-		items = append(items, bind.Msg(n, w.MsgFlushBottom12))
+		items = append(items, bind.Msg(n, w.MsgFlushBelowWide))
 	}
 	var fields []w.FormPart
 	for _, r := range bind.Rows(p.Form) {

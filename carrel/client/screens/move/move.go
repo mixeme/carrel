@@ -66,7 +66,7 @@ func Sheet(p *view.MoveSheet) w.Sheet {
 			foot = append(foot, b, w.Kbd{Keys: enter})
 			continue
 		}
-		foot = append(foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+		foot = append(foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	}
 	return w.Sheet{
 		Icon: "move", Title: string(p.Title),

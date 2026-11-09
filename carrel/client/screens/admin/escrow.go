@@ -114,7 +114,7 @@ func hintField(t view.Text) w.Field {
 // taking them both, Done, and whether a letter went.
 func recoveredCard(r view.IssuedPassword) w.Pad {
 	secret := "login     " + string(r.Login) + "\npassword  " + string(r.Password)
-	row := w.CardRow{Kind: w.CardTop8, Gap: 8, Items: []w.CardRowPart{
+	row := w.CardRow{Kind: w.CardTop8, Gap: w.LineGapNormal, Items: []w.CardRowPart{
 		w.Button{Label: string(r.Copy.Label), Icon: "dup", Kind: w.ButtonPrimary, CopyFrom: recoveredID, Copied: copied},
 		bind.Button(r.Done, ""),
 	}}

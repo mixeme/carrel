@@ -99,7 +99,7 @@ func settingsField(p *view.AdminSettingsPage, r view.FormRow) w.Field {
 	case r.Name == "to":
 		in := bind.Input(r)
 		in.Variant = w.InputFill
-		line := w.Line{Items: []w.LinePart{in}, Gap: w.LineGap8}
+		line := w.Line{Items: []w.LinePart{in}, Gap: w.LineGapNormal}
 		for _, a := range p.Form.Actions {
 			if a.Submits {
 				line.Items = append(line.Items, bind.Button(a, ""))

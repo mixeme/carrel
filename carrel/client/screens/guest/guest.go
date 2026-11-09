@@ -112,7 +112,7 @@ func banner(p *view.PublishedPage) w.Banner {
 		items = append(items, bind.Button(a, ""))
 	}
 	if len(items) > 0 {
-		b.End = w.Line{Gap: w.LineGap6, Place: w.Pushed, Items: items}
+		b.End = w.Line{Gap: w.LineGapNormal, Place: w.Pushed, Items: items}
 	}
 	return b
 }
@@ -332,7 +332,7 @@ func note(p *view.PublishedPage) w.DocLayout {
 	}
 	items = append(items, bind.DocText(p.Note.Rendered, faces)...)
 	if len(p.Attachments) > 0 {
-		files := w.DocFiles{Title: w.Rubric{Text: attachments, Variant: w.RubricBottom7}}
+		files := w.DocFiles{Title: w.Rubric{Text: attachments, Variant: w.RubricBelow}}
 		for _, a := range p.Attachments {
 			files.Items = append(files.Items, w.DocFile{Name: string(a.Name), Size: w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Size))}}, Href: a.Href})
 		}

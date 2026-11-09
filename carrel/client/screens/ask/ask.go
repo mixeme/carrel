@@ -38,7 +38,7 @@ const (
 func Sheet(p *view.AskSheet) w.Sheet {
 	var body []w.SheetPart
 	for _, b := range p.Blocks {
-		block := w.SheetBlock{Title: w.Rubric{Text: string(b.Title), Variant: w.RubricBottom7}}
+		block := w.SheetBlock{Title: w.Rubric{Text: string(b.Title), Variant: w.RubricBelow}}
 		for _, l := range b.Lines {
 			block.Items = append(block.Items, w.SheetLine{Name: string(l.Text), Note: w.Dim{Parts: []w.Inline{w.Text(l.Aside)}}})
 		}
@@ -55,7 +55,7 @@ func Sheet(p *view.AskSheet) w.Sheet {
 		b := bind.Button(a, "")
 		switch {
 		case i == len(p.Actions)-1 && i > 0:
-			foot = append(foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+			foot = append(foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 		case a.Primary:
 			foot = append(foot, b, w.Kbd{Keys: enter})
 		default:

@@ -80,7 +80,7 @@ func TestFileCopyAndOtherStorageAreTheFrames(t *testing.T) {
 // words, with the line open and the name typed.
 func TestNewFolderLineIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-files-13")
-	lineM := regexp.MustCompile(`(?s)<div class="tc-line tc-line--gap-8">(.*?)</div>`).FindStringSubmatch(frame)
+	lineM := regexp.MustCompile(`(?s)<div class="tc-line tc-line--normal">(.*?)</div>`).FindStringSubmatch(frame)
 	if lineM == nil {
 		t.Fatal("s-files-13 draws no line: read it again")
 	}

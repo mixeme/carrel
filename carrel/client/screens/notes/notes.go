@@ -416,7 +416,7 @@ func side(d view.Details) *w.Side {
 		}
 		sec := []w.SecPart{rubric}
 		if len(d.Attach) > 0 {
-			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: 6})
+			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: w.StackGapTight})
 		}
 		items = append(items, w.Sec{Items: sec})
 	}
@@ -433,7 +433,7 @@ func side(d view.Details) *w.Side {
 				w.Dim{Parts: []w.Inline{w.Text(about)}},
 			}, r.From))
 		}
-		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: 6}}})
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: w.StackGapTight}}})
 	}
 	// The note's people, as the agenda's panel names an event's (Р3 of the
 	// server's kinds-parity list; no frame draws them yet — Typecase's task

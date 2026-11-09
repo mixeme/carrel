@@ -126,7 +126,7 @@ func Screen(p *view.TaskPage) w.Shell {
 		}
 		sec := []w.SecPart{rubric}
 		if len(p.Attach) > 0 {
-			sec = append(sec, w.SecList{Items: attachments(p.Attach), Gap: 6})
+			sec = append(sec, w.SecList{Items: attachments(p.Attach), Gap: w.StackGapTight})
 		}
 		main = append(main, w.Sec{Items: sec})
 	}
@@ -160,7 +160,7 @@ func Screen(p *view.TaskPage) w.Shell {
 		}
 		main = append(main, w.Sec{Items: []w.SecPart{
 			w.Rubric{Text: keptRubric(p.LinkedRecord), Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Linked)), Tone: w.BadgeLinked}}},
-			w.SecList{Items: lines, Gap: 5},
+			w.SecList{Items: lines, Gap: w.StackGapTight},
 		}})
 	}
 	if p.LinkedRecord {

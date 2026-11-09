@@ -271,7 +271,7 @@ func source(p *view.ImportPage, d w.Dialog) w.Dialog {
 	card := w.Card{Items: []w.CardPart{
 		w.Rubric{Text: fromFile},
 		w.Field{Label: label, Width: w.FieldW100,
-			Parts: []w.FieldPart{w.Line{Items: []w.LinePart{shown, submit, preview}, Gap: w.LineGap8}}},
+			Parts: []w.FieldPart{w.Line{Items: []w.LinePart{shown, submit, preview}, Gap: w.LineGapNormal}}},
 	}}
 	if len(p.Source.Hint) > 0 {
 		card.Items = append(card.Items, w.CardHint{Parts: cardText(p.Source.Hint), Line: true})
@@ -279,7 +279,7 @@ func source(p *view.ImportPage, d w.Dialog) w.Dialog {
 	d.Items = append(d.Items, card)
 	if p.Source.Folder != nil {
 		folder := w.Card{Variant: w.CardChosen, Items: []w.CardPart{w.Rubric{Text: fromFolder}, bind.FileTree(*p.Source.Folder, tree)}}
-		row := w.CardRow{Kind: w.CardTop8, Gap: 10, Items: []w.CardRowPart{w.FillHint{Parts: cardText(p.Source.FolderHint)}}}
+		row := w.CardRow{Kind: w.CardTop8, Gap: w.LineGapNormal, Items: []w.CardRowPart{w.FillHint{Parts: cardText(p.Source.FolderHint)}}}
 		if a := p.Source.Preview; a != nil {
 			b := bind.Button(*a, a.ID)
 			if !a.Enabled {

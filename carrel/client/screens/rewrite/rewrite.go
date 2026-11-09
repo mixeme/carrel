@@ -57,7 +57,7 @@ func Sheet(p *view.RewriteSheet) w.Sheet {
 		s.Body = append(s.Body, w.Rubric{Text: rubric})
 	}
 	for _, pr := range p.Pairs {
-		from := w.Line{Items: []w.LinePart{w.Mono{Text: string(pr.From)}}, Gap: w.LineGap8, Block: true}
+		from := w.Line{Items: []w.LinePart{w.Mono{Text: string(pr.From)}}, Gap: w.LineGapNormal, Block: true}
 		if pr.Note != "" {
 			from.Items = append(from.Items, w.Dim{Parts: []w.Inline{w.Text(pr.Note)}, Size: w.Dim11_5})
 		}
@@ -67,13 +67,13 @@ func Sheet(p *view.RewriteSheet) w.Sheet {
 		}
 		pick := bind.Pick(pr.Choice)
 		pick.Variant = w.PickT12W240
-		s.Body = append(s.Body, w.Line{Items: []w.LinePart{w.Mono{Text: arrow}, pick}, Gap: w.LineGap8, Block: true})
+		s.Body = append(s.Body, w.Line{Items: []w.LinePart{w.Mono{Text: arrow}, pick}, Gap: w.LineGapNormal, Block: true})
 	}
 	if len(p.Groups) > 0 {
 		s.Body = append(s.Body, w.Rubric{Text: setOff})
 	}
 	for _, g := range p.Groups {
-		line := w.Line{Items: []w.LinePart{w.Check{On: g.On, Name: g.Name, Value: g.Value, Parts: []w.CheckPart{w.Text(g.Label)}}}, Gap: w.LineGap8, Block: true}
+		line := w.Line{Items: []w.LinePart{w.Check{On: g.On, Name: g.Name, Value: g.Value, Parts: []w.CheckPart{w.Text(g.Label)}}}, Gap: w.LineGapNormal, Block: true}
 		if len(g.Records) > 0 {
 			menu := w.Menu{Width: w.MenuWidth290, Pop: w.MenuUnder}
 			for _, r := range g.Records {
@@ -114,7 +114,7 @@ func Sheet(p *view.RewriteSheet) w.Sheet {
 		}
 		b := bind.Submit(a)
 		b.To = a.Href
-		s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGap7, Place: w.Pushed})
+		s.Foot = append(s.Foot, w.Line{Items: []w.LinePart{b, w.Kbd{Keys: esc}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	}
 	return s
 }

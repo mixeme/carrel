@@ -63,7 +63,7 @@ func Attachments(p *view.AttachmentsPage) w.Shell {
 			case r.Extra != nil:
 				in := bind.Input(r)
 				in.Variant = w.InputFill
-				line := w.Line{Items: []w.LinePart{in, bind.Button(*r.Extra, "")}, Gap: w.LineGap8}
+				line := w.Line{Items: []w.LinePart{in, bind.Button(*r.Extra, "")}, Gap: w.LineGapNormal}
 				fs.Items = append(fs.Items, w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{line}, bind.Column(bind.Hint(r))...), Width: attachmentsWidths[r.Name]})
 			default:
 				fs.Items = append(fs.Items, bind.ColumnField(r, attachmentsWidths[r.Name]))

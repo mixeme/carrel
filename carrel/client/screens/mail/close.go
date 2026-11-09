@@ -42,7 +42,7 @@ func Close(p *view.MailCloseSheet) w.Sheet {
 		}
 	}
 	if keep != nil {
-		foot = append(foot, w.Line{Items: []w.LinePart{keep, w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+		foot = append(foot, w.Line{Items: []w.LinePart{keep, w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	}
 	return w.Sheet{
 		Icon: mailIcon, Title: closeTitle,

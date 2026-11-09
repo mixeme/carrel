@@ -486,7 +486,7 @@ func side(d view.Details) *w.Side {
 		}
 		sec := []w.SecPart{rubric}
 		if len(d.Attach) > 0 {
-			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: 6})
+			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: w.StackGapTight})
 		}
 		items = append(items, w.Sec{Items: sec})
 	}

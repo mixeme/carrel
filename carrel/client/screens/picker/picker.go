@@ -149,7 +149,7 @@ func serverPick(servers []view.FileServer, swap string) []w.SheetHeadPart {
 // list of those picked, a row each with its size and Remove —, what a name
 // already taken does, and the list.
 func drop(up view.Action) w.Empty {
-	row := &w.Line{Gap: w.LineGap8, Place: w.Grown, Items: []w.LinePart{
+	row := &w.Line{Gap: w.LineGapNormal, Place: w.Grown, Items: []w.LinePart{
 		w.Faced{Face: w.FaceLarge, Items: []w.LinePart{w.Text("{name} "), w.Dim{Parts: []w.Inline{w.Text("{size}")}}}},
 		w.Button{Label: remove, Kind: w.ButtonDanger, Small: true, Place: w.Pushed, Removes: true},
 	}}
@@ -159,7 +159,7 @@ func drop(up view.Action) w.Empty {
 	return w.Empty{Variant: w.EmptyDashed, Parts: []w.EmptyPart{
 		w.Text(dropHere), pick, w.Text(" "),
 		w.Aside{Face: w.FaceSmall, Parts: []w.Inline{w.Text(taken)}}, w.Text(" "),
-		w.Line{Gap: w.LineGap8, Block: true, ID: listID, Place: w.Grown},
+		w.Line{Gap: w.LineGapNormal, Block: true, ID: listID, Place: w.Grown},
 	}}
 }
 
@@ -180,7 +180,7 @@ func treeParts(p *view.FilePickerSheet) []w.CardPart {
 	// A refusal of New folder in the card stands 8 px from the line of the
 	// name and from the tree (s-files-19, note 83 of Typecase).
 	if p.Failure != nil {
-		out = append(out, bind.Msg(*p.Failure, w.MsgFlushY8))
+		out = append(out, bind.Msg(*p.Failure, w.MsgAroundNormal))
 	}
 	t := bind.FileTree(p.Tree, tree)
 	for i := range t.Rows {
@@ -195,7 +195,7 @@ func treeParts(p *view.FilePickerSheet) []w.CardPart {
 // s-files-19): its field with the cursor, filling the line; Create, which
 // sends the sheet to the address that makes the folder; Cancel.
 func nameLine(f view.Form) w.Line {
-	line := w.Line{Gap: w.LineGap8}
+	line := w.Line{Gap: w.LineGapNormal}
 	for _, r := range bind.Rows(f) {
 		if r.Kind == view.InputHidden {
 			continue
@@ -248,7 +248,7 @@ func foot(actions []view.Action, cancel *w.Button, uploading bool) []w.SheetFoot
 		}
 	}
 	if cancel != nil {
-		out = append(out, w.Line{Gap: w.LineGap7, Place: w.Pushed, Items: []w.LinePart{*cancel, w.Kbd{Keys: esc}}})
+		out = append(out, w.Line{Gap: w.LineGapNormal, Place: w.Pushed, Items: []w.LinePart{*cancel, w.Kbd{Keys: esc}}})
 	}
 	return out
 }

@@ -78,7 +78,7 @@ func Account(p *view.AccountPage) w.Shell {
 func profileField(p *view.AccountPage, r view.FormRow, fs *w.FieldSet) w.Field {
 	in := bind.Input(r)
 	in.Variant = w.InputFill
-	line := w.Line{Items: []w.LinePart{in}, Gap: w.LineGap8}
+	line := w.Line{Items: []w.LinePart{in}, Gap: w.LineGapNormal}
 	if a := r.Extra; a != nil {
 		fs.Action = a.Href
 		b := bind.Button(*a, "")

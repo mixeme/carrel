@@ -51,7 +51,7 @@ func Preview(p *view.MailPreviewSheet) w.Sheet {
 		for _, f := range p.Files {
 			files = append(files, w.Tag{Label: string(f.Name), Icon: w.Icon(kindIcons[string(f.Kind)])})
 		}
-		card = append(card, w.CardRow{Kind: w.CardAttached, Gap: 6, Items: files})
+		card = append(card, w.CardRow{Kind: w.CardAttached, Gap: w.LineGapNormal, Items: files})
 	}
 	if len(p.Links) > 0 {
 		var links []w.CardTextPart
@@ -82,7 +82,7 @@ func Preview(p *view.MailPreviewSheet) w.Sheet {
 			cancel.To = a.Href
 		}
 	}
-	foot = append(foot, w.Line{Items: []w.LinePart{cancel, w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+	foot = append(foot, w.Line{Items: []w.LinePart{cancel, w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	return w.Sheet{
 		Icon: previewIcon, Title: previewTitle,
 		Head:   []w.SheetHeadPart{w.Dim{Parts: []w.Inline{w.Text(previewAside)}, Size: w.Dim11_5, Variant: w.DimWrap, Place: w.Pushed}},

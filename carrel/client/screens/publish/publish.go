@@ -65,7 +65,7 @@ func Sheet(p *view.PublishSheet) w.Sheet {
 		if set.Legend != "" {
 			// «What the visitor sees»: the ticks one under another, the line
 			// under them.
-			g := w.Group{Form: w.GroupColumnLoose}
+			g := w.Group{Form: w.GroupColumn}
 			for _, r := range set.Rows {
 				if r.Kind == view.InputCheck {
 					g.Items = append(g.Items, aside(bind.Check(r)))
@@ -105,7 +105,7 @@ func Sheet(p *view.PublishSheet) w.Sheet {
 				in := bind.Input(r)
 				in.Variant = w.InputFill
 				f := w.Field{Label: string(r.Label), Parts: []w.FieldPart{w.Line{Items: []w.LinePart{in,
-					w.Button{Label: copyWord, Icon: copyIcon, Small: true, Copy: string(r.Value), Copied: copied}}, Gap: w.LineGap6}}, Width: w.FieldW100}
+					w.Button{Label: copyWord, Icon: copyIcon, Small: true, Copy: string(r.Value), Copied: copied}}, Gap: w.LineGapNormal}}, Width: w.FieldW100}
 				if p.Expires != "" {
 					f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(p.Expires)}})
 				}
@@ -120,7 +120,7 @@ func Sheet(p *view.PublishSheet) w.Sheet {
 				body = append(body, bind.Field(r, w.FieldW100))
 			}
 			if len(days) == 2 {
-				body = append(body, w.Line{Items: days, Gap: w.LineGap10, Block: true})
+				body = append(body, w.Line{Items: days, Gap: w.LineGapNormal, Block: true})
 				days = nil
 			}
 		}
@@ -134,7 +134,7 @@ func Sheet(p *view.PublishSheet) w.Sheet {
 		case a.ID == closeID:
 			head = append(head, w.Close{Label: closeWord, Href: a.Href})
 		case a.ID == cancelID:
-			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 		case a.Method == "POST" && a.Href == p.Form.Action:
 			foot = append(foot, bind.Submit(a))
 		default:

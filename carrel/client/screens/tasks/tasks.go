@@ -482,7 +482,7 @@ func side(d view.Details) *w.Side {
 		}
 		sec := []w.SecPart{rubric}
 		if len(d.Attach) > 0 {
-			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: 6})
+			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: w.StackGapTight})
 		}
 		items = append(items, w.Sec{Items: sec})
 	}
@@ -495,7 +495,7 @@ func side(d view.Details) *w.Side {
 				w.Dim{Parts: []w.Inline{w.Text(about(r))}},
 			}, r.From))
 		}
-		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: 6}}})
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: w.StackGapTight}}})
 	}
 	if d.LinkedRecord {
 		items = append(items, bind.KeptSec("Where this task is kept", d.Books, lead))

@@ -459,7 +459,7 @@ func want2(fset, label string) string {
 	return fset[at:]
 }
 
-var frameCardActs = regexp.MustCompile(`(?s)<div class="tc-card">\s*<div class="tc-rubric">([^<]+)<span class="tc-line tc-line--gap-6">(.*?)</span>\s*</div>`)
+var frameCardActs = regexp.MustCompile(`(?s)<div class="tc-card">\s*<div class="tc-rubric">([^<]+)<span class="tc-line tc-line--normal">(.*?)</span>\s*</div>`)
 
 // s-profile-1: the card of a plain file storage carries «New folder» first in
 // its head, where a DAV server's carries «New collection». It opens the same

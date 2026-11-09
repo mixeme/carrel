@@ -329,7 +329,7 @@ func side(d view.Details) *w.Side {
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{
 			w.Rubric{Text: "Where this person is kept", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(d.Books)), Tone: w.BadgeLinked}}},
-			w.SecList{Items: lines, Gap: 5},
+			w.SecList{Items: lines, Gap: w.StackGapTight},
 		}})
 		return &w.Side{Items: items}
 	}

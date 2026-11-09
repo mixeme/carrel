@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.26 — 2026-11-10
+
+Typecase `2406c87`, notes 189–193; server `v0.2.406`. The whole client
+suite passes.
+
+- Gaps are steps, as the library names them (notes 190–192): lines
+  `LineGapTight`, `LineGapNormal`, `LineGapWide`, `LineGapFields` (a
+  `CardRow`'s `Gap` too); a section's list `StackGapTight`; the ticks in a
+  column `GroupColumn`; `RubricBelow`, `DialogTitleGapTight`, `…Normal`,
+  `MsgFlushAboveTight`, `MsgFlushAboveWide`, `MsgFlushBelowWide`,
+  `MsgAroundNormal` in place of the numbered ones.
+- The geometry fixes of note 189 are the library's stylesheet; the note's
+  edit bar already gave H2, list, task, link and Auto-save the third rank
+  in Focus too (s-notes-4).
+
 ## v0.11.25 — 2026-11-09
 
 Typecase `911c960`, notes 180–188; server `v0.2.405`. The whole client

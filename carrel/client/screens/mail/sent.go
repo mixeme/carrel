@@ -37,7 +37,7 @@ func Sent(p *view.MailSentSheet) w.Sheet {
 		} else {
 			line = append(line, w.Strong(r.Said))
 		}
-		body = append(body, w.Line{Items: line, Gap: w.LineGap6, Block: true})
+		body = append(body, w.Line{Items: line, Gap: w.LineGapNormal, Block: true})
 	}
 	var foot []w.SheetFootPart
 	var closing view.Action
@@ -47,7 +47,7 @@ func Sent(p *view.MailSentSheet) w.Sheet {
 			foot = append(foot, bind.Button(a, ""), w.Kbd{Keys: enterKey})
 		case closeID:
 			closing = a
-			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 		}
 	}
 	return w.Sheet{

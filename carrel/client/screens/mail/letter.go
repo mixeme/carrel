@@ -111,7 +111,7 @@ func Letter(p *view.MailSheet) w.Sheet {
 	if len(p.ReplyNote) > 0 {
 		foot = append(foot, w.Dim{Parts: bind.Inlines(p.ReplyNote), Size: w.Dim11_5, Variant: w.DimWrap})
 	}
-	foot = append(foot, w.Line{Items: []w.LinePart{cancel, w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+	foot = append(foot, w.Line{Items: []w.LinePart{cancel, w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 	return w.Sheet{
 		ID: letterID, Icon: mailIcon, Title: letterTitle,
 		Head:   []w.SheetHeadPart{w.Tag{Label: fromWord + string(p.From), On: true, Place: w.Pushed}, w.Close{Label: closeWord, Href: p.Back}},
@@ -170,7 +170,7 @@ func attachments(p *view.MailSheet) w.Sec {
 		items = append(items, it)
 	}
 	attach := w.Drop{Trigger: w.Button{Label: attachWord, Menu: true, Icon: clipIcon, Small: true}, Menu: w.Menu{Items: items, Width: w.MenuWidth212, Pop: w.MenuUnderEnd}}
-	rubric := w.Rubric{Text: attached, Items: []w.RubricPart{w.Num{Value: len(p.Attach)}, w.Line{Items: []w.LinePart{attach}, Gap: w.LineGap6, Place: w.Pushed}}, Variant: w.RubricRow}
+	rubric := w.Rubric{Text: attached, Items: []w.RubricPart{w.Num{Value: len(p.Attach)}, w.Line{Items: []w.LinePart{attach}, Gap: w.LineGapNormal, Place: w.Pushed}}, Variant: w.RubricRow}
 	files := w.SecFiles{}
 	for _, r := range p.Attach {
 		size := string(r.Size)
@@ -201,7 +201,7 @@ func attachments(p *view.MailSheet) w.Sec {
 				parts = append(parts, mp)
 			}
 		}
-		sec.Items = append(sec.Items, w.Msg{Parts: parts, Tone: w.MsgAccent, Space: w.MsgFlushTop11})
+		sec.Items = append(sec.Items, w.Msg{Parts: parts, Tone: w.MsgAccent, Space: w.MsgFlushAboveWide})
 	}
 	return sec
 }

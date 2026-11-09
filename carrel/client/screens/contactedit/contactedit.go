@@ -246,7 +246,7 @@ func photo(b view.PhotoBlock) w.Field {
 		case a.Danger:
 			btn.Kind = w.ButtonDanger
 			if len(line) > 0 {
-				side = append(side, w.Line{Items: line, Gap: w.LineGap6})
+				side = append(side, w.Line{Items: line, Gap: w.LineGapNormal})
 				line = nil
 			}
 			side = append(side, btn)
@@ -255,7 +255,7 @@ func photo(b view.PhotoBlock) w.Field {
 		}
 	}
 	if len(line) > 0 {
-		side = append(side, w.Line{Items: line, Gap: w.LineGap6})
+		side = append(side, w.Line{Items: line, Gap: w.LineGapNormal})
 	}
 	if b.Note != "" {
 		side = append(side, w.FieldHint{Parts: []w.Inline{w.Text(b.Note)}, Variant: w.HintNarrow})

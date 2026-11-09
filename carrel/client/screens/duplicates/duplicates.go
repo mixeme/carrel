@@ -163,13 +163,13 @@ func card(g view.DuplicateGroup) w.Card {
 		c.Items = append(c.Items, w.CardHint{Parts: []w.CardTextPart{w.Text(g.Hint)}, Line: true})
 	}
 	if len(g.Choices) > 0 {
-		questions := w.CardRow{Kind: w.CardTop11, Gap: 22}
+		questions := w.CardRow{Kind: w.CardTop11, Gap: w.LineGapFields}
 		for _, q := range g.Choices {
 			questions.Items = append(questions.Items, question(q))
 		}
 		c.Items = append(c.Items, questions)
 	}
-	acts := w.CardRow{Kind: w.CardActs, Gap: 8}
+	acts := w.CardRow{Kind: w.CardActs, Gap: w.LineGapNormal}
 	var why string
 	for _, a := range g.Actions {
 		b := bind.Button(a, "")
@@ -194,7 +194,7 @@ func card(g view.DuplicateGroup) w.Card {
 // question is a question of a group: radios of a value held once, ticks of
 // what to keep of a value held many times (note 117 p. 1).
 func question(q view.MergeRow) w.Field {
-	line := w.Line{Gap: w.LineGap12, Block: true}
+	line := w.Line{Gap: w.LineGapWide, Block: true}
 	for i, o := range q.Options {
 		ch := w.Check{Name: q.Name, Parts: []w.CheckPart{w.Text(o)}, Radio: !q.Many}
 		if i < len(q.Values) {
@@ -257,7 +257,7 @@ func decided(d view.DecidedCard) w.Card {
 		}}}},
 		w.CardText{Kind: w.CardLine, Parts: []w.CardTextPart{w.Text(string(d.Where) + " "), w.Dim{Parts: []w.Inline{w.Text(sep + string(d.UIDs))}}}},
 	}}
-	acts := w.CardRow{Kind: w.CardActs, Gap: 8}
+	acts := w.CardRow{Kind: w.CardActs, Gap: w.LineGapNormal}
 	for _, a := range d.Actions {
 		acts.Items = append(acts.Items, bind.Button(a, ""))
 	}

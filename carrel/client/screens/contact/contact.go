@@ -139,7 +139,7 @@ func Screen(p *view.ContactPage) w.Shell {
 		}
 		main = append(main, w.Sec{Items: []w.SecPart{
 			w.Rubric{Text: rubric, Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Books)), Tone: w.BadgeLinked}}},
-			w.SecList{Items: lines, Gap: 5},
+			w.SecList{Items: lines, Gap: w.StackGapTight},
 		}})
 	}
 	rubric := w.Rubric{Text: "Timeline"}

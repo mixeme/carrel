@@ -81,7 +81,7 @@ func LinkSheet(p *view.MailLinkSheet) w.Sheet {
 	for _, c := range p.Carries {
 		carries = append(carries, []w.SecItemPart{w.Text(c)})
 	}
-	body = append(body, w.Sec{Items: []w.SecPart{w.Rubric{Text: carriesHdr}, w.SecList{Items: carries, Gap: 5, Muted: true}}, Flush: true})
+	body = append(body, w.Sec{Items: []w.SecPart{w.Rubric{Text: carriesHdr}, w.SecList{Items: carries, Gap: w.StackGapTight, Muted: true}}, Flush: true})
 
 	var foot []w.SheetFootPart
 	for _, a := range p.Form.Actions {
@@ -98,7 +98,7 @@ func LinkSheet(p *view.MailLinkSheet) w.Sheet {
 			b.To = a.Href
 			foot = append(foot, b)
 		case cancelID:
-			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGap7, Place: w.Pushed})
+			foot = append(foot, w.Line{Items: []w.LinePart{bind.Button(a, ""), w.Kbd{Keys: escKey}}, Gap: w.LineGapNormal, Place: w.Pushed})
 		}
 	}
 	return w.Sheet{

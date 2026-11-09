@@ -96,7 +96,7 @@ func Screen(p *view.FileOpSheet) w.Overlay {
 		s.Body = append(s.Body, w.Msg{Parts: bind.MsgParts(p.Alert), Tone: w.MsgAlert, Space: w.MsgFlush})
 	}
 	if len(p.References) > 0 {
-		b := w.SheetBlock{Title: w.Rubric{Text: pointing, Variant: w.RubricBottom7}}
+		b := w.SheetBlock{Title: w.Rubric{Text: pointing, Variant: w.RubricBelow}}
 		for _, r := range p.References {
 			b.Items = append(b.Items, w.SheetLine{Name: string(r.What), Note: w.Dim{Parts: []w.Inline{w.Text("— " + string(r.Then))}}})
 		}
@@ -154,7 +154,7 @@ func treeParts(t view.FileTree, failure *view.Notice) []w.SheetPart {
 // s-files-13): its field with the cursor, filling the line; Create, which
 // sends the sheet to the address that makes the folder; Cancel.
 func nameLine(f view.Form) w.Line {
-	line := w.Line{Gap: w.LineGap8}
+	line := w.Line{Gap: w.LineGapNormal}
 	for _, r := range bind.Rows(f) {
 		if r.Kind == view.InputHidden {
 			continue
@@ -265,7 +265,7 @@ func foot(p *view.FileOpSheet) []w.SheetFootPart {
 		}
 	}
 	if len(cancel) > 0 {
-		out = append(out, w.Line{Gap: w.LineGap7, Place: w.Pushed, Items: cancel})
+		out = append(out, w.Line{Gap: w.LineGapNormal, Place: w.Pushed, Items: cancel})
 	}
 	return out
 }

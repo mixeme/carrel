@@ -52,7 +52,7 @@ func card(c view.AddUserCard) []w.CardPart {
 	}
 	if c.Warning != nil {
 		// A message inside a card keeps the card's width (Typecase's note 148).
-		m := bind.Msg(*c.Warning, w.MsgFlushBottom12)
+		m := bind.Msg(*c.Warning, w.MsgFlushBelowWide)
 		parts = append(parts, m)
 	}
 	return parts
@@ -87,7 +87,7 @@ func linkRow(link view.Text, cp *view.Action, label string) w.CardRow {
 	if cp != nil {
 		b.Label = string(cp.Label)
 	}
-	return w.CardRow{Kind: w.CardTop10, Gap: 6, Items: []w.CardRowPart{in, b}}
+	return w.CardRow{Kind: w.CardTop10, Gap: w.LineGapNormal, Items: []w.CardRowPart{in, b}}
 }
 
 // field is a row of a card's form by its name, and the width its frame
@@ -171,14 +171,14 @@ func temporaryCard(c view.AddUserCard) w.Card {
 // the card's title marked «visible only now», what was done in words, the
 // login and the password in one block, Copy taking them both and Done.
 func issuedCard(c view.AddUserCard, iss view.IssuedPassword) w.Card {
-	msg := bind.Msg(view.Notice{Runs: iss.Message}, w.MsgFlushBottom12)
+	msg := bind.Msg(view.Notice{Runs: iss.Message}, w.MsgFlushBelowWide)
 	secret := "login     " + string(iss.Login) + "\npassword  " + string(iss.Password)
 	cp := w.Button{Label: string(iss.Copy.Label), Icon: "dup", Kind: w.ButtonPrimary, CopyFrom: secretID, Copied: copied}
 	return w.Card{Variant: w.CardChosen, Items: []w.CardPart{
 		w.Rubric{Text: string(c.Title), Items: []w.RubricPart{w.Mono{Text: onlyNow, Variant: w.MonoTightDanger}}},
 		msg,
 		w.Diag{Text: secret, Variant: w.DiagInk, ID: secretID},
-		w.CardRow{Kind: w.CardTop8, Gap: 8, Items: []w.CardRowPart{cp, bind.Button(iss.Done, "")}},
+		w.CardRow{Kind: w.CardTop8, Gap: w.LineGapNormal, Items: []w.CardRowPart{cp, bind.Button(iss.Done, "")}},
 	}}
 }
 
