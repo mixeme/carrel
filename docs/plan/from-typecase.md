@@ -6004,6 +6004,26 @@ Typecase — решения владельца 05.11 по проходу Р-77).
    списков и галки через 4 px (было 2–6), задачи через 8 (было 7–9),
    карточки и разделы друг под другом через 12 (было 10–14).
 
+Записка 192 от 09.11.2026 (Typecase `cf441cb`; по тому же ответу
+владельца от 09.11). **Последний коммит Typecase, который она описывает, —
+`cf441cb`** (574 кадра).
+
+192. **Отступ над и под блоком — ступень.** Ломает сборку Carrel
+   (33 места). Замены:
+   - `w.RubricBottom7` → `w.RubricBelow` (5);
+   - `w.DialogTitleGap4` → `w.DialogTitleGapTight` (4);
+     `w.DialogTitleGap6`, `w.DialogTitleGap8` → `w.DialogTitleGapNormal`
+     (3 + 3);
+   - `w.MsgFlushTop4` → `w.MsgFlushAboveTight` (3), `w.MsgFlushTop11` →
+     `w.MsgFlushAboveWide` (1), `w.MsgFlushBottom12` → `w.MsgFlushBelowWide`
+     (13), `w.MsgFlushY8` → `w.MsgAroundNormal` (1).
+
+   `w.MsgFlushTop2` и `w.RubricBottom2` не меняются: подгонка на 2 px — не
+   отступ. Классы с числами (`tc-rubric--bot7`, `tc-prose--top14`,
+   `tc-msg--flush-top11`…) названы ступенью (`--below-normal`,
+   `--above-wide`…); переменная `--tc-gap-fields` переименована в
+   `--tc-gap-loose`. Видно: сдвиги на 1–2 px в 87 кадрах.
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
