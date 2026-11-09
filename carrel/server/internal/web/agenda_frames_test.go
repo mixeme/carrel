@@ -25,9 +25,14 @@ func TestAgendaByItsFrame(t *testing.T) {
 	// Б2: «5 of 7 calendars · 3 accounts · 10 – 16 August 2026 ·
 	// ‹Europe/Moscow› · 6 events» — the count once the poll is over, the
 	// events of the window (Typecase's note 39, Р-48).
+	// An event of several days counts once (Typecase's note 182).
 	events := 0
 	for _, d := range page.Days {
-		events += len(d.Rows)
+		for _, r := range d.Rows {
+			if !r.Continues {
+				events++
+			}
+		}
 	}
 	if n := len(page.Subtitle); n != 3 || page.Subtitle[1] != (view.Run{Text: "Europe/Moscow", Mark: view.RunMono}) ||
 		!strings.Contains(string(page.Subtitle[0].Text), " calendars · ") ||

@@ -347,7 +347,7 @@ func TestANewFormThatLostItsFilesSaysSo(t *testing.T) {
 		t.Fatalf("a form that lost its files was saved: %d %s", resp.Code, resp.Header().Get("Location"))
 	}
 	page := decode[view.EventEditPage](t, resp)
-	if len(page.Notices) == 0 || page.Notices[0].Title != "Nothing was saved" || !strings.Contains(string(page.Notices[0].Body), "files") {
+	if len(page.Notices) == 0 || page.Notices[0].Title != "Nothing was saved:" || !strings.Contains(string(page.Notices[0].Body), "files") {
 		t.Errorf("notices = %+v, want why nothing was saved", page.Notices)
 	}
 	if resp := f.h.do(postForm(list+"/new", f.sess, formFields(page.Form))); resp.Code != http.StatusSeeOther {

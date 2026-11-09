@@ -17,16 +17,19 @@ import (
 // the screen's (U-1.3): what depends on the data or the state is the
 // server's, and is read here off the frame.
 
-// s-files-1: the attachment folder says so under its title — the badge
+// s-publish-5: the attachment folder says so under its title — the badge
 // «attachment folder» is the screen's word, that this folder is it is the
-// server's.
+// server's; a folder of a month in it does not (s-files-1, Typecase's note
+// 180).
 func TestAttachmentFolderSaysSo(t *testing.T) {
-	if !strings.Contains(mockupFrame(t, "s-files-1"), `<span class="tc-badge">attachment folder</span>`) {
-		t.Fatal("s-files-1 draws no «attachment folder» under its title: read the frame again")
+	if !strings.Contains(mockupFrame(t, "s-publish-5"), `<span class="tc-badge">attachment folder</span>`) ||
+		strings.Contains(mockupFrame(t, "s-files-1"), `<span class="tc-badge">attachment folder</span>`) {
+		t.Fatal("s-publish-5 draws no «attachment folder» under its title, or s-files-1 does: read the frames again")
 	}
 	f := filesFixture(t, true)
 	f.srv.SeedFolder(filesDocs + "carrel/")
 	f.srv.SeedFolder(filesDocs + "carrel/attachments/")
+	f.srv.SeedFolder(filesDocs + "carrel/attachments/2026-08/")
 	folder := f.at("", "carrel", "attachments", "")
 	if rec := f.h.do(postForm("/app/settings/attachments", f.sess, attachAt(t, folder))); rec.Code != http.StatusSeeOther {
 		t.Fatalf("attachment folder: %d %s", rec.Code, rec.Body)
@@ -36,6 +39,9 @@ func TestAttachmentFolderSaysSo(t *testing.T) {
 	}
 	if page := decode[view.FilesPage](t, f.h.do(get(f.at("", "carrel", ""), f.sess))); page.Attachments {
 		t.Errorf("the folder above says it is the attachment folder")
+	}
+	if page := decode[view.FilesPage](t, f.h.do(get(f.at("", "carrel", "attachments", "2026-08", ""), f.sess))); page.Attachments {
+		t.Errorf("a month's folder in it says it is the attachment folder")
 	}
 }
 

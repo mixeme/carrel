@@ -191,7 +191,8 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 		t.Errorf("nav = %+v", nav)
 	}
 
-	// With scripts the rail answers itself and the poll of the new selection.
+	// With scripts the rail answers itself, the poll of the new selection
+	// and the list of the combined view (Typecase's note 186).
 	rec := f.h.do(fragment(postForm("/app/sources/contacts", f.sess, url.Values{"tick": {people.Href}}), "rail"))
 	frag := decode[railFragment](t, rec)
 	if _, team := railRow(t, frag.Body, "Team"); team.Tick != view.TickOff || team.Count != nil {
@@ -201,7 +202,7 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 		t.Errorf("combined row = %+v", c)
 	}
 	var bar view.PollBar
-	if len(frag.Extra) != 1 || frag.Extra[0].Target != "poll" || json.Unmarshal(frag.Extra[0].Body, &bar) != nil || len(bar.Sources) != 1 {
+	if len(frag.Extra) != 2 || frag.Extra[0].Target != "poll" || frag.Extra[1].Target != "main" || json.Unmarshal(frag.Extra[0].Body, &bar) != nil || len(bar.Sources) != 1 {
 		t.Fatalf("extra = %+v", frag.Extra)
 	}
 	if got := contactNames(combined(t, f.h, f.sess, "/app/contacts", contactsPoll)); got != "Ada Lovelace · People, Bob Builder · People" {

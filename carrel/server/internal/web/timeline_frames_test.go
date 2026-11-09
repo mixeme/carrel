@@ -18,12 +18,12 @@ import (
 // other books and its UID.
 
 var (
-	frameTLHead  = regexp.MustCompile(`(?s)<div class="tc-main">\s*<div class="tc-head[^"]*">\s*<div class="tc-head__titles[^"]*">\s*<span class="tc-avatar[^"]*">([^<]*)</span>.*?<div class="tc-head__sub">([^<]*)<span class="tc-badge is-linked">([^<]*)</span>.*?<div class="tc-acts">(.*?)</div>`)
+	frameTLHead  = regexp.MustCompile(`(?s)<div class="tc-main"[^>]*>\s*<div class="tc-head[^"]*">\s*<div class="tc-head__titles[^"]*">\s*<span class="tc-avatar[^"]*">([^<]*)</span>.*?<div class="tc-head__sub">([^<]*)<span class="tc-badge is-linked">([^<]*)</span>.*?<div class="tc-acts">(.*?)</div>`)
 	frameRunbar  = regexp.MustCompile(`(?s)<div class="tc-runbar">(.*?)<details class="tc-drop"><summary class="tc-btn is-sm is-danger">(\d+ failed)`)
 	frameRunMono = regexp.MustCompile(`<span class="tc-mono">([^<]*)</span>`)
 	frameTLRange = regexp.MustCompile(`(?s)<form class="tc-range" action="([^"]*)" method="(get)">(.*?)</form>`)
 	// «Filter by word», the first of the bar (Typecase's note 154).
-	frameTLFilter = regexp.MustCompile(`<div class="tc-bar[^"]*">\s*<form class="tc-in[^"]*" action="([^"]*)" method="get">.*?<input class="tc-q" type="search" name="([^"]*)" placeholder="[^"]*" aria-label="([^"]*)">`)
+	frameTLFilter = regexp.MustCompile(`<div class="tc-bar[^"]*">\s*<form class="tc-in[^"]*" action="([^"]*)" method="get"[^>]*>.*?<input class="tc-q" type="search" name="([^"]*)" placeholder="[^"]*" aria-label="([^"]*)">`)
 	frameTLDay    = regexp.MustCompile(`<input class="tc-in[^"]*" type="date" value="[^"]*" name="([^"]*)" aria-label="([^"]*)">`)
 	frameSideDL   = regexp.MustCompile(`(?s)<div class="tc-side">.*?<dl class="tc-fields">(.*?)</dl>`)
 )

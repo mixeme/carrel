@@ -347,14 +347,13 @@ func TestPublicTroubleIsTheFrames(t *testing.T) {
 	}
 }
 
-// s-agenda-31, -17, s-publish-39: «Filter by word» first in the calendar's
-// bar, a GET by filter (note 129); with a word what is found in the whole calendar stands by
-// day, a series once, the week and ← Today → gone, the line under the title
-// counting what was found.
+// s-agenda-31, s-publish-39: a word narrows what the week shows, for the
+// owner and the guest — «… · 1 of 3 events», ← Today → with the word
+// (Typecase's note 185).
 func TestCalendarFilterIsTheFrames(t *testing.T) {
 	owner := mockupFrame(t, "s-agenda-31")
-	sub := frameOne(t, regexp.MustCompile(`· (\d+) events with «([^»]*)»`), owner, "found")
-	if !strings.Contains(mockupFrame(t, "s-agenda-17"), `<input class="tc-q" type="search" name="filter" placeholder="Filter by word"`) || sub == nil {
+	if !strings.Contains(mockupFrame(t, "s-agenda-17"), `<input class="tc-q" type="search" name="filter" placeholder="Filter by word"`) ||
+		!strings.Contains(owner, " · 1 of 3 events</div>") || !strings.Contains(owner, `title="Previous week"`) {
 		t.Fatal("s-agenda-17, -31 changed: read them again")
 	}
 	f := pub122(t)
@@ -363,19 +362,22 @@ func TestCalendarFilterIsTheFrames(t *testing.T) {
 	if week.Bar.FilterForm == nil || formRow(*week.Bar.FilterForm, "filter") == nil {
 		t.Fatalf("the week's filter = %+v", week.Bar.FilterForm)
 	}
-	found := decode[view.AgendaPage](t, f.h.do(get(cal+"?filter=sync", f.sess)))
-	if found.Bar.Range != nil || len(found.Days) != 1 || len(found.Days[0].Rows) != 1 || !strings.HasSuffix(runsText(found.Subtitle), " · 1 event with «sync»") {
+	found := decode[view.AgendaPage](t, f.h.do(get(cal+"?from=2026-08-10&filter=sync", f.sess)))
+	if found.Bar.Range == nil || len(found.Days) != 1 || len(found.Days[0].Rows) != 1 || !strings.HasSuffix(runsText(found.Subtitle), " · 1 of 2 events") {
 		t.Errorf("found = %+v, subtitle %q", found.Days, runsText(found.Subtitle))
 	}
 
 	guest := mockupFrame(t, "s-publish-39")
-	if !strings.Contains(guest, `<div class="tc-head__sub">3 events with «синк»</div>`) || strings.Contains(guest, `title="Previous week"`) {
+	if !strings.Contains(guest, `<div class="tc-head__sub">10 – 16 August 2026 · 1 of 3 events</div>`) || !strings.Contains(guest, "?from=2026-08-03&amp;filter=") {
 		t.Fatal("s-publish-39 changed: read it again")
 	}
 	link := pubWhole(t, f)
-	p := publicPage(t, f, link+"?filter=papers")
-	if p.Range != nil || runsText(p.Lede) != "1 event with «papers»" || len(p.Days) != 1 || !strings.HasPrefix(p.Days[0].Rows[0].Href, link+"?uid=") {
+	p := publicPage(t, f, link+"?from=2026-08-10&filter=papers")
+	if p.Range == nil || runsText(p.Lede) != "10 – 16 August 2026 · 1 of 2 events" || len(p.Days) != 1 || !strings.HasPrefix(p.Days[0].Rows[0].Href, link+"?uid=") {
 		t.Errorf("the guest's found = %+v, lede %q", p.Days, runsText(p.Lede))
+	}
+	if back := p.Range.Presets[0].Href; !strings.Contains(back, "filter=papers") {
+		t.Errorf("← leads to %q without the word", back)
 	}
 }
 

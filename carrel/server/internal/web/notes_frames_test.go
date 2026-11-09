@@ -26,7 +26,8 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	}
 	frame := mockupFrame(t, "s-notes-1")
 	groups := frameGroups(t, frame)
-	if len(groups) != 1 || groups[0].rubric != "August 2026" || !strings.Contains(frame, `placeholder="Filter by word"`) {
+	// August's notes, then July's «Про сроки по сборнику» (Typecase's note 182).
+	if len(groups) != 2 || groups[0].rubric != "August 2026" || groups[1].rubric != "July 2026" || !strings.Contains(frame, `placeholder="Filter by word"`) {
 		t.Fatalf("s-notes-1 groups = %+v: read the frame again", groups)
 	}
 
@@ -43,17 +44,18 @@ func TestNotebookIsTheFrame(t *testing.T) {
 		t.Errorf("subtitle = %q, want the shape of %q", page.Subtitle, frameSubtitle(t, "s-notes-1"))
 	}
 	// The table counts rows, the rail records (the owner's decision of
-	// 09.10.2026): the linked note is one of «3 notes», and one of each of
+	// 09.10.2026): the linked note is one of «4 notes», and one of each of
 	// its notebooks in the rail.
-	if sub := frameSubtitle(t, "s-notes-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 3 notes") {
+	if sub := frameSubtitle(t, "s-notes-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 4 notes") {
 		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), sub)
 	}
-	// «Записи 2», «Дневник 3» (Typecase's note 123 p. 8): the rail counts
-	// what lies in each, the copies too.
-	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 5 {
-		t.Errorf("the rail's combined row = %+v, want the 5 notes of the ticked notebooks", all.Count)
+	// «Записи 3», «Дневник 3» (Typecase's notes 123 p. 8, 182): the rail
+	// counts what lies in each, the copies too.
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 6 {
+		t.Errorf("the rail's combined row = %+v, want the 6 notes of the ticked notebooks", all.Count)
 	}
-	if len(page.Groups) != 1 || page.Groups[0].Rubric != "August 2026" || page.Groups[0].Count != len(page.Groups[0].Rows) || page.Groups[0].Count != 3 {
+	if len(page.Groups) != 2 || page.Groups[0].Rubric != "August 2026" || page.Groups[0].Count != len(page.Groups[0].Rows) || page.Groups[0].Count != 3 ||
+		page.Groups[1].Rubric != "July 2026" || page.Groups[1].Count != 1 {
 		t.Errorf("groups = %+v", page.Groups)
 	}
 	if n := actionByID(page.Bar.Actions, "record.new"); n == nil || len(n.Arrow) != 2 || !slices.ContainsFunc(n.Arrow, func(m view.MenuItem) bool { return m.Label == "Записи" && m.Aside == "last used" }) {
@@ -100,9 +102,9 @@ func TestNotebookIsTheFrame(t *testing.T) {
 		t.Errorf("filtered = %+v", sifted.Groups)
 	}
 
-	// One notebook: where, how many and as what.
+	// One notebook: where, how many and as what (s-notes-31).
 	one := decode[view.NotesPage](t, app.h.do(get(app.listPath(t, "notes", "zapisi")+"?open="+url.QueryEscape(open), app.sess)))
-	if one.Subtitle != "nextcloud · 2 notes · VJOURNAL" || one.Details == nil || one.Bar.FilterForm == nil {
+	if sub := frameSubtitle(t, "s-notes-31"); string(one.Subtitle) != sub || one.Details == nil || one.Bar.FilterForm == nil {
 		t.Errorf("one notebook = %q %+v", one.Subtitle, one.Details)
 	}
 

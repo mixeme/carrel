@@ -21,8 +21,8 @@ import (
 // Typecase's note 155 (Р-66): what a row's card keeps on a phone.
 var frameMainCell = regexp.MustCompile(`<td class="tc-mono tc-table__main" data-tc-label="[^"]*">(\d[^<]*)</td>`)
 
-// ФН1: the line under the title counts the folder — «sftpgo · vps ·
-// ‹attachment folder› · 5 items» (s-files-1), «… · 2 items · ‹read-only›»
+// ФН1: the line under the title counts the folder — «sftpgo · vps · 4
+// items» (s-files-1, August's folder since Typecase's note 180), «… · 2 items · ‹read-only›»
 // (states-34, Typecase's note 87) — and says none when the storage did not
 // answer (states-33).
 func TestFolderHeadCountsTheFolder(t *testing.T) {
@@ -35,8 +35,9 @@ func TestFolderHeadCountsTheFolder(t *testing.T) {
 		t.Fatalf("lines %q, %q, %q: the frames changed, read them again", line("s-files-1"), line("states-34"), line("states-33"))
 	}
 
+	// Files and a folder, as many as the frame counts.
 	f := filesFixture(t, true)
-	for _, name := range []string{"a.txt", "b.txt", "c.txt", "d.txt"} {
+	for _, name := range []string{"a.txt", "b.txt", "c.txt"} {
 		f.srv.SeedFile(filesDocs+name, name)
 	}
 	f.srv.SeedFolder(filesDocs + "sub/")

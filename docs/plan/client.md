@@ -20,7 +20,7 @@
 
 - строки U-5.5 22, 26, 44 ([carrel-client.md](../spec/carrel-client.md),
   U-5.5) — ждут кадров Typecase и долгов сервера, названных в строках;
-- открытых задач Typecase нет ([to-typecase.md](to-typecase.md));
+- задача Typecase 259 — Objects «Записи» в таблицах настроек ([to-typecase.md](to-typecase.md));
 - хвосты сервера — [server.md](server.md), «Открыто»;
 - семь непройденных пунктов этапов 1, 2, 4, 5, 6 ниже.
 

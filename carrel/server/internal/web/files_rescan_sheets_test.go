@@ -314,22 +314,11 @@ func TestSheetsChooseTheServer(t *testing.T) {
 }
 
 // ФН16: the folder New folder of a tree has just made stands first among
-// the folders beside it (s-notes-11: «2026-08 · just created» above
-// «2026-07»), whatever its name; the others keep their order.
+// the folders beside it, «just created», whatever its name; the others keep
+// their order. s-notes-11 drew it so until Typecase's note 180, where
+// August's folder is there since 4 August and the sheet opens on it.
 func TestFolderJustMadeStandsFirst(t *testing.T) {
-	badge := regexp.MustCompile(`<span class="tc-badge tc-push">([^<]*)</span>`)
-	var rows [][2]string // the name, the badge
-	for _, m := range regexp.MustCompile(`(?s)<(?:div|a) class="(?:is-on )?tc-tree__row tc-tree__row--padl58"[^>]*>(.*?)</(?:div|a)>`).FindAllStringSubmatch(mockupFrame(t, "s-notes-11"), -1) {
-		row := [2]string{frameText(badge.ReplaceAllString(m[1], ""))}
-		if b := badge.FindStringSubmatch(m[1]); b != nil {
-			row[1] = b[1]
-		}
-		rows = append(rows, row)
-	}
-	if len(rows) != 2 || rows[0][1] != "just created" || rows[1][1] != "" || rows[0][0] < rows[1][0] {
-		t.Fatalf("s-notes-11 draws %q under the attachment folder: read the frame again", rows)
-	}
-	fresh, old := rows[0][0], rows[1][0]
+	fresh, old := "2026-08", "2026-07"
 
 	f := filesFixture(t, true)
 	f.srv.SeedFolder(filesDocs + "carrel/" + old + "/")
