@@ -109,7 +109,7 @@ func notebookSubtitle(line string) string {
 // «nextcloud · 2 notes · VJOURNAL · the server granted no write access»); a
 // notebook that did not answer says only where it is (states-29).
 func oneNotebookSubtitle(c *collectionCtx, notes int, read bool) string {
-	line := connLabel(c.conn)
+	line := lineOwner(c)
 	if read {
 		line = notebookSubtitle(line + " · " + plural(notes, recordNouns[c.spec.kind]))
 	}

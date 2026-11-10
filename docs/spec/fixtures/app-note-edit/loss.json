@@ -1,0 +1,780 @@
+{
+  "details": null,
+  "doc": {
+    "bar": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e34\u0026readat=1786370760",
+        "id": "record.save",
+        "label": "Save",
+        "method": "POST",
+        "primary": true,
+        "submits": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "id": "record.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      },
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e34\u0026from=edit\u0026op=attach",
+            "icon": "i-upload",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e34\u0026for=attach\u0026from=edit\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "GET",
+            "target": "sheet"
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e34\u0026from=edit\u0026op=attach",
+        "icon": "i-clip",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST"
+      }
+    ],
+    "body": "Договорились заморозить ветку в четверг.",
+    "dirty": false,
+    "fields": [
+      {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "select",
+        "label": "Notebook",
+        "name": "notebook",
+        "options": [
+          {
+            "colour": "#4a6b52",
+            "label": "nextcloud · Записи",
+            "selected": true,
+            "value": "/app/notes/a-nc-home/zapisi"
+          },
+          {
+            "colour": "#6b4e7a",
+            "label": "nextcloud · Дневник",
+            "selected": false,
+            "value": "/app/notes/a-nc-home/dnevnik"
+          },
+          {
+            "colour": "#3f6e8c",
+            "disabled": true,
+            "label": "nextcloud · Общие с семьёй",
+            "reason": "Read-only",
+            "selected": false,
+            "value": "/app/notes/a-nc-home/zapiski-obshchie"
+          }
+        ],
+        "readOnly": false,
+        "required": false,
+        "value": "/app/notes/a-nc-home/zapisi"
+      },
+      {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "date",
+        "label": "Date",
+        "mono": true,
+        "name": "start.date",
+        "options": [],
+        "readOnly": false,
+        "required": false,
+        "value": "2026-08-10"
+      },
+      {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "time",
+        "label": "Time",
+        "mono": true,
+        "name": "start.time",
+        "options": [],
+        "readOnly": false,
+        "required": false,
+        "value": "11:05"
+      },
+      {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "text",
+        "label": "Tags",
+        "name": "categories",
+        "options": [],
+        "readOnly": false,
+        "required": false,
+        "value": "встречи, релиз"
+      },
+      {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "text",
+        "label": "Link",
+        "name": "url",
+        "options": [],
+        "placeholder": "optional",
+        "readOnly": false,
+        "required": false,
+        "value": ""
+      },
+      {
+        "add": {
+          "add": null,
+          "error": "",
+          "extra": null,
+          "hint": "",
+          "kind": "text",
+          "label": "Add a link",
+          "mono": true,
+          "name": "related.add",
+          "options": [],
+          "placeholder": "Title or UID",
+          "readOnly": false,
+          "required": false,
+          "suggest": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/related",
+          "value": ""
+        },
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "select",
+        "label": "Related to",
+        "mono": true,
+        "multiple": true,
+        "name": "related",
+        "options": [
+          {
+            "colour": "#3f6e8c",
+            "label": "Дописать раздел про кэш",
+            "meta": "task · 14 Aug",
+            "selected": true,
+            "value": "bb21-0fa8-3d66"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Собрать чемодан",
+            "meta": "task · 12 Aug",
+            "selected": false,
+            "value": "aa11-2d09-5f84"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Поездка в Казань",
+            "meta": "event · 12 Aug",
+            "selected": false,
+            "value": "3e6b-71d4-a209"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Забрать документы",
+            "meta": "event · 11 Aug",
+            "selected": false,
+            "value": "1d55-90fe-3c27"
+          },
+          {
+            "colour": "#6b4e7a",
+            "label": "Ревью архитектуры",
+            "meta": "event · 11 Aug",
+            "selected": false,
+            "value": "9c27-0e5d-4412"
+          },
+          {
+            "colour": "#3f6e8c",
+            "label": "Созвон с подрядчиком",
+            "meta": "event · 10 Aug",
+            "selected": false,
+            "value": "7ae3-1c48-55b0"
+          },
+          {
+            "colour": "#6b4e7a",
+            "label": "Заметка со встречи 10.08",
+            "meta": "note · 10 Aug",
+            "selected": false,
+            "value": "9e31-40b7-c012"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Синк-ап по релизу",
+            "meta": "event · 10 Aug",
+            "selected": true,
+            "value": "8f1c-4a02-b7d3"
+          },
+          {
+            "colour": "#3f6e8c",
+            "label": "Дежурство: первая линия",
+            "meta": "event · 10 Aug",
+            "selected": false,
+            "value": "2f04-8b71-e39a"
+          },
+          {
+            "colour": "#8c6239",
+            "label": "Дежурство: первая линия",
+            "meta": "event · 10 Aug",
+            "selected": false,
+            "value": "5e90-33c1-a8d2"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Что почитать про CRDT",
+            "meta": "note · 8 Aug",
+            "selected": false,
+            "value": "6d92-13ef-b408"
+          },
+          {
+            "colour": "#6b4e7a",
+            "label": "Что почитать про CRDT",
+            "meta": "note · 8 Aug",
+            "selected": false,
+            "value": "8e04-21ab-d517"
+          },
+          {
+            "colour": "#3f6e8c",
+            "label": "Ответить подрядчику по смете",
+            "meta": "task · 8 Aug",
+            "selected": false,
+            "value": "bb20-4c17-8a52"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Отправить документы в МФЦ",
+            "meta": "task · 7 Aug",
+            "selected": false,
+            "value": "aa10-77bc-0e31"
+          },
+          {
+            "colour": "#3f6e8c",
+            "label": "Согласовать обложку",
+            "meta": "task · 4 Aug",
+            "selected": false,
+            "value": "bb22-6e1a-0c44"
+          },
+          {
+            "colour": "#6b4e7a",
+            "label": "Про дорогу до дачи",
+            "meta": "note · 3 Aug",
+            "selected": false,
+            "value": "7f03-5b26-cc19"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Про сроки по сборнику",
+            "meta": "note · 21 Jul",
+            "selected": false,
+            "value": "6d93-21b4-c517"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Продлить страховку",
+            "meta": "task",
+            "selected": false,
+            "value": "aa12-9e44-c703"
+          },
+          {
+            "colour": "#4a6b52",
+            "label": "Прочитать договор аренды",
+            "meta": "task",
+            "selected": false,
+            "value": "aa13-5b2e-71c0"
+          },
+          {
+            "hint": "By UID: a record that is not among the loaded ones.",
+            "label": "By UID…",
+            "selected": false,
+            "separator": true,
+            "typed": true,
+            "value": ""
+          }
+        ],
+        "placeholder": "UID of the record",
+        "readOnly": false,
+        "required": false,
+        "suggest": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/related",
+        "value": "8f1c-4a02-b7d3"
+      }
+    ],
+    "foreign": [
+      {
+        "text": "Properties Carrel does not know — "
+      },
+      {
+        "mark": "mono",
+        "text": "X-JTX-COLOR"
+      },
+      {
+        "text": " and two more — are kept unchanged and not shown here."
+      }
+    ],
+    "form": {
+      "action": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "etag",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "e34"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "readat",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "1786370760"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Title",
+              "name": "summary",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "Заметка со встречи 10.08"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "focus": true,
+              "hint": "",
+              "kind": "area",
+              "label": "Body",
+              "name": "description",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "Договорились заморозить ветку в четверг."
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
+    "mode": "editing",
+    "readOnly": false,
+    "rendered": [
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Договорились заморозить ветку в четверг."
+      }
+    ],
+    "title": "Заметка со встречи 10.08"
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": true
+  },
+  "loss": {
+    "actions": [],
+    "aggregated": false,
+    "days": null,
+    "properties": [
+      "X-CARREL-UNKNOWN-FLAG",
+      "X-EVOLUTION-MEMO-COLOR"
+    ],
+    "title": "The change was saved, but the server did not keep these properties:"
+  },
+  "meta": {
+    "actions": [
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e34\u0026from=edit\u0026op=attach",
+            "icon": "i-upload",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e34\u0026for=attach\u0026from=edit\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "GET",
+            "target": "sheet"
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e34\u0026from=edit\u0026op=attach",
+        "icon": "i-clip",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST"
+      },
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e34",
+        "icon": "i-trash",
+        "id": "record.delete",
+        "label": "Delete note",
+        "method": "POST",
+        "target": "sheet"
+      }
+    ],
+    "attach": [
+      {
+        "actions": [
+          {
+            "csrf": "csrf",
+            "danger": true,
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e34\u0026from=edit\u0026n=0\u0026op=detach",
+            "id": "attach.remove",
+            "label": "Remove",
+            "method": "POST"
+          }
+        ],
+        "from": null,
+        "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
+        "inline": true,
+        "name": "2026-08-10-sync-board.png",
+        "size": "412 KB",
+        "state": "ok",
+        "type": "image/png"
+      },
+      {
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e34\u0026from=edit\u0026n=1\u0026op=detach",
+            "id": "attach.remove",
+            "label": "Remove link, keep the file",
+            "method": "POST"
+          }
+        ],
+        "from": null,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
+        "inline": false,
+        "name": "запись-встречи.m4a",
+        "place": "Documents / carrel",
+        "size": "24 MB",
+        "state": "ok",
+        "type": "audio/mp4"
+      }
+    ],
+    "attendees": [],
+    "date": "",
+    "foreign": [],
+    "foreignShow": null,
+    "link": null,
+    "linked": [],
+    "menu": [],
+    "related": [],
+    "tags": [],
+    "tagsBadge": null,
+    "tagsFrom": null
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "icon": "i-note",
+        "id": "nav.neighbour",
+        "label": "Заметка со встречи 10.08",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+        "icon": "i-note",
+        "id": "nav.neighbour",
+        "label": "Что почитать про CRDT",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "label": "Записи",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapiski-obshchie",
+            "label": "Общие с семьёй",
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#4a6b52",
+    "compared": "",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "path": "",
+    "readOnly": false,
+    "stamp": "nextcloud · Записи",
+    "uid": "5c81-77aa-0d64"
+  },
+  "textFrom": null,
+  "title": "Edit note",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "uid": "5c81-77aa-0d64"
+}

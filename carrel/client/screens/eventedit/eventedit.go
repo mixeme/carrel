@@ -353,6 +353,10 @@ func field(r view.FormRow) w.Field {
 		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Days(r)}}
 	case r.Kind == view.InputCheck:
 		return w.Field{Parts: []w.FieldPart{bind.Check(r)}}
+	case r.Kind == view.InputSelect && r.Suggest != "":
+		// «Related to»: the records as tags with the line the next is
+		// typed in, as the task's and the note's (s-agenda-3, -15).
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{bind.Related(r)}, bind.Hint(r)...), Width: width(r.Name)}
 	case r.Kind == view.InputSelect && r.Placeholder != "":
 		d := bind.PickMenu(r)
 		d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder

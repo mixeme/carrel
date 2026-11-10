@@ -445,9 +445,11 @@ STATE_FRAME = {
     # ничего не отмечено (states-18, -25), сервер одного списка не ответил
     # (states-22, -29), потеря свойств при записи задачи (states-24); полные
     # формы новой задачи и новой заметки — состояние new каталога правки, их
-    # кадры — s-tasks-14 и s-notes-30 (маршрут …/new). Кадры states-19 … -21,
-    # -23, -26 … -28, -30, -31 (опрос идёт, источник отказал, пустой список,
-    # только для чтения, потеря у заметки) фикстур пока не имеют.
+    # кадры — s-tasks-14 и s-notes-30 (маршрут …/new). Опрос идёт (states-19,
+    # -26: держат «Работу» и «Дневник»), источник отказал (states-20, -27),
+    # пустой список (states-21, -28), только для чтения — подписка
+    # «Праздники РФ» и «Общие с семьёй» (states-23, -30), потеря у заметки
+    # (states-31).
     # Обычные панели задачи и заметки (записка 125 п. 9) — части кадров
     # объединённых видов.
     "app-tasks-all/panel-one": "s-tasks-20",
@@ -458,6 +460,15 @@ STATE_FRAME = {
     "app-task-edit/new": "s-tasks-14",
     "app-notes-all/empty": "states-25",
     "app-notes/source-error": "states-29",
+    "app-tasks-all/partial": "states-19",
+    "app-tasks-all/unavailable": "states-20",
+    "app-tasks/empty": "states-21",
+    "app-tasks/readonly": "states-23",
+    "app-notes-all/partial": "states-26",
+    "app-notes-all/unavailable": "states-27",
+    "app-notes/empty": "states-28",
+    "app-notes/readonly": "states-30",
+    "app-note-edit/loss": "states-31",
     "app-note-edit/new": "s-notes-30",
     "app-files-folder/empty": "states-32",
     "app-files-folder/source-error": "states-33",

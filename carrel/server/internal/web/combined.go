@@ -354,7 +354,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	}
 	filter := s.tagFilter(base, query)
 	shown := s.foldLinked(blob, spec.kind, filter.keep(spec.kind, st.items))
-	st.shell.Rail.Tags = filter.rail(spec.kind, st.items)
+	st.shell.Rail.Tags = filter.rail(spec.kind, railItems(sess, spec.kind, st.task, st.snap, blob, st.items))
 
 	// The print header says how many collections the view shows and, once the
 	// poll is over, how many records; nothing ticked has nothing to print.
@@ -830,6 +830,53 @@ func lastPoll(sess *session.Session, k view.Kind) *fanout.Snapshot {
 	}
 	snap := last.Snapshot()
 	return &snap
+}
+
+// railItems are what the rail's tags of a combined view are read from — the
+// section's, as a list's are (sectionTags; the owner's decision of
+// 08.10.2026): what this poll brought, and, of a source that has not
+// answered it — still asked, refused, stopped —, what the latest earlier
+// poll of the session that it answered read of it (states-19, -20, -26,
+// -27). A session that has polled nothing before knows what came alone.
+func railItems(sess *session.Session, k view.Kind, current *listTask, snap *fanout.Snapshot, blob sealed.Blob, items []listed) []listed {
+	if snap == nil {
+		return items
+	}
+	missing := map[string]bool{}
+	for _, src := range snap.Sources {
+		if src.State != view.SourceDone && src.State != view.SourceEmpty {
+			missing[src.ID] = true
+		}
+	}
+	out := items
+	for _, t := range sess.Tasks() {
+		if len(missing) == 0 {
+			break
+		}
+		lt, ok := t.(*listTask)
+		if !ok || lt.kind != k || lt == current {
+			continue
+		}
+		prev := lt.Snapshot()
+		answered := map[string]bool{}
+		for _, src := range prev.Sources {
+			if missing[src.ID] && (src.State == view.SourceDone || src.State == view.SourceEmpty) {
+				answered[src.ID] = true
+				delete(missing, src.ID)
+			}
+		}
+		if len(answered) == 0 {
+			continue
+		}
+		var from []fanout.Item
+		for _, it := range prev.Items {
+			if it.Kind == k && answered[it.AccountID+":"+it.Col] {
+				from = append(from, it)
+			}
+		}
+		out = append(append([]listed{}, out...), listedOf(blob, from)...)
+	}
+	return out
 }
 
 // lastPollRefused reports whether a collection did not answer the poll.

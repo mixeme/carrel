@@ -348,7 +348,7 @@ func (s *Server) attachAction(c *collectionCtx, uid, etag, from string) view.Act
 func (s *Server) detachAction(c *collectionCtx, uid, etag, from string, a cal.Attachment) view.Action {
 	q := s.opQuery("detach", etag, from)
 	q.Set("n", strconv.Itoa(a.Index))
-	act := view.Action{ID: "attach.remove", Label: "Remove", Icon: "i-trash", Href: s.postQuery(c.recordPath(uid)+"/edit", q), Method: "POST", Danger: true, Enabled: true}
+	act := view.Action{ID: "attach.remove", Label: "Remove", Href: s.postQuery(c.recordPath(uid)+"/edit", q), Method: "POST", Danger: true, Enabled: true}
 	if !a.Inline {
 		act.Label, act.Danger = "Remove link, keep the file", false
 	}

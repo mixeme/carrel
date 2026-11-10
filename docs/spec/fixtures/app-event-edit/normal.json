@@ -7,7 +7,6 @@
           "danger": true,
           "enabled": true,
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e9\u0026from=edit\u0026n=0\u0026op=detach",
-          "icon": "i-trash",
           "id": "attach.remove",
           "label": "Remove",
           "method": "POST"
@@ -3274,18 +3273,13 @@
             },
             "error": "",
             "extra": null,
-            "hint": "A record that is not loaded here: its UID.",
+            "hint": "",
             "kind": "select",
             "label": "Related to",
             "mono": true,
             "multiple": true,
             "name": "related",
             "options": [
-              {
-                "label": "5c81-77aa-0d64",
-                "selected": true,
-                "value": "5c81-77aa-0d64"
-              },
               {
                 "colour": "#4a6b52",
                 "label": "Поездка в Казань",
@@ -3315,6 +3309,20 @@
                 "value": "7ae3-1c48-55b0"
               },
               {
+                "colour": "#4a6b52",
+                "label": "Заметка со встречи 10.08",
+                "meta": "note · 10 Aug",
+                "selected": true,
+                "value": "5c81-77aa-0d64"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Заметка со встречи 10.08",
+                "meta": "note · 10 Aug",
+                "selected": false,
+                "value": "9e31-40b7-c012"
+              },
+              {
                 "colour": "#3f6e8c",
                 "label": "Дежурство: первая линия",
                 "meta": "event · 10 Aug",
@@ -3327,6 +3335,34 @@
                 "meta": "event · 10 Aug",
                 "selected": false,
                 "value": "5e90-33c1-a8d2"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Что почитать про CRDT",
+                "meta": "note · 8 Aug",
+                "selected": false,
+                "value": "6d92-13ef-b408"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Что почитать про CRDT",
+                "meta": "note · 8 Aug",
+                "selected": false,
+                "value": "8e04-21ab-d517"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Про дорогу до дачи",
+                "meta": "note · 3 Aug",
+                "selected": false,
+                "value": "7f03-5b26-cc19"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Про сроки по сборнику",
+                "meta": "note · 21 Jul",
+                "selected": false,
+                "value": "6d93-21b4-c517"
               },
               {
                 "hint": "By UID: a record that is not among the loaded ones.",

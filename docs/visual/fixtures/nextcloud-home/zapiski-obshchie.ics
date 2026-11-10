@@ -1,0 +1,35 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Carrel//mockup fixtures//RU
+CALSCALE:GREGORIAN
+NAME:Общие с семьёй
+X-WR-CALNAME:Общие с семьёй
+BEGIN:VTIMEZONE
+TZID:Europe/Moscow
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0300
+TZNAME:MSK
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VJOURNAL
+UID:4a17-c2e9-0b53
+DTSTAMP:20260806T170000Z
+DTSTART;TZID=Europe/Moscow:20260806T200000
+SUMMARY:Список на дачу
+DESCRIPTION:Семена\, шланг\, две банки краски дл
+ я забора\, перчатки и новый замок на кали
+ тку.
+END:VJOURNAL
+BEGIN:VJOURNAL
+UID:4a18-5d70-e2c4
+DTSTAMP:20260719T120000Z
+DTSTART;TZID=Europe/Moscow:20260719T150000
+SUMMARY:Рецепт бабушкиного пирога
+CATEGORIES:рецепты
+DESCRIPTION:Мука — три стакана\, кефир — стака
+ н\, яблоки кислые\, четыре штуки\; печь со
+ рок минут при ста восьмидесяти.
+END:VJOURNAL
+END:VCALENDAR

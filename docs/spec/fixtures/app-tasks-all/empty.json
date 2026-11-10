@@ -563,6 +563,7 @@
       "target": "rail"
     }
   },
+  "readOnly": false,
   "subtitle": "0 of 3 lists · 0 accounts",
   "title": "Combined list",
   "top": {

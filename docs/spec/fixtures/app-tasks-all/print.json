@@ -1077,6 +1077,7 @@
       "target": "rail"
     }
   },
+  "readOnly": false,
   "subtitle": "2 of 3 lists · nextcloud · 7 tasks",
   "title": "Combined list",
   "top": {

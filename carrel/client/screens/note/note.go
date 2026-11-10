@@ -311,11 +311,12 @@ func read(p *view.NotePage) []w.MainPart {
 }
 
 // notices are the notices over the text and what the server did not keep of
-// the last save.
+// the last save — that one flush under the bar, as the other kinds' forms
+// draw it (states-31, -17, -12).
 func notices(p *view.NotePage) []w.MainPart {
 	out := bind.Notices(p.Notices, w.MsgSpacePage)
 	if p.Loss != nil {
-		out = append(out, bind.Loss(*p.Loss, w.MsgSpacePage)...)
+		out = append(out, bind.Loss(*p.Loss, w.MsgFlushTop2)...)
 	}
 	return out
 }

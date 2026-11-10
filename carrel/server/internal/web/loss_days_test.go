@@ -76,3 +76,32 @@ func TestLostDaysOfASeriesAreDays(t *testing.T) {
 		})
 	}
 }
+
+// The days are said in the zone the form above them shows its times in —
+// the event's own (states-36: «12:00» in Asia/Yekaterinburg, under a form
+// that shows 12:00–13:00 «as sent»), not the person's: on one page the same
+// meeting is not at two hours.
+func TestLostDaysAreSaidInTheZoneOfTheForm(t *testing.T) {
+	series := "BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nDTSTART;TZID=Asia/Yekaterinburg:20260810T120000\n" +
+		"DTEND;TZID=Asia/Yekaterinburg:20260810T130000\nRRULE:FREQ=WEEKLY;COUNT=6\n" +
+		"EXDATE;TZID=Asia/Yekaterinburg:20260824T120000\nSUMMARY:Sync-up\nEND:VEVENT\n" +
+		"BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID;TZID=Asia/Yekaterinburg:20260831T120000\n" +
+		"DTSTART;TZID=Asia/Yekaterinburg:20260901T150000\nDTEND;TZID=Asia/Yekaterinburg:20260901T160000\n" +
+		"SUMMARY:Sync-up\nEND:VEVENT"
+	f := calendarFixture(t, nil, "e.ics", ics(series))
+	f.srv.Drop = []string{"EXDATE", "RECURRENCE-ID"}
+	rec := f.path("calendar") + "/e"
+	form := formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	if form.Get("start.time") != "12:00" {
+		t.Fatalf("the form shows %s, not the event's 12:00", form.Get("start.time"))
+	}
+	form.Set("summary", "Sync-up, renamed")
+	page := decode[view.EventEditPage](t, f.h.do(postForm(rec+"/edit", f.sess, form)))
+	if page.Loss == nil || page.Loss.Days == nil {
+		t.Fatalf("loss = %+v", page.Loss)
+	}
+	want := "The skipped meeting of 24 August is back; the one moved from 31 August to 1 September, 15:00, is back on its day at 12:00."
+	if got := string(page.Loss.Days.Body); got != want {
+		t.Errorf("days = %q, want %q", got, want)
+	}
+}

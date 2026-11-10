@@ -1,0 +1,697 @@
+{
+  "bar": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota/new",
+        "icon": "i-plus",
+        "id": "record.new",
+        "label": "New task",
+        "method": "GET",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota/import",
+        "icon": "i-import",
+        "id": "collection.import",
+        "label": "Import",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota/export",
+        "icon": "i-export",
+        "id": "collection.export",
+        "label": "Export",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
+      }
+    ],
+    "columns": {
+      "form": {
+        "action": "/app/tasks/a-nc-home/rabota/columns",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/rabota/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/rabota/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "due",
+          "label": "Due",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "complete",
+          "label": "Complete",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "priority",
+          "label": "Priority",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "status",
+          "label": "Status",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "where",
+          "label": "Where",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
+    "compact": null,
+    "drop": {
+      "accept": [
+        ".ics"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/tasks/a-nc-home/rabota/import",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "Contacts take this one"
+            }
+          ]
+        },
+        {
+          "ext": ".md",
+          "says": [
+            {
+              "text": "A notebook takes this one"
+            }
+          ]
+        },
+        {
+          "ext": ".zip",
+          "says": [
+            {
+              "text": "A notebook takes this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "text": "One "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " file into "
+        },
+        {
+          "mark": "strong",
+          "text": "nextcloud · Работа"
+        }
+      ],
+      "many": false,
+      "note": "The preview opens first: nothing is written until it has been read",
+      "oneOnly": "One file at a time: only notes take several",
+      "refused": [
+        {
+          "text": "Only "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " files are imported here"
+        }
+      ]
+    },
+    "filter": "",
+    "filterForm": {
+      "action": "/app/tasks/a-nc-home/rabota",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
+    "loaded": 0,
+    "range": null,
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota?show=open",
+        "id": "tasks.open",
+        "label": "Open",
+        "method": "GET",
+        "on": true,
+        "tally": "0"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota?show=done",
+        "id": "tasks.done",
+        "label": "Done",
+        "method": "GET",
+        "tally": "0"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota?show=all",
+        "id": "tasks.all",
+        "label": "All",
+        "method": "GET",
+        "tally": "0"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota?sort=due",
+        "id": "sort.due",
+        "label": "By due",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota?sort=priority",
+        "id": "sort.priority",
+        "label": "By priority",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota?sort=changed",
+        "id": "sort.changed",
+        "label": "Recently changed",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": null
+  },
+  "details": null,
+  "empty": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota/new",
+        "icon": "i-plus",
+        "id": "record.new",
+        "label": "New task",
+        "method": "GET",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota/import",
+        "icon": "i-import",
+        "id": "collection.import",
+        "label": "Import",
+        "method": "GET"
+      }
+    ],
+    "body": "Add a task, or import a file of them.",
+    "details": null,
+    "role": "info",
+    "title": "This list is empty."
+  },
+  "groups": [],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "poll": null,
+  "print": {
+    "range": "Open · 0 tasks",
+    "taken": "10 August 2026, 17:06",
+    "title": "Работа"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [
+      {
+        "enabled": true,
+        "href": "/app/collections/new?kind=task",
+        "icon": "i-plus",
+        "id": "collection.new",
+        "label": "New list",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections/new",
+        "icon": "i-server",
+        "id": "account.connect",
+        "label": "Connect account",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?op=feed",
+        "icon": "i-link",
+        "id": "feed.subscribe",
+        "label": "Subscribe to a feed",
+        "method": "GET"
+      }
+    ],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "2 of 3 collections ticked",
+    "sections": [
+      {
+        "account": "",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks",
+            "label": "Combined list",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "part"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/dela",
+            "label": "Дела",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/rabota",
+            "label": "Работа",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "Subscriptions",
+        "accountID": "",
+        "feeds": true,
+        "rows": [
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "detail": "",
+            "feed": true,
+            "href": "/app/tasks/f-ru-holidays/feed",
+            "label": "Праздники РФ",
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [
+      {
+        "href": "/app/tasks/a-nc-home/rabota",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/tasks/a-nc-home/rabota?tag=%D0%B4%D0%BE%D0%BC",
+        "label": "дом",
+        "on": false
+      },
+      {
+        "href": "/app/tasks/a-nc-home/rabota?tag=read",
+        "label": "read",
+        "on": false
+      }
+    ],
+    "ticks": {
+      "action": "/app/sources/tasks",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/tasks/a-nc-home/rabota"
+            }
+          ],
+          "unfold": null
+        }
+      ],
+      "target": "rail"
+    }
+  },
+  "readOnly": false,
+  "subtitle": "nextcloud · 0 tasks",
+  "title": "Работа",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/rabota",
+        "icon": "i-refresh",
+        "id": "list.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "just now",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

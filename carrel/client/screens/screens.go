@@ -482,16 +482,13 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.EventEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
 		Waits: []Wait{
-			{Row: 26, Fixture: "app-event-edit/normal"},    // ждёт библиотеку: U-5.5 #26
 			{Row: 26, Fixture: "app-event-edit/loss"},      // ждёт библиотеку: U-5.5 #26
 			{Row: 26, Fixture: "app-event-edit/loss-days"}, // ждёт библиотеку: U-5.5 #26
-			{Row: 44, Fixture: "app-event-new/normal"},     // ждёт библиотеку: U-5.5 #44
-			{Row: 44, Fixture: "app-event-new/files-gone"}, // ждёт библиотеку: U-5.5 #44
 		},
 	},
 	{
 		Model:  func() any { return new(view.TasksPage) },
-		Frames: []string{"s-tasks-1", "s-tasks-15", "s-tasks-20", "states-18", "states-22", "print-4"},
+		Frames: []string{"s-tasks-1", "s-tasks-15", "s-tasks-20", "states-18", "states-19", "states-20", "states-21", "states-22", "states-23", "print-4"},
 		Draw: func(model any) Root {
 			if p := model.(*view.TasksPage); p.Print.Paper {
 				return tasks.Paper(p)
@@ -504,6 +501,10 @@ var All = []Screen{
 				return tasks.Forms(p)
 			}
 			return nil // nothing on paper is pressed
+		},
+		Waits: []Wait{
+			{Row: 46, Fixture: "app-tasks/empty"},    // ждёт библиотеку: U-5.5 #46
+			{Row: 46, Fixture: "app-tasks/readonly"}, // ждёт библиотеку: U-5.5 #46
 		},
 	},
 	{
@@ -522,7 +523,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotesPage) },
-		Frames: []string{"s-notes-1", "s-notes-31", "s-notes-33", "states-25", "states-29", "print-8"},
+		Frames: []string{"s-notes-1", "s-notes-31", "s-notes-33", "states-25", "states-26", "states-27", "states-28", "states-29", "states-30", "print-8"},
 		Draw: func(model any) Root {
 			if p := model.(*view.NotesPage); p.Print.Paper {
 				return notes.Paper(p)
@@ -536,10 +537,13 @@ var All = []Screen{
 			}
 			return nil // nothing on paper is pressed, as the tasks'
 		},
+		Waits: []Wait{
+			{Row: 46, Fixture: "app-notes/readonly"}, // ждёт библиотеку: U-5.5 #46
+		},
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },
-		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30", "s-notes-32", "s-notes-27", "print-5"},
+		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30", "s-notes-32", "s-notes-27", "states-31", "print-5"},
 		Draw: func(model any) Root {
 			if p := model.(*view.NotePage); p.Print.Paper {
 				return note.Paper(p)

@@ -234,6 +234,26 @@
       "stamp": "nextcloud · Дневник",
       "title": "Что почитать про CRDT",
       "when": "8 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#3f6e8c",
+      "detail": "Мука — три стакана, кефир — стакан, яблоки кислые, четыре штуки; печь сорок минут при ста восьмидесяти.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapiski-obshchie\u0026uid=4a18-5d70-e2c4\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Общие с семьёй",
+      "title": "Рецепт бабушкиного пирога",
+      "when": "19 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#3f6e8c",
+      "detail": "Семена, шланг, две банки краски для забора, перчатки и новый замок на калитку.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapiski-obshchie\u0026uid=4a17-c2e9-0b53\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Общие с семьёй",
+      "title": "Список на дачу",
+      "when": "6 Aug"
     }
   ],
   "search": {

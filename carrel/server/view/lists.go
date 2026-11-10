@@ -200,10 +200,11 @@ type TasksPage struct {
 	// задач — когда опрос закончен), один список — «nextcloud · 21 tasks»
 	// (s-tasks-1)
 	Subtitle Text        `json:"subtitle"`
-	Bar      ListBar     `json:"bar"` // сегменты Open / Done / All со счётом
+	ReadOnly bool        `json:"readOnly"` // список только для чтения — подписка или без права записи: метка у заголовка (states-23)
+	Bar      ListBar     `json:"bar"`      // сегменты Open / Done / All со счётом
 	Groups   []TaskGroup `json:"groups"`
 	Poll     *PollBar    `json:"poll"`  // единый вид; nil — один список или ничего не отмечено
-	Empty    *Notice     `json:"empty"` // ничего не отмечено: почему и кнопка «Tick every list» (U-6.0); nil — есть что показать
+	Empty    *Notice     `json:"empty"` // ничего не отмечено: почему и кнопка «Tick every list» (U-6.0); пустой список — «This list is empty.» (states-21); nil — есть что показать
 }
 type TaskGroup struct {
 	Rubric Text `json:"rubric"`
@@ -264,10 +265,11 @@ type NotesPage struct {
 	// «nextcloud · 2 notes · VJOURNAL»: компонент, которым заметки лежат на
 	// сервере (s-notes-1)
 	Subtitle Text        `json:"subtitle"`
+	ReadOnly bool        `json:"readOnly"` // тетрадь только для чтения: метка у заголовка (states-30)
 	Bar      ListBar     `json:"bar"`
 	Groups   []NoteGroup `json:"groups"`
 	Poll     *PollBar    `json:"poll"`  // единый вид; nil — одна тетрадь или ничего не отмечено
-	Empty    *Notice     `json:"empty"` // ничего не отмечено: почему и кнопка «Tick every notebook» (U-6.0); nil — есть что показать
+	Empty    *Notice     `json:"empty"` // ничего не отмечено: почему и кнопка «Tick every notebook» (U-6.0); пустая тетрадь — «This notebook is empty.» (states-28); nil — есть что показать
 }
 
 // NoteGroup — месяц тетради, «August 2026», по дате заметки; без даты —

@@ -601,4 +601,27 @@ write(u'nextcloud-home/dnevnik.ics', cal(u'Дневник',
        u'FILENAME=маршрут.gpx:' + base64.b64encode(route_gpx()).decode('ascii'),
        u'END:VJOURNAL']))
 
+# «Общие с семьёй» — тетрадь только для чтения, флажок снят (рейлы заметок,
+# s-notes-1). Открытая, она показывает две заметки (states-30); тег
+# «рецепты» её рейла — у рецепта.
+write(u'nextcloud-home/zapiski-obshchie.ics', cal(u'Общие с семьёй',
+      [u'BEGIN:VJOURNAL',
+       u'UID:4a17-c2e9-0b53',
+       u'DTSTAMP:20260806T170000Z',
+       u'DTSTART;TZID=Europe/Moscow:20260806T200000',
+       u'SUMMARY:Список на дачу',
+       u'DESCRIPTION:%s' % esc(u'Семена, шланг, две банки краски для забора, '
+                               u'перчатки и новый замок на калитку.'),
+       u'END:VJOURNAL'] +
+      [u'BEGIN:VJOURNAL',
+       u'UID:4a18-5d70-e2c4',
+       u'DTSTAMP:20260719T120000Z',
+       u'DTSTART;TZID=Europe/Moscow:20260719T150000',
+       u'SUMMARY:Рецепт бабушкиного пирога',
+       u'CATEGORIES:рецепты',
+       u'DESCRIPTION:%s' % esc(u'Мука — три стакана, кефир — стакан, яблоки '
+                               u'кислые, четыре штуки; печь сорок минут при '
+                               u'ста восьмидесяти.'),
+       u'END:VJOURNAL']))
+
 print(u'\nГотово.')

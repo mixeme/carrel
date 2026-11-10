@@ -99,7 +99,9 @@ var (
 func Screen(p *view.NotesPage) w.Shell {
 	main := []w.MainPart{head(p)}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
-	if ticked(p.Rail) && (len(p.Groups) > 0 || len(p.Bar.Segments) > 0) {
+	// An empty list has no bar: nothing to filter or sort (states-21,
+	// -28), as an empty book (states-10).
+	if ticked(p.Rail) && p.Empty == nil && (len(p.Groups) > 0 || len(p.Bar.Segments) > 0) {
 		main = append(main, bar(p.Bar))
 	}
 	if r := bind.Runbar(p.Poll); r != nil {
@@ -214,6 +216,10 @@ func head(p *view.NotesPage) w.Head {
 				title.Mark = &w.Mark{Colour: string(r.Colour), Size: w.MarkH20}
 			}
 		}
+	}
+	if p.ReadOnly {
+		// By the mark, as the frame draws it (states-30).
+		title.Badge = &w.Badge{Label: "read-only"}
 	}
 	var acts []w.ActsPart
 	for _, a := range p.Bar.Actions {

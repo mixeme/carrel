@@ -17,6 +17,48 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.407 — 2026-11-10
+
+Typecase `2406c87`; towards the milestone `v0.3.0` — U-5.5 #44 closed, #26
+narrowed, the states of the tasks and the notes have fixtures. Typecase
+tasks 260, 261 opened.
+
+### For consumers
+
+- `TasksPage.ReadOnly` and `NotesPage.ReadOnly` are new: a list this
+  account may only read — a feed, or one the server gave no write to —, as
+  `ContactsListPage.ReadOnly` (states-23, -30). A feed's list says
+  «Subscriptions · 2 tasks · a feed can only be read» under its title.
+- An empty list of tasks or notes carries `Empty`, as a book does: «This
+  list is empty.» · «Add a task, or import a file of them.», «This notebook
+  is empty.» · «Write a note, or import a file of them.», each with New and
+  Import (states-21, -28). The book's says «This book is empty.», with the
+  period the frames give it.
+- The rail's tags of a combined view keep those of a source that has not
+  answered this poll — still asked, refused, stopped —, read from the
+  session's earlier poll, as the rail of one list does (states-19, -20).
+- The days of a series a server did not keep are said in the zone the
+  form shows its times in, the event's own: «1 September, 15:00, is back on
+  its day at 12:00» of an event in Asia/Yekaterinburg (states-36), no longer
+  the person's.
+- An attachment's Remove (`attach.remove`) carries no icon: no frame draws
+  one (s-agenda-3).
+
+### Data set and fixtures
+
+- The feed «Праздники РФ» holds the two tasks states-23 draws, «День
+  Воздушного флота — поздравить отца» and «День археолога — открытка Вере»;
+  «Купить подарки к Новому году», which no frame drew, is gone.
+  «Общие с семьёй» holds the two notes of states-30
+  (`nextcloud-home/zapiski-obshchie.ics`); it stays unticked.
+- New fixtures: `app-tasks-all/partial`, `/unavailable`, `app-tasks/empty`,
+  `/readonly`, `app-notes-all/partial`, `/unavailable`, `app-notes/empty`,
+  `/readonly`, `app-note-edit/loss` (states-19…-21, -23, -26…-28, -30, -31).
+- `app-event-edit/loss` is the save states-17 draws: the server did not keep
+  X-CALENDARSERVER-PRIVATE-COMMENT and X-MICROSOFT-CDO-BUSYSTATUS, the tags
+  and the organiser stay. The event forms are read after the notes:
+  «Related to» names «Заметка со встречи 10.08» with its notebook's mark.
+
 ## v0.2.406 — 2026-11-10
 
 Typecase `2406c87`, notes 189–193.

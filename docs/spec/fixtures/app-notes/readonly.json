@@ -1,0 +1,673 @@
+{
+  "bar": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapiski-obshchie/export",
+        "icon": "i-export",
+        "id": "collection.export",
+        "label": "Export",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
+      }
+    ],
+    "columns": {
+      "form": {
+        "action": "/app/notes/a-nc-home/zapiski-obshchie/columns",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapiski-obshchie/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapiski-obshchie/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "excerpt",
+          "label": "Excerpt",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "date",
+          "label": "Date",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
+    "compact": null,
+    "drop": null,
+    "filter": "",
+    "filterForm": {
+      "action": "/app/notes/a-nc-home/zapiski-obshchie",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
+    "loaded": 2,
+    "range": null,
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?sort=newest",
+        "id": "sort.newest",
+        "label": "Newest",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?sort=oldest",
+        "id": "sort.oldest",
+        "label": "Oldest",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?sort=title",
+        "id": "sort.title",
+        "label": "Title",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?sort=changed",
+        "id": "sort.changed",
+        "label": "Recently changed",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": null
+  },
+  "details": null,
+  "empty": null,
+  "groups": [
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "6 Aug 20:00",
+          "colour": "",
+          "date": "6 Aug",
+          "excerpt": "Семена, шланг, две банки краски для забора, перчатки и новый замок на калитку.",
+          "href": "/app/notes/a-nc-home/zapiski-obshchie?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapiski-obshchie%2F4a17-c2e9-0b53",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/4a17-c2e9-0b53",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/4a17-c2e9-0b53/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/export?uid=4a17-c2e9-0b53",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapiski-obshchie\u0026k=notes\u0026uid=4a17-c2e9-0b53",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Список на дачу",
+          "uid": "4a17-c2e9-0b53"
+        }
+      ],
+      "rubric": "August 2026"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "19 Jul 15:00",
+          "colour": "",
+          "date": "19 Jul",
+          "excerpt": "Мука — три стакана, кефир — стакан, яблоки кислые, четыре штуки; печь сорок минут при ста восьмидесяти.",
+          "href": "/app/notes/a-nc-home/zapiski-obshchie?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapiski-obshchie%2F4a18-5d70-e2c4",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/4a18-5d70-e2c4",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/4a18-5d70-e2c4/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/export?uid=4a18-5d70-e2c4",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapiski-obshchie\u0026k=notes\u0026uid=4a18-5d70-e2c4",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "tags": [
+            {
+              "href": "/app/notes/a-nc-home/zapiski-obshchie?tag=%D1%80%D0%B5%D1%86%D0%B5%D0%BF%D1%82%D1%8B",
+              "label": "рецепты",
+              "on": false
+            }
+          ],
+          "target": "details",
+          "title": "Рецепт бабушкиного пирога",
+          "uid": "4a18-5d70-e2c4"
+        }
+      ],
+      "rubric": "July 2026"
+    }
+  ],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "poll": null,
+  "print": {
+    "range": "2 notes",
+    "taken": "10 August 2026, 17:06",
+    "title": "Общие с семьёй"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [
+      {
+        "enabled": true,
+        "href": "/app/collections/new?kind=note",
+        "icon": "i-plus",
+        "id": "collection.new",
+        "label": "New notebook",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections/new",
+        "icon": "i-server",
+        "id": "account.connect",
+        "label": "Connect account",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?op=feed",
+        "icon": "i-link",
+        "id": "feed.subscribe",
+        "label": "Subscribe to a feed",
+        "method": "GET"
+      }
+    ],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": 6,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "2 of 3 collections ticked",
+    "sections": [
+      {
+        "account": "",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "",
+            "count": 6,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes",
+            "label": "Combined notebook",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "part"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapiski-obshchie",
+            "label": "Общие с семьёй",
+            "on": true,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [
+      {
+        "href": "/app/notes/a-nc-home/zapiski-obshchie",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
+        "label": "встречи",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8",
+        "label": "книги",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?tag=%D0%B4%D0%B0%D1%87%D0%B0",
+        "label": "дача",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+        "label": "релиз",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapiski-obshchie?tag=%D1%80%D0%B5%D1%86%D0%B5%D0%BF%D1%82%D1%8B",
+        "label": "рецепты",
+        "on": false
+      }
+    ],
+    "ticks": {
+      "action": "/app/sources/notes",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/notes/a-nc-home/zapiski-obshchie"
+            }
+          ],
+          "unfold": null
+        }
+      ],
+      "target": "rail"
+    }
+  },
+  "readOnly": true,
+  "subtitle": "nextcloud · 2 notes · VJOURNAL · the server granted no write access",
+  "title": "Общие с семьёй",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapiski-obshchie",
+        "icon": "i-refresh",
+        "id": "list.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "just now",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

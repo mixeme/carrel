@@ -25,8 +25,8 @@
 | `nextcloud-home/rabota-zadachi.ics` | nextcloud · **Работа** (задачи) | 7.3 |
 | `nextcloud-home/zapisi.ics` | nextcloud · **Записи** | 7.4 «Заметки», полноэкранная правка |
 | `nextcloud-home/dnevnik.ics` | nextcloud · **Дневник** | 7.4 |
-| — | nextcloud · **Общие с семьёй** | 7.4, рейлы заметок: тетрадь только для чтения, флажок снят, заметок нет («2 of 3 notebooks», «—» и «ro») |
-| `feeds/ru-holidays.ics` | подписка **Праздники РФ** | 7.2 и 7.3, рейл; 7.11.2 |
+| `nextcloud-home/zapiski-obshchie.ics` | nextcloud · **Общие с семьёй** | 7.4, рейлы заметок: тетрадь только для чтения, флажок снят («2 of 3 notebooks», «—» и «ro»); открытая — две заметки, «Список на дачу» и «Рецепт бабушкиного пирога» (states-30) |
+| `feeds/ru-holidays.ics` | подписка **Праздники РФ** | 7.2 и 7.3, рейл; 7.11.2; две задачи — «День Воздушного флота — поздравить отца» и «День археолога — открытка Вере» (states-23) |
 | `feeds/league-season.ics` | подписка **Расписание лиги** | там же, снятая, пароль не подходит |
 | `sftpgo-vps/Documents/` | sftpgo · vps · **Documents** | 7.5 «Файлы», папка вложений `carrel/attachments` |
 | `sftpgo-vps/Public/` | sftpgo · vps · **Public** | 7.5, только чтение, флажок снят; два файла (`states-34`) |

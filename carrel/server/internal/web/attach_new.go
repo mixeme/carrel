@@ -268,7 +268,7 @@ func (s *Server) draftRows(c *collectionCtx, d attachDraft) []view.AttachRow {
 		if size >= 0 {
 			row.Size = formatSize(size)
 		}
-		remove := view.Action{ID: "attach.remove", Label: "Remove", Icon: "i-trash", Method: "POST", Danger: true, Enabled: true, Submits: true,
+		remove := view.Action{ID: "attach.remove", Label: "Remove", Method: "POST", Danger: true, Enabled: true, Submits: true,
 			Href: s.newAttachStep(c, "detach", d.UID, url.Values{"n": {strconv.Itoa(i)}})}
 		if f.Data == nil {
 			remove.Label, remove.Danger = "Remove link, keep the file", false

@@ -1289,6 +1289,7 @@
           "target": "rail"
         }
       },
+      "readOnly": false,
       "subtitle": "2 of 3 notebooks · 4 notes · VJOURNAL",
       "title": "Combined notebook",
       "top": {

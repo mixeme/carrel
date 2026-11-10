@@ -536,7 +536,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e30",
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e32",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -1143,6 +1143,7 @@
       "target": "rail"
     }
   },
+  "readOnly": false,
   "subtitle": "2 of 3 notebooks · 4 notes · VJOURNAL",
   "title": "Combined notebook",
   "top": {

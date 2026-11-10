@@ -963,7 +963,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	countGroups(page.Groups)
 	page.Details = s.openInPanel(r, c.sess, c.listPath(), shown, page.Groups)
 	if total == 0 {
-		page.Empty = bookEmpty(c, page.Bar.Actions)
+		page.Empty = listEmpty(c, page.Bar.Actions)
 	}
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindContact, by, r.URL.Query())
 	c.read = items
@@ -1751,7 +1751,7 @@ func taskShow(r *http.Request) string {
 
 func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	show := taskShow(r)
-	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
+	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col)), ReadOnly: c.col.ReadOnly}
 	// New task, Import, Export and Print (s-tasks-1): Print is the list
 	// with print=1 (U-10).
 	page.Bar.Drop = s.importDrop(c) // s-io-1 (Им3)
@@ -1774,6 +1774,9 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	shown := filterByWord(linkedElsewhere(s.catalogOf(c.sess), view.KindTask, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items))), sift)
 	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.sess, c.tf, show, shown, c.spec.segment, false, filter, c.tf.now, by)
 	page.Subtitle = text(bookSubtitle(c, len(objs), true))
+	if len(objs) == 0 && len(bad) == 0 {
+		page.Empty = listEmpty(c, page.Bar.Actions) // states-21
+	}
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, taskRowsOn(page.Groups))
 	page.Bar.Segments = append(s.taskSegments(c.listPath(), filter.tag, show, open, done),
 		s.sortSegments(c.listPath(), view.KindTask, by, r.URL.Query())...)
@@ -1982,7 +1985,7 @@ func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Act
 }
 
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
-	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
+	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col)), ReadOnly: c.col.ReadOnly}
 	page.Bar.Drop = s.importDrop(c) // s-io-1 (Им3)
 	// Print after Export, as every list has it (s-notes-31; Typecase's note
 	// 154, Р-63).
@@ -2004,6 +2007,9 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	shown := filterByWord(linkedElsewhere(s.catalogOf(c.sess), view.KindNote, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items))), sift)
 	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, shown, c.spec.segment, false, filter, by)
 	page.Subtitle = text(oneNotebookSubtitle(c, len(objs), true))
+	if len(objs) == 0 && len(bad) == 0 {
+		page.Empty = listEmpty(c, page.Bar.Actions) // states-28
+	}
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, noteRowsOn(page.Groups))
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindNote, by, r.URL.Query())
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))

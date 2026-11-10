@@ -503,6 +503,7 @@
       "target": "rail"
     }
   },
+  "readOnly": false,
   "subtitle": "nextcloud",
   "title": "Записи",
   "top": {

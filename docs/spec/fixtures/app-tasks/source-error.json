@@ -494,6 +494,7 @@
       "target": "rail"
     }
   },
+  "readOnly": false,
   "subtitle": "nextcloud",
   "title": "Дела",
   "top": {

@@ -1,0 +1,1018 @@
+{
+  "bar": {
+    "actions": [
+      {
+        "arrow": [
+          {
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/new",
+            "id": "record.new",
+            "label": "Записи",
+            "method": "GET"
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/dnevnik/new",
+            "id": "record.new",
+            "label": "Дневник",
+            "method": "GET"
+          }
+        ],
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/new?pick=1",
+        "icon": "i-plus",
+        "id": "record.new",
+        "label": "New note",
+        "method": "GET",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/import",
+        "icon": "i-import",
+        "id": "collection.import",
+        "label": "Import",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/export",
+        "icon": "i-export",
+        "id": "collection.export",
+        "label": "Export",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
+      }
+    ],
+    "columns": {
+      "form": {
+        "action": "/app/notes/columns?task=t-task",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/notes/columns?task=t-task",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/notes/columns?task=t-task",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "excerpt",
+          "label": "Excerpt",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "date",
+          "label": "Date",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
+    "compact": null,
+    "drop": {
+      "accept": [
+        ".md",
+        ".zip",
+        ".ics"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/import",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "Contacts take this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "mark": "mono",
+          "text": ".md"
+        },
+        {
+          "text": " files, a "
+        },
+        {
+          "mark": "mono",
+          "text": ".zip"
+        },
+        {
+          "text": " or an "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " file — where it goes is asked next"
+        }
+      ],
+      "many": true,
+      "note": "The preview opens first: nothing is written until it has been read",
+      "refused": [
+        {
+          "text": "Only "
+        },
+        {
+          "mark": "mono",
+          "text": ".md"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "mark": "mono",
+          "text": ".zip"
+        },
+        {
+          "text": " or "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " files are imported here"
+        }
+      ]
+    },
+    "filter": "",
+    "filterForm": {
+      "action": "/app/notes",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "task",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "t-task"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
+    "loaded": 3,
+    "range": null,
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/app/notes?sort=newest",
+        "id": "sort.newest",
+        "label": "Newest",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes?sort=oldest",
+        "id": "sort.oldest",
+        "label": "Oldest",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes?sort=title",
+        "id": "sort.title",
+        "label": "Title",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes?sort=changed",
+        "id": "sort.changed",
+        "label": "Recently changed",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": null
+  },
+  "details": null,
+  "empty": null,
+  "groups": [
+    {
+      "count": 2,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "10 Aug 11:05",
+          "colour": "#4a6b52",
+          "date": "10 Aug",
+          "excerpt": "Договорились заморозить ветку в среду.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F5c81-77aa-0d64\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e24",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [
+            {
+              "href": "/app/notes?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8\u0026task=t-task",
+              "label": "встречи",
+              "on": false
+            },
+            {
+              "href": "/app/notes?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7\u0026task=t-task",
+              "label": "релиз",
+              "on": false
+            }
+          ],
+          "target": "details",
+          "title": "Заметка со встречи 10.08",
+          "uid": "5c81-77aa-0d64"
+        },
+        {
+          "badges": [],
+          "changed": "8 Aug 22:00",
+          "colour": "#4a6b52",
+          "date": "8 Aug",
+          "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d92-13ef-b408\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d92-13ef-b408",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d92-13ef-b408",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e25",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [
+            {
+              "href": "/app/notes?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8\u0026task=t-task",
+              "label": "книги",
+              "on": false
+            }
+          ],
+          "target": "details",
+          "title": "Что почитать про CRDT",
+          "uid": "6d92-13ef-b408"
+        }
+      ],
+      "rubric": "August 2026"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "21 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "21 Jul",
+          "excerpt": "Анна просит две недели на вёрстку после сдачи текста.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d93-21b4-c517\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d93-21b4-c517",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d93-21b4-c517",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517/delete?etag=e26",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Про сроки по сборнику",
+          "uid": "6d93-21b4-c517"
+        }
+      ],
+      "rubric": "July 2026"
+    }
+  ],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "poll": {
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": false,
+        "href": "/app/search/progress/t-task/cancel",
+        "id": "poll.stop",
+        "label": "Stop",
+        "method": "POST",
+        "reason": "The list has finished.",
+        "target": "poll"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes?again=1",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET"
+      }
+    ],
+    "answeredAt": "10 August, 17:04",
+    "aside": "2 min ago",
+    "every": 700,
+    "failed": "1 failed",
+    "note": "What arrived in time is shown. Notes from the unavailable notebook are missing — not “there are none”, but “we have not seen them”.",
+    "percent": 100,
+    "poll": "/app/search/progress/t-task/poll",
+    "retryAll": null,
+    "running": false,
+    "sources": [
+      {
+        "colour": "#4a6b52",
+        "count": 3,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Записи",
+        "state": "done"
+      },
+      {
+        "answer": "REPORT /alice/calendars/dnevnik/ → 503 Service Unavailable",
+        "colour": "#6b4e7a",
+        "count": null,
+        "fromCache": false,
+        "message": "The server answered 503 Service Unavailable.",
+        "retry": {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/search/progress/t-task/retry?source=a-nc-home%3Adnevnik",
+          "id": "source.retry",
+          "label": "Retry",
+          "method": "POST",
+          "target": "poll"
+        },
+        "stamp": "nextcloud · Дневник",
+        "state": "error"
+      }
+    ],
+    "stream": "/app/search/progress/t-task",
+    "summary": [
+      {
+        "text": "Polled 1 of 2 sources · 3 notes"
+      }
+    ],
+    "taskID": "t-task"
+  },
+  "print": {
+    "foot": "Carrel · notes · 3 notes · captured 2026-08-10 17:04 · 1 of 2 notebooks",
+    "heading": "Notes · Combined notebook",
+    "range": "2 notebooks · 3 notes",
+    "sources": "nextcloud · Записи",
+    "taken": "10 August 2026, 17:04",
+    "title": "Combined notebook"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [
+      {
+        "enabled": true,
+        "href": "/app/collections/new?kind=note",
+        "icon": "i-plus",
+        "id": "collection.new",
+        "label": "New notebook",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections/new",
+        "icon": "i-server",
+        "id": "account.connect",
+        "label": "Connect account",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?op=feed",
+        "icon": "i-link",
+        "id": "feed.subscribe",
+        "label": "Subscribe to a feed",
+        "method": "GET"
+      }
+    ],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "2 of 3 collections ticked",
+    "sections": [
+      {
+        "account": "",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes",
+            "label": "Combined notebook",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "part"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "The server answered 503 Service Unavailable.",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "unavailable",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapiski-obshchie",
+            "label": "Общие с семьёй",
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [
+      {
+        "href": "/app/notes?task=t-task",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/notes?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8\u0026task=t-task",
+        "label": "встречи",
+        "on": false
+      },
+      {
+        "href": "/app/notes?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8\u0026task=t-task",
+        "label": "книги",
+        "on": false
+      },
+      {
+        "href": "/app/notes?tag=%D0%B4%D0%B0%D1%87%D0%B0\u0026task=t-task",
+        "label": "дача",
+        "on": false
+      },
+      {
+        "href": "/app/notes?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7\u0026task=t-task",
+        "label": "релиз",
+        "on": false
+      }
+    ],
+    "ticks": {
+      "action": "/app/sources/notes",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/notes"
+            }
+          ],
+          "unfold": null
+        }
+      ],
+      "target": "rail"
+    }
+  },
+  "readOnly": false,
+  "subtitle": "2 of 3 notebooks · 3 notes · VJOURNAL",
+  "title": "Combined notebook",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/notes?again=1",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

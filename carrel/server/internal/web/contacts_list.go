@@ -269,31 +269,55 @@ func combinedParts(rail view.Rail, spec kindSpec, seen *int) (ticked, where, cou
 // (states-4: «radicale · vps · 2 cards · the server granted no write
 // access»).
 func bookSubtitle(c *collectionCtx, cards int, read bool) string {
-	line := connLabel(c.conn)
+	line := lineOwner(c)
 	if read {
 		line += " · " + plural(cards, recordNouns[c.spec.kind])
 	}
 	return line + noWriteTail(c)
 }
 
+// lineOwner is what the line under a collection's title begins with: its
+// connection, or for a feed the section of the rail it stands in,
+// «Subscriptions» (states-23).
+func lineOwner(c *collectionCtx) string {
+	if c.conn.Feed {
+		return "Subscriptions"
+	}
+	return connLabel(c.conn)
+}
+
 // noWriteTail is what the line under a collection's title ends with when
-// the server gave no write to it (states-4, -30).
+// it cannot be written: a feed by its kind (states-23), else because the
+// server gave no write to it (states-4, -30).
 func noWriteTail(c *collectionCtx) string {
+	if c.conn.Feed {
+		return " · a feed can only be read"
+	}
 	if c.col.ReadOnly {
 		return " · the server granted no write access"
 	}
 	return ""
 }
 
-// bookEmpty is what an empty book says: that it is empty, and the way to
-// fill it (U-6.0) — none in a book that cannot be written.
-func bookEmpty(c *collectionCtx, actions []view.Action) *view.Notice {
-	n := &view.Notice{Role: view.NoticeInfo, Title: "This book is empty", Actions: []view.Action{}}
+// emptyWords are what an empty list of each kind says, the frames' words
+// (states-10, -21, -28): that it is empty, and the way to fill it.
+var emptyWords = map[view.Kind][2]view.Text{
+	view.KindContact: {"This book is empty.", "Add a contact, or import a file of them."},
+	view.KindTask:    {"This list is empty.", "Add a task, or import a file of them."},
+	view.KindNote:    {"This notebook is empty.", "Write a note, or import a file of them."},
+}
+
+// listEmpty is what an empty list says: that it is empty, and the way to
+// fill it (U-6.0) — none in one that cannot be written. Every kind alike
+// («kinds are equal»).
+func listEmpty(c *collectionCtx, actions []view.Action) *view.Notice {
+	words := emptyWords[c.spec.kind]
+	n := &view.Notice{Role: view.NoticeInfo, Title: words[0], Actions: []view.Action{}}
 	if c.col.ReadOnly {
 		n.Body = "The server granted no write access: nothing can be added here."
 		return n
 	}
-	n.Body = "Add a contact, or import a file of them."
+	n.Body = words[1]
 	for _, a := range actions {
 		if a.ID == "record.new" || a.ID == "collection.import" {
 			a.Arrow = nil

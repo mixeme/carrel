@@ -4267,7 +4267,11 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	for _, p := range props {
 		report.Properties = append(report.Properties, text(p))
 	}
-	report.Days = lostDaysNotice(loss.Days, c.spec.kind, c.tf, len(props) > 0)
+	// The days in the zone the form under the report shows its times in
+	// (states-36), as the sheet of a series says them (ask_series.go).
+	days := c.tf
+	days.tz = formZone(zoneOf(got.Props()[zoneProp(got.Props())]), c.tf.tz)
+	report.Days = lostDaysNotice(loss.Days, c.spec.kind, days, len(props) > 0)
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
 		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: s.now(), loss: report, notices: notices,
 	}))

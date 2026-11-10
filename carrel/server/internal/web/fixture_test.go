@@ -130,10 +130,10 @@ var mockupSet = []mockupCollection{
 	// «Общие с семьёй» is the third notebook of every rail of the notes
 	// since Typecase 55104b7 (from-typecase note 35, tasks 105, 127): this
 	// account may only read it, and it stands with its tick off — «2 of 3
-	// notebooks», «—» and «ro» (s-notes-1). The frames draw none of its
-	// notes, and the set holds none.
+	// notebooks», «—» and «ro» (s-notes-1). Opened, it shows its two notes
+	// (states-30, Typecase task 97).
 	{account: "nextcloud", slug: "zapiski-obshchie", name: "Общие с семьёй", colour: "#3F6E8C",
-		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, readOnly: true, unticked: true},
+		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/zapiski-obshchie.ics", readOnly: true, unticked: true},
 	// «Команда» is a book this account may only read, and «Рассылки» stands
 	// in the catalog out of the combined views: both are what the frames show.
 	{account: "radicale · vps", slug: "komanda", name: "Команда", colour: "#6B4E7A",
@@ -1960,6 +1960,10 @@ func TestFixtureEventEdit(t *testing.T) {
 	// The address books were read too: an attendee found in one is known
 	// (s-agenda-1, -2: the mark of the book and a link; task 77).
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	// The notes were read: Related to names «Заметка со встречи 10.08»
+	// with the mark of its notebook (s-agenda-3), as the task's names its
+	// event.
+	openList(t, app, "/app/notes")
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3/edit"
 	app.compare(t, "app-event-edit/normal.json", app.h.do(get(rec, app.sess)))
@@ -4206,6 +4210,25 @@ func seriesExceptions(t *testing.T, app *mockupApp) {
 	nc.Seed(p, body)
 }
 
+// privateProperties gives «Синк-ап по релизу» the two properties of other
+// clients states-17 names as not kept: a private comment of Apple's
+// calendar server and Outlook's busy status. The set's file holds neither:
+// no other frame draws them.
+func privateProperties(t *testing.T, app *mockupApp) {
+	t.Helper()
+	nc := app.servers["nextcloud"]
+	p := davtest.CalendarHome + "lichnyj/8f1c-4a02-b7d3.ics"
+	body, _, ok := nc.Object(p)
+	if !ok {
+		t.Fatal("the event is not on the stand")
+	}
+	at := strings.Index(body, "END:VEVENT")
+	if at < 0 {
+		t.Fatal("the event is not the set's: read the set again")
+	}
+	nc.Seed(p, body[:at]+"X-CALENDARSERVER-PRIVATE-COMMENT:взять ноутбук\r\nX-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n"+body[at:])
+}
+
 // C-14.3: what a server drops, on the forms of the other kinds, and the
 // combined views while their poll is still running.
 func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
@@ -4215,7 +4238,9 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 		state                   string                             // the fixture's state: loss, unless named
 		prep                    func(t *testing.T, app *mockupApp) // what the record holds beyond the set
 	}{
-		{"app-event-edit", "calendar", "lichnyj", "8f1c-4a02-b7d3", []string{"CATEGORIES", "ORGANIZER"}, "", nil},
+		// The two properties states-17 names, which the event carries
+		// on the stand and the server does not keep; the rest is kept.
+		{"app-event-edit", "calendar", "lichnyj", "8f1c-4a02-b7d3", []string{"X-CALENDARSERVER-PRIVATE-COMMENT", "X-MICROSOFT-CDO-BUSYSTATUS"}, "", privateProperties},
 		{"app-task-edit", "tasks", "dela", "aa10-77bc-0e31", []string{"X-APPLE-SORT-ORDER", "X-OC-HIDESUBTASKS"}, "", nil},
 		// The days of a series the server did not keep, said as days
 		// (states-36, from-typecase note 62): the meeting of 24 August left
@@ -4238,23 +4263,46 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 			if one.segment != "calendar" {
 				openList(t, app, "/app/"+one.segment)
 			}
+			event := one.dir == "app-event-edit"
+			if event {
+				// The books and the notes were read too, as for the form
+				// of s-agenda-3: the attendees carry the marks of their
+				// books, Related to the name of its note.
+				openList(t, app, "/app/contacts")
+				openList(t, app, "/app/notes")
+				// The change the person made is one the frame cannot
+				// show: the meeting moved to «Переговорная 2» — the room
+				// states-17 and -36 draw — from «Переговорная 1».
+				nc := app.servers["nextcloud"]
+				p := davtest.CalendarHome + one.slug + "/" + one.uid + ".ics"
+				body, _, ok := nc.Object(p)
+				if !ok || !strings.Contains(body, "LOCATION:Переговорная 2\r\n") {
+					t.Fatal("the event is not the set's: read the set again")
+				}
+				nc.Seed(p, strings.Replace(body, "LOCATION:Переговорная 2\r\n", "LOCATION:Переговорная 1\r\n", 1))
+			}
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
 			form := formFields(decode[struct {
 				Form view.Form `json:"form"`
 			}](t, app.h.do(get(rec+"/edit", app.sess))).Form)
 			app.servers["nextcloud"].Drop = one.drop
-			form.Set("summary", string(form.Get("summary"))+" ·")
+			if event {
+				form.Set("location", "Переговорная 2")
+			} else {
+				form.Set("summary", string(form.Get("summary"))+" ·")
+			}
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 			app.compare(t, one.dir+"/"+state+".json", app.h.do(postForm(rec+"/edit", app.sess, form)))
 		})
 	}
-	// Only the calendar: its collections stand on both stands, so one can
-	// be held while the other answers. The tasks and the notes of this set
-	// live on nextcloud alone — holding it holds everything, and what the
-	// screen shows then is not a state but a moment. The partial state is
-	// covered here and by the contacts.
-	for _, one := range []struct{ dir, segment string }{
-		{"app-agenda-all", "calendar"},
+	// One collection is held while the others answer: «Проекты» of the
+	// calendar on its stand (states-13), «Работа» of the tasks and
+	// «Дневник» of the notes on nextcloud (states-19, -26). A hold is on
+	// the collection's path, so the other lists of the same stand answer.
+	for _, one := range []struct{ dir, segment, server, held, stamp string }{
+		{"app-agenda-all", "calendar", "radicale · vps", "proekty", "radicale · vps"},
+		{"app-tasks-all", "tasks", "nextcloud", "rabota", "nextcloud · Работа"},
+		{"app-notes-all", "notes", "nextcloud", "dnevnik", "nextcloud · Дневник"},
 	} {
 		t.Run(one.dir+"-partial", func(t *testing.T) {
 			app := newMockupApp(t)
@@ -4265,9 +4313,10 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 			app.h.srv.SetClock(mockupNow(t).Add(-time.Hour))
 			openList(t, app, "/app/"+one.segment)
 			app.h.srv.SetClock(mockupNow(t))
-			// «Проекты» alone is held: «Дежурства», on the same stand,
-			// answers (states-13).
-			release := app.servers["radicale · vps"].StallAt(app.realPath(t, "proekty"))
+			// One collection alone is held: «Дежурства», on the stand of
+			// «Проекты», answers (states-13), and so do «Дела» beside
+			// «Работа» and «Записи» beside «Дневник».
+			release := app.servers[one.server].StallAt(app.realPath(t, one.held))
 			defer release()
 			first := app.h.do(get("/app/"+one.segment, app.sess))
 			task := taskOf(t, first)
@@ -4297,7 +4346,7 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 						// source asks the change tag before its read, and
 						// the steady point that took any querying source
 						// for a held one was taken early (24.09.2026).
-						if !strings.HasPrefix(string(sp.Stamp), "radicale · vps") {
+						if !strings.HasPrefix(string(sp.Stamp), one.stamp) {
 							return false
 						}
 						held = true
@@ -4314,6 +4363,12 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 				return held && answered
 			})
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+			if one.segment == "tasks" {
+				// «Продлить страховку» just marked done from its row, as
+				// in s-tasks-1: it stays under Open, crossed (states-19,
+				// -20).
+				tickMockupTask(t, app, decode[view.TasksPage](t, app.h.do(get("/app/tasks?task="+task, app.sess))), "Продлить страховку")
+			}
 			app.compare(t, one.dir+"/partial.json", app.h.do(get("/app/"+one.segment+"?task="+task, app.sess)))
 		})
 	}

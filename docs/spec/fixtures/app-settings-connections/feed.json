@@ -1859,9 +1859,9 @@
                 "value": "Calendar · 3"
               },
               {
-                "label": "Tasks · 1",
+                "label": "Tasks · 2",
                 "selected": true,
-                "value": "Tasks · 1"
+                "value": "Tasks · 2"
               }
             ],
             "readOnly": true,
@@ -2110,7 +2110,7 @@
       ],
       "note": "",
       "password": null,
-      "size": "793 B",
+      "size": "976 B",
       "stale": false,
       "state": "ok",
       "title": "Праздники РФ",
@@ -2345,7 +2345,7 @@
     "ok": true,
     "steps": [
       {
-        "detail": "GET /ru-holidays.ics → 200 · 0 ms · 793 B",
+        "detail": "GET /ru-holidays.ics → 200 · 0 ms · 976 B",
         "name": "fetch",
         "state": "ok"
       },
@@ -2355,7 +2355,7 @@
         "state": "ok"
       },
       {
-        "detail": "Calendar · 3, Tasks · 1",
+        "detail": "Calendar · 3, Tasks · 2",
         "name": "parse",
         "state": "ok"
       },

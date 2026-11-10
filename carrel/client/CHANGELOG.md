@@ -4,6 +4,22 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.27 — 2026-11-10
+
+Typecase `2406c87`; server `v0.2.407`.
+
+- An event's «Related to» is the records as tags with the line the next is
+  typed in, as a task's and a note's (`bind.Related`): s-agenda-3, -15 and
+  -32 match their frames, U-5.5 #44 is closed.
+- U-5.5 #26 is narrowed to the two forms with a loss report: states-17 and
+  -36 draw no «Other» and no «Source» (Typecase task 260).
+- An empty list of tasks or notes draws its `Empty` without the bar
+  (states-21, -28); a read-only one says «read-only» by its mark
+  (`TasksPage.ReadOnly`, `NotesPage.ReadOnly`; states-23, -30).
+- What the server did not keep of a note's save stands flush under the
+  bar, as an event's and a contact's (states-31).
+- The task, note and notes screens name states-19…-23, -26…-31.
+
 ## v0.11.26 — 2026-11-10
 
 Typecase `2406c87`, notes 189–193; server `v0.2.406`. The whole client

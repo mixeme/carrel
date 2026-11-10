@@ -1279,10 +1279,11 @@ type TasksPage struct {
     // нём задач, «nextcloud · 21 tasks», список только для чтения —
     // «nextcloud · the server granted no write access» (s-tasks-1)
     Subtitle Text
+    ReadOnly bool // список только для чтения — подписка или без права записи: у заголовка метка «read-only» (states-23)
     Bar   ListBar // сегменты «Open 12», «Done 48», «All 60» (s-tasks-1); Actions: New task (в едином виде со стрелкой «куда», s-tasks-5), Import, Export, Print (i-print, ?print=1)
     Groups []TaskGroup
     Poll  *PollBar // единый вид; nil — один список или ничего не отмечено
-    Empty *Notice  // ничего не отмечено: «No lists are ticked» и «Tick every list» (rail.tick.all, U-6.0), Poll — nil; nil — есть что показать
+    Empty *Notice  // ничего не отмечено: «No lists are ticked» и «Tick every list» (rail.tick.all, U-6.0), Poll — nil; пустой список — «This list is empty.» · «Add a task, or import a file of them.» с New task и Import (states-21); nil — есть что показать
 }
 // Count — сколько задач в группе; Overdue — группа просроченного, её счёт
 // тревогой (is-alert, s-tasks-1)
@@ -1321,10 +1322,11 @@ type NotesPage struct {
     // закончен); одна тетрадь — «nextcloud · 2 notes · VJOURNAL», только для
     // чтения — «nextcloud · the server granted no write access» (s-notes-1)
     Subtitle Text
+    ReadOnly bool // тетрадь только для чтения: у заголовка метка «read-only» (states-30)
     Bar    ListBar // Filter и FilterForm — «Filter by word» без сценариев (?filter=, по названию и тексту); сегменты Newest · Oldest · Title; Actions: New note (в едином виде со стрелкой «куда», s-notes-13), Import, Export
     Groups []NoteGroup
     Poll   *PollBar // единый вид; nil — одна тетрадь или ничего не отмечено
-    Empty  *Notice  // ничего не отмечено: «No notebooks are ticked» и «Tick every notebook» (rail.tick.all, U-6.0), Poll — nil; nil — есть что показать
+    Empty  *Notice  // ничего не отмечено: «No notebooks are ticked» и «Tick every notebook» (rail.tick.all, U-6.0), Poll — nil; пустая тетрадь — «This notebook is empty.» · «Write a note, or import a file of them.» с New note и Import (states-28); nil — есть что показать
 }
 // Месяц тетради по дате заметки, «August 2026»; без даты — последней
 // группой «No date»; по названию — одна группа без рубрики (s-notes-1).
