@@ -6033,6 +6033,33 @@ Typecase — решения владельца 05.11 по проходу Р-77).
    фикстуре `app-settings-connections/normal`. Проверке
    `TestObjectsAreWhatTheCollectionsHold` можно сверять и «Записи».
 
+Записка 194 от 10.11.2026 (Typecase `52cbb9b`; по тому же ответу
+владельца от 09.11). **Последний коммит Typecase, который она описывает, —
+`52cbb9b`** (574 кадра).
+
+194. **Внутренние поля — от полей страницы и ступенями.** Ломает сборку
+   Carrel (15 мест на main). Замены:
+   - `w.HeadPadBottom8` → `w.HeadSnug` (4: `files.go`, `folder.go`,
+     `guest.go:156`, `connections.go`); `w.HeadPadBottom6` → `w.HeadSnug`
+     (1: `guest.go:159`); `w.HeadPadBottom10` → `w.HeadSnug` (2:
+     `timeline.go`); `w.HeadPadTop11` → `w.HeadPadTopWide` (0);
+   - `w.FormColumnGap10` → `w.FormColumnWide` (2: `forgot.go`,
+     `guard/screens_test.go`), `w.FormColumnGap10Mid` →
+     `w.FormColumnWideMid` (0); `w.FormBottom12` → `w.FormBottom` (2:
+     `importer.go`, `davloom.go`); `w.FormGap12` → `w.FormGapFields` (0);
+   - `w.Field{Gap: 7}` и `{Gap: 8}` → `w.Field{Gapped: true}` (4:
+     `escrow.go`, `appearance.go`, `attachments.go`, `backup.go`).
+
+   Те же имена стоят в рабочих ветках `wip/*`. Классы с числами названы
+   словом (`tc-card--pad12-14` → `tc-card--snug`, `tc-row--*--padl14-padr14`
+   → `tc-row--*--inset`, `tc-tickrow--padl14` → `tc-tickrow--inset`,
+   `tc-head--padb6`, `--padb10` → `tc-head--snug`, `tc-main__banner--12` →
+   `tc-main__banner--snug`…); значения — `var(--tc-page-gutter)` и
+   переменные ступеней. Поля кнопок-значков, уровни дерева, поля
+   кадров-примеров — размеры и остаются числами. Видно: по бокам ничего не
+   сдвинулось; сверху и снизу 11 и 14 → 12, 6 и 10 → 8, галки поля 7 → 8,
+   поля карточки и форма-столбик 10 → 12; 120 кадров, сдвиги на 1–2 px.
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
