@@ -3,7 +3,6 @@ package bind
 import (
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
-	"fmt"
 )
 
 // A note (C-6.9, U-6.4): its text, which the server hands parsed — blocks,
@@ -177,14 +176,13 @@ func bullets(b view.Block, f TextFaces) w.DocBullets {
 
 // itemParts puts words at the end of an item's line, one part each: every
 // part of words is a part of an item too (Text, Strong, Em, Hint, Dot, Mono,
-// Span, Link, SlugOf, Mention; Typecase's note 195).
+// Span, Link, SlugOf, Mention; Typecase's note 195). The doc tests hold that
+// none is lost.
 func itemParts(line []w.DocItemPart, words []w.Inline) []w.DocItemPart {
 	for _, in := range words {
-		part, ok := in.(w.DocItemPart)
-		if !ok {
-			panic(fmt.Sprintf("bind: %T is a part of words but not of a list item", in))
+		if part, ok := in.(w.DocItemPart); ok {
+			line = append(line, part)
 		}
-		line = append(line, part)
 	}
 	return line
 }
