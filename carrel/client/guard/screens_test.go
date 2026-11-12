@@ -851,7 +851,7 @@ func TestKinRules(t *testing.T) {
 		"other data":                {w.Form{Items: []w.FormPart{w.Field{Label: "x", Width: w.FieldW100, Parts: []w.FieldPart{w.Input{Value: "y", Focus: true, Name: "n"}}}}, Variant: w.FormColumnFlush}, true},
 		"the meaning of HTML":       {w.Form{Action: "/login", Fields: []w.Hidden{{Name: "_csrf", Value: "x"}}, Items: []w.FormPart{w.Field{Label: "p", Width: w.FieldW100, Parts: []w.FieldPart{w.Input{Kind: w.InputPassword, Name: "password", Required: true}}}}, Variant: w.FormColumnFlush}, true},
 		"no rows":                   {form(), false},
-		"a variant of the form":     {w.Form{Items: []w.FormPart{row("1")}, Variant: w.FormColumnGap10}, false},
+		"a variant of the form":     {w.Form{Items: []w.FormPart{row("1")}, Variant: w.FormColumnWide}, false},
 		"a variant of a row":        {form(row("1"), w.Field{Label: "x", Width: w.FieldMD, Parts: []w.FieldPart{w.Input{}}}), false},
 		"a variant deep in a row":   {form(w.Field{Label: "x", Width: w.FieldW100, Parts: []w.FieldPart{w.Input{Variant: w.InputChip}}}), false},
 		"another widget in the run": {form(row("1"), w.Check{}), false},

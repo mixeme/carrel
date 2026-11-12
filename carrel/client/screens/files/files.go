@@ -57,7 +57,7 @@ const (
 //     by name.
 //   - Nothing to show (Empty): what, why, and the button that helps.
 func Screen(p *view.FilesRootPage) w.Shell {
-	h := w.Head{Title: &w.HeadTitle{Text: rootName(p.Rail), Size: w.HeadTitle18}, Pad: w.HeadPadBottom8}
+	h := w.Head{Title: &w.HeadTitle{Text: rootName(p.Rail), Size: w.HeadTitle18}, Pad: w.HeadSnug}
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}

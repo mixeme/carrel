@@ -42,7 +42,7 @@ func Appearance(p *view.AppearancePage) w.Shell {
 			}
 		}
 		if len(ticks) > 0 {
-			fs.Items = append(fs.Items, w.Field{Parts: ticks, Gap: 7, Place: w.Grown})
+			fs.Items = append(fs.Items, w.Field{Parts: ticks, Gapped: true, Place: w.Grown})
 		}
 		if len(set.Facts) > 0 {
 			fs.Items = append(fs.Items, bind.Facts(set.Facts))

@@ -153,10 +153,10 @@ func strip(s view.PublishedStrip) w.Strip {
 // contact's initials before it, the line under it, a folder's crumbs, the
 // filter at the end.
 func head(p *view.PublishedPage) w.Head {
-	h := w.Head{Title: &w.HeadTitle{Text: string(p.Title)}, Pad: w.HeadPadBottom8}
+	h := w.Head{Title: &w.HeadTitle{Text: string(p.Title)}, Pad: w.HeadSnug}
 	switch {
 	case p.File != nil:
-		h.Title.Size, h.Pad = w.HeadTitle19, w.HeadPadBottom6
+		h.Title.Size, h.Pad = w.HeadTitle19, w.HeadSnug
 	case p.Folder != nil:
 		h.Title.Size = w.HeadTitle19
 	case p.Avatar != nil:

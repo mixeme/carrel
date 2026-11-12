@@ -59,7 +59,7 @@ func Attachments(p *view.AttachmentsPage) w.Shell {
 					hints = append(hints, w.Field{Parts: h, Place: w.Grown})
 				}
 			case r.Kind == view.InputCheck:
-				fs.Items = append(fs.Items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Column(bind.Hint(r))...), Gap: 7, OwnLine: true, Place: w.Grown})
+				fs.Items = append(fs.Items, w.Field{Parts: append([]w.FieldPart{bind.Check(r)}, bind.Column(bind.Hint(r))...), Gapped: true, OwnLine: true, Place: w.Grown})
 			case r.Extra != nil:
 				in := bind.Input(r)
 				in.Variant = w.InputFill

@@ -550,7 +550,7 @@ func feedPanel(p *view.ConnectionsPage) *w.Side {
 	}
 	side := &w.Side{Items: []w.SidePart{
 		w.Head{Title: &w.HeadTitle{Text: title, Size: w.HeadTitle17}, Subs: []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(feedSub)}}},
-			Acts: &w.Acts{Items: []w.ActsPart{w.Close{Label: closePanel, Href: cancelHref(f.Actions)}}}, Pad: w.HeadPadBottom8},
+			Acts: &w.Acts{Items: []w.ActsPart{w.Close{Label: closePanel, Href: cancelHref(f.Actions)}}}, Pad: w.HeadSnug},
 		form,
 	}}
 	foot := w.FormFoot{}

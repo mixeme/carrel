@@ -706,7 +706,7 @@ func side(d view.Details) *w.Side {
 	h := w.Head{
 		Title: &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle17},
 		Acts:  &w.Acts{Items: []w.ActsPart{w.Close{Label: closePanel, Href: d.Close}}},
-		Pad:   w.HeadPadBottom8,
+		Pad:   w.HeadSnug,
 	}
 	if d.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}}

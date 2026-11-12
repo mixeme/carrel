@@ -3,6 +3,7 @@ package bind
 import (
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
+	"fmt"
 )
 
 // A note (C-6.9, U-6.4): its text, which the server hands parsed — blocks,
@@ -145,20 +146,47 @@ func bullets(b view.Block, f TextFaces) w.DocBullets {
 	var out w.DocBullets
 	for _, it := range b.Children {
 		if !blockish(it) {
-			out.Items = append(out.Items, Spans(it, f))
+			out.Items = append(out.Items, itemParts(nil, Spans(it, f)))
 			continue
 		}
-		var line []w.Inline
+		// An item's line holds its words and its nested lists (DocItemPart,
+		// Typecase's note 195): the words of one run are joined as before,
+		// with the separator after whatever the line already holds.
+		var line []w.DocItemPart
+		var words []w.Inline
 		for _, c := range it.Children {
 			if c.Kind == view.BlockList {
+				line, words = itemParts(line, words), nil
 				line = append(line, bullets(c, f))
 				continue
 			}
-			line = joinInlines(line, lineSep, Spans(c, f))
+			more := Spans(c, f)
+			if len(words) == 0 && len(line) > 0 && len(more) > 0 {
+				words = []w.Inline{w.Text(lineSep)}
+				for _, in := range more {
+					words = addInline(words, in)
+				}
+				continue
+			}
+			words = joinInlines(words, lineSep, more)
 		}
-		out.Items = append(out.Items, line)
+		out.Items = append(out.Items, itemParts(line, words))
 	}
 	return out
+}
+
+// itemParts puts words at the end of an item's line, one part each: every
+// part of words is a part of an item too (Text, Strong, Em, Hint, Dot, Mono,
+// Span, Link, SlugOf, Mention; Typecase's note 195).
+func itemParts(line []w.DocItemPart, words []w.Inline) []w.DocItemPart {
+	for _, in := range words {
+		part, ok := in.(w.DocItemPart)
+		if !ok {
+			panic(fmt.Sprintf("bind: %T is a part of words but not of a list item", in))
+		}
+		line = append(line, part)
+	}
+	return line
 }
 
 // quote is a quotation's paragraphs as its words.

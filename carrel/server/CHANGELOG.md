@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.408 — 2026-11-12
+
+Typecase `47e6f66`, notes 194–201.
+
+### For consumers
+
+Nothing changes in what the server sends. The copy of the mockup is
+Typecase's `47e6f66`: inner paddings are steps named by a word (note 194),
+bars, tables, menus and the top bar fold to the room they have with the
+script (notes 196–199), search suggestions as wide as their lines (note
+200), and the top bar's «⋯» as an example frame (components-44, note 201).
+
 ## v0.2.407 — 2026-11-10
 
 Typecase `2406c87`; towards the milestone `v0.3.0` — U-5.5 #44 closed, #26

@@ -229,7 +229,7 @@ var ro = w.Badge{Label: "ro", Place: w.Pushed}
 // source is the first step: «Into», the file, the folders of notes, the
 // step's message; the dialog sends the file.
 func source(p *view.ImportPage, d w.Dialog) w.Dialog {
-	d.Items = append(d.Items, w.Form{Items: []w.FormPart{intoField(p, 0, w.FieldW100)}, Variant: w.FormBottom12, Tight: true})
+	d.Items = append(d.Items, w.Form{Items: []w.FormPart{intoField(p, 0, w.FieldW100)}, Variant: w.FormBottom, Tight: true})
 	var choose *view.Action
 	for i, a := range p.Actions {
 		if a.ID == "import.choose" {

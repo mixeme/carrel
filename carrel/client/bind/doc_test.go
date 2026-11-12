@@ -74,9 +74,9 @@ func TestDocText(t *testing.T) {
 	}
 	same(t, "the parts of a text", bind.DocText(parts, faces), []w.DocPart{
 		w.DocHeading{Text: "Что держит"},
-		w.DocBullets{Items: [][]w.Inline{
+		w.DocBullets{Items: [][]w.DocItemPart{
 			{w.Text("миграция — "), w.Link{Text: "задача", Href: "https://e.org/t"}},
-			{w.Text("тесты"), w.DocBullets{Items: [][]w.Inline{
+			{w.Text("тесты"), w.DocBullets{Items: [][]w.DocItemPart{
 				{w.Mono{Text: "go test ./...", Variant: w.MonoChip}, w.Text(" — зелёный")},
 				{w.Text("нагрузочный")},
 			}}},
@@ -113,7 +113,7 @@ func TestSecText(t *testing.T) {
 		w.SecTasks{Items: []w.DocTask{{Tick: w.Tick{Variant: w.TickNudge, Sign: true}, Text: "проверить changelog"}}},
 		w.DocHeading{Text: "Отложено"},
 		w.Prose{Parts: []w.Inline{w.Text("Перенос вложений.")}, Variant: w.ProseRead},
-		w.DocBullets{Items: [][]w.Inline{{w.Text("раз")}, {w.Text("два")}}},
+		w.DocBullets{Items: [][]w.DocItemPart{{w.Text("раз")}, {w.Text("два")}}},
 	})
 	same(t, "a quotation, code and a table", bind.SecText([]view.Block{
 		{Kind: view.BlockQuote, Children: []view.Block{para("Не выпускаем.")}},

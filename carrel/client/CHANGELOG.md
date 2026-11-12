@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.28 — 2026-11-12
+
+Typecase `47e6f66`, notes 194–201; server `v0.2.408`. The whole client
+suite passes.
+
+- Inner paddings are steps, as the library names them (note 194):
+  `HeadSnug` for the head's bottom of 6, 8 and 10, `FormColumnWide`,
+  `FormBottom`, and a field's ticks `Gapped` in place of `Gap: 7` and `8`.
+  The timeline's line under its rows is `EmptySmall`: the library prints
+  the small empty state one way now.
+- A list item's line is its own slot, `DocItemPart` (note 195): the words
+  and the list nested in an item go in it part by part.
+- Notes 196–201 change the library's stylesheet and script only: bars,
+  tables, menus and the top bar fold to their room; nothing to change here.
+
 ## v0.11.27 — 2026-11-10
 
 Typecase `2406c87`; server `v0.2.407`.

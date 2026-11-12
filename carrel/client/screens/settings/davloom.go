@@ -84,7 +84,7 @@ func Davloom(p *view.DavloomPage) w.Shell {
 		if p.AddressHint != "" {
 			f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(p.AddressHint)}, Variant: w.HintColumn})
 		}
-		main = append(main, w.Form{Items: []w.FormPart{f}, Variant: w.FormBottom12})
+		main = append(main, w.Form{Items: []w.FormPart{f}, Variant: w.FormBottom})
 	}
 	if len(p.Note) > 0 {
 		main = append(main, w.Msg{Column: true, Parts: bind.MsgParts(p.Note), Tone: w.MsgAccent})

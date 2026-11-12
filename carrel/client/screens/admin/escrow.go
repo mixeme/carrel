@@ -80,7 +80,7 @@ func escrowFields(f view.Form) []w.Field {
 	var out, hints []w.Field
 	for _, r := range bind.Rows(f) {
 		if r.Kind == view.InputCheck {
-			out = append(out, w.Field{Parts: []w.FieldPart{bind.Check(r)}, Gap: 7, Place: w.Grown})
+			out = append(out, w.Field{Parts: []w.FieldPart{bind.Check(r)}, Gapped: true, Place: w.Grown})
 			if r.Hint != "" {
 				out = append(out, hintField(r.Hint))
 			}

@@ -69,7 +69,7 @@ func Screen(p *view.ContactTimelinePage) w.Shell {
 		Avatar: &avatar,
 		Kicker: &w.Rubric{Text: "Timeline", Variant: w.RubricBottom2},
 		Title:  &w.HeadTitle{Text: string(p.Name)},
-		Pad:    w.HeadPadBottom10,
+		Pad:    w.HeadSnug,
 	}
 	sub := w.HeadSub{}
 	if p.Subtitle != "" {
@@ -113,7 +113,7 @@ func Screen(p *view.ContactTimelinePage) w.Shell {
 			w.List{Rows: rows})
 	}
 	if p.Note != "" {
-		main = append(main, w.Empty{Parts: []w.EmptyPart{w.Text(p.Note)}, Variant: w.EmptySmallTop})
+		main = append(main, w.Empty{Parts: []w.EmptyPart{w.Text(p.Note)}, Variant: w.EmptySmall})
 	}
 	t := bind.Top(p.Top, top)
 	var panel *w.Side
@@ -249,7 +249,7 @@ func side(c view.Details) *w.Side {
 		Tools:  tools,
 		Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel", Href: c.Close}}},
 		Middle: true,
-		Pad:    w.HeadPadBottom10,
+		Pad:    w.HeadSnug,
 	}
 	items := []w.SidePart{h}
 	fields := w.Fields{}

@@ -68,7 +68,7 @@ func Screen(p *view.ForgotPage) w.Page {
 			}
 			cards = append(cards, w.Card{Items: parts, Variant: w.CardSnug})
 		}
-		items = append(items, w.Form{Items: cards, Variant: w.FormColumnGap10})
+		items = append(items, w.Form{Items: cards, Variant: w.FormColumnWide})
 	}
 	foot = append(foot, bind.Button(p.Back, ""))
 	items = append(items, w.FormFoot{Items: foot, Variant: w.FormFootFlush})

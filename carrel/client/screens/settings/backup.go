@@ -417,7 +417,7 @@ func signinField(r view.FormRow, rows []view.FormRow) w.Field {
 			line.Items = append(line.Items, in, w.Faced{Face: w.FaceLarge, Items: []w.LinePart{w.Text(daysWord)}})
 		}
 	}
-	return w.Field{Parts: []w.FieldPart{line}, Gap: 8, Place: w.Grown}
+	return w.Field{Parts: []w.FieldPart{line}, Gapped: true, Place: w.Grown}
 }
 
 // BackupForms are the forms of the page's actions that post with none of
