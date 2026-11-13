@@ -33,8 +33,8 @@ type linkedCard struct {
 	group  sealed.LinkedGroup
 	self   sealed.RecordRef
 	others []linkedMember
-	// apart is the notice of a group found come apart as the card opened:
-	// every other member gone (Б16). nil — it did not come apart now.
+	// apart is the notice of members found gone as the card opened: every
+	// other member, or some of them (Б16). nil — none went now.
 	apart *view.Notice
 }
 
@@ -55,10 +55,10 @@ func (s *Server) linkedOf(ctx context.Context, c *collectionCtx, uid string) (li
 	others, gone := s.readMembers(ctx, c.sess, c.spec, g, self)
 	lc.others = others
 	if len(gone) > 0 {
+		// Said whether the group came apart or only lost these: a group of
+		// three that lost one is a group of two (Б16, server v0.2.411).
+		lc.apart = apartNotice(s.catalogOf(c.sess), gone)
 		s.forgetMembers(c.sess, "", gone)
-		if len(lc.others) == 0 {
-			lc.apart = apartNotice(s.catalogOf(c.sess), gone)
-		}
 	}
 	return lc, len(lc.others) > 0
 }
@@ -201,5 +201,5 @@ func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid strin
 	tags = func(own []view.Tag) bool {
 		return len(own) > 0 && slices.ContainsFunc(lr.qs, func(q question) bool { return q.prop() == "CATEGORIES" })
 	}
-	return fields, tags, s.memberRows(lc, lr), nil, true
+	return fields, tags, s.memberRows(lc, lr), lc.apart, true
 }

@@ -4254,6 +4254,17 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 		s.redirect(w, r, done)
 		return
 	}
+	etag := got.ETag
+	// A photo step of a card's form kept what was typed for the form it
+	// comes back to (keepCardTyping): the form under the report is that
+	// form (Б9 of the audit of 11.10.2026; it showed the server's card, and
+	// the typing waited for the next open). An offer of the report — the
+	// older form of the photo — keeps the typing with its frame instead.
+	if c.card != nil && len(actions) == 0 {
+		if t, ok := takeCardTyping(c, uid); ok {
+			vals, etag = typedOver(t, vals, etag)
+		}
+	}
 	s.rememberBody(c, got)
 	// The frame's message (states-17): what was lost in bold, then the
 	// properties; the days of a series as days, in a message of their own
@@ -4273,7 +4284,7 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	days.tz = formZone(zoneOf(got.Props()[zoneProp(got.Props())]), c.tf.tz)
 	report.Days = lostDaysNotice(loss.Days, c.spec.kind, days, len(props) > 0)
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
-		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: s.now(), loss: report, notices: notices,
+		obj: got, uid: uid, values: vals, alarms: alarms, etag: etag, readAt: s.now(), loss: report, notices: notices,
 	}))
 }
 

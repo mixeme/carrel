@@ -1454,6 +1454,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-table__file a.tc-table__filename::after{content:none}
   /* У имени плитки зона обычная, а длинное имя под пальцем переносится, а не вылезает. */
   .tc-tile a.tc-tile__name{white-space:normal;overflow-wrap:anywhere}
+  .tc-row :is(.tc-row__title,.tc-row__cell,.tc-row__excerpt,.tc-row__file):has(a[href]){white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
   .tc-in.is-pick::before{pointer-events:auto;width:44px;height:44px;top:50%;bottom:auto;right:auto;left:50%;
     transform:translate(-50%,-50%);background:transparent}
   .tc-menu.is-pop,.tc-drop{z-index:6;overflow:visible}

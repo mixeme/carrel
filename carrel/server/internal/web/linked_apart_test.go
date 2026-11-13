@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -63,5 +64,67 @@ func TestTheDuplicatesScreenSaysGroupsCameApart(t *testing.T) {
 	n := noticeTitled(page.Shell.Notices, "1 linked group removed.")
 	if n == nil || string(n.Body) != "Its other records are no longer at their addresses (deleted or moved). The records left are unchanged on the server." {
 		t.Errorf("notices = %+v", page.Shell.Notices)
+	}
+}
+
+// linkedThree links Ada's two copies and adds a third member that is not on
+// its server: what is left of a group of three whose one copy was deleted or
+// moved elsewhere.
+func linkedThree(t *testing.T) dupFixture {
+	t.Helper()
+	f := newDupFixture(t)
+	f.load(t)
+	g := onlyGroup(t, f.page(t))
+	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, url.Values{"choice.FN": {pick}})))
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		b.Duplicates.Linked[0].Members = append(b.Duplicates.Linked[0].Members, sealed.RecordRef{AccountID: f.id, Col: peopleBook, UID: "ada-gone"})
+	})
+	return f
+}
+
+// A group of three that lost one stays a group of two, and says so: the card
+// of a copy, and the person's timeline, name where the copy was (Б16, its
+// rest), in the owner's words of 03.11.2026.
+func TestALinkedGroupThatLostOneOfThreeSaysSo(t *testing.T) {
+	said := func(t *testing.T, notices []view.Notice) {
+		t.Helper()
+		n := noticeTitled(notices, "Link removed.")
+		if n == nil || !strings.HasPrefix(string(n.Body), "The linked copy in ") ||
+			!strings.HasSuffix(string(n.Body), " is no longer at its address (deleted or moved). This record is unchanged.") {
+			t.Errorf("notices = %+v", notices)
+		}
+	}
+
+	f := linkedThree(t)
+	card := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
+	said(t, card.Shell.Notices)
+	if d := f.decisions(t); len(d.Linked) != 1 || len(d.Linked[0].Members) != 2 {
+		t.Errorf("the group = %+v, want the two copies left", d.Linked)
+	}
+	if len(card.Books) != 1 {
+		t.Errorf("the card's rows of the others = %+v, want the one left", card.Books)
+	}
+
+	f = linkedThree(t)
+	tl := decode[view.ContactTimelinePage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here")+"/timeline", f.sess)))
+	said(t, tl.Shell.Notices)
+	if tl.Linked == nil || tl.Linked.Label != "in 2 books" {
+		t.Errorf("timeline linked = %+v, want «in 2 books»", tl.Linked)
+	}
+}
+
+// The timeline of a person whose group came apart whole says so too.
+func TestATimelineSaysItsGroupCameApart(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	g := onlyGroup(t, f.page(t))
+	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, url.Values{"choice.FN": {pick}})))
+	_, etag, _ := f.other.Object(workBook + "ada-there.vcf")
+	f.h.do(postForm(f.record(f.otherID, workBook, "ada-there")+"/delete", f.sess, url.Values{"etag": {etag}, "sheet": {"1"}, "copy": {f.otherID + "/" + url.PathEscape(workBook)}}))
+	tl := decode[view.ContactTimelinePage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here")+"/timeline", f.sess)))
+	if noticeTitled(tl.Shell.Notices, "Link removed.") == nil {
+		t.Errorf("the timeline says nothing: %+v", tl.Shell.Notices)
 	}
 }

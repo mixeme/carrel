@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.411 — 2026-11-14
+
+Typecase `eb7cfbe` (note 203); towards the milestone `v0.3.0` — the rest of
+Б16 and of Б9.
+
+### For consumers
+
+- **A linked group that loses one of its copies says so** (Б16). A group of
+  three whose one copy is no longer at its address stays a group of two,
+  and the card of a copy says «Link removed.» · «The linked copy in … is no
+  longer at its address (deleted or moved). This record is unchanged.» —
+  the owner's words of 03.11.2026, said before only when every other copy
+  was gone. Events, tasks and notes say it too.
+- **The person's timeline says it as the card does**: «Link removed.» when
+  the group of the person came apart or lost a copy as the timeline was
+  read; before, it said nothing.
+- **The form under the loss report of Save photo is what was typed** (Б9).
+  A photo step sends the card's form with it; when the server did not keep
+  everything of the photo's write, the report stood over the card as the
+  server holds it, and the typing came back only with the next open of the
+  form — a Save under the report wrote the server's card. Now the form
+  under the report is the typing, at the version the photo left, shown
+  once. With the offer of the older form the typing waits with the frame,
+  as before.
+- Note 203 (a link inside a row's text wraps on a phone) changes nothing on
+  Carrel's screens: the mockup copy is Typecase's `eb7cfbe`.
+
 ## v0.2.410 — 2026-11-13
 
 Typecase `ce8fa9d` (note 202); towards the milestone `v0.3.0` — the rest of

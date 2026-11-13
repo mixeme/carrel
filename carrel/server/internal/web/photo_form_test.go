@@ -139,3 +139,40 @@ func TestCardPhotoTypingKeepsItsVersion(t *testing.T) {
 		t.Errorf("the form names version %q, want the one the typing was made at, %q", got, opened)
 	}
 }
+
+// Б9, its rest: Save photo on a server that does not keep the photo answers
+// with the loss report over the edit form. The form under it showed the
+// card as the server holds it, the typing waiting for the next open of the
+// form — a Save under the report wrote the server's card and left the typing
+// for later. Now the form under the report is the typing, as after a photo
+// step that lost nothing, at the version the photo left.
+func TestTheLossReportOfAPhotoKeepsWhatWasTyped(t *testing.T) {
+	f := bookFixture(t, nil, "BEGIN:VCARD\nVERSION:3.0\nUID:ada\nFN:Ada Lovelace\nORG:Analytical Engines\nEND:VCARD\n")
+	f.srv.Drop = []string{"PHOTO"}
+	rec := f.path("contacts") + "/ada"
+	edit := decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
+	typed := url.Values{"fn": {"Ada King"}, "org": {"Analytical Engines"}, "title": {"Countess"}}
+	resp := f.h.do(formWithPhoto(t, f, actionHref(t, edit.Photo.Actions, "photo.add"), false, typed, jpegOf(t, halvesImage(400, 400))))
+	if resp.Code != http.StatusSeeOther {
+		t.Fatalf("upload: %d %s", resp.Code, resp.Body.String())
+	}
+	page := decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
+	saved := decode[view.ContactEditPage](t, f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, cropForm(page))))
+	if saved.Loss == nil || len(saved.Loss.Properties) != 1 || saved.Loss.Properties[0] != "PHOTO" {
+		t.Fatalf("loss = %+v", saved.Loss)
+	}
+	if formValue(t, saved, "fn") != "Ada King" || formValue(t, saved, "title") != "Countess" {
+		t.Errorf("the form under the report: fn %q, title %q, want the typing", formValue(t, saved, "fn"), formValue(t, saved, "title"))
+	}
+	_, etag, _ := f.srv.Object(f.col + "ada.vcf")
+	if got := formValue(t, saved, "etag"); got != etag {
+		t.Errorf("the form under the report edits version %q, the card is at %q", got, etag)
+	}
+	if strings.Contains(body(t, f, "ada.vcf"), "Countess") {
+		t.Error("Save photo wrote the typing")
+	}
+	// Shown once: the form opened again is the card's.
+	if again := decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))); formValue(t, again, "fn") != "Ada Lovelace" {
+		t.Errorf("the form opened again shows %q, want the card's", formValue(t, again, "fn"))
+	}
+}

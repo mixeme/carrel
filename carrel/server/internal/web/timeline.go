@@ -650,7 +650,9 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 	page.Card.Fields = withBirthdayAside(withTagLinks(page.Card.Fields, s.recordTags(c, obj)), c.tf)
 	// A person in more than one book: «in 2 books» by the head, the others
 	// in the panel (s-contacts-7, S-16).
-	if lc, ok := s.linkedOf(ctx, c, person.uid); ok {
+	lc, ok := s.linkedOf(ctx, c, person.uid)
+	page.Shell.Notices = withNotice(page.Shell.Notices, lc.apart)
+	if ok {
 		page.Linked = &view.Badge{Label: text(fmt.Sprintf("in %d books", len(lc.others)+1)), Role: view.BadgeLinked}
 		lr, _ := linkedRecordFrom(c, lc, obj)
 		page.Card.Books = s.memberRows(lc, lr)
