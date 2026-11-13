@@ -817,7 +817,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 1,
           "path": "/alice/files/Files/",
           "pick": "a-nc-home|/alice/files/Files/",
           "readOnly": false,
@@ -1484,7 +1484,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 10,
           "path": "/alice/files/Documents/",
           "pick": "a-sftp-vps|/alice/files/Documents/",
           "readOnly": false,
@@ -1555,7 +1555,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 2,
           "path": "/alice/files/Public/",
           "pick": "a-sftp-vps|/alice/files/Public/",
           "readOnly": true,

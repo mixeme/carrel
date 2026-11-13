@@ -17,6 +17,40 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.409 — 2026-11-13
+
+Typecase `47e6f66`; towards the milestone `v0.3.0` — the counts of the
+settings against their frames. Typecase task 262 opened.
+
+### For consumers
+
+- **«Objects» of a file collection is how many files it holds at every
+  depth** (the owner's decision of 13.11.2026; s-profile-1 «Documents 9»).
+  No server says it, so Carrel walks the tree in the background when
+  Connections opens: storage after storage, a PROPFIND of depth 1 a folder.
+  `CollectionRow.Counting` is new — the walk goes on, `Objects` is how many
+  files so far («1240…»); `CollectionRow.ObjectsNote` is new — the walk was
+  refused mid-way, `Objects` is nil, and why: «Not counted: PROPFIND
+  /dav/Documents/carrel/ → 503 Service Unavailable.». The count is kept in
+  the session with the change tag of the storage's root; Connections asks
+  the root again after `CARREL_CACHE_COLLECTION_TTL` and walks again only
+  when the tag moved — a server that gives a folder no tag keeps its count
+  until Update collection list, which always counts again. The page shows
+  the count it has when it is drawn: a frame of the counting state and
+  its refresh by itself wait for Typecase's task 262.
+- The decision of 03.10.2026 on a folder row of Files (ФБ11: only what the
+  same PROPFIND says) stands; the same walk for Files is the owner's to
+  think of after the first working version.
+
+### Fixtures
+
+- The settings' fixtures open the lists out of the combined views too —
+  «Дни рождения», «Общие с семьёй», «Рассылки», the feed's tasks —, as a
+  person looks at one: every row of the tables counts what it holds, as
+  the frames draw them. Typecase's task 262: the frames' «19 collections»
+  (17), «Общие с семьёй 0» (2), the feed's «Tasks 1» (2), «Documents 9»
+  (10), and the counting state.
+
 ## v0.2.408 — 2026-11-12
 
 Typecase `47e6f66`, notes 194–201.

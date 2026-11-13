@@ -382,6 +382,12 @@ type CollectionRow struct {
 	LastRead When   `json:"lastRead"`
 	Changed  When   `json:"changed"`
 	Objects  *int   `json:"objects"`
+	// Counting — у файловой коллекции идёт фоновый обход дерева (решение
+	// владельца 13.11.2026): Objects — сколько файлов насчитано пока,
+	// «1 240…»; ObjectsNote — обход отказан посреди, Objects — nil, почему —
+	// подсказкой прочерка
+	Counting    bool `json:"counting,omitempty"`
+	ObjectsNote Text `json:"objectsNote,omitempty"`
 	// Tick — опрашивается ли коллекция: on — во всех её родах, part — в
 	// части, off — ни в одном (s-profile-1: снятая — снятым флажком, её не
 	// опрашивают; Нс21)

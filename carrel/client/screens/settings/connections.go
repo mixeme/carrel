@@ -36,6 +36,8 @@ const (
 	pickName        = "pick"
 	newBadge        = "new"
 	disconnectID    = "connection.disconnect"
+	counting        = "…"
+	noCount         = "—"
 )
 
 // kindWords are a collection's kinds as the list says them (s-profile-1).
@@ -319,8 +321,16 @@ func collectionsTable(rows []view.CollectionRow, narrow bool) w.Table {
 			what.Parts = []w.CellPart{w.Text(joined(kinds, kindSep) + " "), w.Badge{Label: roBadge}}
 		}
 		objects := w.TableCell{Mono: true}
-		if r.Objects != nil {
+		switch {
+		case r.Counting && r.Objects != nil:
+			// The files of a storage while its tree is walked: how many so
+			// far (the owner's decision of 13.11.2026; Typecase's task 262).
+			objects.Parts = []w.CellPart{w.Text(strconv.Itoa(*r.Objects) + counting)}
+		case r.Objects != nil:
 			objects.Parts = []w.CellPart{w.Text(strconv.Itoa(*r.Objects))}
+		case r.ObjectsNote != "":
+			// The walk refused mid-way: a dash, and why in its hint.
+			objects.Parts = []w.CellPart{w.Span{Text: noCount, Title: string(r.ObjectsNote)}}
 		}
 		row := w.TableRow{Cells: []w.TableCell{
 			pick,

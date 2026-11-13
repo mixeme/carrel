@@ -428,6 +428,9 @@ func (s *Server) updateCollectionList(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
+	// The storages of the connection are counted again, whatever the
+	// discovery says (the owner's decision of 13.11.2026; files_count.go).
+	forgetFilesCount(sess, blob, conn.ID)
 	res, trace, err := discover.Run(r.Context(), s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
 	if trace != nil {
 		sess.NoteCheck(conn.ID, trace)
@@ -572,6 +575,9 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 			// (s-profile-4, Typecase's note 103): no line of its own.
 			unlocked := sess.UnlockUntil(s.now()) != nil
 			tf := s.timeFor(sess)
+			// The files of the storages are counted in the background
+			// (files_count.go); the rows say how far.
+			s.countFiles(sess, blob)
 			cols := 0
 			for _, c := range blob.Connections {
 				card := s.connectionCard(sess, tf, blob, c, unlocked)
@@ -762,6 +768,9 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		}
 		row.LastRead, row.Changed = readingOf(sess, tf, c.ID, col.Path)
 		row.Objects = objectsOf(sess, c.ID, col)
+		if col.Has(view.KindFile) {
+			row.Objects, row.Counting, row.ObjectsNote = fileObjects(sess, c.ID, col)
+		}
 		row.Tick = tickOf(blob, c.ID, col)
 		row.Toggle = view.Action{ID: "collection.tick", Label: row.Label, Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/settings/connections", url.Values{"op": {"pick"}})}

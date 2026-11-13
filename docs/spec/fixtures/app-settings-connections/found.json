@@ -293,7 +293,7 @@
             "event"
           ],
           "label": "Дни рождения",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -524,13 +524,13 @@
           }
         },
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#3f6e8c",
           "kinds": [
             "note"
           ],
           "label": "Общие с семьёй",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -1279,7 +1279,7 @@
             "contact"
           ],
           "label": "Рассылки",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -1337,7 +1337,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 0,
           "path": "/alice/contacts/rassylki/",
           "pick": "a-rad-vps|/alice/contacts/rassylki/",
           "readOnly": false,
@@ -1667,7 +1667,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 10,
           "path": "/alice/files/Documents/",
           "pick": "a-sftp-vps|/alice/files/Documents/",
           "readOnly": false,
@@ -1738,7 +1738,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 2,
           "path": "/alice/files/Public/",
           "pick": "a-sftp-vps|/alice/files/Public/",
           "readOnly": true,
@@ -2014,7 +2014,7 @@
         {
           "kind": "task",
           "label": "Tasks",
-          "objects": null,
+          "objects": 2,
           "pick": "f-ru-holidays|tasks",
           "tick": "off",
           "toggle": {

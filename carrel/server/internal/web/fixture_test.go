@@ -800,6 +800,10 @@ func newMockupApp(t *testing.T) *mockupApp {
 	if seen != len(mockupSet) {
 		t.Fatalf("the set did not reach the catalog: %d of %d", seen, len(mockupSet))
 	}
+	// Connections counts the files of the storages in the background (the
+	// owner's decision of 13.11.2026): the set is ready when they are
+	// counted, and no walk runs under what a test does next.
+	counted(t, app)
 	return app
 }
 
@@ -2075,6 +2079,7 @@ func settingsState(t *testing.T, app *mockupApp) (work, home string) {
 func settingsDevices(t *testing.T, app *mockupApp) {
 	t.Helper()
 	openSections(t, app)
+	openUnticked(t, app)
 	readFolders(t, app)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	for _, id := range mockupDevices(t, app) {
@@ -3403,6 +3408,35 @@ func openSections(t *testing.T, app *mockupApp) {
 	t.Helper()
 	for _, path := range []string{"/app/contacts", "/app/calendar?from=2026-08-10", "/app/tasks", "/app/notes"} {
 		openList(t, app, path)
+	}
+}
+
+// openUnticked opens the lists that stand out of the combined views — «Дни
+// рождения», «Общие с семьёй», «Рассылки», and the tasks of the feed
+// «Праздники РФ» —, as a person looks at one now and then: the tables of
+// the settings count what each holds (s-profile-1: «Objects» of every row).
+func openUnticked(t *testing.T, app *mockupApp) {
+	t.Helper()
+	for _, one := range []struct{ segment, slug string }{
+		{"calendar", "dni-rozhdeniya"}, {"notes", "zapiski-obshchie"}, {"contacts", "rassylki"},
+	} {
+		path := app.listPath(t, one.segment, one.slug)
+		if one.segment == "calendar" {
+			path += "?from=2026-08-10"
+		}
+		if rec := app.h.do(get(path, app.sess)); rec.Code != 200 {
+			t.Fatalf("%s: %d", path, rec.Code)
+		}
+	}
+	key, _ := app.sess.DataKey()
+	blob, _ := app.h.users.Catalog(app.sess.AccountID(), key)
+	for _, s := range blob.Subscriptions {
+		if s.Name == "Праздники РФ" {
+			path := "/app/tasks/" + s.ID + "/" + url.PathEscape(s.FeedCollection().Path)
+			if rec := app.h.do(get(path, app.sess)); rec.Code != 200 {
+				t.Fatalf("%s: %d", path, rec.Code)
+			}
+		}
 	}
 }
 

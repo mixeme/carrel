@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.29 — 2026-11-13
+
+Typecase `47e6f66`; server `v0.2.409`. The whole client suite passes.
+
+- «Objects» of a storage while its tree is walked says how many files so
+  far, «1240…» (`CollectionRow.Counting`); a walk refused mid-way leaves a
+  dash with why in its hint (`CollectionRow.ObjectsNote`). The frame of
+  the counting state is Typecase's task 262.
+
 ## v0.11.28 — 2026-11-12
 
 Typecase `47e6f66`, notes 194–201; server `v0.2.408`. The whole client
