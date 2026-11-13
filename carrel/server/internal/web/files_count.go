@@ -37,7 +37,21 @@ type filesCount struct {
 
 	mu       sync.Mutex
 	running  bool
-	counting map[string]int // by filesKey: files so far of a storage being walked
+	counting map[string]int  // by filesKey: files so far of a storage being walked
+	waiting  map[string]bool // by filesKey: storages the walk has still to see
+}
+
+// waits tells whether the walk has still to see a storage.
+func (f *filesCount) waits(key string) bool {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.waiting[key]
+}
+
+func (f *filesCount) seen(key string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	delete(f.waiting, key)
 }
 
 func (f *filesCount) ID() string { return f.id }
@@ -71,11 +85,12 @@ func (f *filesCount) set(key string, n int, on bool) {
 // filesKey names a storage among the walk's and in the session's cache.
 func filesKey(accountID, path string) string { return accountID + "\x00" + path }
 
-// filesCountKey is the cache entry of a storage's count: «n\x00tag\x00at» —
-// n files at the root's change tag, found at at (Unix nanoseconds);
-// «!\x00why\x00at» — the walk was refused; empty — not counted (Update
-// collection list asks for a walk so).
-func filesCountKey(path string) string { return "files\x00" + path }
+// A storage's count is kept by the session (Session.FilesCount), not in its
+// cache: the budgets of the cache would take it away under a busy session,
+// and the page would count again from nothing. The value: «n\x00tag\x00at»
+// — n files at the root's change tag, found at at (Unix nanoseconds);
+// «!\x00why\x00at» — the walk was refused; none — not counted (Update
+// collection list forgets it so).
 
 type filesCounted struct {
 	n    int
@@ -86,7 +101,7 @@ type filesCounted struct {
 }
 
 func peekFilesCount(sess *session.Session, accountID, path string) filesCounted {
-	data, ok := sess.Cache().PeekETagMap(accountID, filesCountKey(path))
+	data, ok := sess.FilesCount(accountID, path)
 	if !ok || len(data) == 0 {
 		return filesCounted{}
 	}
@@ -113,23 +128,34 @@ func peekFilesCount(sess *session.Session, accountID, path string) filesCounted 
 // refusal (head «!», tail why), found at at.
 func putFilesCount(sess *session.Session, accountID, path, head, tail string, at time.Time) {
 	value := head + "\x00" + tail + "\x00" + strconv.FormatInt(at.UnixNano(), 10)
-	sess.Cache().PutETagMap(accountID, filesCountKey(path), []byte(value))
+	sess.SetFilesCount(accountID, path, []byte(value))
 }
 
 // freshFilesCount tells whether a storage's kept count was found so lately
 // that its root is not asked again: as long as a whole read of a list is
 // trusted (CARREL_CACHE_COLLECTION_TTL).
 func (s *Server) freshFilesCount(kept filesCounted) bool {
-	return kept.ok && s.now().Sub(kept.at) < s.cfg.CacheCollectionTTL
+	return kept.ok && kept.tag != recountTag && s.now().Sub(kept.at) < s.cfg.CacheCollectionTTL
 }
+
+// recountTag stands for the root's change tag of a count Update collection
+// list asked to find again: no root has it, so the walk goes over the tree,
+// and the row keeps the number it had until the new one is found.
+const recountTag = "\x01recount"
 
 // forgetFilesCount asks for the storages of a connection to be counted
 // again (Update collection list).
 func forgetFilesCount(sess *session.Session, blob sealed.Blob, accountID string) {
 	for _, col := range blob.CollectionsOf(accountID) {
-		if col.Has(view.KindFile) {
-			sess.Cache().PutETagMap(accountID, filesCountKey(col.Path), nil)
+		if !col.Has(view.KindFile) {
+			continue
 		}
+		kept := peekFilesCount(sess, accountID, col.Path)
+		if !kept.ok || kept.note != "" {
+			sess.SetFilesCount(accountID, col.Path, nil)
+			continue
+		}
+		putFilesCount(sess, accountID, col.Path, strconv.Itoa(kept.n), recountTag, kept.at)
 	}
 }
 
@@ -172,7 +198,10 @@ func (s *Server) countFiles(sess *session.Session, blob sealed.Blob) {
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	f := &filesCount{id: id, cancel: cancel, running: true, counting: map[string]int{}}
+	f := &filesCount{id: id, cancel: cancel, running: true, counting: map[string]int{}, waiting: map[string]bool{}}
+	for _, st := range all {
+		f.waiting[filesKey(st.conn.ID, st.col.Path)] = true
+	}
 	sess.KeepTask(f)
 	go func() {
 		defer func() {
@@ -194,6 +223,7 @@ func (s *Server) countFiles(sess *session.Session, blob sealed.Blob) {
 // its kept count stands at.
 func (s *Server) countStorage(ctx context.Context, sess *session.Session, f *filesCount, conn sealed.Connection, col sealed.Collection) {
 	key := filesKey(conn.ID, col.Path)
+	defer f.seen(key)
 	p, err := s.fileProvider(conn)
 	if err != nil {
 		putFilesCount(sess, conn.ID, col.Path, "!", "Not counted: "+sentence(err.Error()), s.now())
@@ -254,12 +284,23 @@ func notCounted(folder string, err error) string {
 // so far and that it is counting while the walk goes over it, else the kept
 // count — or none, and why, when the walk was refused.
 func fileObjects(sess *session.Session, accountID string, col sealed.Collection) (*int, bool, view.Text) {
-	if f := latestFilesCount(sess); f != nil {
-		if n, ok := f.so(filesKey(accountID, col.Path)); ok {
+	key := filesKey(accountID, col.Path)
+	f := latestFilesCount(sess)
+	kept := peekFilesCount(sess, accountID, col.Path)
+	counted := kept.ok && kept.note == ""
+	// The growing count is the first one of the session: a storage with a
+	// number keeps it while it is asked or walked again, and changes it once
+	// the walk is over.
+	if f != nil && !counted {
+		if n, ok := f.so(key); ok {
 			return &n, true, ""
 		}
+		// One the walk has still to see is being counted too: the page
+		// does not look finished between two storages.
+		if f.waits(key) {
+			return nil, true, ""
+		}
 	}
-	kept := peekFilesCount(sess, accountID, col.Path)
 	switch {
 	case !kept.ok:
 		return nil, false, ""

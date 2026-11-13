@@ -897,7 +897,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 1,
           "path": "/alice/files/Files/",
           "pick": "a-nc-home|/alice/files/Files/",
           "readOnly": false,

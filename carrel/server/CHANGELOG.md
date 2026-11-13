@@ -35,9 +35,13 @@ settings against their frames. Typecase task 262 opened.
   the session with the change tag of the storage's root; Connections asks
   the root again after `CARREL_CACHE_COLLECTION_TTL` and walks again only
   when the tag moved — a server that gives a folder no tag keeps its count
-  until Update collection list, which always counts again. The page shows
-  the count it has when it is drawn: a frame of the counting state and
-  its refresh by itself wait for Typecase's task 262.
+  until Update collection list, which always counts again. The growing
+  count is the first one of the session: a storage waiting for the walk
+  with no number says it is counting too (`Counting`, `Objects` nil), and
+  one counted before keeps its number while it is counted again. The count
+  is the session's (`Session.FilesCount`), not under the budgets of its
+  cache. The page shows the count it has when it is drawn: a frame of the
+  counting state and its refresh by itself wait for Typecase's task 262.
 - The decision of 03.10.2026 on a folder row of Files (ФБ11: only what the
   same PROPFIND says) stands; the same walk for Files is the owner's to
   think of after the first working version.

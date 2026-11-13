@@ -9,7 +9,8 @@ entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/clien
 Typecase `47e6f66`; server `v0.2.409`. The whole client suite passes.
 
 - «Objects» of a storage while its tree is walked says how many files so
-  far, «1240…» (`CollectionRow.Counting`); a walk refused mid-way leaves a
+  far, «1240…» (`CollectionRow.Counting`), one waiting for the walk «…»;
+  a walk refused mid-way leaves a
   dash with why in its hint (`CollectionRow.ObjectsNote`). The frame of
   the counting state is Typecase's task 262.
 

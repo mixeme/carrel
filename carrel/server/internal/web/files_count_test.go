@@ -55,6 +55,14 @@ func counted(t *testing.T, app *mockupApp) view.ConnectionsPage {
 	}
 }
 
+// freshSession signs in again and opens Connections in the new session: it
+// has counted nothing yet.
+func freshSession(t *testing.T, app *mockupApp) {
+	t.Helper()
+	app.sess = app.h.login("mix", "password123")
+	app.h.do(get("/app/settings/connections", app.sess))
+}
+
 // recount presses Update collection list on the connection of slug and
 // opens Connections: its storages are walked again.
 func recount(t *testing.T, app *mockupApp, slug string) {
@@ -101,10 +109,11 @@ func TestFileCollectionsCountTheirFilesAtEveryDepth(t *testing.T) {
 func TestAFileCollectionSaysItIsCounting(t *testing.T) {
 	app := newMockupApp(t)
 	sftp := app.servers["sftpgo · vps"]
-	counted(t, app) // the set's own visit of Connections is over
 	release := sftp.StallAt(app.realPath(t, "Documents") + "carrel/")
 	defer release()
-	recount(t, app, "Documents")
+	// A new session has counted nothing: its first walk shows the count
+	// growing.
+	freshSession(t, app)
 	deadline := time.Now().Add(10 * time.Second)
 	for {
 		r := fileRows(decode[view.ConnectionsPage](t, app.h.do(get("/app/settings/connections", app.sess))))["Documents"]
@@ -137,4 +146,57 @@ func TestAFileCollectionRefusedMidWayHasNoCount(t *testing.T) {
 	if r := fileRows(counted(t, app))["Public"]; r.Objects == nil || *r.Objects != 2 {
 		t.Errorf("Public beside it: %+v", r)
 	}
+}
+
+// A storage still waiting for the walk, with no count yet, says it is being
+// counted too: between two storages the page does not look finished.
+func TestAStorageWaitingForTheWalkSaysItIsCounting(t *testing.T) {
+	app := newMockupApp(t)
+	sftp := app.servers["sftpgo · vps"]
+	// Documents is held at its root's listing; Public, after it on the same
+	// connection, waits.
+	release := sftp.StallAt(app.realPath(t, "Documents"))
+	defer release()
+	freshSession(t, app)
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		rows := fileRows(decode[view.ConnectionsPage](t, app.h.do(get("/app/settings/connections", app.sess))))
+		if rows["Documents"].Counting {
+			if p := rows["Public"]; !p.Counting || p.Objects != nil {
+				t.Errorf("Public waiting for the walk: %+v", p)
+			}
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("Documents while held: %+v", rows["Documents"])
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	release()
+	counted(t, app)
+}
+
+// Counted again (Update collection list), a storage keeps its number while
+// the walk goes over it, and changes it when the walk is over.
+func TestARecountKeepsTheNumberUntilItIsFound(t *testing.T) {
+	app := newMockupApp(t)
+	sftp := app.servers["sftpgo · vps"]
+	inside := app.realPath(t, "Documents") + "carrel/"
+	before := sftp.CountRequests("PROPFIND", inside)
+	release := sftp.StallAt(inside)
+	defer release()
+	recount(t, app, "Documents")
+	deadline := time.Now().Add(10 * time.Second)
+	for sftp.CountRequests("PROPFIND", inside) == before {
+		if time.Now().After(deadline) {
+			t.Fatal("the recount did not reach «carrel»")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	r := fileRows(decode[view.ConnectionsPage](t, app.h.do(get("/app/settings/connections", app.sess))))["Documents"]
+	if r.Counting || r.Objects == nil || *r.Objects != 10 {
+		t.Errorf("Documents while counted again: %+v", r)
+	}
+	release()
+	counted(t, app)
 }

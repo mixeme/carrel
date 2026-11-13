@@ -384,7 +384,7 @@ type CollectionRow struct {
 	Objects  *int   `json:"objects"`
 	// Counting — у файловой коллекции идёт фоновый обход дерева (решение
 	// владельца 13.11.2026): Objects — сколько файлов насчитано пока,
-	// «1 240…»; ObjectsNote — обход отказан посреди, Objects — nil, почему —
+	// «1 240…»; nil — хранилище ждёт обхода без счёта, «…»; ObjectsNote — обход отказан посреди, Objects — nil, почему —
 	// подсказкой прочерка
 	Counting    bool `json:"counting,omitempty"`
 	ObjectsNote Text `json:"objectsNote,omitempty"`

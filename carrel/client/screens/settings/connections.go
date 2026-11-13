@@ -326,6 +326,9 @@ func collectionsTable(rows []view.CollectionRow, narrow bool) w.Table {
 			// The files of a storage while its tree is walked: how many so
 			// far (the owner's decision of 13.11.2026; Typecase's task 262).
 			objects.Parts = []w.CellPart{w.Text(strconv.Itoa(*r.Objects) + counting)}
+		case r.Counting:
+			// Waiting for the walk, no count yet.
+			objects.Parts = []w.CellPart{w.Text(counting)}
 		case r.Objects != nil:
 			objects.Parts = []w.CellPart{w.Text(strconv.Itoa(*r.Objects))}
 		case r.ObjectsNote != "":

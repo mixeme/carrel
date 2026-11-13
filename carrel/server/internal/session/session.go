@@ -28,26 +28,27 @@ type Session struct {
 	accountID string
 	login     string
 
-	mu         sync.Mutex
-	ended      bool
-	dataKey    [crypt.KeyLen]byte
-	csrf       []byte
-	created    time.Time
-	lastSeen   time.Time
-	absoluteAt time.Time
-	drafts     Drafts
-	history    []HistoryEntry
-	losses     LossRegistry
-	fanout     int
-	tasks      []Task // newest first
-	transfers  []Transfer
-	unlockAt   time.Time
-	readings   map[string]Reading               // by connection and collection path (S-22)
-	ticks      map[string]tick                  // tasks marked done, by collection and UID (ticks.go)
-	refusals   map[string]bool                  // what a server refused in a collection (refusals.go)
-	checks     map[string]*view.DiagnosticTrace // last check of each connection (C-6)
-	agent      string                           // the browser, as the account page names it
-	address    string                           // the client address at sign-in
+	mu          sync.Mutex
+	ended       bool
+	dataKey     [crypt.KeyLen]byte
+	csrf        []byte
+	created     time.Time
+	lastSeen    time.Time
+	absoluteAt  time.Time
+	drafts      Drafts
+	history     []HistoryEntry
+	losses      LossRegistry
+	fanout      int
+	tasks       []Task // newest first
+	transfers   []Transfer
+	unlockAt    time.Time
+	readings    map[string]Reading               // by connection and collection path (S-22)
+	ticks       map[string]tick                  // tasks marked done, by collection and UID (ticks.go)
+	refusals    map[string]bool                  // what a server refused in a collection (refusals.go)
+	filesCounts map[string]string                // files of a storage at every depth (filescount.go)
+	checks      map[string]*view.DiagnosticTrace // last check of each connection (C-6)
+	agent       string                           // the browser, as the account page names it
+	address     string                           // the client address at sign-in
 
 	cache *Cache
 	mgr   *Manager
@@ -379,6 +380,7 @@ func (s *Session) end() {
 	s.readings = nil
 	s.ticks = nil
 	s.refusals = nil
+	s.filesCounts = nil
 	s.mu.Unlock()
 
 	for _, t := range tasks {

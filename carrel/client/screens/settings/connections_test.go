@@ -19,11 +19,15 @@ func TestObjectsOfAStorageWhileCountedAndRefused(t *testing.T) {
 			{Label: "Documents", Kinds: []view.Kind{view.KindFile}, Objects: &n, Counting: true},
 			{Label: "Public", Kinds: []view.Kind{view.KindFile},
 				ObjectsNote: "Not counted: PROPFIND /dav/Public/x/ → 503 Service Unavailable."},
+			{Label: "Archive", Kinds: []view.Kind{view.KindFile}, Counting: true},
 		},
 	}}}
 	html := settings.Connections(page).Render()
 	if !strings.Contains(html, ">1240…<") {
 		t.Errorf("the walked storage does not say «1240…»:\n%s", html)
+	}
+	if !strings.Contains(html, ">…<") {
+		t.Errorf("the storage waiting for the walk does not say «…»:\n%s", html)
 	}
 	if !strings.Contains(html, `title="Not counted: PROPFIND /dav/Public/x/ → 503 Service Unavailable."`) {
 		t.Errorf("the refused storage does not say why:\n%s", html)

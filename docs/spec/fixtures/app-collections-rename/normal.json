@@ -1601,7 +1601,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 10,
               "path": "/alice/files/Documents/",
               "pick": "a-sftp-vps|/alice/files/Documents/",
               "readOnly": false,
