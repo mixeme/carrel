@@ -203,6 +203,9 @@ func (s *Server) countFiles(sess *session.Session, blob sealed.Blob) {
 		f.waiting[filesKey(st.conn.ID, st.col.Path)] = true
 	}
 	sess.KeepTask(f)
+	// The walk's counts are of the time it started: the server's clock is
+	// read here, in the request, and never by the walk (a test moves it).
+	at := s.now()
 	go func() {
 		defer func() {
 			f.mu.Lock()
@@ -214,33 +217,33 @@ func (s *Server) countFiles(sess *session.Session, blob sealed.Blob) {
 			if ctx.Err() != nil {
 				return
 			}
-			s.countStorage(ctx, sess, f, st.conn, st.col)
+			s.countStorage(ctx, sess, f, st.conn, st.col, at)
 		}
 	}()
 }
 
 // countStorage walks one storage, unless its root's change tag is the one
 // its kept count stands at.
-func (s *Server) countStorage(ctx context.Context, sess *session.Session, f *filesCount, conn sealed.Connection, col sealed.Collection) {
+func (s *Server) countStorage(ctx context.Context, sess *session.Session, f *filesCount, conn sealed.Connection, col sealed.Collection, at time.Time) {
 	key := filesKey(conn.ID, col.Path)
 	defer f.seen(key)
 	p, err := s.fileProvider(conn)
 	if err != nil {
-		putFilesCount(sess, conn.ID, col.Path, "!", "Not counted: "+sentence(err.Error()), s.now())
+		putFilesCount(sess, conn.ID, col.Path, "!", "Not counted: "+sentence(err.Error()), at)
 		return
 	}
 	root := strings.TrimSuffix(fileRoot(conn, col), "/") + "/"
 	top, err := p.Stat(ctx, root)
 	if err != nil {
 		if ctx.Err() == nil {
-			putFilesCount(sess, conn.ID, col.Path, "!", notCounted(root, err), s.now())
+			putFilesCount(sess, conn.ID, col.Path, "!", notCounted(root, err), at)
 		}
 		return
 	}
 	// A server that gives a folder no change tag gives none that moves: its
 	// count stands until Update collection list.
 	if kept := peekFilesCount(sess, conn.ID, col.Path); kept.ok && kept.note == "" && kept.tag == top.ETag {
-		putFilesCount(sess, conn.ID, col.Path, strconv.Itoa(kept.n), kept.tag, s.now())
+		putFilesCount(sess, conn.ID, col.Path, strconv.Itoa(kept.n), kept.tag, at)
 		return
 	}
 	files := 0
@@ -253,7 +256,7 @@ func (s *Server) countStorage(ctx context.Context, sess *session.Session, f *fil
 		entries, err := p.List(ctx, folder)
 		if err != nil {
 			if ctx.Err() == nil {
-				putFilesCount(sess, conn.ID, col.Path, "!", notCounted(folder, err), s.now())
+				putFilesCount(sess, conn.ID, col.Path, "!", notCounted(folder, err), at)
 			}
 			return
 		}
@@ -266,7 +269,7 @@ func (s *Server) countStorage(ctx context.Context, sess *session.Session, f *fil
 		}
 		f.set(key, files, true)
 	}
-	putFilesCount(sess, conn.ID, col.Path, strconv.Itoa(files), top.ETag, s.now())
+	putFilesCount(sess, conn.ID, col.Path, strconv.Itoa(files), top.ETag, at)
 }
 
 // notCounted is why a storage has no count: the request refused, as the
