@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.410 — 2026-11-13
+
+Typecase `ce8fa9d` (note 202); towards the milestone `v0.3.0` — the rest of
+Б42 and of Б3. Typecase task 263 opened.
+
+### For consumers
+
+- **A published file or folder follows its rename or move in Files.** The
+  link opens it at its new place, and so does a link to anything inside a
+  folder renamed or moved; moved to another connection, the link is sealed
+  again with that connection's address and credentials, as a record's link
+  is (Б41). Before, the guest read «No longer there.» The journal says
+  `publish.follow`, as for records.
+- The rename sheet says «Notes and events that point at it will not find
+  it under the new name.» — published links are no longer in it. The frame
+  `s-files-21` still names them: Typecase task 263.
+- **A card with a line that is not a property is not read** (Б3): a line
+  with no colon after its name, with no name, or with an open quote.
+  go-vcard skipped such a line and read the card without it — the field was
+  gone from the screen with nothing said. Now the card is invalid vCard, as
+  a calendar record with such a line already was: the book reads past it
+  and says «1 record not shown: invalid vCard.», the line quoted in the
+  details; an import lists it among the broken cards with its line number.
+  A vCard 2.1 quoted-printable value broken with «=» is one line and reads
+  as before.
+- Note 202 (one text edge for every block) changes only Typecase's CSS: the
+  mockup copy is Typecase's `ce8fa9d`, the server is unchanged by it.
+
 ## v0.2.409 — 2026-11-13
 
 Typecase `47e6f66`; towards the milestone `v0.3.0` — the counts of the

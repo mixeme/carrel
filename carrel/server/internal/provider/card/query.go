@@ -211,6 +211,9 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 			// Read again with its bare parameters named (readCard).
 			card, ao.DecodeError = readCard(ao.Data)
 		}
+		if ao.DecodeError == nil {
+			ao.DecodeError = brokenLine(ao.Data)
+		}
 		if ao.DecodeError != nil || card == nil {
 			err := ao.DecodeError
 			if err == nil {

@@ -120,6 +120,7 @@ type Users interface {
 	PublishedLinks(viewerID string) []user.PublishedLink
 	RevokePublished(viewerID, id string) error
 	FollowPublished(viewerID string, from, to user.Place, conn sealed.Connection) (int, error)
+	FollowPublishedFiles(viewerID string, from, to user.FilePlace, conn sealed.Connection) (int, error)
 	MarkPublishedGone(viewerID string, at user.Place) error
 	MarkLinkGone(id string) error
 	// NoteLinkMissing keeps how many records a guest's read left out (Б3).

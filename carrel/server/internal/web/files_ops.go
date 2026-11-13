@@ -1145,7 +1145,10 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		// The new name is the form's field "name".
 		confirm.Label = "Rename"
 		confirm = writeAction(c, confirm)
-		sheet.Warning = line("Notes, events and published links that point at it will not find it under the new name.")
+		// Published links follow it (Б42, server v0.2.410); notes and events
+		// keep the old address. The frame still names the links — Typecase's
+		// task 263.
+		sheet.Warning = line("Notes and events that point at it will not find it under the new name.")
 	case view.FileDelete:
 		confirm.Label, confirm.Danger = "Delete", true
 		for _, e := range items {

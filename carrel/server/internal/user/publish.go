@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -422,6 +423,49 @@ func (s *Service) FollowPublished(viewerID string, from, to Place, conn sealed.C
 	if from == to {
 		return 0, nil
 	}
+	return s.follow(viewerID, from.matches, to.AccountID, conn, func(l *store.PublishedLink) {
+		l.AccountID, l.Col = to.AccountID, to.Col
+		if from.UID != "" {
+			l.UID = to.UID
+		}
+	})
+}
+
+// FilePlace is where a published file or folder is: a file collection of a
+// connection, and the path in it, segment by segment.
+type FilePlace struct {
+	AccountID, Col string
+	Path           []string
+}
+
+// inside says whether a link opens what is at the place, or something in it.
+func (p FilePlace) inside(l *store.PublishedLink) bool {
+	if l.Kind != "file" || l.AccountID != p.AccountID || l.Col != p.Col || l.Path == "" || len(p.Path) == 0 {
+		return false
+	}
+	segs := strings.Split(l.Path, "/")
+	return len(segs) >= len(p.Path) && slices.Equal(segs[:len(p.Path)], p.Path)
+}
+
+// FollowPublishedFiles points the viewer's links to a file or a folder at
+// from, and to anything inside the folder, at to: what they open was renamed
+// or moved in Files (Б42 of the audit of 11.10.2026; a record's link follows
+// its move by FollowPublished, Б41). A link to another connection is sealed
+// again with conn, as there.
+func (s *Service) FollowPublishedFiles(viewerID string, from, to FilePlace, conn sealed.Connection) (int, error) {
+	if from.AccountID == to.AccountID && from.Col == to.Col && slices.Equal(from.Path, to.Path) {
+		return 0, nil
+	}
+	return s.follow(viewerID, from.inside, to.AccountID, conn, func(l *store.PublishedLink) {
+		rest := strings.Split(l.Path, "/")[len(from.Path):]
+		l.AccountID, l.Col = to.AccountID, to.Col
+		l.Path = strings.Join(append(slices.Clone(to.Path), rest...), "/")
+	})
+}
+
+// follow moves every link of the viewer that match picks with move; one that
+// changes connection, to account, gets its envelope sealed again with conn.
+func (s *Service) follow(viewerID string, match func(*store.PublishedLink) bool, account string, conn sealed.Connection, move func(*store.PublishedLink)) (int, error) {
 	now := s.now()
 	n := 0
 	err := s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
@@ -432,10 +476,10 @@ func (s *Service) FollowPublished(viewerID string, from, to Place, conn sealed.C
 		var plain []byte
 		for i := range st.Published {
 			l := &st.Published[i]
-			if l.UserID != viewerID || !from.matches(l) {
+			if l.UserID != viewerID || !match(l) {
 				continue
 			}
-			if to.AccountID != l.AccountID {
+			if account != l.AccountID {
 				if plain == nil {
 					var err error
 					if plain, err = (publish.Envelope{Server: conn.Server, Login: conn.Login, Password: conn.Password, CertFingerprint: conn.CertFingerprint}).Marshal(); err != nil {
@@ -450,17 +494,14 @@ func (s *Service) FollowPublished(viewerID string, from, to Place, conn sealed.C
 				crypt.Wipe(l.Envelope)
 				l.Envelope = env
 			}
-			l.AccountID, l.Col = to.AccountID, to.Col
-			if from.UID != "" {
-				l.UID = to.UID
-			}
+			move(l)
 			l.Gone = false
 			n++
 		}
 		if n == 0 {
 			return nil, nil
 		}
-		return []store.AuditEntry{{When: now, Who: u.Login, What: "publish.follow", Whom: u.Login, Detail: fmt.Sprintf("%s links %d", to.AccountID, n)}}, nil
+		return []store.AuditEntry{{When: now, Who: u.Login, What: "publish.follow", Whom: u.Login, Detail: fmt.Sprintf("%s links %d", account, n)}}, nil
 	})
 	return n, err
 }

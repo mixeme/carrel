@@ -72,7 +72,7 @@
   "title": "Rename",
   "warning": [
     {
-      "text": "Notes, events and published links that point at it will not find it under the new name."
+      "text": "Notes and events that point at it will not find it under the new name."
     }
   ]
 }

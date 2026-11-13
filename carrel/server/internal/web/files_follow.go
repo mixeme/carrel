@@ -7,6 +7,7 @@ import (
 	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -15,24 +16,34 @@ import (
 // 11.10.2026): the folder of attachments set in settings (S-20) — renamed
 // or moved, the setting names its new place; the sheet of a deletion says
 // that the folder holds the attachments, and which published links open it.
+// A published file or folder goes on being opened by its link (server
+// v0.2.410): renamed or moved, the link opens it at its new place, as a
+// record's link follows its move (Б41).
 
 // under says whether segs is prefix or inside it.
 func under(segs, prefix []string) bool {
 	return len(segs) >= len(prefix) && slices.Equal(segs[:len(prefix)], prefix)
 }
 
-// afterPlaced follows a folder moved or renamed by a row of the queue: the
+// afterPlaced follows a file or a folder moved or renamed by a row of the
+// queue: the published links to it or to anything in it open it at its new
+// place, read with the credentials of the connection it is on now; the
 // attachment folder inside it names its new place.
 func (s *Server) afterPlaced(sess *session.Session, t *transfer) {
-	if t.state != view.OpDone || !t.dir || (t.kind != "move" && t.kind != "rename") {
+	if t.state != view.OpDone || (t.kind != "move" && t.kind != "rename") {
 		return
 	}
 	blob := s.catalogOf(sess)
+	to := append(append(slices.Clone(t.folder), t.rel...), t.name)
+	if conn, ok := blob.Connection(t.account); ok {
+		_, _ = s.users.FollowPublishedFiles(sess.AccountID(),
+			user.FilePlace{AccountID: t.srcAccount, Col: t.srcCol, Path: t.src},
+			user.FilePlace{AccountID: t.account, Col: t.col, Path: to}, conn)
+	}
 	att := blob.Attachments
-	if att == nil || att.AccountID != t.srcAccount || att.Path != t.srcCol || !under(att.Folder, t.src) {
+	if !t.dir || att == nil || att.AccountID != t.srcAccount || att.Path != t.srcCol || !under(att.Folder, t.src) {
 		return
 	}
-	to := append(append(slices.Clone(t.folder), t.rel...), t.name)
 	next := sealed.AttachmentFolder{AccountID: t.account, Path: t.col, Folder: append(to, att.Folder[len(t.src):]...), Monthly: att.Monthly}
 	key, _ := sess.DataKey()
 	_ = s.users.SetAttachmentFolder(sess.AccountID(), key, next)

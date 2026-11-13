@@ -783,7 +783,7 @@ label.tc-tree__row{cursor:pointer}
 .tc-scrim[hidden]:target{display:flex}
 .tc-scrim{position:absolute;inset:0;z-index:7;background:rgba(23,33,28,.22);display:flex;align-items:flex-start;justify-content:center;padding-top:44px}
 [data-tc-theme="dark"] .tc-scrim{background:rgba(0,0,0,.42)}
-.tc-sheet{width:560px;max-width:92%;background:var(--tc-surface);border:.5px solid var(--tc-edge);border-radius:5px;display:flex;flex-direction:column;position:relative;container:tcbox / inline-size}
+.tc-sheet{--tc-page-gutter:var(--tc-page-gutter-narrow);width:560px;max-width:92%;background:var(--tc-surface);border:.5px solid var(--tc-edge);border-radius:5px;display:flex;flex-direction:column;position:relative;container:tcbox / inline-size}
 .tc-sheet__head{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:.5px solid var(--tc-hair);position:relative}
 .tc-sheet__body{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .tc-sheet__foot{display:flex;align-items:center;gap:8px;padding:11px 14px;border-top:.5px solid var(--tc-hair)}
@@ -1208,7 +1208,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-table:has(td.tc-table__main),.tc-table:has(td.tc-table__main) > tbody{display:block;width:100%}
   .tc-table:has(td.tc-table__main) > thead{display:none}
   .tc-table:has(td.tc-table__main) > tbody > tr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:0;row-gap:4px;
-    align-items:center;padding:10px var(--tc-page-gutter-narrow);border-bottom:.5px solid var(--tc-hair)}
+    align-items:center;padding:10px var(--tc-page-gutter);border-bottom:.5px solid var(--tc-hair)}
   /* Промежутки — полями ячеек, не сетки: карточка без галочки не держит 10 px под её пустую колонку. */
   /* В диалоге, в карточке и в теле листа поле уже есть: строка-карточка своего не берёт. */
   .tc-dialog .tc-table:has(td.tc-table__main) > tbody > tr,.tc-card > .tc-table:has(td.tc-table__main) > tbody > tr,
@@ -1608,7 +1608,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-sheet__fields.tc-sheet__fields{gap:11px 14px}
 .tc-side__acts.tc-side__acts{padding:12px 20px 0}
 .tc-sec__note.tc-sec__note{font-size:12px;color:var(--tc-muted)}
-.tc-main__results.tc-main__results{padding:14px 20px}
+.tc-main__results.tc-main__results{padding:14px var(--tc-page-gutter)}
 .tc-card__top11.tc-card__top11{margin-top:11px}
 .tc-card__acts.tc-card__acts{margin-top:12px}
 /* Почему кнопка недоступна — строкой под рядом, у правого края: рядом с кнопкой причина сдвинула бы её из столбца. */
@@ -1812,7 +1812,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-in--title.tc-in--title{height:auto;font-family:var(--tc-font-serif);font-size:24px;padding:7px 12px}
 .tc-in--body.tc-in--body{min-height:260px;font-size:14.5px;line-height:1.7;padding:14px 16px}
 .tc-doc__task.tc-doc__task{align-items:baseline;display:flex;gap:9px}
-.tc-list--mx-14.tc-list--mx-14{margin:0 -14px}
+.tc-list--mx-14.tc-list--mx-14{margin:0 -14px;--tc-page-gutter:var(--tc-page-gutter-narrow)}
 .tc-main--zone.tc-main--zone{justify-content:center;color:var(--tc-dusty);align-items:center}
 .tc-main--padb180.tc-main--padb180{padding-bottom:180px}
 .tc-main--minh88.tc-main--minh88{min-height:88px}

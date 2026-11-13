@@ -1,6 +1,7 @@
 package card
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -22,7 +23,46 @@ import (
 // names one. The lines the card keeps for writing (cardBlocks) are the ones
 // it came in.
 func readCard(text string) (vcard.Card, error) {
+	if err := brokenLine(text); err != nil {
+		return nil, err
+	}
 	return vcard.NewDecoder(strings.NewReader(namedParams(text))).Decode()
+}
+
+// brokenLine refuses a card with a line that is not a property — no colon
+// after the name, no name, an open quote (model.ParseLine). go-vcard skips
+// such a line and reads the card without it, so a field would be gone from
+// the screen with nothing said (Б3 of the audit of 11.10.2026); a calendar
+// record with one is refused by go-ical, and a card is too. Only the lines
+// of the first card are looked at, from BEGIN:VCARD to END:VCARD, as
+// go-vcard reads them; empty lines are none, and a quoted-printable value of
+// vCard 2.1 broken with «=» is one line (numberedLines).
+func brokenLine(text string) error {
+	in := false
+	lines, _ := numberedLines([]byte(text))
+	for _, l := range lines {
+		bare := strings.ToUpper(strings.TrimSpace(l))
+		switch {
+		case !in:
+			in = bare == "BEGIN:VCARD"
+		case bare == "END:VCARD":
+			return nil
+		case bare == "":
+		default:
+			if _, ok := model.ParseLine(l); !ok {
+				return fmt.Errorf("card: %q is not a property: no name, or no colon after it", cutLine(l))
+			}
+		}
+	}
+	return nil
+}
+
+// cutLine is a line short enough for an error: a broken line can be a photo.
+func cutLine(l string) string {
+	if r := []rune(l); len(r) > 60 {
+		return string(r[:60]) + "…"
+	}
+	return l
 }
 
 // hasBareParam reports a card with a parameter without a name.
