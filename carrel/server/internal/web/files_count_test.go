@@ -138,7 +138,16 @@ func TestAFileCollectionRefusedMidWayHasNoCount(t *testing.T) {
 	counted(t, app)
 	sftp.RefuseAt("PROPFIND", app.realPath(t, "Documents")+"carrel/attachments/", http.StatusServiceUnavailable, "")
 	recount(t, app, "Documents")
+	// A recount keeps the number it had and does not say it is counting
+	// (TestARecountKeepsTheNumberUntilItIsFound): counted would find it
+	// still and not wait. The walk is waited for until the refusal is kept;
+	// a slow machine (the Windows gates of 15.11.2026) read the old number.
+	deadline := time.Now().Add(10 * time.Second)
 	r := fileRows(counted(t, app))["Documents"]
+	for r.ObjectsNote == "" && time.Now().Before(deadline) {
+		time.Sleep(20 * time.Millisecond)
+		r = fileRows(counted(t, app))["Documents"]
+	}
 	if r.Objects != nil || r.Counting || !strings.HasPrefix(string(r.ObjectsNote), "Not counted: PROPFIND ") ||
 		!strings.HasSuffix(string(r.ObjectsNote), "carrel/attachments/ → 503 Service Unavailable.") {
 		t.Errorf("Documents refused mid-way: %+v", r)

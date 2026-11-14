@@ -49,6 +49,9 @@ the record's audit and А2. Typecase task 264 opened.
   event and task. One field changed changes its own lines; nothing else was
   found. The test server cannot keep two rules (go-ical again), so the second
   rule is a step of the live forms, `second rule`, on every stand.
+- `TestAFileCollectionRefusedMidWayHasNoCount` waits for the recount's
+  refusal: a recount keeps the old number without «counting», and the
+  Windows gates read it before the walk was over.
 
 ## v0.2.411 — 2026-11-14
 
