@@ -51,7 +51,7 @@ func Visitor(obj *model.Object, allowed func(prop string) bool, title string) (*
 		}
 	}
 	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(out); err != nil {
+	if err := encodeCalendar(&buf, out); err != nil {
 		return nil, err
 	}
 	return Parse(obj.Path, obj.ETag, &buf)

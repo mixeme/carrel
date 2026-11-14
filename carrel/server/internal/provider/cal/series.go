@@ -209,7 +209,7 @@ func Apart(obj *model.Object, at time.Time, uid string, loc *time.Location) (*mo
 // reparse writes doc and reads it back as obj's record.
 func reparse(obj *model.Object, doc *ical.Calendar) (*model.Object, error) {
 	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(doc); err != nil {
+	if err := encodeCalendar(&buf, doc); err != nil {
 		return nil, err
 	}
 	return Parse(obj.Path, obj.ETag, bytes.NewReader(model.FoldLines(buf.Bytes())))

@@ -38,7 +38,7 @@ func EnsureTimezone(obj *model.Object, loc *time.Location, year int) (*model.Obj
 	main.Props = rawToProps(obj.Props())
 	cal.Children = append([]*ical.Component{Timezone(loc, year)}, cal.Children...)
 	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
+	if err := encodeCalendar(&buf, cal); err != nil {
 		return nil, err
 	}
 	return model.NewCalendarObject(obj.Path, obj.ETag, main.Name, obj.Props(), buf.Bytes()), nil

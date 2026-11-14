@@ -801,7 +801,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	var done *view.Action
 	if c.feed == nil && !c.col.ReadOnly {
 		a := s.doneAction(c.recordPath(uid)+"/edit", obj.ETag, page.Done, "")
-		a.Hint = s.doneHint(c, obj)
+		a.Hint = s.doneHint(c.tf, obj)
 		done = &a
 	}
 	// Edit, Mark done and Print in the head, Attach in its block (by its

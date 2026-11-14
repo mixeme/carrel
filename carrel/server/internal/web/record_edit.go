@@ -1997,7 +1997,7 @@ func goOn(obj *model.Object, have, want formValues, tz *time.Location) (count st
 // doneHint says what Done does to a repeating task before it is ticked: the
 // day it moves on to, or that this is its last time (the owner's words of
 // 02.11.2026). Empty for a task that does not repeat or is done.
-func (s *Server) doneHint(c *collectionCtx, obj *model.Object) view.Text {
+func (s *Server) doneHint(tf timeFmt, obj *model.Object) view.Text {
 	if obj == nil || !obj.IsCalendar() || cal.RawRRULE(obj) == "" || taskDone(obj) {
 		return ""
 	}
@@ -2008,7 +2008,7 @@ func (s *Server) doneHint(c *collectionCtx, obj *model.Object) view.Text {
 	case !ok:
 		return "Repeating task, last occurrence: Done completes the task."
 	}
-	return text("Repeating task: Done completes this occurrence and moves the task to the next one, " + c.tf.shortDay(next) + ".")
+	return text("Repeating task: Done completes this occurrence and moves the task to the next one, " + tf.shortDay(next) + ".")
 }
 
 // fillNames is U-6.1: the display name and the two parts of N fill each
@@ -3335,7 +3335,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				quickDay = nil
 			}
 		case fieldDone:
-			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals)), Hint: s.doneHint(c, st.obj)})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals)), Hint: s.doneHint(c.tf, st.obj)})
 		case fieldPercent:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText, Mono: true})
 		case fieldReminders:

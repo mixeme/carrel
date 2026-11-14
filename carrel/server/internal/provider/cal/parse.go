@@ -48,7 +48,7 @@ func Encode(w io.Writer, obj *model.Object) error {
 	// of hundreds of kilobytes, and upstream will not fold (docs/servers.md,
 	// SV-31).
 	var out bytes.Buffer
-	if err := ical.NewEncoder(&out).Encode(cal); err != nil {
+	if err := encodeCalendar(&out, cal); err != nil {
 		return err
 	}
 	_, err = w.Write(model.FoldLines(out.Bytes()))

@@ -186,7 +186,7 @@ func RetimeExceptions(obj *model.Object, was model.RawValue) (*model.Object, int
 		return obj, 0, nil
 	}
 	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(doc); err != nil {
+	if err := encodeCalendar(&buf, doc); err != nil {
 		return nil, 0, err
 	}
 	out, err := Parse(obj.Path, obj.ETag, bytes.NewReader(model.FoldLines(buf.Bytes())))

@@ -141,3 +141,27 @@ func TestARepeatingTaskSkipsADayLeftOut(t *testing.T) {
 		t.Errorf("after the first time:\n%s", got)
 	}
 }
+
+// А2, the row: the tick of a repeating task's row says what it will do, as
+// the form does under Done — the words of the form, as the tick's hint. A
+// task that does not repeat has none.
+func TestTheTickOfARepeatingTaskRowSaysWhatDoneDoes(t *testing.T) {
+	f := calendarFixture(t, nil, "water.ics", repeatingTask("FREQ=WEEKLY;BYDAY=MO"))
+	f.srv.Seed(f.col+"once.ics", ics("BEGIN:VTODO\nUID:once\nDTSTAMP:20260101T000000Z\nSUMMARY:Once\nEND:VTODO"))
+	page := decode[view.TasksPage](t, f.h.do(get(f.path("tasks"), f.sess)))
+	hints := map[string]string{}
+	for _, g := range page.Groups {
+		for _, r := range g.Rows {
+			if r.Tick == nil {
+				t.Fatalf("%s has no tick", r.UID)
+			}
+			hints[r.UID] = string(r.Tick.Hint)
+		}
+	}
+	if want := "Repeating task: Done completes this occurrence and moves the task to the next one, 19 Jan."; hints["water"] != want {
+		t.Errorf("the tick of the repeating task = %q, want %q", hints["water"], want)
+	}
+	if h, ok := hints["once"]; !ok || h != "" {
+		t.Errorf("the tick of a task that does not repeat = %q (listed %v)", h, ok)
+	}
+}

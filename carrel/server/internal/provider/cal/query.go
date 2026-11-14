@@ -373,7 +373,7 @@ func fromReport(co caldav.CalendarObject) (*model.Object, error) {
 		return nil, errors.New("the reply carried no calendar data")
 	}
 	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(co.Data); err != nil {
+	if err := encodeCalendar(&buf, co.Data); err != nil {
 		return nil, err
 	}
 	obj, err := Parse(co.Path, strings.Trim(co.ETag, `"`), &buf)
@@ -408,7 +408,7 @@ func NewObject(component, uid string, now time.Time) (*model.Object, error) {
 	main.Props.SetDateTime(ical.PropDateTimeStamp, now.UTC())
 	cal.Children = append(cal.Children, main)
 	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
+	if err := encodeCalendar(&buf, cal); err != nil {
 		return nil, err
 	}
 	return Parse("", "", &buf)

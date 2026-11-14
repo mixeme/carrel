@@ -112,6 +112,7 @@ func runForms(t *testing.T, endpoint, user, pass string) {
 	}
 	t.Run("event", func(t *testing.T) { liveEventFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	t.Run("task", func(t *testing.T) { liveTaskFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
+	t.Run("second rule", func(t *testing.T) { liveSecondRule(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	if cal.Has(view.KindNote) {
 		t.Run("note", func(t *testing.T) { liveNoteFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	} else {
@@ -511,6 +512,31 @@ func liveTaskFields(ctx context.Context, t *testing.T, app *liveApp, client *dav
 	}
 	got, _ = rawBody(ctx, t, client, file)
 	mustHave(t, "mark done", got, "STATUS:COMPLETED", "COMPLETED:", "SUMMARY:Slides", "DESCRIPTION:Keep me", "LOCATION:Room 4", "X-CUSTOM:keep-me")
+}
+
+// liveSecondRule is the check of the record's audit, «a second RRULE on the
+// stand»: an event another client wrote with two rules is edited, and both
+// rules come back as they were. go-ical refused to write such an event, and
+// every edit of it failed (server v0.2.411). A server that does not keep two
+// rules even as sent is said in the log: its limit is not the form's.
+func liveSecondRule(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, suffix string) {
+	uid := "rules-" + suffix
+	file := cal + uid + ".ics"
+	if !trySeed(ctx, t, client, file, "text/calendar; charset=utf-8", "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Other client//EN\n"+
+		"BEGIN:VEVENT\nUID:"+uid+"\nDTSTAMP:20260101T000000Z\nDTSTART:20260112T070000Z\nDTEND:20260112T080000Z\nSUMMARY:Rules\n"+
+		"RRULE:FREQ=WEEKLY;BYDAY=MO\nRRULE:FREQ=MONTHLY;BYMONTHDAY=1\nX-CUSTOM:keep-me\nEND:VEVENT\nEND:VCALENDAR\n") {
+		t.Skip("the server refused an event with two rules")
+	}
+	if seeded, _ := rawBody(ctx, t, client, file); strings.Count(strings.ToUpper(seeded), "RRULE:") != 2 {
+		t.Skipf("the server did not keep two rules even as sent:\n%s", seeded)
+	}
+	rec := "/app/calendar/" + connID + "/" + url.PathEscape(cal) + "/" + url.PathEscape(uid)
+	liveEdit(t, app, rec, func(p view.EventEditPage) view.Form { return p.Form }, map[string]string{"summary": "Rules, both"})
+	got, _ := rawBody(ctx, t, client, file)
+	mustHave(t, "second rule", got, "Rules\\, both", "FREQ=WEEKLY", "BYDAY=MO", "FREQ=MONTHLY", "BYMONTHDAY=1", "X-CUSTOM:keep-me")
+	if n := strings.Count(strings.ToUpper(got), "RRULE:"); n != 2 {
+		t.Errorf("second rule: %d rules after the edit, want 2:\n%s", n, got)
+	}
 }
 
 func liveNoteFields(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, suffix string) {

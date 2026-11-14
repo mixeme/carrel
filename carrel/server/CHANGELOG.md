@@ -17,6 +17,39 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.412 — 2026-11-15
+
+Typecase `eb7cfbe`; towards the milestone `v0.3.0` — the check matrix of
+the record's audit and А2. Typecase task 264 opened.
+
+### For consumers
+
+- **An event with two RRULE lines can be edited.** RFC 5545 says a
+  component SHOULD NOT hold two rules, and some clients write two; go-ical
+  refused to write such an event («want at most one "RRULE" property, got
+  2»), so every save of it failed. Now every rule is written as it came,
+  whatever else the edit changes. The same for every other write of a
+  calendar document: moving a time of a series, taking a series apart,
+  reminders, the guest's file of a published calendar.
+- **The tick of a repeating task's row says what it will do**, in the words
+  the form says under Done: «Repeating task: Done completes this occurrence
+  and moves the task to the next one, 19 Jan.» (`TaskRow.Tick.Hint`; none
+  for a task that does not repeat or is done). The client draws it once
+  Typecase gives the tick a hint and a frame: task 264.
+
+### For developers
+
+- `encodeCalendar` in `internal/provider/cal/encode.go` writes every
+  calendar document: the second and later rules of a component go through
+  go-ical under `X-CARREL-EXTRA-RRULE` and out as `RRULE` again.
+- `field_matrix_more_test.go`: a card beyond the seed of `v0.2.188` (an
+  Apple-labelled mail, a second mail, an address with a part the form has
+  no field for, the birthday, the web page, the given name, a tag),
+  attendees with answers, roles and delegation, the fields of a new card,
+  event and task. One field changed changes its own lines; nothing else was
+  found. The test server cannot keep two rules (go-ical again), so the second
+  rule is a step of the live forms, `second rule`, on every stand.
+
 ## v0.2.411 — 2026-11-14
 
 Typecase `eb7cfbe` (note 203); towards the milestone `v0.3.0` — the rest of

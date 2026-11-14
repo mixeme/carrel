@@ -108,7 +108,7 @@ func TakeTime(dst, src *model.Object) (out *model.Object, dropped int, err error
 	dcal.Children = append(append(zonesIn, children...), instances...)
 
 	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(dcal); err != nil {
+	if err := encodeCalendar(&buf, dcal); err != nil {
 		return nil, 0, err
 	}
 	return model.NewCalendarObject(dst.Path, dst.ETag, dmain.Name, props, buf.Bytes()), dropped, nil

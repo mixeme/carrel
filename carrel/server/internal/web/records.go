@@ -1869,6 +1869,12 @@ func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, item
 				// (s-tasks-16).
 				tick = s.linkedTick(it.from, segment, uid)
 			}
+			if !isDone && !ticked {
+				// What the tick does to a repeating task, as the form says
+				// it under Done (А2 of the audit of 11.10.2026); the row's
+				// frame of it is Typecase's task 264.
+				tick.Hint = s.doneHint(tf, o)
+			}
 			row.Tick = &tick
 		}
 		if !due.Start.IsZero() {
