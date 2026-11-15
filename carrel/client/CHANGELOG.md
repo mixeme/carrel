@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.33 — 2026-11-15
+
+Typecase `2acba65`, note 205; server `v0.2.414`. The whole client suite
+passes.
+
+- U-5.5 #26 and #46 are closed: the event form with a loss report
+  (states-17, -36) and the tasks and notes states (states-21, -23, -30)
+  match their frames. The only row left is #22.
+
 ## v0.11.32 — 2026-11-15
 
 Typecase `f1ebe7f`, note 204; server `v0.2.413`. The whole client suite

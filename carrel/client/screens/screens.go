@@ -481,10 +481,7 @@ var All = []Screen{
 		Draw:   func(model any) Root { return eventedit.Screen(model.(*view.EventEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
-		Waits: []Wait{
-			{Row: 26, Fixture: "app-event-edit/loss"},      // ждёт библиотеку: U-5.5 #26
-			{Row: 26, Fixture: "app-event-edit/loss-days"}, // ждёт библиотеку: U-5.5 #26
-		},
+		Waits:  []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.TasksPage) },
@@ -502,10 +499,7 @@ var All = []Screen{
 			}
 			return nil // nothing on paper is pressed
 		},
-		Waits: []Wait{
-			{Row: 46, Fixture: "app-tasks/empty"},    // ждёт библиотеку: U-5.5 #46
-			{Row: 46, Fixture: "app-tasks/readonly"}, // ждёт библиотеку: U-5.5 #46
-		},
+		Waits: []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.TaskPage) },
@@ -537,9 +531,7 @@ var All = []Screen{
 			}
 			return nil // nothing on paper is pressed, as the tasks'
 		},
-		Waits: []Wait{
-			{Row: 46, Fixture: "app-notes/readonly"}, // ждёт библиотеку: U-5.5 #46
-		},
+		Waits: []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },

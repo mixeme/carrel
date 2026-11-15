@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.414 — 2026-11-15
+
+Typecase `2acba65` (note 205): the frames follow Carrel's set — Typecase's
+tasks 260, 261, 263 and points 1–4 of 262 closed.
+
+### For consumers
+
+Nothing in the running server.
+
+### For developers
+
+- `TestRenameSheetIsTheFrame` reads the line of `s-files-21` as it stands
+  («Notes and events that point at it will not find it under the new
+  name.»); `TestObjectsAreWhatTheCollectionsHold` checks «Общие с семьёй»
+  (2) and Documents (10) too.
+
 ## v0.2.413 — 2026-11-15
 
 Typecase `f1ebe7f` (note 204); towards the milestone `v0.3.0` — the last
