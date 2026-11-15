@@ -565,18 +565,7 @@
       "selected": false,
       "size": "",
       "thumb": "",
-      "type": "folder",
-      "upload": {
-        "csrf": "csrf",
-        "enabled": true,
-        "file": "file",
-        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/%D0%B0%D1%80%D1%85%D0%B8%D0%B2/",
-        "icon": "i-upload",
-        "id": "folder.upload",
-        "label": "Upload into архив",
-        "method": "POST",
-        "target": "queue"
-      }
+      "type": "folder"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
@@ -658,18 +647,7 @@
       "selected": false,
       "size": "",
       "thumb": "",
-      "type": "folder",
-      "upload": {
-        "csrf": "csrf",
-        "enabled": true,
-        "file": "file",
-        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D0%B8%D0%BA%D0%B8/",
-        "icon": "i-upload",
-        "id": "folder.upload",
-        "label": "Upload into черновики",
-        "method": "POST",
-        "target": "queue"
-      }
+      "type": "folder"
     },
     {
       "dimensions": "4032×3024",
@@ -751,8 +729,7 @@
       "selected": true,
       "size": "2.8 MB",
       "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/whiteboard.jpg?thumb=1\u0026v=18c22a8feacb00002ccccd",
-      "type": "image/jpeg",
-      "upload": null
+      "type": "image/jpeg"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/%D0%BF%D0%B0%D0%BD%D0%BE%D1%80%D0%B0%D0%BC%D0%B0.tif",
@@ -834,8 +811,7 @@
       "selected": false,
       "size": "84 MB",
       "thumb": "",
-      "type": "image/tiff",
-      "upload": null
+      "type": "image/tiff"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/%D1%81%D0%BC%D0%B5%D1%82%D0%B0.pdf",
@@ -916,8 +892,7 @@
       "selected": false,
       "size": "1.2 MB",
       "thumb": "",
-      "type": "application/pdf",
-      "upload": null
+      "type": "application/pdf"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-1.png",
@@ -998,8 +973,7 @@
       "selected": false,
       "size": "640 KB",
       "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-1.png?thumb=1\u0026v=18be1ed46152a000a0000",
-      "type": "image/png",
-      "upload": null
+      "type": "image/png"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-2.png",
@@ -1080,8 +1054,7 @@
       "selected": false,
       "size": "712 KB",
       "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-2.png?thumb=1\u0026v=18be687fa98cb000b2000",
-      "type": "image/png",
-      "upload": null
+      "type": "image/png"
     }
   ],
   "select": {

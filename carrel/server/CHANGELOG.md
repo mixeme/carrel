@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.413 — 2026-11-15
+
+Typecase `f1ebe7f` (note 204); towards the milestone `v0.3.0` — the last
+open item of the files section.
+
+### For consumers
+
+- **`FileRow.Upload` is gone.** A folder's row carried its own upload («Upload
+  into …», `folder.upload`) for a drop onto the row; the owner's decision of
+  13.10.2026 (Typecase Р-59, note 60) sends a drop into the open folder
+  instead, and neither the client nor Typecase read the field. A folder's
+  bar keeps Upload (`file.upload`, `file.upload.folder`); the page keeps its
+  drop sheet. Ten fixtures of folders lose the key.
+
+### For developers
+
+- `TestNoRowTakesADrop` replaces `TestFolderRowsTakeADrop`: no row of a
+  folder's answer has the key `upload`.
+
 ## v0.2.412 — 2026-11-15
 
 Typecase `eb7cfbe`; towards the milestone `v0.3.0` — the check matrix of

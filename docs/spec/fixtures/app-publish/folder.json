@@ -735,18 +735,7 @@
           "selected": false,
           "size": "",
           "thumb": "",
-          "type": "folder",
-          "upload": {
-            "csrf": "csrf",
-            "enabled": true,
-            "file": "file",
-            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/",
-            "icon": "i-upload",
-            "id": "folder.upload",
-            "label": "Upload into carrel",
-            "method": "POST",
-            "target": "queue"
-          }
+          "type": "folder"
         },
         {
           "href": "/app/files/a-sftp-vps/Documents/download/%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0-%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0-v2.pdf",
@@ -827,8 +816,7 @@
           "selected": false,
           "size": "1.6 MB",
           "thumb": "",
-          "type": "application/pdf",
-          "upload": null
+          "type": "application/pdf"
         }
       ],
       "select": {

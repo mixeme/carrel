@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.32 — 2026-11-15
+
+Typecase `f1ebe7f`, note 204; server `v0.2.413`. The whole client suite
+passes.
+
+- Built with Typecase `f1ebe7f`: a press on a tag field's empty place, or on
+  a tag that only shows, puts the cursor in its typing line (`tc.js`); a
+  table cell's block keeps its button's 44 px zone on a phone. Nothing in
+  the client changes; the client never read `FileRow.Upload`, which the
+  server dropped.
+
 ## v0.11.31 — 2026-11-14
 
 Typecase `eb7cfbe`, note 203; server `v0.2.411`. The whole client suite

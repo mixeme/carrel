@@ -743,10 +743,6 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 			row.Href, row.Type = s.route(c.href("", rowSegs, true)), "folder"
 			row.Open = row.Href
 			row.Items = s.folderItems(c, rowSegs, e)
-			// A drop on the row goes into it (U-15.3, s-files-1).
-			into := writeAction(c, view.Action{ID: "folder.upload", Label: text("Upload into " + e.Name), Icon: "i-upload",
-				Href: s.route(c.href("upload", rowSegs, true)), Method: "POST", Enabled: true, File: uploadField})
-			row.Upload = &into
 		} else {
 			mt := fileType(e.Name, e.Type)
 			row.Href, row.Type, row.Size = s.route(c.href("download", rowSegs, false)), text(mt), formatSize(e.Size)

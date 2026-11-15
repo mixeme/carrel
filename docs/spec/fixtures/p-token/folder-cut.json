@@ -65,8 +65,7 @@
         "selected": false,
         "size": "2.8 MB",
         "thumb": "",
-        "type": "image/jpeg",
-        "upload": null
+        "type": "image/jpeg"
       },
       {
         "href": "/p/link-july-token/file/%D0%BF%D0%B0%D0%BD%D0%BE%D1%80%D0%B0%D0%BC%D0%B0.tif",
@@ -79,8 +78,7 @@
         "selected": false,
         "size": "84 MB",
         "thumb": "",
-        "type": "image/tiff",
-        "upload": null
+        "type": "image/tiff"
       },
       {
         "href": "/p/link-july-token/file/%D1%81%D0%BC%D0%B5%D1%82%D0%B0.pdf",
@@ -93,8 +91,7 @@
         "selected": false,
         "size": "1.2 MB",
         "thumb": "",
-        "type": "application/pdf",
-        "upload": null
+        "type": "application/pdf"
       }
     ],
     "total": "5 items · 89.4 MB"

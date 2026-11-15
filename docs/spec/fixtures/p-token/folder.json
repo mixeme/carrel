@@ -65,8 +65,7 @@
         "selected": false,
         "size": "",
         "thumb": "",
-        "type": "folder",
-        "upload": null
+        "type": "folder"
       },
       {
         "href": "/p/link-august-token/file/2026-08-04-whiteboard.jpg",
@@ -79,8 +78,7 @@
         "selected": false,
         "size": "2.8 MB",
         "thumb": "",
-        "type": "image/jpeg",
-        "upload": null
+        "type": "image/jpeg"
       },
       {
         "href": "/p/link-august-token/file/2026-08-10-sync-board.png",
@@ -93,8 +91,7 @@
         "selected": false,
         "size": "412 KB",
         "thumb": "",
-        "type": "image/png",
-        "upload": null
+        "type": "image/png"
       },
       {
         "href": "/p/link-august-token/file/release-checklist.md",
@@ -107,8 +104,7 @@
         "selected": false,
         "size": "3 KB",
         "thumb": "",
-        "type": "text/markdown",
-        "upload": null
+        "type": "text/markdown"
       },
       {
         "href": "/p/link-august-token/file/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
@@ -121,8 +117,7 @@
         "selected": false,
         "size": "23 B",
         "thumb": "",
-        "type": "audio/mp4",
-        "upload": null
+        "type": "audio/mp4"
       },
       {
         "href": "/p/link-august-token/file/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
@@ -135,8 +130,7 @@
         "selected": false,
         "size": "1.2 MB",
         "thumb": "",
-        "type": "application/pdf",
-        "upload": null
+        "type": "application/pdf"
       }
     ],
     "total": "6 items · 4.4 MB"

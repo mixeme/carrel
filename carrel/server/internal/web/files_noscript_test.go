@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"strings"
@@ -118,19 +119,28 @@ func TestTreeNodesHaveAddresses(t *testing.T) {
 	}
 }
 
-// ФБ14: a folder of the list takes a drop: its row carries the upload into
-// it; a file's row does not.
-func TestFolderRowsTakeADrop(t *testing.T) {
+// A drop goes into the open folder, not onto a folder's row (Р-59 of
+// Typecase, the owner's decision of 13.10.2026, note 60): no row carries an
+// upload of its own — the folder's bar has Upload, the page its drop sheet.
+func TestNoRowTakesADrop(t *testing.T) {
 	f := filesFixture(t, true)
 	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
 	f.srv.SeedFolder(filesDocs + "sub/")
-	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	sub := fileRow(t, page, "sub")
-	if sub.Upload == nil || sub.Upload.Href != f.at("upload", "sub", "") || sub.Upload.File != "file" || sub.Upload.Method != "POST" || !sub.Upload.Enabled {
-		t.Fatalf("folder row's upload = %+v", sub.Upload)
+	rec := f.h.do(get(f.at(""), f.sess))
+	var raw struct {
+		Rows []map[string]json.RawMessage `json:"rows"`
 	}
-	if a := fileRow(t, page, "a.txt"); a.Upload != nil {
-		t.Errorf("a file takes a drop: %+v", a.Upload)
+	if err := json.Unmarshal(rec.Body.Bytes(), &raw); err != nil || len(raw.Rows) != 2 {
+		t.Fatalf("rows: %v, %d", err, len(raw.Rows))
+	}
+	for _, r := range raw.Rows {
+		if up, ok := r["upload"]; ok {
+			t.Errorf("row %s carries an upload: %s", r["name"], up)
+		}
+	}
+	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	if up := actionByID(page.Bar.Actions, "file.upload"); up == nil || !up.Enabled || up.File == "" {
+		t.Errorf("the bar's Upload: %+v", up)
 	}
 }
 

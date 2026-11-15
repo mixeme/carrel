@@ -747,8 +747,7 @@
       "selected": false,
       "size": "2.8 MB",
       "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-04-whiteboard.jpg?thumb=1\u0026v=18c89f188a41c8002ccccd",
-      "type": "image/jpeg",
-      "upload": null
+      "type": "image/jpeg"
     },
     {
       "dimensions": "1920×1080",
@@ -830,8 +829,7 @@
       "selected": true,
       "size": "412 KB",
       "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/2026-08-10-sync-board.png?thumb=1\u0026v=18ca6326aee5680067000",
-      "type": "image/png",
-      "upload": null
+      "type": "image/png"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/release-checklist.md",
@@ -912,8 +910,7 @@
       "selected": false,
       "size": "3 KB",
       "thumb": "",
-      "type": "text/markdown",
-      "upload": null
+      "type": "text/markdown"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
@@ -994,8 +991,7 @@
       "selected": false,
       "size": "1.2 MB",
       "thumb": "",
-      "type": "application/pdf",
-      "upload": null
+      "type": "application/pdf"
     }
   ],
   "select": {

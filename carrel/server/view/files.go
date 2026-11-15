@@ -99,10 +99,6 @@ type FileRow struct {
 	Dimensions Text       `json:"dimensions,omitempty"`
 	Selected   bool       `json:"selected"`
 	Menu       []MenuItem `json:"menu"`
-	// Upload — у строки папки: загрузка в неё (бросок на строку, U-15.3;
-	// s-files-1), POST …/upload/{путь папки}/ с полем файла File; у
-	// хранилища только для чтения выключена с причиной; у файла nil
-	Upload *Action `json:"upload"`
 }
 type TransferQueue struct {
 	// Title — шапка очереди (s-files-2): «Uploading 2 of 3» — пока строка

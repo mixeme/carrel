@@ -4120,8 +4120,8 @@ Open, `file.download` Download, `file.rename`, `file.move`, `file.copy`,
 только для чтения переименование, перенос и удаление выключены с причиной,
 скачивание и копия — нет. Без сценариев (U-8): `files.select.clear` «Clear
 selection» формы выделения папки, `folder.new.create` и `folder.new.cancel`
-листа New folder (s-files-23), `folder.upload` — загрузка в папку строки (бросок
-на неё); загрузки — `file.upload` (Files), `file.upload.folder` (Folder),
+листа New folder (s-files-23); загрузки — в открытую папку, бросок на строку
+папки не ведёт (Р-59 Typecase, решение владельца 13.10.2026); загрузки — `file.upload` (Files), `file.upload.folder` (Folder),
 `files.picker.upload` — с полем файла `Action.File`. Корень и папка:
 `files.refresh` (корень), `folder.refresh`, `files.details` — Details шапки
 папки, `list.print` — Print в её «⋯»; панель файла — `file.download`,
