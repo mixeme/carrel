@@ -1931,7 +1931,7 @@ type DuplicateGroup struct {
     Rows    []DuplicateMember
     Actions []Action // Link · Not duplicates · Merge on the server
     Decision DuplicateDecision // C-8
-    Hint     Text // под строками, у карточки без вопросов: что значит пара (s-dup-1) — у событий с разными UID, пока не решено, «The same event in two calendars, different UIDs. Agenda shows it twice; …», у заметок «Same title and the same date: a note copied into a second notebook. …»; у «not duplicates», контактов и задач пусто
+    Hint     Text // под строками, у карточки без вопросов: что значит пара (s-dup-1) — у событий с разными UID, пока не решено, «The same event in two calendars, different UIDs. Agenda shows it twice; …», у заметок «Same title and the same date: a note copied into a second notebook. …»; у «not duplicates», контактов и задач пусто. Связанная группа, которая при этом чтении потеряла копию и стоит, говорит здесь первой фразой, где та была, — один раз (решение владельца 15.11.2026): «The linked copy in nextcloud · Архив is no longer at its address (deleted or moved). The other copies stay linked and are unchanged on the server.»; распавшаяся целиком — над списком, «1 linked group removed.»
     // Вопросы, где копии расходятся (записка Typecase 117 п. 1): радио
     // однозначного, отметки «что оставить» многозначного; ответ уходит с
     // решением и запоминается при связанной группе. Запись без значения —

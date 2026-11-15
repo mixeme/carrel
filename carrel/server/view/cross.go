@@ -205,7 +205,9 @@ type DuplicateGroup struct {
 	// Hint — под строками группы: что значит такая пара (s-dup-1, Дб6) —
 	// у событий с разными UID «The same event in two calendars, different
 	// UIDs. …», у заметок «Same title and the same date: a note copied into
-	// a second notebook. …»; пусто — сказать нечего
+	// a second notebook. …»; связанная группа, потерявшая при этом чтении
+	// копию, — первой фразой, где та была, один раз (решение владельца
+	// 15.11.2026); пусто — сказать нечего
 	Hint Text `json:"hint,omitempty"`
 	// Choices — вопросы, где копии расходятся (записка Typecase 117 п. 1):
 	// ответ уходит с решением и запоминается при связанной группе

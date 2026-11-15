@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.415 — 2026-11-16
+
+Typecase `2acba65`; towards the milestone `v0.3.0` — the rest of Б16.
+
+### For consumers
+
+- **The screen of duplicates says a linked group lost a copy, in the
+  group's card.** A group of three whose copy in nextcloud · Архив was
+  deleted or moved stood as «linked ×2» without a word. Now the line under
+  its rows (`DuplicateGroup.Hint`) says, on the read that finds it, «The
+  linked copy in nextcloud · Архив is no longer at its address (deleted or
+  moved). The other copies stay linked and are unchanged on the server.»
+  — the first words those of the record's card. The owner's choice of
+  15.11.2026: in the card, not above the list, where a group that came
+  apart whole is said, having no card left. Said once, as on the card.
+
+### For developers
+
+- `goneSentence` (from `apartNotice`) says where the gone members were;
+  `lostMembers` finds them in the groups `dupes.Prune` leaves standing.
+- `TestTheDuplicatesScreenSaysAGroupLostACopyInItsCard`.
+
 ## v0.2.414 — 2026-11-15
 
 Typecase `2acba65` (note 205): the frames follow Carrel's set — Typecase's

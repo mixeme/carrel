@@ -69,6 +69,12 @@ func (s *Server) linkedOf(ctx context.Context, c *collectionCtx, uid string) (li
 // The owner's words of 03.11.2026 say what Carrel saw — no record at the
 // address —, since it cannot tell a delete from a move.
 func apartNotice(blob sealed.Blob, gone []sealed.RecordRef) *view.Notice {
+	return &view.Notice{Role: view.NoticeInfo, Title: "Link removed.", Body: text(goneSentence(blob, gone) + " This record is unchanged.")}
+}
+
+// goneSentence says where the gone members of a linked group were, in the
+// owner's words of 03.11.2026: what Carrel saw — no record at the address.
+func goneSentence(blob sealed.Blob, gone []sealed.RecordRef) string {
 	var where []string
 	for _, ref := range gone {
 		conn, okConn := blob.Connection(ref.AccountID)
@@ -86,7 +92,7 @@ func apartNotice(blob sealed.Blob, gone []sealed.RecordRef) *view.Notice {
 	case len(where) > 0:
 		body = "The linked copy in " + where[0] + " is no longer at its address (deleted or moved)."
 	}
-	return &view.Notice{Role: view.NoticeInfo, Title: "Link removed.", Body: text(body + " This record is unchanged.")}
+	return body
 }
 
 // memberRows are the rows under a copy's card: every other member with

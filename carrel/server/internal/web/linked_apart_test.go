@@ -114,6 +114,32 @@ func TestALinkedGroupThatLostOneOfThreeSaysSo(t *testing.T) {
 	}
 }
 
+// The screen of duplicates says it on the card of a group that lost one of
+// its copies and stands (the owner's choice of 15.11.2026: in the group's
+// card, under its rows — not above the list, where a group that came apart
+// whole is said, having no card left): where the copy was, in the words of
+// the record's card, and that the others stay linked. Said once, as there.
+func TestTheDuplicatesScreenSaysAGroupLostACopyInItsCard(t *testing.T) {
+	f := linkedThree(t)
+	page := f.page(t)
+	g := onlyGroup(t, page)
+	if g.Badge.Label != "linked ×2" {
+		t.Errorf("badge = %q, want the two copies left", g.Badge.Label)
+	}
+	const tail = " is no longer at its address (deleted or moved). The other copies stay linked and are unchanged on the server."
+	if !strings.HasPrefix(string(g.Hint), "The linked copy in ") || !strings.HasSuffix(string(g.Hint), tail) {
+		t.Errorf("the group's card says %q", g.Hint)
+	}
+	for _, n := range page.Shell.Notices {
+		if strings.Contains(string(n.Title), "linked group") {
+			t.Errorf("said above the list too: %+v", n)
+		}
+	}
+	if again := onlyGroup(t, f.page(t)); strings.Contains(string(again.Hint), "no longer at its address") {
+		t.Errorf("said on every read: %q", again.Hint)
+	}
+}
+
 // The timeline of a person whose group came apart whole says so too.
 func TestATimelineSaysItsGroupCameApart(t *testing.T) {
 	f := newDupFixture(t)

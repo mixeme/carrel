@@ -51,6 +51,10 @@ type dupState struct {
 	// apart is how many linked groups this read found come apart, their
 	// other members gone (Б16): the screen says so.
 	apart int
+	// lost are the members gone from the linked groups this read found
+	// standing with fewer copies, by group: the group's card says where they
+	// were (Б16, the owner's choice of 15.11.2026).
+	lost map[string][]sealed.RecordRef
 }
 
 // dupThreshold is the person's number of points, else the instance's.
@@ -171,16 +175,36 @@ func (s *Server) uidHolders(sess *session.Session, blob sealed.Blob, k view.Kind
 	return out
 }
 
+// lostMembers are the members of before missing from the same group in
+// kept, for every group that still stands.
+func lostMembers(before, kept []sealed.LinkedGroup) map[string][]sealed.RecordRef {
+	out := map[string][]sealed.RecordRef{}
+	for _, k := range kept {
+		for _, b := range before {
+			if b.ID != k.ID {
+				continue
+			}
+			for _, m := range b.Members {
+				if !slices.Contains(k.Members, m) {
+					out[k.ID] = append(out[k.ID], m)
+				}
+			}
+		}
+	}
+	return out
+}
+
 // readDuplicates finds the groups among what is loaded. A linked member the
 // loaded lists say is gone leaves its group silently, and the blob is written
 // without a journal line (S-16).
 func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 	blob := s.catalogOf(sess)
 	loaded, present, read := s.loadedRecords(sess, blob)
-	apart := 0
+	apart, lost := 0, map[string][]sealed.RecordRef{}
 	if prune {
 		if kept, changed := dupes.Prune(blob.Duplicates.Linked, present); changed {
 			apart = len(blob.Duplicates.Linked) - len(kept)
+			lost = lostMembers(blob.Duplicates.Linked, kept)
 			key, _ := sess.DataKey()
 			err := s.users.EditDuplicates(sess.AccountID(), key, "", "", func(d *sealed.Duplicates) error {
 				d.Linked, _ = dupes.Prune(d.Linked, present)
@@ -191,7 +215,7 @@ func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 			}
 		}
 	}
-	st := dupState{blob: blob, records: map[sealed.RecordRef]loadedRecord{}, threshold: s.dupThreshold(blob), apart: apart, read: read}
+	st := dupState{blob: blob, records: map[sealed.RecordRef]loadedRecord{}, threshold: s.dupThreshold(blob), apart: apart, lost: lost, read: read}
 	recs := make([]dupes.Record, 0, len(loaded))
 	for _, l := range loaded {
 		if _, seen := st.records[l.rec.Ref]; seen {
@@ -572,6 +596,15 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 		// only on a card with nothing to ask (s-dup-1: «Дежурство», «Что
 		// почитать про CRDT»).
 		out.Hint = ""
+	}
+	if gone := st.lost[g.id]; len(gone) > 0 && g.decision == view.DecisionLinked {
+		// A group that lost a copy and stands says it in its own card; one
+		// that came apart whole has none and is said above the list.
+		said := goneSentence(st.blob, gone) + " The other copies stay linked and are unchanged on the server."
+		if out.Hint != "" {
+			said += " " + string(out.Hint)
+		}
+		out.Hint = text(said)
 	}
 	switch g.decision {
 	case view.DecisionLinked:
