@@ -37,9 +37,11 @@ Nothing changed in the running server since `v0.2.417`.
 
 - **Yandex loses a record it just took, for a moment** (SV-62): after a
   `PUT` answered 201 it answers `GET` of the record with 404 and leaves it
-  out of a `REPORT`, and has it again 0.6–2 s later; a calendar made by
-  `MKCALENDAR` shows in the home a moment after its 201. The same bodies
-  sent by curl stay — not a matter of what Carrel sends. Carrel already
+  out of a `REPORT`, and has it again later (how long is not measured; it
+  happened in two runs of Yandex's forms out of three, then in none of
+  six); a calendar made by `MKCALENDAR` may show in the home only after its
+  201. The same bodies sent by curl stay — not a matter of what Carrel
+  sends. The live set logs every such wait with how many 404 it took. Carrel already
   takes a record not found by the read after a save as saved, with no loss
   report. The live set asks again for up to 10 s while the answer is 404
   (`getSettled` in `rawBody` and `bodyIfThere`, the form in `matrixSave`,

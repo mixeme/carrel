@@ -229,12 +229,14 @@ func getSettled(ctx context.Context, t *testing.T, c *dav.Client, path string) (
 	t.Helper()
 	start := time.Now()
 	rc, etag, err := c.Get(ctx, path, nil)
+	asked := 1
 	for err != nil && notFound(err) && time.Since(start) < settleWait {
 		time.Sleep(500 * time.Millisecond)
 		rc, etag, err = c.Get(ctx, path, nil)
+		asked++
 	}
-	if err == nil && time.Since(start) >= 500*time.Millisecond {
-		t.Logf("GET %s answered 404 first and the record after %s (SV-62)", path, time.Since(start).Round(100*time.Millisecond))
+	if err == nil && asked > 1 {
+		t.Logf("GET %s answered 404 %d times, then the record, %s after the first ask (SV-62)", path, asked-1, time.Since(start).Round(100*time.Millisecond))
 	}
 	return rc, etag, err
 }

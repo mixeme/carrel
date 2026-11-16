@@ -95,7 +95,9 @@ func makeCollection(ctx context.Context, t *testing.T, client *dav.Client, endpo
 	var fresh []string
 	// Yandex lists a calendar it made a moment after its 201 (SV-62): the
 	// home is read again while nothing new is in it.
-	for start := time.Now(); ; time.Sleep(500 * time.Millisecond) {
+	start, asked := time.Now(), 0
+	for ; ; time.Sleep(500 * time.Millisecond) {
+		asked++
 		fresh = fresh[:0]
 		for p := range collectionChildren(ctx, t, client, home) {
 			if !before[p] {
@@ -105,6 +107,9 @@ func makeCollection(ctx context.Context, t *testing.T, client *dav.Client, endpo
 		if len(fresh) != 0 || time.Since(start) >= settleWait {
 			break
 		}
+	}
+	if len(fresh) != 0 && asked > 1 {
+		t.Logf("%s listed nothing new %d times, then the collection, %s after the first ask (SV-62)", home, asked-1, time.Since(start).Round(100*time.Millisecond))
 	}
 	if len(fresh) != 1 {
 		t.Fatalf("%s %s: nothing at that address and %d new collections in %s — %v",

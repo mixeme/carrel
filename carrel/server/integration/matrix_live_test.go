@@ -165,9 +165,14 @@ func matrixSave(t *testing.T, app *liveApp, kind view.Kind, rec string, set map[
 	// A record just written may be out of the server's REPORT for a moment
 	// (SV-62, Yandex): the form is asked again while it answers 404.
 	edit := app.get(rec + "/edit")
-	for start := time.Now(); edit.Code == http.StatusNotFound && time.Since(start) < settleWait; {
+	start, asked := time.Now(), 1
+	for edit.Code == http.StatusNotFound && time.Since(start) < settleWait {
 		time.Sleep(500 * time.Millisecond)
 		edit = app.get(rec + "/edit")
+		asked++
+	}
+	if edit.Code == http.StatusOK && asked > 1 {
+		t.Logf("the form of %s answered 404 %d times, then the record, %s after the first ask (SV-62)", rec, asked-1, time.Since(start).Round(100*time.Millisecond))
 	}
 	var v url.Values
 	switch kind {
