@@ -49,6 +49,23 @@ type liveApp struct {
 	st    *store.Store
 	users *user.Service
 	sess  *session.Session
+	mgr   *session.Manager
+}
+
+// freshSession signs the owner in again: a session of its own, with a
+// bucket of its own (a run of hundreds of requests in a few seconds, the
+// matrix on a fast stand, is past one session's).
+func (a *liveApp) freshSession(t *testing.T) {
+	t.Helper()
+	id, dataKey, _, ok := a.users.Authenticate(context.Background(), "owner", "password123")
+	if !ok {
+		t.Fatal("login")
+	}
+	sess, err := a.mgr.Create(id, "owner", dataKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.sess = sess
 }
 
 func newLiveApp(t *testing.T) *liveApp {
@@ -84,7 +101,7 @@ func newLiveApp(t *testing.T) *liveApp {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &liveApp{t: t, srv: web.New(cfg, st, mgr, users, render.JSONRenderer{}, "live", "live"), st: st, users: users, sess: sess}
+	return &liveApp{t: t, srv: web.New(cfg, st, mgr, users, render.JSONRenderer{}, "live", "live"), st: st, users: users, sess: sess, mgr: mgr}
 }
 
 func (a *liveApp) get(path string) *httptest.ResponseRecorder {

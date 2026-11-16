@@ -63,6 +63,7 @@ func liveMatrix(ctx context.Context, t *testing.T, client *dav.Client, endpoint,
 		}
 		for j, c := range r.cases {
 			t.Run(r.name+"/"+c.name, func(t *testing.T) {
+				app.freshSession(t)
 				matrixCaseRun(ctx, t, app, client, connID, col, suffix, i, j, r, c)
 			})
 		}
@@ -82,6 +83,7 @@ func liveMatrix(ctx context.Context, t *testing.T, client *dav.Client, endpoint,
 			continue
 		}
 		t.Run("new "+string(n.kind), func(t *testing.T) {
+			app.freshSession(t)
 			list := matrixList(n.kind, connID, col)
 			var v url.Values
 			switch n.kind {

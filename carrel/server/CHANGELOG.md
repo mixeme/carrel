@@ -47,7 +47,8 @@ field × a hard record» on the servers people connect, the owner's word of
   and edits of `edit_is_the_edit_test.go`, `field_matrix_test.go` and
   `field_matrix_more_test.go`, each seeded, saved once by Carrel, saved
   with one field, read: the lines that differ must be the field's. It runs
-  in an app of its own (a session's bucket), takes a collection per kind,
+  in an app of its own, a session of its own per case (a session's
+  bucket: on the Stalwart stand two hundred requests took two seconds), takes a collection per kind,
   seeds no record with attendees in the owner's own mailboxes
   (`personalAccount`: the server would send invitations), and reads what
   a server keeps its own way (SV-25 names, groups, one `TITLE`, a length
