@@ -104,15 +104,19 @@ func runForms(t *testing.T, endpoint, user, pass string) {
 	conn := blob.Connections[0]
 	cal := catalogEntry(t, blob, calPath)
 
+	bookCol := ""
 	if bookPath == "" {
 		t.Logf("the server would not make an address book: the contact part is skipped")
 	} else {
-		book := catalogEntry(t, blob, bookPath)
-		t.Run("contact", func(t *testing.T) { liveContactFields(ctx, t, app, client, conn.ID, book.Path, suffix) })
+		bookCol = catalogEntry(t, blob, bookPath).Path
+		t.Run("contact", func(t *testing.T) { liveContactFields(ctx, t, app, client, conn.ID, bookCol, suffix) })
 	}
 	t.Run("event", func(t *testing.T) { liveEventFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	t.Run("task", func(t *testing.T) { liveTaskFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	t.Run("second rule", func(t *testing.T) { liveSecondRule(ctx, t, app, client, conn.ID, cal.Path, suffix) })
+	t.Run("matrix", func(t *testing.T) {
+		liveMatrix(ctx, t, client, endpoint, user, pass, map[view.Kind]string{view.KindContact: bookPath, view.KindEvent: calPath, view.KindTask: calPath}, suffix)
+	})
 	if cal.Has(view.KindNote) {
 		t.Run("note", func(t *testing.T) { liveNoteFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	} else {
@@ -590,9 +594,15 @@ func checksPasswords(t *testing.T, endpoint, user, pass string) bool {
 // host, went on working). This once it is a list of names and not a question
 // to the server: the question is the wrong password itself, and a row of
 // those may lock a person's account.
+//
+// Nextcloud holds one another way (docs/servers.md, SV-63): after wrong
+// passwords from an address it answers every request from it, the right
+// password too, 25 s late, for hours — found 16.11.2026, when the wrong
+// password of each run had slowed the next runs' Nextcloud to an hour. It
+// is known by its DAV path, /remote.php/.
 func holdsAGrudge(endpoint string) bool {
 	u, err := url.Parse(endpoint)
-	return err == nil && strings.HasSuffix(u.Hostname(), "icloud.com")
+	return err == nil && (strings.HasSuffix(u.Hostname(), "icloud.com") || strings.Contains(u.Path, "/remote.php/"))
 }
 
 // review Р-9: the password went wrong — the card says so after
@@ -602,7 +612,7 @@ func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass
 	blob, _ := app.users.Catalog(app.sess.AccountID(), key)
 	broken := blob.Connections[0]
 	if holdsAGrudge(endpoint) {
-		t.Log("the server refuses the right password for minutes after a wrong one: the wrong-password half is not run against it")
+		t.Log("the server holds a wrong password against the right one for minutes or hours (SV-58, SV-63): the wrong-password half is not run against it")
 		liveConnectionEditRight(t, app, connID, endpoint, user, pass, broken.Label)
 		return
 	}
@@ -701,4 +711,7 @@ func runContactFieldsInTheOnlyBook(t *testing.T, endpoint, user, pass, who strin
 	// earlier runs sat in the iCloud book.
 	removeLater(t, client, book.Path+"vera-"+suffix+".vcf")
 	liveContactFields(ctx, t, app, client, connID, book.Path, suffix)
+	t.Run("matrix", func(t *testing.T) {
+		liveMatrix(ctx, t, client, endpoint, user, pass, map[view.Kind]string{view.KindContact: book.Path}, suffix)
+	})
 }

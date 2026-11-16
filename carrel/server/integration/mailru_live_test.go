@@ -52,4 +52,7 @@ func TestMailruEventFields(t *testing.T) {
 	}
 	suffix := fmt.Sprintf("carrel-mailru-%d-%d", os.Getpid(), time.Now().Unix()%100000)
 	liveEventFields(ctx, t, app, client, connID, cal.Path, suffix)
+	t.Run("matrix", func(t *testing.T) {
+		liveMatrix(ctx, t, client, endpoint, user, pass, map[view.Kind]string{view.KindEvent: cal.Path, view.KindTask: cal.Path}, suffix)
+	})
 }

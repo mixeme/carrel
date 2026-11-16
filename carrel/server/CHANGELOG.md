@@ -17,6 +17,51 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.416 — 2026-11-16
+
+Typecase `2acba65`; towards the milestone `v0.3.0` — the matrix «every
+field × a hard record» on the servers people connect, the owner's word of
+16.11.2026.
+
+### For consumers
+
+- **A Google card with a web page reads right.** Google keeps a colon of a
+  card's value escaped, `URL:https\://ada.example` (docs/servers.md,
+  SV-61). The card showed «https\://ada.example», not a link; the form held
+  the backslash; a new address saved was reported not kept. Now `\:` is a
+  colon, `\\:` a backslash and a colon; an untouched line goes back as it
+  came. A list reads such a card the way the record does — read two ways,
+  the check before a save refused every save of the card («Pre-save check
+  failed: the field Address would not be saved as entered»); that came with
+  the first half of this fix and never left the branch.
+- **An attendee a scheduling server marked is not reported lost.** Baikal
+  and Nextcloud (sabre) and SoGo write `SCHEDULE-STATUS=1.1` on an attendee
+  they sent an invitation to (RFC 6638, SV-60); the save of a new attendee
+  said «the server did not keep: ATTENDEE». The parameter is the server's;
+  what else a server changes on the line is still reported.
+
+### For developers
+
+- `integration`: the step `matrix` of the live forms
+  (`matrix_live_test.go`, `matrix_run_live_test.go`) — the hard records
+  and edits of `edit_is_the_edit_test.go`, `field_matrix_test.go` and
+  `field_matrix_more_test.go`, each seeded, saved once by Carrel, saved
+  with one field, read: the lines that differ must be the field's. It runs
+  in an app of its own (a session's bucket), takes a collection per kind,
+  seeds no record with attendees in the owner's own mailboxes
+  (`personalAccount`: the server would send invitations), and reads what
+  a server keeps its own way (SV-25 names, groups, one `TITLE`, a length
+  kept as an end, its stamps, the empty lines it serves) as the server's.
+  `TestGoogleCalendarMatrix`; iCloud, Mail.ru and the books of Google and
+  iCloud run it too. Green on Baikal, Nextcloud (34 of 34; the run ended
+  in its last step under SV-63), SoGo, Yandex, iCloud, Google, Mail.ru.
+- `holdsAGrudge` names Nextcloud (by `/remote.php/`): after wrong
+  passwords it answers everything 25 s late for hours (SV-63).
+- `model.withoutScheduleStatus`, `card.plainColons`, `card.ownRead`;
+  `TestAScheduleStatusTheServerWritesIsNotALoss`,
+  `TestAnEscapedColonIsAColon`, `TestACardAsGoogleKeepsItSaves`,
+  `TestAGroupedWebPageKeepsItsGroup`.
+
 ## v0.2.415 — 2026-11-16
 
 Typecase `2acba65`; towards the milestone `v0.3.0` — the rest of Б16.

@@ -26,7 +26,64 @@ func readCard(text string) (vcard.Card, error) {
 	if err := brokenLine(text); err != nil {
 		return nil, err
 	}
-	return vcard.NewDecoder(strings.NewReader(namedParams(text))).Decode()
+	return vcard.NewDecoder(strings.NewReader(plainColons(namedParams(text)))).Decode()
+}
+
+// plainColons is text with every «\:» of a value a colon. Google keeps a
+// colon of a card's value escaped — «URL:https\://ada.example»
+// (docs/servers.md, SV-61); RFC 6350 §3.4 escapes only the backslash, the
+// comma, the semicolon and the line end, and go-vcard leaves «\:» as it
+// is, so the card showed the backslash, the address was no link, and a new
+// one saved read back as lost. An escaped backslash before a colon,
+// «\\:», stays a backslash and a colon. text itself when no line has one.
+func plainColons(text string) string {
+	if !strings.Contains(text, `\:`) {
+		return text
+	}
+	lines := model.LogicalLines([]byte(text))
+	changed := false
+	for i, l := range lines {
+		if !strings.Contains(l, `\:`) {
+			continue
+		}
+		// The value starts after the first colon outside quotes.
+		quoted, start := false, -1
+		for j := 0; j < len(l) && start < 0; j++ {
+			switch l[j] {
+			case '"':
+				quoted = !quoted
+			case ':':
+				if !quoted {
+					start = j + 1
+				}
+			}
+		}
+		if start < 0 {
+			continue
+		}
+		var b strings.Builder
+		b.WriteString(l[:start])
+		v := l[start:]
+		for j := 0; j < len(v); j++ {
+			if v[j] == '\\' && j+1 < len(v) {
+				if v[j+1] == ':' {
+					b.WriteByte(':')
+				} else {
+					b.WriteString(v[j : j+2])
+				}
+				j++
+				continue
+			}
+			b.WriteByte(v[j])
+		}
+		if b.String() != l {
+			lines[i], changed = b.String(), true
+		}
+	}
+	if !changed {
+		return text
+	}
+	return strings.Join(lines, "\r\n") + "\r\n"
 }
 
 // brokenLine refuses a card with a line that is not a property — no colon
@@ -67,6 +124,13 @@ func cutLine(l string) string {
 
 // hasBareParam reports a card with a parameter without a name.
 func hasBareParam(text string) bool { return namedParams(text) != text }
+
+// ownRead reports a card go-vcard alone reads otherwise than readCard: a
+// parameter without a name, or a colon escaped (SV-61). A list's answer is
+// then read again, or the list and the record would read one card two ways
+// — and the check before a save refused every save of a Google card with a
+// web page (the live matrix, 16.11.2026).
+func ownRead(text string) bool { return hasBareParam(text) || plainColons(text) != text }
 
 // namedParams is text with every bare parameter named; text itself when it
 // has none.

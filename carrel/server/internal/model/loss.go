@@ -113,11 +113,27 @@ func propsEqual(a, b *Object, prop string) bool {
 		default:
 			return false
 		}
-		if !sameParams(av[i].params, withoutAddedPref(av[i].params, bv[i].params)) {
+		if !sameParams(withoutScheduleStatus(av[i].params), withoutScheduleStatus(withoutAddedPref(av[i].params, bv[i].params))) {
 			return false
 		}
 	}
 	return true
+}
+
+// withoutScheduleStatus is the parameters less SCHEDULE-STATUS: how the
+// sending of an invitation went, which a server that schedules writes,
+// changes and takes away itself (RFC 6638 §7.3; Baikal and Nextcloud —
+// docs/servers.md, SV-60). The attendee is the one sent; calling him lost
+// told a person of a loss that had not happened.
+func withoutScheduleStatus(p map[string]string) map[string]string {
+	for k := range p {
+		if strings.EqualFold(k, "SCHEDULE-STATUS") {
+			out := maps.Clone(p)
+			delete(out, k)
+			return out
+		}
+	}
+	return p
 }
 
 // withoutAddedPref is the parameters got came back with, less a PREF among

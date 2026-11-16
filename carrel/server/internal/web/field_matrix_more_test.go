@@ -61,6 +61,36 @@ func TestACardBeyondTheSeedSaveIsTheEdit(t *testing.T) {
 	}
 }
 
+// A web page in a group with Apple's label, as Google keeps one
+// («item2.URL» beside «item2.X-ABLabel:Work»; the live matrix on Google,
+// 16.11.2026): a new address keeps the group, so the label stays its.
+func TestAGroupedWebPageKeepsItsGroup(t *testing.T) {
+	card := "BEGIN:VCARD\nVERSION:3.0\nUID:hard\nFN:Ada Lovelace\nN:Lovelace;Ada;;;\n" +
+		"item2.URL;TYPE=PREF:https://ada.example\nitem2.X-ABLabel:Work\nEND:VCARD\n"
+	f := contactsFixture(t, false, card)
+	before, after := oneEdit(t, f, f.path("contacts")+"/hard", "hard.vcf", url.Values{"nickname": {"Ada"}}, url.Values{"url.0": {"https://ada.example/new"}})
+	if got := changedLines(before, after); !slices.Equal(got, []string{"item2.URL"}) {
+		t.Errorf("lines changed: %v, want [item2.URL]\n%s", got, after)
+	}
+	mustContain(t, after, "item2.URL", "https://ada.example/new", "item2.X-ABLABEL:Work")
+}
+
+// A card as Google keeps it (the live matrix, 16.11.2026): groups taken
+// apart, an address marked PREF, Apple's label lines without their group.
+// Another field saved is saved.
+func TestACardAsGoogleKeepsItSaves(t *testing.T) {
+	card := "BEGIN:VCARD\nVERSION:3.0\nN:Lovelace;Ada;Augusta;Countess;PhD\nFN:Countess Ada Augusta Lovelace PhD\nUID:hard\n" +
+		"BDAY;VALUE=DATE:1815-12-10\nADR;TYPE=HOME,PREF:;Flat 2;12 St James's Square;London;;SW1Y 4JH;UK\n" +
+		"EMAIL;TYPE=WORK,PREF:ada@example.com\nEMAIL;TYPE=HOME:ada@home.example\n" +
+		"item1.IMPP;TYPE=PREF;X-SERVICE-TYPE=Skype:skype:ada\nX-CUSTOM:keep\nX-ABLABEL:Office\nX-ABADR:gb\n" +
+		"item1.X-ABLabel:Other\nitem2.URL;TYPE=PREF:https://ada.example\nitem2.X-ABLabel:Work\nEND:VCARD\n"
+	f := contactsFixture(t, false, card)
+	before, after := oneEdit(t, f, f.path("contacts")+"/hard", "hard.vcf", url.Values{"bday": {"11.12.1815"}}, url.Values{"nickname": {"Ada"}})
+	if got := changedLines(before, after); !slices.Equal(got, []string{"NICKNAME"}) {
+		t.Errorf("lines changed: %v, want [NICKNAME]\n%s", got, after)
+	}
+}
+
 // Attendees as other clients write them: a reply, a role, a delegate, a
 // language. A list changed by the field changes the lines of the people
 // changed; the others keep every parameter.

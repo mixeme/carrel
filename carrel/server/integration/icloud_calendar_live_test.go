@@ -202,6 +202,9 @@ func TestICloudForms(t *testing.T) {
 	t.Run("task", func(t *testing.T) {
 		liveTaskFields(ctx, t, app, client, connID, tk.Path, suffix)
 	})
+	t.Run("matrix", func(t *testing.T) {
+		liveMatrix(ctx, t, client, endpoint, user, pass, map[view.Kind]string{view.KindEvent: cal, view.KindTask: taskCal}, suffix)
+	})
 	t.Run("connection", func(t *testing.T) { liveConnectionEdit(t, app, connID, endpoint, user, pass) })
 	// Last: it takes the connection out from under the rest.
 	t.Run("disconnect", func(t *testing.T) { liveDisconnect(t, app, connID, endpoint, user, pass, ev.Path) })

@@ -207,8 +207,9 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 	var bad []Unreadable
 	for _, ao := range aos {
 		card := ao.Card
-		if ao.DecodeError == nil && card != nil && hasBareParam(ao.Data) {
-			// Read again with its bare parameters named (readCard).
+		if ao.DecodeError == nil && card != nil && ownRead(ao.Data) {
+			// Read again with its bare parameters named and its colons
+			// plain (readCard): a list reads a card as the record does.
 			card, ao.DecodeError = readCard(ao.Data)
 		}
 		if ao.DecodeError == nil {
