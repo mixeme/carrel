@@ -148,7 +148,9 @@ func TestAFileCollectionRefusedMidWayHasNoCount(t *testing.T) {
 		time.Sleep(20 * time.Millisecond)
 		r = fileRows(counted(t, app))["Documents"]
 	}
-	if r.Objects != nil || r.Counting || !strings.HasPrefix(string(r.ObjectsNote), "Not counted: PROPFIND ") ||
+	// The words of s-profile-37 (Typecase's note 206), then the request and
+	// the server's answer.
+	if r.Objects != nil || r.Counting || !strings.HasPrefix(string(r.ObjectsNote), "Counting stopped: the server refused to list a folder in it — PROPFIND ") ||
 		!strings.HasSuffix(string(r.ObjectsNote), "carrel/attachments/ → 503 Service Unavailable.") {
 		t.Errorf("Documents refused mid-way: %+v", r)
 	}

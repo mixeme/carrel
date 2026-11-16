@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.417 — 2026-11-16
+
+Typecase `e92dd5c` (note 206); Typecase's tasks 262 (point 5) and 264
+closed — no task of Carrel's is open there.
+
+### For consumers
+
+- **A repeating task's row says it repeats**: `TaskRow.Badges` holds
+  «repeats weekly» (`repeatsWord`, as an event's row in the agenda), after
+  the linked badge when there is one (s-tasks-21).
+- **A storage whose walk stopped says so in the frame's words**, then the
+  request and the answer: `CollectionRow.ObjectsNote` is «Counting
+  stopped: the server refused to list a folder in it — PROPFIND
+  /dav/Documents/carrel/ → 503 Service Unavailable.» (s-profile-37; was
+  «Not counted: PROPFIND …»).
+
+### For developers
+
+- `TestTheTickOfARepeatingTaskRowSaysWhatDoneDoes` checks the badge too;
+  `TestAFileCollectionRefusedMidWayHasNoCount` the new words.
+
 ## v0.2.416 — 2026-11-16
 
 Typecase `2acba65`; towards the milestone `v0.3.0` — the matrix «every

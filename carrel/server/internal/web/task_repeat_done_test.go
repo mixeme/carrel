@@ -149,14 +149,25 @@ func TestTheTickOfARepeatingTaskRowSaysWhatDoneDoes(t *testing.T) {
 	f := calendarFixture(t, nil, "water.ics", repeatingTask("FREQ=WEEKLY;BYDAY=MO"))
 	f.srv.Seed(f.col+"once.ics", ics("BEGIN:VTODO\nUID:once\nDTSTAMP:20260101T000000Z\nSUMMARY:Once\nEND:VTODO"))
 	page := decode[view.TasksPage](t, f.h.do(get(f.path("tasks"), f.sess)))
-	hints := map[string]string{}
+	hints, badges := map[string]string{}, map[string][]string{}
 	for _, g := range page.Groups {
 		for _, r := range g.Rows {
 			if r.Tick == nil {
 				t.Fatalf("%s has no tick", r.UID)
 			}
 			hints[r.UID] = string(r.Tick.Hint)
+			for _, b := range r.Badges {
+				badges[r.UID] = append(badges[r.UID], string(b.Label))
+			}
 		}
+	}
+	// s-tasks-21 (Typecase's note 206): the row says it repeats, as an
+	// event's row in the agenda does.
+	if got := badges["water"]; len(got) != 1 || got[0] != "repeats weekly" {
+		t.Errorf("the badges of the repeating task = %v, want [repeats weekly]", got)
+	}
+	if got := badges["once"]; len(got) != 0 {
+		t.Errorf("the badges of a task that does not repeat = %v", got)
 	}
 	if want := "Repeating task: Done completes this occurrence and moves the task to the next one, 19 Jan."; hints["water"] != want {
 		t.Errorf("the tick of the repeating task = %q, want %q", hints["water"], want)

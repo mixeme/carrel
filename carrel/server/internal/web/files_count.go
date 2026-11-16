@@ -229,7 +229,7 @@ func (s *Server) countStorage(ctx context.Context, sess *session.Session, f *fil
 	defer f.seen(key)
 	p, err := s.fileProvider(conn)
 	if err != nil {
-		putFilesCount(sess, conn.ID, col.Path, "!", "Not counted: "+sentence(err.Error()), at)
+		putFilesCount(sess, conn.ID, col.Path, "!", countStopped+" "+sentence(err.Error()), at)
 		return
 	}
 	root := strings.TrimSuffix(fileRoot(conn, col), "/") + "/"
@@ -272,16 +272,20 @@ func (s *Server) countStorage(ctx context.Context, sess *session.Session, f *fil
 	putFilesCount(sess, conn.ID, col.Path, strconv.Itoa(files), top.ETag, at)
 }
 
-// notCounted is why a storage has no count: the request refused, as the
-// trace of a connection says it (s-profile-1: «PROPFIND /dav.php/ → 401
+// notCounted is why a storage has no count: the words of s-profile-37
+// (Typecase's note 206), then the request refused as the trace of a
+// connection says it (s-profile-1: «PROPFIND /dav.php/ → 401
 // Unauthorized»).
 func notCounted(folder string, err error) string {
 	var se *dav.StatusError
 	if errors.As(err, &se) {
-		return fmt.Sprintf("Not counted: PROPFIND %s → %d %s.", folder, se.Code, http.StatusText(se.Code))
+		return fmt.Sprintf("%s the server refused to list a folder in it — PROPFIND %s → %d %s.", countStopped, folder, se.Code, http.StatusText(se.Code))
 	}
-	return "Not counted: PROPFIND " + folder + " → " + strings.TrimSuffix(sentence(err.Error()), ".") + "."
+	return countStopped + " PROPFIND " + folder + " → " + strings.TrimSuffix(sentence(err.Error()), ".") + "."
 }
+
+// countStopped leads the hint of a storage whose walk stopped (s-profile-37).
+const countStopped = "Counting stopped:"
 
 // fileObjects is what a row of a file collection says in Objects: the files
 // so far and that it is counting while the walk goes over it, else the kept

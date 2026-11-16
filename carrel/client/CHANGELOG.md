@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.34 — 2026-11-16
+
+Typecase `e92dd5c`, note 206; server `v0.2.417`. The whole client suite
+passes.
+
+- The tick of a task's row says in its hint what pressing does when the
+  server says it (`TaskRow.Tick.Hint` → `Tick.Title`): «Repeating task:
+  Done completes this occurrence and moves the task to the next one, 24
+  Aug.» (s-tasks-21). A plain tick has none.
+- Objects of a storage while its tree is walked is the number in the
+  badge of work under way, «Counting: 4 so far.» in its hint; one waiting
+  for the walk says «0» there; a walk refused mid-way is a dash in the
+  failure's colour with the server's why (s-profile-37). Was «1240…», «…»
+  and a plain dash.
+
 ## v0.11.33 — 2026-11-15
 
 Typecase `2acba65`, note 205; server `v0.2.414`. The whole client suite

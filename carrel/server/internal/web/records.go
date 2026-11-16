@@ -1847,6 +1847,12 @@ func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, item
 			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: linkedState(it),
 			Badges: linkedBadge(it), Sources: linkedSources(it),
 		}
+		if cal.HasRecurrence(o) {
+			// A repeating task says so, as an event's row in the agenda
+			// does (s-tasks-21; Typecase's note 206): its tick does not
+			// take it to the done ones (TaskRow.Tick.Hint).
+			row.Badges = append(row.Badges, view.Badge{Label: text(repeatsWord(cal.RawRRULE(o))), Role: view.BadgeNeutral})
+		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 			if len(it.also) > 0 {

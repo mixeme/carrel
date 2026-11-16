@@ -81,6 +81,11 @@ func sub(r view.Runs, danger func(view.Text) w.HeadSubPart) []w.HeadSub {
 // nothing (Р-38 of Typecase, 80d1319: Tick.Sign, states-23).
 func Tick(a *view.Action, done bool, label string) w.Tick {
 	t := w.Tick{Done: done, Label: label}
+	if a != nil {
+		// What pressing does when it is not plain: a repeating task's tick
+		// completes this occurrence (s-tasks-21; Typecase's note 206).
+		t.Title = string(a.Hint)
+	}
 	if a != nil && a.Enabled && a.Method == "POST" {
 		t.Send = w.Send{Form: TickID(*a)}
 	} else {

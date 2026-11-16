@@ -36,7 +36,8 @@ const (
 	pickName        = "pick"
 	newBadge        = "new"
 	disconnectID    = "connection.disconnect"
-	counting        = "…"
+	countingLead    = "Counting: "
+	countingTail    = " so far."
 	noCount         = "—"
 )
 
@@ -322,18 +323,21 @@ func collectionsTable(rows []view.CollectionRow, narrow bool) w.Table {
 		}
 		objects := w.TableCell{Mono: true}
 		switch {
-		case r.Counting && r.Objects != nil:
-			// The files of a storage while its tree is walked: how many so
-			// far (the owner's decision of 13.11.2026; Typecase's task 262).
-			objects.Parts = []w.CellPart{w.Text(strconv.Itoa(*r.Objects) + counting)}
 		case r.Counting:
-			// Waiting for the walk, no count yet.
-			objects.Parts = []w.CellPart{w.Text(counting)}
+			// The files of a storage while its tree is walked: how many so
+			// far, in the badge of work under way, the words in its hint
+			// (s-profile-37; the owner's decisions of 13.11 and 16.11.2026);
+			// one waiting for the walk has counted none yet.
+			n := 0
+			if r.Objects != nil {
+				n = *r.Objects
+			}
+			objects.Parts = []w.CellPart{w.Badge{Label: strconv.Itoa(n), Tone: w.BadgeProgress, Title: countingLead + strconv.Itoa(n) + countingTail}}
 		case r.Objects != nil:
 			objects.Parts = []w.CellPart{w.Text(strconv.Itoa(*r.Objects))}
 		case r.ObjectsNote != "":
 			// The walk refused mid-way: a dash, and why in its hint.
-			objects.Parts = []w.CellPart{w.Span{Text: noCount, Title: string(r.ObjectsNote)}}
+			objects.Parts = []w.CellPart{w.Span{Face: w.FaceDanger, Text: noCount, Title: string(r.ObjectsNote)}}
 		}
 		row := w.TableRow{Cells: []w.TableCell{
 			pick,

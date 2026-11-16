@@ -10,7 +10,7 @@
 @font-face{font-family:"Source Code Pro";font-style:normal;font-weight:200 900;font-display:swap;src:url("fonts/SourceCodePro.ttf") format("truetype")}
 :root{
   --tc-ink:#17211C; --tc-card:#E8DFCB; --tc-edge:#C9BFA6; --tc-accent:#4A6B52;
-  --tc-bg:#F5F1E8; --tc-surface:#FFFDF7; --tc-rule:#D8CFBB; --tc-hair:#E2DACA; --tc-dusty:#6A6351; --tc-muted:#56503F; --tc-danger:#A84232;
+  --tc-bg:#F5F1E8; --tc-surface:#FFFDF7; --tc-rule:#D8CFBB; --tc-hair:#E2DACA; --tc-dusty:#6A6351; --tc-muted:#56503F; --tc-danger:#A84232; --tc-progress:#7D5E0C;
   --tc-font-serif:"Literata", Georgia, "Times New Roman", serif;
   --tc-font-sans:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --tc-font-mono:"Source Code Pro", ui-monospace, "Cascadia Mono", monospace;
@@ -181,7 +181,7 @@ body:has(#w390:checked) .tc-root{width:100%}
 </style>
 <style data-tc>:root{
   --tc-ink:#17211C; --tc-card:#E8DFCB; --tc-edge:#C9BFA6; --tc-accent:#4A6B52;
-  --tc-bg:#F5F1E8; --tc-surface:#FFFDF7; --tc-rule:#D8CFBB; --tc-hair:#E2DACA; --tc-dusty:#6A6351; --tc-muted:#56503F; --tc-danger:#A84232;
+  --tc-bg:#F5F1E8; --tc-surface:#FFFDF7; --tc-rule:#D8CFBB; --tc-hair:#E2DACA; --tc-dusty:#6A6351; --tc-muted:#56503F; --tc-danger:#A84232; --tc-progress:#7D5E0C;
   --tc-font-serif:"Literata", Georgia, "Times New Roman", serif;
   --tc-font-sans:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --tc-font-mono:"Source Code Pro", ui-monospace, "Cascadia Mono", monospace;
@@ -208,7 +208,7 @@ body[data-tc-root]{margin:0;background:var(--tc-bg);color:var(--tc-ink);font-fam
 .tc-root code,.tc-root .tc-mono{font-family:var(--tc-font-mono);font-size:11.5px}
 .tc-root svg{display:block}
 [data-tc-theme="dark"]{--tc-ink:#E8DFCB;--tc-bg:#141A16;--tc-surface:#1B231D;--tc-card:#242E27;--tc-edge:#3A463D;
-  --tc-rule:#2F3B33;--tc-hair:#28332B;--tc-dusty:#99927C;--tc-muted:#A79E88;--tc-accent:#7FA085;--tc-danger:#D5786B}
+  --tc-rule:#2F3B33;--tc-hair:#28332B;--tc-dusty:#99927C;--tc-muted:#A79E88;--tc-accent:#7FA085;--tc-danger:#D5786B;--tc-progress:#C9A23E}
 /* верхняя панель */
 .tc-top{height:var(--tc-top);display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--tc-surface);border-bottom:.5px solid var(--tc-rule)}
 /* Поиск по центру: равные крылья flex:1 1 0 слева и справа. */
@@ -646,6 +646,7 @@ a.tc-row__title:hover{text-decoration:underline}
   letter-spacing:.03em;background:transparent}
 .tc-badge.is-linked{border-color:var(--tc-accent);color:var(--tc-accent)}
 .tc-badge.is-alert{border-color:var(--tc-danger);color:var(--tc-danger)}
+.tc-badge.is-progress{border-color:var(--tc-progress);color:var(--tc-progress)}
 .tc-runbar{display:flex;align-items:center;gap:8px;padding:7px var(--tc-page-gutter);background:var(--tc-card);flex-wrap:wrap;
   border-bottom:.5px solid var(--tc-rule);font-size:11.5px;color:var(--tc-muted)}
 /* Индикатор опроса 64 px, не шкала: 120 на планшете выталкивает хвост. */
@@ -7132,6 +7133,26 @@ SEQUENCE  2</div>
 </div>
 <figcaption>Активный фильтр — сегментный переключатель с числами. Просроченное вынесено в свою группу и окрашено <code>--tc-danger</code>. Флажок выполнения — квадрат 13&nbsp;px. <b>Только что отмеченная задача остаётся под Open</b> — зачёркнутой, с полной галкой, — пока список не прочитан заново: строка не выпрыгивает из-под руки, и отметку можно снять там же. <b>Связанная задача — одна строка</b>: «linked ×2» у названия, в столбце источника — сколько их, оба штампа в подсказке. <b>Панель связанной задачи — связанная запись</b>, как у книги (Р-63): «in 2 lists», всё, что есть хотя бы в одной копии, с меткой, откуда взято (Р-78), Edit — лист копий, ниже — где она хранится.</figcaption>
 </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-tasks-21">
+    <div class="frame-label"><span>Строка повторяющейся задачи</span><span class="frag">фрагмент</span><i>пример: в наборе повторяющейся задачи нет</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-list">
+          <div class="tc-row tc-row--tickmarkcols">
+            <button class="tc-tick" type="button" title="Repeating task: Done completes this occurrence and moves the task to the next one, 24 Aug."></button><span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <a class="tc-row__title" href="#"><span class="tc-row__words">Полить цветы</span> <span class="tc-badge">repeats weekly</span></a>
+
+            <span class="tc-mono tc-row__due">17 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">—</span><span class="tc-row__cell tc-row__source">nextcloud · Дела</span>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Отметка повторяющейся задачи не уводит её в сделанные: закрывает этот раз и переносит задачу на следующий. Подсказка у отметки говорит это словами формы: «Repeating task: Done completes this occurrence and moves the task to the next one, 24 Aug.», на последнем разе — «Repeating task, last occurrence: Done completes the task.» Строка несёт «repeats weekly», как событие в агенде (задача Carrel 264).</figcaption>
+</figure>
+
 
 <figure>
 <div class="frame" data-frame="s-tasks-20" data-screen="/app/tasks" data-part="panel-one">
@@ -16067,6 +16088,35 @@ dav: HTTP 503: the server is busy</div>
 </div>
 <figcaption><b>Рейл один на весь раздел настроек.</b><br><br><b>«Show password» стоит и здесь</b> — пароль от чужого сервера человек доверил Carrel, и вернуть его по требованию — прямая обязанность читального зала. Механика <a href="#reveal">общая с экраном нового устройства</a> и описана там один раз: тот же лист, вопрос раз в сеанс, автоскрытие, журнал.<br><br><b>Диагностика перестаёт быть отладочным выводом и становится содержимым экрана.</b> Ровно этим Carrel отличается от клиентов, которые пишут «cannot connect»: видно, какой шаг сломался и что именно ответил сервер. Здесь она стоит у того аккаунта, к которому относится. <b>Коллекции стоят таблицей с шапкой</b>, а не сеткой строк рейла: сколько объектов и когда запись менялась на сервере — две величины на коллекцию, и их сравнивают по вертикали. Когда сервер отвечал — в шапке карточки, один раз на аккаунт. Снятая коллекция видна снятым флажком: её не опрашивают. <code>getctag</code> и ETag Carrel уже видит; нужно это, когда рядом работают DAVx5 на телефоне и Thunderbird на работе, данные разошлись, и причину иначе не установить. Журналом изменений это не является: журнал требует хранить содержимое, чего Carrel не делает.<br><br><b>Подписки стоят на этом же экране, ниже серверов</b> — и той же карточкой: для человека лента такой же источник записей, и разводить их по двум страницам значило бы спрашивать «это сервер или лента?» раньше, чем «откуда у меня эти события?». Разбор подписки — <a href="#subscribe">ниже</a>.<br><br><b>Здесь же коллекциями и распоряжаются</b> — «New collection» в шапке аккаунта, <span class="tc-mono">⋯</span> последней колонкой у каждой строки. Разобрано отдельно ниже (<a href="#collections">создать, переименовать, удалить</a>), но живёт не в отдельном разделе настроек: место, где перечислены сервер и всё, что на нём лежит, и есть место, где заводят ещё одну коллекцию.<br><br><b>«Remove» у аккаунта стало «Disconnect», и это не косметика.</b> Рядом появилась кнопка, которая удаляет данные на чужом сервере, — и две соседние кнопки со словом «удалить» и противоположными последствиями рано или поздно нажали бы не ту. «Disconnect» убирает подключение из Carrel и на сервере не трогает ничего; «Delete on the server…» в меню коллекции — наоборот. Слово выбрано так, чтобы разницу было видно до нажатия, а не в подтверждении.</figcaption>
 </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-profile-37">
+    <div class="frame-label"><span>Подключения · Objects папки, пока идёт счёт</span><span class="frag">фрагмент</span><i>Documents считается, Public — сервер отказал посреди счёта</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+          <div class="tc-card">
+            <div class="tc-rubric">sftpgo · vps</div>
+            <div class="tc-mono tc-mono--t11-5-dusty">https://files.example.org/dav/ · mix · plain WebDAV, no principal · last answer 5 min ago</div>
+            <table class="tc-table">
+              <thead><tr><th class="tc-table__col--tick-sm"></th><th>Folder</th><th class="tc-table__n3">What is in it</th><th class="tc-table__n4 tc-table__col--num">Objects</th><th class="tc-table__col--changed tc-table__main">Changed on the server</th><th class="tc-table__col--menu"></th></tr></thead>
+              <tbody>
+                <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="sftpgo|documents" aria-label="Documents" aria-pressed="true"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Documents</span></span></td>
+                  <td class="tc-mono tc-table__n3">files</td><td class="tc-mono tc-table__n4"><span class="tc-badge is-progress" title="Counting: 4 so far.">4</span></td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">5 min ago</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+                <tr class="is-off"><td><button class="tc-tickrow__tick is-off" type="submit" form="conn-picks" name="pick" value="sftpgo|public" aria-label="Public" aria-pressed="false"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#9A9280"></span><span class="tc-table__filename">Public</span></span></td>
+                  <td class="tc-mono tc-table__n3">files <span class="tc-badge">ro</span></td><td class="tc-mono tc-table__n4"><span class="tc-dim--danger" title="Counting stopped: the server refused to list a folder in it.">—</span></td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">3 d ago</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+              </tbody>
+            </table>
+          </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Objects папки хранилища — файлы на всех её уровнях; этого числа не даёт ни один сервер, Carrel обходит дерево сам, начиная с открытия «Connections». Пока обход идёт, число растёт в жёлтом бейдже хода (<code>--tc-progress</code>, решение владельца 16.11), слова «Counting: 4 so far» — в подсказке (столбец Objects в 70 px слов не вмещает), страница обновляет его опросом; кончился — итог, как в <code>s-profile-1</code>. Сервер отказал посреди обхода — прочерк цветом сбоя, причина в подсказке (решение владельца 13.11, задача Carrel 262).</figcaption>
+</figure>
+
 
 <figure>
 <div class="frame" data-frame="s-profile-27" data-screen="/app/settings/connections" data-part="found">
