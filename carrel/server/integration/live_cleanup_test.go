@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/provider/file"
@@ -92,9 +93,17 @@ func makeCollection(ctx context.Context, t *testing.T, client *dav.Client, endpo
 		return want
 	}
 	var fresh []string
-	for p := range collectionChildren(ctx, t, client, home) {
-		if !before[p] {
-			fresh = append(fresh, p)
+	// Yandex lists a calendar it made a moment after its 201 (SV-62): the
+	// home is read again while nothing new is in it.
+	for start := time.Now(); ; time.Sleep(500 * time.Millisecond) {
+		fresh = fresh[:0]
+		for p := range collectionChildren(ctx, t, client, home) {
+			if !before[p] {
+				fresh = append(fresh, p)
+			}
+		}
+		if len(fresh) != 0 || time.Since(start) >= settleWait {
+			break
 		}
 	}
 	if len(fresh) != 1 {

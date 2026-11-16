@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -215,9 +216,37 @@ func liveRequest(ctx context.Context, t *testing.T, endpoint, user, pass, method
 	}
 }
 
+// settleWait is how long a read right after a write is asked again while
+// the server answers 404: Yandex, for a moment after a PUT, answers GET of
+// the record it just took with 404 and leaves it out of a REPORT, and has
+// it again a second later (SV-62, the live run of 17.11.2026). A record
+// that is really gone is still gone after the wait.
+const settleWait = 10 * time.Second
+
+// getSettled is GET of path, asked again for settleWait while the server
+// answers 404.
+func getSettled(ctx context.Context, t *testing.T, c *dav.Client, path string) (io.ReadCloser, string, error) {
+	t.Helper()
+	start := time.Now()
+	rc, etag, err := c.Get(ctx, path, nil)
+	for err != nil && notFound(err) && time.Since(start) < settleWait {
+		time.Sleep(500 * time.Millisecond)
+		rc, etag, err = c.Get(ctx, path, nil)
+	}
+	if err == nil && time.Since(start) >= 500*time.Millisecond {
+		t.Logf("GET %s answered 404 first and the record after %s (SV-62)", path, time.Since(start).Round(100*time.Millisecond))
+	}
+	return rc, etag, err
+}
+
+func notFound(err error) bool {
+	var se *dav.StatusError
+	return errors.As(err, &se) && se.Code == http.StatusNotFound
+}
+
 func rawBody(ctx context.Context, t *testing.T, c *dav.Client, path string) (string, string) {
 	t.Helper()
-	rc, etag, err := c.Get(ctx, path, nil)
+	rc, etag, err := getSettled(ctx, t, c, path)
 	if err != nil {
 		t.Fatalf("GET %s: %v", path, err)
 	}
@@ -623,7 +652,7 @@ func sameRule(got string, parts ...string) bool {
 // server accepted and then kept nothing of is a fact about the server.
 func bodyIfThere(ctx context.Context, t *testing.T, c *dav.Client, path string) string {
 	t.Helper()
-	rc, _, err := c.Get(ctx, path, nil)
+	rc, _, err := getSettled(ctx, t, c, path)
 	if err != nil {
 		t.Logf("GET %s: %v", path, err)
 		return ""

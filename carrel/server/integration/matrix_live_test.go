@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"carrel.dev/carrel/server/view"
 )
@@ -161,14 +162,21 @@ func matrixExt(kind view.Kind) (string, string) {
 // values given joined by NUL.
 func matrixSave(t *testing.T, app *liveApp, kind view.Kind, rec string, set map[string]string) []string {
 	t.Helper()
+	// A record just written may be out of the server's REPORT for a moment
+	// (SV-62, Yandex): the form is asked again while it answers 404.
+	edit := app.get(rec + "/edit")
+	for start := time.Now(); edit.Code == http.StatusNotFound && time.Since(start) < settleWait; {
+		time.Sleep(500 * time.Millisecond)
+		edit = app.get(rec + "/edit")
+	}
 	var v url.Values
 	switch kind {
 	case view.KindContact:
-		v = liveForm(liveDecode[view.ContactEditPage](t, "edit "+rec, app.get(rec+"/edit")).Form)
+		v = liveForm(liveDecode[view.ContactEditPage](t, "edit "+rec, edit).Form)
 	case view.KindEvent:
-		v = liveForm(liveDecode[view.EventEditPage](t, "edit "+rec, app.get(rec+"/edit")).Form)
+		v = liveForm(liveDecode[view.EventEditPage](t, "edit "+rec, edit).Form)
 	default:
-		v = liveForm(liveDecode[view.TaskEditPage](t, "edit "+rec, app.get(rec+"/edit")).Form)
+		v = liveForm(liveDecode[view.TaskEditPage](t, "edit "+rec, edit).Form)
 	}
 	for k, val := range set {
 		v[k] = strings.Split(val, "\x00")

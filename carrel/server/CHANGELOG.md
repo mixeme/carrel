@@ -17,7 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
-## v0.2.417 — 2026-11-16
+## v0.3.0 — 2026-11-17
+
+**Tagged:** `server-v0.3.0`.
+
+Milestone «the contract covers every frame» (docs/development.md): every
+section passed the client's scan, «Открыто» of the server's plan holds only
+what the owner deferred, no Typecase task of Carrel's is open, and the gates,
+the Linux gates with `-race` and the whole live set — the external servers
+(Baikal, Nextcloud, SoGo, Yandex, iCloud, Google, Mail.ru, OpenCloud, SFTPGo)
+and the stands (Radicale, Stalwart, Xandikos, Davis, DAViCal) — are green on
+this commit.
+
+### For consumers
+
+Nothing changed in the running server since `v0.2.417`.
+
+### For developers
+
+- **Yandex loses a record it just took, for a moment** (SV-62): after a
+  `PUT` answered 201 it answers `GET` of the record with 404 and leaves it
+  out of a `REPORT`, and has it again 0.6–2 s later; a calendar made by
+  `MKCALENDAR` shows in the home a moment after its 201. The same bodies
+  sent by curl stay — not a matter of what Carrel sends. Carrel already
+  takes a record not found by the read after a save as saved, with no loss
+  report. The live set asks again for up to 10 s while the answer is 404
+  (`getSettled` in `rawBody` and `bodyIfThere`, the form in `matrixSave`,
+  the home in `makeCollection`); a record really gone is still gone after
+  the wait.
 
 Typecase `e92dd5c` (note 206); Typecase's tasks 262 (point 5) and 264
 closed — no task of Carrel's is open there.
