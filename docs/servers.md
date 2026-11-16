@@ -785,7 +785,13 @@ Nextcloud — тот же sabre).
   (`ORGANIZER:mailto:carrel@carrel.mixdep.ru`), отправленному приглашению —
   `SCHEDULE-STATUS=1.1` на строке участника. SoGo, став организатором,
   сверх того сбрасывает ответы участников в `NEEDS-ACTION` и разбирает
-  передачу участия (`DELEGATED-TO`, участник, которому передали).
+  передачу участия (`DELEGATED-TO`, участник, которому передали). Davis
+  (тот же sabre) рассылает приглашения почтой и без почтового транспорта
+  отвечает на всякую смену участников `500`
+  (`Symfony\Component\Mailer\Exception\TransportException`), ничего не
+  записав; Carrel так и говорит — «The server refused the change. Nothing
+  was saved.» с ответом сервера в подробностях. Стенд шлёт приглашения в
+  никуда (`MAILER_DSN: null://null`).
 - **Была ошибка Carrel.** Сравнение после записи считало параметры строки
   целиком: участник, к которому сервер дописал `SCHEDULE-STATUS`, шёл в
   отчёт о потере — «the server did not keep: ATTENDEE», хотя сервер хранил

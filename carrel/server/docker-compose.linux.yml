@@ -140,6 +140,12 @@ services:
       WEBDAV_TMP_DIR: "/data/webdav/tmp"
       WEBDAV_PUBLIC_DIR: "/data/webdav/public"
       WEBDAV_HOMES_DIR: "/data/webdav/homes"
+      # Its scheduler mails the invitations of an event whose attendees
+      # change (RFC 6638, docs/servers.md SV-60); with no transport every such
+      # save is a 500 TransportException (the matrix of 16.11.2026). The
+      # stand sends them nowhere.
+      MAILER_DSN: "null://null"
+      INVITE_FROM_ADDRESS: "carrel@carrel.test"
     volumes:
       - davis-data:/data
 
