@@ -409,7 +409,7 @@ func (st dupState) titleOf(g dupGroup) string {
 // «Decided earlier»; from-typecase note 117 p. 10): what was decided, where
 // its records lie and under which UIDs, and its undoing — a button of its
 // card's form, as a group's.
-func (s *Server) decidedView(sess *session.Session, st dupState, g dupGroup) view.DecidedCard {
+func (s *Server) decidedView(sess *session.Session, st dupState, g dupGroup, only view.Kind) view.DecidedCard {
 	out := view.DecidedCard{ID: g.id, Kind: g.kind, Title: text(st.titleOf(g)), Decision: g.decision, Note: "Not loaded in this session"}
 	var where, uids []string
 	for _, m := range st.groupMembers(g.refs) {
@@ -428,7 +428,7 @@ func (s *Server) decidedView(sess *session.Session, st dupState, g dupGroup) vie
 		out.Badge = view.Badge{Label: "not duplicates", Role: view.BadgeNeutral}
 		out.Actions = []view.Action{decideAction("duplicates.again", "Offer again", "again")}
 	}
-	out.Form = &view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+	out.Form = &view.Form{Action: s.decideAt(only), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
 		csrfField(sess),
 		{Name: "group", Kind: view.InputHidden, Value: text(g.id)},
 	}}}}
@@ -553,7 +553,7 @@ func decideAction(id, label, do string) view.Action {
 	return view.Action{ID: id, Label: text(label), Method: "POST", Enabled: true, Submits: true, Name: "do", Value: do}
 }
 
-func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.DuplicateGroup {
+func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup, only view.Kind) view.DuplicateGroup {
 	out := view.DuplicateGroup{ID: g.id, Kind: g.kind, Score: g.score, Decision: g.decision, Hint: groupHint(g)}
 	for _, r := range g.reasons {
 		out.Reasons = append(out.Reasons, text(reasonText(g.kind, r)))
@@ -625,7 +625,7 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	}
 	// Every card is a form (U-8; from-typecase note 117 p. 8): its group
 	// and token hidden, its questions in it, every decision a button of it.
-	out.Form = &view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+	out.Form = &view.Form{Action: s.decideAt(only), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
 		csrfField(sess),
 		{Name: "group", Kind: view.InputHidden, Value: text(g.id)},
 	}}}}
@@ -640,6 +640,26 @@ func kindFilter(r *http.Request) view.Kind {
 		}
 	}
 	return ""
+}
+
+// decideAt is where a decision of the screen is sent: under the filter it
+// is shown under (Bar.Segments), so that the answer and the way back stand
+// under it too (U-15.1: «Link them» under «Notes» led back to «All»).
+func (s *Server) decideAt(only view.Kind) string {
+	q := url.Values{}
+	if only != "" {
+		q.Set("kind", string(only))
+	}
+	return s.postQuery("/app/duplicates/decide", q)
+}
+
+// duplicatesBack is the screen a decision goes back to: the filter it was
+// taken under.
+func duplicatesBack(r *http.Request) string {
+	if k := kindFilter(r); k != "" {
+		return "/app/duplicates?kind=" + url.QueryEscape(string(k))
+	}
+	return "/app/duplicates"
 }
 
 var dupSegmentLabels = map[view.Kind]string{
@@ -725,9 +745,9 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		switch {
 		case only != "" && g.kind != only:
 		case g.decision != view.DecisionNone && !st.loaded(g):
-			page.Decided = append(page.Decided, s.decidedView(sess, st, g))
+			page.Decided = append(page.Decided, s.decidedView(sess, st, g, only))
 		default:
-			page.Groups = append(page.Groups, s.groupView(sess, st, g))
+			page.Groups = append(page.Groups, s.groupView(sess, st, g, only))
 		}
 	}
 	segment := func(k view.Kind, label string, n int) view.Action {
@@ -767,7 +787,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	page.Threshold = view.ThresholdControl{Value: st.threshold, Default: s.cfg.DuplicatesThreshold}
 	// The threshold is a form of its own (U-8, s-dup-1): the field goes by
 	// Enter, as the frame draws no button beside it.
-	page.Threshold.Form = view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+	page.Threshold.Form = view.Form{Action: s.decideAt(only), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
 		csrfField(sess),
 		{Name: "do", Kind: view.InputHidden, Value: "threshold"},
 		{Name: "value", Label: "Match threshold", Kind: view.InputNumber, Value: text(strconv.Itoa(st.threshold)), Mono: true},
@@ -793,7 +813,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	save := decideAction("duplicates.weights.save", "Save", "weights")
 	save.Primary = true
 	page.Threshold.WeightForm = view.Form{
-		Action: s.route("/app/duplicates/decide"), Method: "POST",
+		Action: s.decideAt(only), Method: "POST",
 		Sets:    []view.FieldSet{{Rows: []view.FormRow{csrfField(sess)}}},
 		Actions: []view.Action{save, reset},
 	}
@@ -879,7 +899,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 			d.Threshold = n
 			return nil
 		})
-		s.redirect(w, r, "/app/duplicates")
+		s.redirect(w, r, duplicatesBack(r))
 		return
 	}
 	if do == "defaults" {
@@ -887,7 +907,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 			d.Weights = nil
 			return nil
 		})
-		s.redirect(w, r, "/app/duplicates")
+		s.redirect(w, r, duplicatesBack(r))
 		return
 	}
 	if do == "weights" {
@@ -935,7 +955,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		s.redirect(w, r, "/app/duplicates")
+		s.redirect(w, r, duplicatesBack(r))
 		return
 	}
 	st := s.readDuplicates(sess, true)
@@ -1033,7 +1053,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if notice == nil && !render.WantsFragment(r) {
-		s.redirect(w, r, "/app/duplicates")
+		s.redirect(w, r, duplicatesBack(r))
 		return
 	}
 	page := s.duplicatesPage(sess, s.readDuplicates(sess, false), kindFilter(r))

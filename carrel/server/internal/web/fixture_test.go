@@ -3,10 +3,8 @@ package web_test
 import (
 	"bytes"
 	"context"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"hash/crc32"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -202,56 +200,6 @@ var mockupFileCols = []struct {
 	{account: "nextcloud", slug: "Files", name: "Files", local: "nextcloud-home/Files"},
 }
 
-// mockupFileShapes are the sizes and times the frames give the files of
-// the set (s-files-1, s-files-5, states-34): the files on disk are stubs,
-// and the stand grows them to the size; a folder's time is set after what
-// is in it. head goes before the stub: the header of an image whose width
-// and height a frame draws (s-files-1: «Dimensions · 1920×1080»; s-files-5:
-// «2.8 MB · 4032×3024»). The sizes of «2026-07» add up to the frame's
-// «7 items · 89.4 MB», the two of «Public» to «2 items · 5.3 MB».
-var mockupFileShapes = []struct {
-	slug, rel string
-	size      int64
-	at        string
-	head      string
-}{
-	{slug: "Documents", rel: "carrel/attachments/2026-07/whiteboard.jpg", size: 2936013, at: "2026-07-14 16:20", head: jpegHead4032x3024},
-	{slug: "Documents", rel: "carrel/attachments/2026-07/схема-1.png", size: 640 << 10, at: "2026-07-01 12:00"},
-	{slug: "Documents", rel: "carrel/attachments/2026-07/схема-2.png", size: 712 << 10, at: "2026-07-02 10:30"},
-	{slug: "Documents", rel: "carrel/attachments/2026-07/смета.pdf", size: 1258291, at: "2026-07-09 15:45"},
-	{slug: "Documents", rel: "carrel/attachments/2026-07/панорама.tif", size: 88122982, at: "2026-07-20 13:10"},
-	{slug: "Public", rel: "прайс-2026.pdf", size: 1153434, at: "2026-07-28 10:15"},
-	{slug: "Public", rel: "схема-проезда.png", size: 4404019, at: "2026-06-02 16:40"},
-	{slug: "Documents", rel: "carrel/attachments/2026-08/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07", head: pngHead(1920, 1080)},
-	// The checklist is the frame's Markdown in the set, 3 KB as it stands
-	// (s-publish-10): a public page reads it as its body.
-	{slug: "Documents", rel: "carrel/attachments/2026-08/release-checklist.md", at: "2026-08-09 18:44"},
-	{slug: "Documents", rel: "carrel/attachments/2026-08/смета-подрядчик.pdf", size: 1258291, at: "2026-08-05 14:20"},
-	{slug: "Documents", rel: "carrel/attachments/2026-08/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03", head: jpegHead4032x3024},
-	{slug: "Documents", rel: "carrel/attachments/2026-07", at: "2026-07-01 09:12"},
-	{slug: "Documents", rel: "ковалёва-обложка-v2.pdf", size: 1677722, at: "2026-08-06 16:20"},
-	// August's folder, changed when its last file came (s-publish-5:
-	// «2026-08 · folder · 4 items · 2026-08-10 11:07»; note 180).
-	{slug: "Documents", rel: "carrel/attachments/2026-08", at: "2026-08-10 11:07"},
-}
-
-// jpegHead4032x3024 is the start of a JPEG and its baseline frame header:
-// 3024 lines of 4032, three components — what the head of a camera's
-// picture tells, and all of it the size of an image is read from (S-17).
-const jpegHead4032x3024 = "\xff\xd8\xff\xc0\x00\x11\x08\x0b\xd0\x0f\xc0\x03\x01\x22\x00\x02\x11\x01\x03\x11\x01"
-
-// pngSignature is the eight bytes every PNG begins with.
-const pngSignature = "\x89PNG\r\n\x1a\n"
-
-// pngHead is the start of a PNG and its IHDR, w by h of eight-bit RGB: all
-// of it the size of an image is read from (S-17).
-func pngHead(w, h uint32) string {
-	ihdr := binary.BigEndian.AppendUint32(binary.BigEndian.AppendUint32([]byte("IHDR"), w), h)
-	ihdr = append(ihdr, 8, 2, 0, 0, 0)
-	head := binary.BigEndian.AppendUint32([]byte(pngSignature), 13)
-	return string(binary.BigEndian.AppendUint32(append(head, ihdr...), crc32.ChecksumIEEE(ihdr)))
-}
-
 // mockupFiles puts the file collections of the set in the catalog and their
 // files on the stands, ticks the two the frames tick, and makes
 // «Documents / carrel / attachments» the folder attachments go to. The file
@@ -275,56 +223,11 @@ func mockupFiles(t *testing.T, h *harness, sess *session.Session, root string, s
 		srv := servers[fc.account]
 		path := davtest.FileRoot + fc.slug + "/"
 		paths[fc.slug] = path
-		srv.SeedFolder(path)
-		dir := filepath.Join(root, filepath.FromSlash(fc.local))
-		err := filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
-			if err != nil || p == dir {
-				return err
-			}
-			rel, _ := filepath.Rel(dir, p)
-			target := path + filepath.ToSlash(rel)
-			if d.IsDir() {
-				srv.SeedFolder(target + "/")
-				return nil
-			}
-			data, err := os.ReadFile(p)
-			if err != nil {
-				return err
-			}
-			srv.SeedFile(target, string(data))
-			// When a file changed is part of what the screens show («Oldest»
-			// of attachments-1): the day its name begins with, else the set's
-			// day — never the day the set is loaded.
-			at := mockupNow(t)
-			if len(d.Name()) >= 10 {
-				if day, err := time.ParseInLocation("2006-01-02", d.Name()[:10], at.Location()); err == nil {
-					at = day.Add(12 * time.Hour)
-				}
-			}
-			srv.SetModified(target, at)
-			return nil
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		// The set's files are stubs of a few bytes; the stand gives the ones
+		// The set's files are stubs of a few bytes; SeedSet gives the ones
 		// the frames draw their sizes and times (s-files-1, -2, -5,
-		// states-34): 412 KB under the thumbnail's ceiling, 2.8 MB over it,
-		// a folder of July.
-		for _, one := range mockupFileShapes {
-			if one.slug != fc.slug {
-				continue
-			}
-			target := path + one.rel
-			if one.size > 0 {
-				data, ok := srv.File(target)
-				if !ok {
-					t.Fatalf("the set has no %s", target)
-				}
-				srv.SeedFile(target, one.head+data)
-				srv.Grow(target, one.size)
-			}
-			srv.SetModified(target, mockupDayAt(t, one.at))
+		// states-34), as it gives them on the acceptance stand.
+		if err := srv.SeedSet(path, filepath.Join(root, filepath.FromSlash(fc.local)), fc.slug, mockupNow(t)); err != nil {
+			t.Fatal(err)
 		}
 		col := sealed.Collection{Path: path, Name: fc.name, Kinds: []view.Kind{view.KindFile}, ReadOnly: fc.readOnly}
 		if fc.account == "sftpgo · vps" {

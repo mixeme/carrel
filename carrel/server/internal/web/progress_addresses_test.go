@@ -159,11 +159,30 @@ func TestTheEndOfAPollBringsItsPage(t *testing.T) {
 	if page.Poll == nil || page.Poll.Running || page.Poll.TaskID != list.Poll.TaskID {
 		t.Errorf("the list at the end stands on another poll or a running one: %+v", page.Poll)
 	}
+	// The page is drawn as the browser's own would be (U-15.1, the stand's
+	// second round): its Look — the source column of the combined notebook
+	// was gone without it — and its rows opening in the panel, as the list
+	// they replace does.
+	looks := func(what string, page view.ContactsListPage) {
+		t.Helper()
+		if page.Look != list.Look {
+			t.Errorf("%s: look %+v, want the browser's %+v", what, page.Look, list.Look)
+		}
+		for _, g := range page.Groups {
+			for _, r := range g.Rows {
+				if !strings.HasPrefix(r.Href, "/app/contacts?") || !strings.Contains(r.Href, "open=") {
+					t.Errorf("%s: %s leads to %s, not the panel of the list", what, r.Name, r.Href)
+				}
+			}
+		}
+	}
+	looks("the list's poll-finished", page)
 	raw := f.h.do(asPoll(get("/app/search/progress/"+list.Poll.TaskID+"/poll", f.sess))).Body.String()
 	page = view.ContactsListPage{}
 	if err := json.Unmarshal(mainOf("the list's last fallback answer", raw), &page); err != nil || len(names(page.Groups)) != 2 {
 		t.Errorf("the list by the fallback poll at the end: %v, %v", names(page.Groups), err)
 	}
+	looks("the list's last fallback answer", page)
 
 	found := search(t, f.h, f.sess, "q=Ada")
 	var results view.SearchPage

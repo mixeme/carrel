@@ -1521,7 +1521,18 @@ func (s *Server) pageAtTheEnd(r *http.Request, t any, query url.Values) (any, bo
 		}
 	}
 	u.RawQuery = q.Encode()
-	return s.pageAt(r, u)
+	page, ok := s.pageAt(r, u)
+	if !ok {
+		return nil, false
+	}
+	// Drawn as the browser's own page would be: its Look — the source
+	// column of a combined list, the density — and its rows opening in the
+	// panel of the list at its own address (stampPanel reads the address
+	// from the request), as the stamping renderer does for a page.
+	look := lookOf(r)
+	at2 := r.Clone(r.Context())
+	at2.URL = u
+	return stampPanel(at2, stampLook(page, look), look), true
 }
 
 // postSearchProgressRetry asks one source again and nobody else (S-15.1);

@@ -160,3 +160,38 @@ func TestACollectionWithoutANameIsNamedByItsKind(t *testing.T) {
 		t.Errorf("the calendar is alone and keeps its plain name: %q", byPath[cal])
 	}
 }
+
+// A storage entered by an address with a path — SFTPGo under /dav/, Nextcloud
+// under /remote.php/dav/files/<login>/ — offers the folders at that address.
+// A PROPFIND of depth 1 answers the address itself first; that answer is the
+// storage, not one more folder in it, and the acceptance stand showed it as a
+// third storage «files» beside Documents and Public (s-files-1 has two). With
+// no folder in it, the address itself is the one collection.
+func TestAStorageAtAPathIsNotItsOwnFolder(t *testing.T) {
+	srv := davtest.New(t)
+	srv.SeedFolder(davtest.FileRoot + "Documents/")
+	srv.SeedFolder(davtest.FileRoot + "Public/")
+	res, _, err := Run(t.Context(), loopbackGuard(), srv.URL+davtest.FileRoot, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, c := range res.Collections {
+		got = append(got, strings.TrimSuffix(c.Path, "/"))
+	}
+	slices.Sort(got)
+	want := []string{davtest.FileRoot + "Documents", davtest.FileRoot + "Public"}
+	if !res.FileOnly || !slices.Equal(got, want) {
+		t.Errorf("fileOnly %v, collections %q, want %q", res.FileOnly, got, want)
+	}
+
+	empty := davtest.New(t)
+	empty.SeedFolder(davtest.FileRoot)
+	res, _, err = Run(t.Context(), loopbackGuard(), empty.URL+davtest.FileRoot, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Collections) != 1 || strings.TrimSuffix(res.Collections[0].Path, "/") != strings.TrimSuffix(davtest.FileRoot, "/") {
+		t.Errorf("an empty storage = %+v, want its own address alone", res.Collections)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/view"
 	"github.com/emersion/go-webdav/carddav"
 )
@@ -69,7 +70,7 @@ func TestFixturePublicPages(t *testing.T) {
 		"publish-sheet.png": "2026-08-09 17:20", "search-results.png": "2026-08-09 17:10",
 	} {
 		shot := docs + "carrel/attachments/2026-08/скриншоты/" + name
-		sftp.SeedFile(shot, pngSignature)
+		sftp.SeedFile(shot, davtest.PNGSignature)
 		sftp.SetModified(shot, mockupDayAt(t, at))
 	}
 	sftp.SetModified(docs+"carrel/attachments/2026-08/скриншоты", mockupDayAt(t, "2026-08-10 11:07"))

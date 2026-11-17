@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.4 — 2026-11-17
+
+Client `v0.11.37`. The second round of the client's acceptance (U-15.1) on
+the stand of the mockup set.
+
+### For consumers
+
+- **The page the end of a poll brings is drawn for the browser** (C-7.3,
+  C-7.4): its `look` is the browser's (Appearance) and the rows of a list
+  open in the panel of the list (`?open=`), as on the page it replaces.
+  Since `v0.3.3` that page came with an empty `look` — the combined lists
+  lost their source column («2 sources», «nextcloud · Дневник») — and its
+  rows led to the record's page.
+- **A storage entered by an address with a path** (S-6) — SFTPGo under
+  `/dav/`, Nextcloud under `/remote.php/dav/files/<login>/` — offers the
+  folders at that address and no longer itself as one more: the answer of
+  depth 1 names the address too, and it was taken for a folder («files»
+  beside Documents and Public). With no folder in it, the address itself
+  is the one collection — at its path, not at the server's root.
+- **A decision on duplicates stays under the filter** it was taken under
+  (`/app/duplicates/decide`): the forms of the cards, the threshold and the
+  weights post to the address with `?kind=` of the segment shown, and the
+  answer and the redirect stand under it; «Link them» under «Notes» led
+  back to «All».
+- `davtest.SeedSet`, `davtest.SetShapes` — a folder of the set on a file
+  server with the sizes, times and image heads the frames give, shared by
+  the fixtures and the stand: the stand's files had the day it was started
+  and the stubs' sizes.
+
 ## v0.3.3 — 2026-11-17
 
 Client `v0.11.37`. The first round of the client's acceptance (U-15.1) on

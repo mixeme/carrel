@@ -790,3 +790,29 @@ func TestWhatWasReadOutlivesTheCollectionTTL(t *testing.T) {
 		t.Errorf("rail count = %v", c)
 	}
 }
+
+// A decision taken under a filter stays under it (U-15.1, the stand's second
+// round): «Link them» under «Notes» led back to «All», and the next pair of
+// notes was among the contacts again. The card's form, the threshold's and
+// the weights' carry the filter, and so does the way back.
+func TestADecisionKeepsTheFilter(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	const under = "/app/duplicates?kind=contact"
+	p := decode[view.DuplicatesPage](t, f.h.do(get(under, f.sess)))
+	g := onlyGroup(t, p)
+	for what, action := range map[string]string{"the card": g.Form.Action, "the threshold": p.Threshold.Form.Action} {
+		if !strings.Contains(action, "kind=contact") {
+			t.Errorf("%s posts to %s, without the filter", what, action)
+		}
+	}
+	rec := f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, nil)))
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != under {
+		t.Fatalf("link under the filter: %d, back to %q, want %q", rec.Code, rec.Header().Get("Location"), under)
+	}
+	linked := onlyGroup(t, decode[view.DuplicatesPage](t, f.h.do(get(under, f.sess))))
+	rec = f.h.do(decideRequest(t, f.sess, linked, "duplicates.unlink", asItStands(linked, nil)))
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != under {
+		t.Errorf("unlink under the filter: %d, back to %q, want %q", rec.Code, rec.Header().Get("Location"), under)
+	}
+}

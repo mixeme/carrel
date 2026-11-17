@@ -116,7 +116,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 			trace.OK = true
 			return &Result{BaseURL: endpoint, Collections: []Collection{col}}, trace, nil
 		}
-		cols, ferr := fileCollections(ctx, client)
+		cols, ferr := fileCollections(ctx, client, endpoint)
 		if ferr != nil {
 			trace.Steps = steps
 			return nil, trace, ferr
@@ -493,14 +493,20 @@ func collectionNoun(col Collection) string {
 	return "a calendar"
 }
 
-func fileCollections(ctx context.Context, client *dav.Client) ([]Collection, error) {
+// fileCollections are the folders at the entered address. A PROPFIND of
+// depth 1 answers the address itself too; that answer is the storage, not a
+// folder in it — at the server's root and at an address with a path alike
+// (SFTPGo under /dav/, Nextcloud under /remote.php/dav/files/<login>/). With
+// no folder in it, the address itself is the one collection.
+func fileCollections(ctx context.Context, client *dav.Client, endpoint string) ([]Collection, error) {
 	infos, err := client.WebDAV().ReadDir(ctx, "", false)
 	if err != nil {
 		return nil, err
 	}
+	self := hrefKey(endpoint)
 	var out []Collection
 	for _, fi := range infos {
-		if !fi.IsDir || fi.Path == "/" {
+		if !fi.IsDir || fi.Path == "/" || hrefKey(fi.Path) == self {
 			continue
 		}
 		out = append(out, Collection{
@@ -511,8 +517,8 @@ func fileCollections(ctx context.Context, client *dav.Client) ([]Collection, err
 	}
 	if len(out) == 0 {
 		out = []Collection{{
-			Path:        "/",
-			DisplayName: pathBase("/"),
+			Path:        self + "/",
+			DisplayName: pathBase(self + "/"),
 			Kinds:       []view.Kind{view.KindFile},
 		}}
 	}

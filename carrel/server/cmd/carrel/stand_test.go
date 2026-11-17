@@ -92,11 +92,20 @@ func TestStand(t *testing.T) {
 		}
 	}
 
-	// The file server: «Documents» and «Public» as the set has them.
+	// The file server: «Documents» and «Public» as the set has them, with
+	// the sizes and times the frames draw (davtest.SetShapes) — the day
+	// the frames were drawn, not the day the stand is started.
 	files := davtest.New(t)
 	files.Login, files.Password = "alice", "secret"
+	setZone, err := time.LoadLocation("Europe/Moscow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	setDay := time.Date(2026, 8, 10, 17, 4, 0, 0, setZone)
 	for _, folder := range []string{"Documents", "Public"} {
-		seedFolder(t, files, davtest.FileRoot+folder+"/", filepath.Join(root, "sftpgo-vps", folder))
+		if err := files.SeedSet(davtest.FileRoot+folder+"/", filepath.Join(root, "sftpgo-vps", folder), folder, setDay); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	// The feeds, served as files; the league's behind a password that is
@@ -205,32 +214,6 @@ var standSet = []standCollection{
 	{"radicale · vps", "proekty", "Проекты", "#6B4E7A", []string{"VEVENT"}, []string{"radicale-vps/proekty.ics"}, false},
 	{"radicale · vps", "dezhurstva", "Дежурства", "#8C6239", []string{"VEVENT"}, []string{"radicale-vps/dezhurstva.ics"}, false},
 	{"baikal", "obshchij", "Общий", "#9A9280", []string{"VEVENT"}, nil, false},
-}
-
-// seedFolder puts a folder of the set on a file server, as it is on disk.
-func seedFolder(t *testing.T, srv *davtest.Server, at, dir string) {
-	t.Helper()
-	srv.SeedFolder(at)
-	err := filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
-		if err != nil || p == dir {
-			return err
-		}
-		rel, _ := filepath.Rel(dir, p)
-		target := at + filepath.ToSlash(rel)
-		if d.IsDir() {
-			srv.SeedFolder(target + "/")
-			return nil
-		}
-		data, err := os.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		srv.SeedFile(target, string(data))
-		return nil
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
 }
 
 // untick takes a collection off its rail: the tick of its row, pressed.
