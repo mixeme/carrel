@@ -30,6 +30,7 @@
   "body": "Зарядки, переходник, распечатать посадочный.",
   "details": null,
   "done": false,
+  "drop": null,
   "fields": [
     {
       "from": null,

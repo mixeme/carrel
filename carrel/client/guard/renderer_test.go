@@ -65,6 +65,20 @@ func formsOf(scr screens.Screen, model any) string {
 	return out
 }
 
+// pageFormsOf are the forms at a whole page's end: the screen's, then the
+// form of its drop sheet the screen prints none of (the list's import),
+// which the document adds. An answer for a zone carries the screen's only:
+// the drop's form stays where the page has it.
+func pageFormsOf(scr screens.Screen, model any) string {
+	out := formsOf(scr, model)
+	if scr.Drop != nil {
+		if _, f, ok := scr.Drop(model); ok && f != nil {
+			out += f.Render()
+		}
+	}
+	return out
+}
+
 // rootOf cuts the root out of a served page: after the sprite of icons,
 // before the screen's forms and the library's script.
 func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
@@ -79,8 +93,15 @@ func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
 	}
 	rest := page[i+j+len("</div>"):]
 	assets := document.Assets(base)
-	tail := formsOf(scr, model) + `<script src="` + assets.JS + `"></script><script src="` + assets.Live + `"></script></body></html>`
+	tail := pageFormsOf(scr, model) + `<script src="` + assets.JS + `"></script><script src="` + assets.Live + `"></script></body></html>`
 	root, ok := strings.CutSuffix(rest, tail)
+	// The closed drop sheet (document.withDrop) the frames draw alone
+	// (s-io-1, -20…-22), as the keys' one.
+	if scr.Drop != nil {
+		if sheet, _, has := scr.Drop(model); has {
+			root = strings.Replace(root, sheet.Render(), "", 1)
+		}
+	}
 	return unzoned(root), ok && root != ""
 }
 

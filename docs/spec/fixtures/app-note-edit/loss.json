@@ -424,6 +424,7 @@
     ],
     "title": "Заметка со встречи 10.08"
   },
+  "drop": null,
   "look": {
     "compact": false,
     "panel": true,

@@ -365,6 +365,34 @@ func (s *Server) attachOf(c *collectionCtx, uid, etag string) *view.Action {
 	return &a
 }
 
+// attachDrop is the words of the drop sheet of a record's page (s-io-20,
+// Typecase's note 136), where Attach is: a file dropped on the page is
+// attached to the record named by its title; one over the record's limit
+// goes to the folder for attachments and the record keeps a link — or, with
+// no folder to write to, is not attached, for the reason Attach would give
+// (placeAttachment). The size is not known while the file is carried, so
+// the sheet says the rule.
+func (s *Server) attachDrop(c *collectionCtx, obj *model.Object, attach *view.Action) *view.AttachDrop {
+	if attach == nil {
+		return nil
+	}
+	over := "Over " + sizeText(attachLimit(c.col))
+	d := &view.AttachDrop{Lead: "Drop to attach", Line: join("to ", strongRun(recordTitle(c.spec.kind, obj)))}
+	fc := s.savedFolder(c.sess, s.catalogOf(c.sess))
+	switch {
+	case fc == nil && s.catalogOf(c.sess).Attachments == nil:
+		d.Note = join(over + " it is not attached: no folder for attachments is chosen")
+	case fc == nil:
+		d.Note = join(over + " it is not attached: the folder for attachments is not available")
+	case fc.col.ReadOnly:
+		d.Note = join(over + " it is not attached: the folder for attachments is read-only")
+	default:
+		where := strings.Join(append([]string{collectionLabel(fc.col)}, fc.segs...), " / ")
+		d.Note = join(over+" it goes to ", monoRun(where), " and the "+recordNouns[c.spec.kind]+" keeps a link")
+	}
+	return d
+}
+
 // Writing.
 
 func attachBack(c *collectionCtx, uid, from string) string {

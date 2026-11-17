@@ -381,11 +381,13 @@ func (s *Server) linkedPage(sess *session.Session, spec kindSpec, lr linkedRecor
 	case view.EventPage:
 		p.LinkedRecord, p.Subtitle, p.Fields, p.Linked = true, text(head), lr.markFrom(p.Fields), s.keptRows(lr, shown)
 		p.Actions, p.Menu, p.ReadOnly, p.Source = actions, menu, false, view.SourceBlock{}
+		p.Drop = nil // Attach is a copy's, so a file has nowhere to be dropped (s-io-20)
 		lr.markCopies(p.Attach, p.Related)
 		return p
 	case view.TaskPage:
 		p.LinkedRecord, p.Subtitle, p.Fields, p.Linked = true, view.Runs{{Text: text(head)}}, lr.markFrom(p.Fields), s.keptRows(lr, shown)
 		p.Actions, p.Menu, p.ReadOnly, p.Source = actions, menu, false, view.SourceBlock{}
+		p.Drop = nil // Attach is a copy's, so a file has nowhere to be dropped (s-io-20)
 		lr.markCopies(p.Attach, p.Related)
 		return p
 	case view.NotePage:
@@ -402,6 +404,7 @@ func (s *Server) linkedPage(sess *session.Session, spec kindSpec, lr linkedRecor
 		// «Kept as the server sent them» stays, folded, as the note's own
 		// (s-notes-32; Typecase's task 254).
 		p.Doc.Bar, p.Meta.Actions, p.Meta.Menu, p.Source = actions, nil, menu, view.SourceBlock{}
+		p.Drop = nil // no Attach, so nothing is dropped (s-io-20)
 		return p
 	default:
 		return p

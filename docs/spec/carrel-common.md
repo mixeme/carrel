@@ -1161,6 +1161,14 @@ type ListBar struct {
 type ImportDrop struct { Action Action; Accept []Text; Many bool; Lead Text; Line Runs; Note Text; Refused Runs; OneOnly Text; Elsewhere []ImportElsewhere }
 type ImportElsewhere struct { Ext Text; Says Runs }
 
+// Бросок файла на страницу записи (s-io-20, записка Typecase 136): Lead —
+// «Drop to attach», Line — «to ‹название›» (название — RunStrong), Note —
+// куда уходит файл больше предела записи: «Over 2 MB it goes to
+// ‹Documents / carrel› and the event keeps a link» (папка — RunMono), без
+// папки вложений — «Over 2 MB it is not attached: no folder for attachments
+// is chosen». Файл уходит формой Attach «From this computer».
+type AttachDrop struct { Lead Text; Line Runs; Note Runs }
+
 // Выбор столбцов (components-21, components-42; S-9.6). Меню — форма:
 // отмеченные пункты уходят полем col в том порядке, в каком стоят, — порядок
 // пунктов и есть порядок столбцов. Выбор помнит этот браузер (U-12).
@@ -1511,6 +1519,7 @@ type EventPage struct { // чтение: то, что открывается п�
     Attendees []AttendeeRow // организатор первым (Status «organiser»), за ним участники; только чтение, без согласования
 
     Attach    []AttachRow
+    Drop      *AttachDrop // бросок файла на страницу (s-io-20, записка Typecase 136); nil — вложить нельзя
     Related   []TimelineRow
     Linked    []Field // та же встреча в других календарях (S-16)
     Source    SourceBlock
@@ -1649,6 +1658,7 @@ type TaskPage struct { // чтение
     Done      bool       // выполнена: Mark done (task.done) снимает отметку
     Attendees []AttendeeRow // люди задачи, как у события: организатор первым (Status «organiser»), за ним участники; только чтение (Р3 списка равенства родов; кадра нет). Организатора среди Fields нет
     Attach    []AttachRow
+    Drop      *AttachDrop // бросок файла на страницу (s-io-20, записка Typecase 136); nil — вложить нельзя
     Related   []TimelineRow
     Linked    []Field // та же задача в других списках (S-16)
     Source    SourceBlock // Path и сравнение с сервером, как у события
@@ -1697,6 +1707,7 @@ type NotePage struct {
     Meta   NoteMeta
     Source SourceBlock // колонка: UID заметки и когда прочитана (s-notes-2, -20); у новой UID пуст
     Loss   *LossReport
+    Drop   *AttachDrop // бросок файла на страницу (s-io-20); nil — вложить нельзя
 }
 
 type NoteDoc struct { // колонка текста страницы заметки: чтение или правка

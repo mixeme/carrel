@@ -312,6 +312,30 @@
         ],
         "title": "Заметка со встречи 10.08"
       },
+      "drop": {
+        "lead": "Drop to attach",
+        "line": [
+          {
+            "text": "to "
+          },
+          {
+            "mark": "strong",
+            "text": "Заметка со встречи 10.08"
+          }
+        ],
+        "note": [
+          {
+            "text": "Over 2 MB it goes to "
+          },
+          {
+            "mark": "mono",
+            "text": "Documents / carrel / attachments"
+          },
+          {
+            "text": " and the note keeps a link"
+          }
+        ]
+      },
       "look": {
         "compact": false,
         "panel": true,

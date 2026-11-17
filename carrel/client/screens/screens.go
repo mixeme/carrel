@@ -82,6 +82,13 @@ type Screen struct {
 	// the forgotten password (s-auth-6), the wipe's confirmation (s-auth-10).
 	// nil — the screen has none.
 	Forms func(model any) []widget.PostForm
+	// Drop is the page's drop sheet (Typecase's notes 60, 136; bind.DropSheet)
+	// from the same view model, and the form it names when the screen
+	// prints none of its own (the list's import, bind.ImportDrop); the
+	// document puts the sheet among the page's own sheets (Shell.Dialogs)
+	// and the form at the page's end. ok false — no file is dropped here.
+	// nil — the screen takes no drop.
+	Drop func(model any) (sheet widget.Scrim, form *widget.PostForm, ok bool)
 	// Notices is the space the screen keeps around the shell's notices: the
 	// page's gutters (zero), but flush with the sides of a dialog on the
 	// conflict screen (s-conflict-8…-11). The zone notices is drawn so too.
@@ -101,6 +108,27 @@ type Screen struct {
 	// control in the screen's code. nil — nothing waits.
 	Waits []Wait
 }
+
+// importDrop is a list's drop sheet (s-io-1; Typecase's notes 60, 136): the
+// import its bar names (ListBar.Drop) and the wizard's form it sends; a list
+// one does not write into names none.
+func importDrop(bar view.ListBar) (widget.Scrim, *widget.PostForm, bool) {
+	if bar.Drop == nil {
+		return widget.Scrim{}, nil, false
+	}
+	sheet, form := bind.ImportDrop(*bar.Drop, importIcon)
+	return sheet, &form, true
+}
+
+// ownForm is a drop sheet that names a form the screen prints itself: the
+// page's Attach (s-io-20), an edit's, whose file field takes the dropped
+// file (s-io-21, -22).
+func ownForm(sheet widget.Scrim, ok bool) (widget.Scrim, *widget.PostForm, bool) {
+	return sheet, nil, ok
+}
+
+// importIcon is the drop sheet's icon of an import (s-io-1).
+const importIcon widget.Icon = "import"
 
 // Wait is one thing of a screen the library cannot draw yet, by its row of
 // the list «ждёт библиотеку» (U-5.5):
@@ -399,6 +427,9 @@ var All = []Screen{
 			return contacts.Screen(model.(*view.ContactsListPage))
 		},
 		Title: func(model any) string { return string(model.(*view.ContactsListPage).Title) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return importDrop(model.(*view.ContactsListPage).Bar)
+		},
 		Forms: func(model any) []widget.PostForm {
 			if p := model.(*view.ContactsListPage); !p.Print.Paper {
 				return contacts.Forms(p)
@@ -446,8 +477,11 @@ var All = []Screen{
 		Frames: []string{"s-contacts-3", "s-contacts-4", "s-contacts-27", "s-contacts-38", "states-12"},
 		Draw:   func(model any) Root { return contactedit.Screen(model.(*view.ContactEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.ContactEditPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return contactedit.Forms(model.(*view.ContactEditPage)) },
-		Waits:  []Wait{},
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(contactedit.Drop(model.(*view.ContactEditPage)))
+		},
+		Forms: func(model any) []widget.PostForm { return contactedit.Forms(model.(*view.ContactEditPage)) },
+		Waits: []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.AgendaPage) },
@@ -460,6 +494,9 @@ var All = []Screen{
 			return agenda.Screen(p)
 		},
 		Title: func(model any) string { return string(model.(*view.AgendaPage).Title) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return importDrop(model.(*view.AgendaPage).Bar)
+		},
 		Forms: func(model any) []widget.PostForm {
 			if p := model.(*view.AgendaPage); !p.Print.Paper {
 				return agenda.Forms(p)
@@ -473,15 +510,21 @@ var All = []Screen{
 		Frames: []string{"s-agenda-2", "s-agenda-25"},
 		Draw:   func(model any) Root { return event.Screen(model.(*view.EventPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return event.Forms(model.(*view.EventPage)) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(event.Drop(model.(*view.EventPage)))
+		},
+		Forms: func(model any) []widget.PostForm { return event.Forms(model.(*view.EventPage)) },
 	},
 	{
 		Model:  func() any { return new(view.EventEditPage) },
 		Frames: []string{"s-agenda-3", "s-agenda-15", "s-agenda-32", "states-17", "states-36"},
 		Draw:   func(model any) Root { return eventedit.Screen(model.(*view.EventEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventEditPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
-		Waits:  []Wait{},
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(eventedit.Drop(model.(*view.EventEditPage)))
+		},
+		Forms: func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
+		Waits: []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.TasksPage) },
@@ -493,6 +536,9 @@ var All = []Screen{
 			return tasks.Screen(model.(*view.TasksPage))
 		},
 		Title: func(model any) string { return string(model.(*view.TasksPage).Title) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return importDrop(model.(*view.TasksPage).Bar)
+		},
 		Forms: func(model any) []widget.PostForm {
 			if p := model.(*view.TasksPage); !p.Print.Paper {
 				return tasks.Forms(p)
@@ -506,14 +552,20 @@ var All = []Screen{
 		Frames: []string{"s-tasks-2", "s-tasks-17"},
 		Draw:   func(model any) Root { return task.Screen(model.(*view.TaskPage)) },
 		Title:  func(model any) string { return string(model.(*view.TaskPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return task.Forms(model.(*view.TaskPage)) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(task.Drop(model.(*view.TaskPage)))
+		},
+		Forms: func(model any) []widget.PostForm { return task.Forms(model.(*view.TaskPage)) },
 	},
 	{
 		Model:  func() any { return new(view.TaskEditPage) },
 		Frames: []string{"s-tasks-3", "s-tasks-14", "states-24"},
 		Draw:   func(model any) Root { return taskedit.Screen(model.(*view.TaskEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.TaskEditPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return taskedit.Forms(model.(*view.TaskEditPage)) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(taskedit.Drop(model.(*view.TaskEditPage)))
+		},
+		Forms: func(model any) []widget.PostForm { return taskedit.Forms(model.(*view.TaskEditPage)) },
 	},
 	{
 		Model:  func() any { return new(view.NotesPage) },
@@ -525,6 +577,9 @@ var All = []Screen{
 			return notes.Screen(model.(*view.NotesPage))
 		},
 		Title: func(model any) string { return string(model.(*view.NotesPage).Title) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return importDrop(model.(*view.NotesPage).Bar)
+		},
 		Forms: func(model any) []widget.PostForm {
 			if p := model.(*view.NotesPage); !p.Print.Paper {
 				return notes.Forms(p)
@@ -543,6 +598,9 @@ var All = []Screen{
 			return note.Screen(model.(*view.NotePage))
 		},
 		Title: func(model any) string { return string(model.(*view.NotePage).Title) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(note.Drop(model.(*view.NotePage)))
+		},
 		Forms: func(model any) []widget.PostForm {
 			if p := model.(*view.NotePage); !p.Print.Paper {
 				return note.Forms(p)

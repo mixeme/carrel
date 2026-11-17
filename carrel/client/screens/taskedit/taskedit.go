@@ -154,10 +154,7 @@ const saveKey = "Ctrl+S"
 //     record yet (s-tasks-14).
 //   - Under the form the deletion.
 func Screen(p *view.TaskEditPage) w.Shell {
-	formID := formEdit
-	if p.UID == "" {
-		formID = formNew
-	}
+	formID := formOf(p)
 	var plain, primary []w.ActsPart
 	var attach *view.Action
 	for _, a := range p.Form.Actions {

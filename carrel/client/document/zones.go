@@ -97,9 +97,10 @@ var EmptyPoll = PollZone(widget.Runbar{Closed: true}, nil)
 
 // Root is a screen's root as a page prints it: the zones of C-7.2 named
 // (Zoned), the poll's bar the zone poll (withPoll), the queue of transfers
-// the zone queue (withQueue), the sheet of the keys closed (withKeys).
+// the zone queue (withQueue), the sheet of the keys closed (withKeys), the
+// drop sheet closed (withDrop).
 func Root(scr screens.Screen, model any) screens.Root {
-	return withKeys(withQueue(withPoll(withNotices(Zoned(scr.Draw(model)), model), model)))
+	return withDrop(withKeys(withQueue(withPoll(withNotices(Zoned(scr.Draw(model)), model), model))), scr, model)
 }
 
 // withNotices is a page's root with its band of notices the zone notices:

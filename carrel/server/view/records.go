@@ -145,13 +145,30 @@ type EventPage struct {
 	// за ним участники; только чтение, без согласования
 	Attendees []AttendeeRow `json:"attendees"`
 	Attach    []AttachRow   `json:"attach"`
-	Related   []TimelineRow `json:"related"`
-	Linked    []Field       `json:"linked"` // та же встреча в других календарях (S-16)
-	Source    SourceBlock   `json:"source"`
-	Loss      *LossReport   `json:"loss"`
-	Actions   []Action      `json:"actions"`  // на виду: правка, вложение, новая задача, удаление
-	Menu      []MenuItem    `json:"menu"`     // «⋯»: Move, Copy, Export .ics, Publish a link
-	ReadOnly  bool          `json:"readOnly"` // чужая коллекция: правки нет вовсе, а не заблокированная форма
+	// Drop — бросок файла на страницу записи (s-io-20, записка Typecase
+	// 136): слова листа броска; файл уходит формой Attach «From this
+	// computer». nil — вложить нельзя
+	Drop     *AttachDrop   `json:"drop"`
+	Related  []TimelineRow `json:"related"`
+	Linked   []Field       `json:"linked"` // та же встреча в других календарях (S-16)
+	Source   SourceBlock   `json:"source"`
+	Loss     *LossReport   `json:"loss"`
+	Actions  []Action      `json:"actions"`  // на виду: правка, вложение, новая задача, удаление
+	Menu     []MenuItem    `json:"menu"`     // «⋯»: Move, Copy, Export .ics, Publish a link
+	ReadOnly bool          `json:"readOnly"` // чужая коллекция: правки нет вовсе, а не заблокированная форма
+}
+
+// AttachDrop — слова листа броска на странице записи (s-io-20): Lead —
+// «Drop to attach»; Line — «to ‹название записи›», название жирным; Note —
+// куда уходит файл больше того, что запись держит внутри: «Over 2 MB it goes
+// to ‹Documents / carrel› and the event keeps a link» (папка вложений
+// моноширинно), а без папки — почему такой файл не вложится: «Over 2 MB it
+// is not attached: no folder for attachments is chosen». Размера файла лист
+// не называет: пока файл несут, браузер его не отдаёт
+type AttachDrop struct {
+	Lead Text `json:"lead"`
+	Line Runs `json:"line"`
+	Note Runs `json:"note"`
 }
 
 // EventEditPage — правка: та же запись формой.
@@ -313,10 +330,14 @@ type TaskPage struct {
 	// родов; кадра нет). Организатор — не строка Fields
 	Attendees []AttendeeRow `json:"attendees"`
 	Attach    []AttachRow   `json:"attach"`
-	Related   []TimelineRow `json:"related"`
-	Linked    []Field       `json:"linked"` // та же задача в других списках (S-16)
-	Source    SourceBlock   `json:"source"`
-	Loss      *LossReport   `json:"loss"`
+	// Drop — бросок файла на страницу записи (s-io-20, записка Typecase
+	// 136): слова листа броска; файл уходит формой Attach «From this
+	// computer». nil — вложить нельзя
+	Drop    *AttachDrop   `json:"drop"`
+	Related []TimelineRow `json:"related"`
+	Linked  []Field       `json:"linked"` // та же задача в других списках (S-16)
+	Source  SourceBlock   `json:"source"`
+	Loss    *LossReport   `json:"loss"`
 	// Actions — на виду: Edit (i-pencil), Mark done, Attach, Print
 	// (record.print); удаление — Danger, внизу
 	Actions  []Action   `json:"actions"`
@@ -367,6 +388,10 @@ type NotePage struct {
 	Meta     NoteMeta    `json:"meta"`
 	Source   SourceBlock `json:"source"`
 	Loss     *LossReport `json:"loss"`
+	// Drop — бросок файла на страницу записи (s-io-20, записка Typecase
+	// 136): слова листа броска; файл уходит формой Attach «From this
+	// computer». nil — вложить нельзя
+	Drop *AttachDrop `json:"drop"`
 }
 
 // NoteDoc — фрагмент: чтение или правка.

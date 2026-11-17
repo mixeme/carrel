@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.2 — 2026-11-17
+
+Client `v0.11.36`: the drop sheets of the client's stage 4 (Typecase's note
+136).
+
+### For consumers
+
+- **`EventPage.Drop`, `TaskPage.Drop`, `NotePage.Drop`** (`*AttachDrop`,
+  new): the words of the sheet over a record's page while a file is dragged
+  over it (s-io-20) — `Lead` «Drop to attach», `Line` «to ‹title›» (the
+  title strong), `Note` where a file over the record's limit goes: «Over 2
+  MB it goes to ‹Documents / carrel› and the event keeps a link» (the
+  folder for attachments mono; the record's own limit when its collection
+  takes less). Without a folder to write to, `Note` says why such a file is
+  not attached, by Attach's reasons: «Over 2 MB it is not attached: no
+  folder for attachments is chosen» (or «… is not available», «… is
+  read-only») — words of the frame's pattern, no frame of their own. The
+  file goes with Attach «From this computer». nil where there is no
+  Attach: a read-only collection, a feed, a linked record's card.
+- Fixtures reshot: the pages of an event, a task and a note (`drop`), the
+  sheets over them, a note's edit (`drop: null`).
+
+### For developers
+
+- `TestARecordPageSaysWhatADropDoes`.
+
 ## v0.3.1 — 2026-11-17
 
 Typecase `e416059`, note 207 (the owner's decision of 16.11); client

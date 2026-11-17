@@ -188,6 +188,30 @@
       "attendees": [],
       "body": "",
       "details": null,
+      "drop": {
+        "lead": "Drop to attach",
+        "line": [
+          {
+            "text": "to "
+          },
+          {
+            "mark": "strong",
+            "text": "Дежурство: первая линия"
+          }
+        ],
+        "note": [
+          {
+            "text": "Over 2 MB it goes to "
+          },
+          {
+            "mark": "mono",
+            "text": "Documents / carrel / attachments"
+          },
+          {
+            "text": " and the event keeps a link"
+          }
+        ]
+      },
       "fields": [
         {
           "from": null,

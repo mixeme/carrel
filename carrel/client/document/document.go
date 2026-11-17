@@ -206,6 +206,9 @@ func Of(scr screens.Screen, model any, base string) page.Document {
 	if scr.Forms != nil {
 		doc.Forms = scr.Forms(model)
 	}
+	if f, ok := dropForm(scr, model); ok {
+		doc.Forms = append(doc.Forms, f)
+	}
 	// The theme the server chose for this browser (Look.Theme, the cookie
 	// of Appearance): printed in <html>, seen without a script (Typecase's
 	// note 75, task 186 p. 1). A page outside the shell has none.

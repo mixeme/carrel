@@ -4,6 +4,37 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.36 — 2026-11-17
+
+Server `v0.3.2`; Typecase `e416059`. The client's stage 4: the drop sheets
+(Typecase's notes 60, 136). The whole client suite passes.
+
+- A page where a file may be dropped carries its drop sheet, closed, among
+  its own sheets (`Shell.Dialogs`, as the keys' sheet): the library's
+  script opens it while a file is dragged over the page and puts the file
+  dropped into the form it names. `Screen.Drop` gives it; the document
+  places it (`document.withDrop`) and the form it names when the screen
+  prints none (`bind.DropSheet`, `bind.ImportDrop`, `bind.AttachDrop`).
+  - A list that names its import (`ListBar.Drop`): «Drop to import», the
+    server's line and note, the wizard's form (s-io-1).
+  - The page of an event, a task, a note: «Drop to attach», «to ‹title›»,
+    where a large file goes — the server's words (`AttachDrop`), the form
+    of Attach «From this computer» (s-io-20).
+  - The edit and the new form of an event, a task, a note: «Drop to
+    attach», «Attached when you save» — the file joins the attachments as
+    one picked (s-io-21).
+  - A card's edit: «Drop a photo», «It replaces the photo when you save» —
+    the file stands in the photo's field (s-io-22).
+- `TestDropSheets`: each page has a sheet where it takes a file and none
+  elsewhere; the sheet names a form of the page with a file field; opened,
+  it is its frame's (s-io-1 on a list of one collection, -20, -21, -22).
+- Not yet: the import's first step and Restore from this computer (s-io-23)
+  — their file field stands in a `Dialog`, which has no ID to name; the
+  refusal of a drop on a list; the folder's sheet (no frame). Typecase's
+  task 265.
+- Stage 4's «Forms» checked and closed: `Disables`, `InputAdd` and the
+  form's token in a header were already there.
+
 ## v0.11.35 — 2026-11-17
 
 Typecase `e416059`, note 207; server `v0.3.1`. The whole client suite

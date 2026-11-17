@@ -95,6 +95,30 @@
   "body": "Зарядки, переходник, распечатать посадочный.",
   "details": null,
   "done": false,
+  "drop": {
+    "lead": "Drop to attach",
+    "line": [
+      {
+        "text": "to "
+      },
+      {
+        "mark": "strong",
+        "text": "Собрать чемодан"
+      }
+    ],
+    "note": [
+      {
+        "text": "Over 2 MB it goes to "
+      },
+      {
+        "mark": "mono",
+        "text": "Documents / carrel / attachments"
+      },
+      {
+        "text": " and the task keeps a link"
+      }
+    ]
+  },
   "fields": [
     {
       "from": null,

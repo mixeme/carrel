@@ -713,7 +713,9 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 		edit.Icon = "i-pencil"
 	}
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
-	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), s.sendFor(c, uid), print, ops.del), ops.menu
+	attach := s.attachOf(c, uid, obj.ETag)
+	page.Actions, page.Menu = shown(edit, attach, s.sendFor(c, uid), print, ops.del), ops.menu
+	page.Drop = s.attachDrop(c, obj, attach) // s-io-20
 	return page
 }
 
@@ -812,7 +814,9 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 		edit.Icon = "i-pencil"
 	}
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
-	page.Actions, page.Menu = shown(edit, done, s.attachOf(c, uid, obj.ETag), s.sendFor(c, uid), print, ops.del), ops.menu
+	attach := s.attachOf(c, uid, obj.ETag)
+	page.Actions, page.Menu = shown(edit, done, attach, s.sendFor(c, uid), print, ops.del), ops.menu
+	page.Drop = s.attachDrop(c, obj, attach) // s-io-20
 	return page
 }
 
@@ -849,7 +853,9 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})},
 		s.sendFor(c, uid),
 		&view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true})
-	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
+	attach := s.attachOf(c, uid, obj.ETag)
+	page.Meta.Actions = shown(attach, ops.del)
+	page.Drop = s.attachDrop(c, obj, attach) // s-io-20
 	page.Meta.Menu = noteMenu(ops.menu)
 	// The day, and the time when the note has one (s-notes-2).
 	page.Meta.Date = text(noteWhen(obj, tf))

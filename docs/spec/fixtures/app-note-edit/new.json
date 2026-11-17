@@ -414,6 +414,7 @@
     "rendered": [],
     "title": ""
   },
+  "drop": null,
   "look": {
     "compact": false,
     "panel": true,

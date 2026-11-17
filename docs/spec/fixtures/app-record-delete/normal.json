@@ -294,6 +294,30 @@
       ],
       "body": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.",
       "details": null,
+      "drop": {
+        "lead": "Drop to attach",
+        "line": [
+          {
+            "text": "to "
+          },
+          {
+            "mark": "strong",
+            "text": "Синк-ап по релизу"
+          }
+        ],
+        "note": [
+          {
+            "text": "Over 2 MB it goes to "
+          },
+          {
+            "mark": "mono",
+            "text": "Documents / carrel / attachments"
+          },
+          {
+            "text": " and the event keeps a link"
+          }
+        ]
+      },
       "fields": [
         {
           "badge": {

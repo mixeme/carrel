@@ -184,6 +184,30 @@
       "body": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4.",
       "details": null,
       "done": false,
+      "drop": {
+        "lead": "Drop to attach",
+        "line": [
+          {
+            "text": "to "
+          },
+          {
+            "mark": "strong",
+            "text": "Отправить документы в МФЦ"
+          }
+        ],
+        "note": [
+          {
+            "text": "Over 2 MB it goes to "
+          },
+          {
+            "mark": "mono",
+            "text": "Documents / carrel / attachments"
+          },
+          {
+            "text": " and the task keeps a link"
+          }
+        ]
+      },
       "fields": [
         {
           "from": null,
