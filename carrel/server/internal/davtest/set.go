@@ -6,6 +6,7 @@ import (
 	"hash/crc32"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -60,60 +61,101 @@ func PNGHead(w, h uint32) string {
 	return string(binary.BigEndian.AppendUint32(append(head, ihdr...), crc32.ChecksumIEEE(ihdr)))
 }
 
-// SeedSet puts a folder of the set (dir on disk, slug its name in
-// SetShapes) under at, a folder under FileRoot: its folders and files, each
-// file changed on the day its name begins with, else on day — never the day
-// the set is loaded, for when a file changed is part of what the screens
-// show («Oldest» of attachments-1) —, and then the sizes, times and image
-// heads SetShapes give. The fixtures and the acceptance stand load the set
-// the same way through it.
-func (s *Server) SeedSet(at, dir, slug string, day time.Time) error {
-	s.SeedFolder(at)
+// SetFile is one entry of a folder of the set as a server is to hold it: a
+// folder (Rel ends in "/"), or a file — what is written (an image's head
+// before the stub), the size it is grown to with zeros (0: as written) and
+// when it changed.
+type SetFile struct {
+	Rel  string
+	Data string
+	Size int64
+	At   time.Time
+}
+
+// SetFiles reads a folder of the set (dir on disk, slug its name in
+// SetShapes) in the order a walk finds it: each file changed on the day its
+// name begins with, else on day — never the day the set is loaded, for when
+// a file changed is part of what the screens show («Oldest» of
+// attachments-1) —, and then with the sizes, times and image heads
+// SetShapes give. A folder's time is the shape's when it has one, else the
+// zero time: a server sets it.
+func SetFiles(dir, slug string, day time.Time) ([]SetFile, error) {
+	var out []SetFile
+	at := map[string]int{}
 	err := filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
 		if err != nil || p == dir {
 			return err
 		}
 		rel, _ := filepath.Rel(dir, p)
-		target := at + filepath.ToSlash(rel)
+		rel = filepath.ToSlash(rel)
 		if d.IsDir() {
-			s.SeedFolder(target + "/")
+			at[rel] = len(out)
+			out = append(out, SetFile{Rel: rel + "/"})
 			return nil
 		}
 		data, err := os.ReadFile(p)
 		if err != nil {
 			return err
 		}
-		s.SeedFile(target, string(data))
 		when := day
 		if len(d.Name()) >= 10 {
 			if named, err := time.ParseInLocation("2006-01-02", d.Name()[:10], day.Location()); err == nil {
 				when = named.Add(12 * time.Hour)
 			}
 		}
-		s.SetModified(target, when)
+		at[rel] = len(out)
+		out = append(out, SetFile{Rel: rel, Data: string(data), At: when})
 		return nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, one := range SetShapes {
 		if one.Slug != slug {
 			continue
 		}
-		target := at + one.Rel
-		if one.Size > 0 {
-			data, ok := s.File(target)
-			if !ok {
-				return fmt.Errorf("the set has no %s", target)
-			}
-			s.SeedFile(target, one.Head+data)
-			s.Grow(target, one.Size)
+		i, ok := at[one.Rel]
+		if !ok {
+			return nil, fmt.Errorf("the set has no %s in %s", one.Rel, slug)
 		}
 		when, err := time.ParseInLocation("2006-01-02 15:04", one.At, day.Location())
 		if err != nil {
-			return err
+			return nil, err
 		}
-		s.SetModified(target, when)
+		out[i].At = when
+		if one.Size > 0 {
+			out[i].Data = one.Head + out[i].Data
+			out[i].Size = one.Size
+		}
+	}
+	return out, nil
+}
+
+// SeedSet puts a folder of the set (SetFiles) under at, a folder under
+// FileRoot: its folders and files as they are walked, then the times — the
+// folders' last, for writing in a folder changes it. The fixtures and the
+// acceptance stand load the set the same way through it.
+func (s *Server) SeedSet(at, dir, slug string, day time.Time) error {
+	set, err := SetFiles(dir, slug, day)
+	if err != nil {
+		return err
+	}
+	s.SeedFolder(at)
+	for _, f := range set {
+		if strings.HasSuffix(f.Rel, "/") {
+			s.SeedFolder(at + f.Rel)
+			continue
+		}
+		s.SeedFile(at+f.Rel, f.Data)
+		if f.Size > 0 {
+			s.Grow(at+f.Rel, f.Size)
+		}
+		s.SetModified(at+f.Rel, f.At)
+	}
+	for _, f := range set {
+		if strings.HasSuffix(f.Rel, "/") && !f.At.IsZero() {
+			s.SetModified(at+strings.TrimSuffix(f.Rel, "/"), f.At)
+		}
 	}
 	return nil
 }

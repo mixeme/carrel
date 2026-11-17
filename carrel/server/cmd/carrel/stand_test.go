@@ -35,24 +35,8 @@ import (
 //
 //	CARREL_STAND=2h go test -run TestStand -timeout 0 ./cmd/carrel
 func TestStand(t *testing.T) {
-	hold := os.Getenv("CARREL_STAND")
-	if hold == "" {
-		t.Skip("CARREL_STAND=<how long> runs the acceptance stand")
-	}
-	wait, err := time.ParseDuration(hold)
-	if err != nil {
-		t.Fatalf("CARREL_STAND: %v", err)
-	}
-	port := 8099
-	if p := os.Getenv("CARREL_STAND_PORT"); p != "" {
-		if port, err = strconv.Atoi(p); err != nil {
-			t.Fatalf("CARREL_STAND_PORT: %v", err)
-		}
-	}
-	root, err := filepath.Abs(filepath.Join("..", "..", "..", "..", "docs", "visual", "fixtures"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	wait := standHold(t, "CARREL_STAND")
+	port, root := standPort(t), standRoot(t)
 
 	servers := map[string]*davtest.Server{}
 	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
@@ -97,19 +81,92 @@ func TestStand(t *testing.T) {
 	// the frames were drawn, not the day the stand is started.
 	files := davtest.New(t)
 	files.Login, files.Password = "alice", "secret"
-	setZone, err := time.LoadLocation("Europe/Moscow")
-	if err != nil {
-		t.Fatal(err)
-	}
-	setDay := time.Date(2026, 8, 10, 17, 4, 0, 0, setZone)
 	for _, folder := range []string{"Documents", "Public"} {
-		if err := files.SeedSet(davtest.FileRoot+folder+"/", filepath.Join(root, "sftpgo-vps", folder), folder, setDay); err != nil {
+		if err := files.SeedSet(davtest.FileRoot+folder+"/", filepath.Join(root, "sftpgo-vps", folder), folder, standDay(t)); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	// The feeds, served as files; the league's behind a password that is
-	// changed once it is subscribed.
+	feeds, leaguePassword := standFeeds(t, root)
+
+	t.Setenv("CARREL_TIMEZONE", "Europe/Moscow")
+	b := startPlainOn(t, port, "127.0.0.1")
+
+	standSignIn(b)
+	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
+		b.open("/app/settings/connections")
+		b.follow("Connect account")
+		b.press("Connect", url.Values{"label": {label}, "server": {servers[label].URL}, "login": {"alice"}, "password": {"secret"}}, nil)
+	}
+	b.open("/app/files")
+	b.follow("Connect account")
+	b.press("Connect", url.Values{"label": {"sftpgo · vps"}, "server": {files.URL + davtest.FileRoot}, "login": {"alice"}, "password": {"secret"}}, nil)
+
+	standRails(t, b, feeds.URL, nil)
+	leaguePassword.Store("changed")
+
+	// «Общий» on baikal: connected and ticked, and then its password stops
+	// fitting (README, step 6).
+	servers["baikal"].Refuse("REPORT", 401, "")
+
+	mock := standMockup(t, port, root)
+	t.Logf("the stand: %s (login %s); the mockup: %s/mockups/carrel-ui-mockups.html; holding %s", b.origin, standLogin, mock, wait)
+	standWait(t, wait)
+}
+
+// standHold is how long a stand holds, from its variable (2h); a stand not
+// asked for is skipped.
+func standHold(t *testing.T, name string) time.Duration {
+	t.Helper()
+	hold := os.Getenv(name)
+	if hold == "" {
+		t.Skip(name + "=<how long> runs the acceptance stand")
+	}
+	wait, err := time.ParseDuration(hold)
+	if err != nil {
+		t.Fatalf("%s: %v", name, err)
+	}
+	return wait
+}
+
+// standPort is CARREL_STAND_PORT, 8099 when not said.
+func standPort(t *testing.T) int {
+	t.Helper()
+	port := 8099
+	if p := os.Getenv("CARREL_STAND_PORT"); p != "" {
+		var err error
+		if port, err = strconv.Atoi(p); err != nil {
+			t.Fatalf("CARREL_STAND_PORT: %v", err)
+		}
+	}
+	return port
+}
+
+// standRoot is the folder of the set, docs/visual/fixtures.
+func standRoot(t *testing.T) string {
+	t.Helper()
+	root, err := filepath.Abs(filepath.Join("..", "..", "..", "..", "docs", "visual", "fixtures"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return root
+}
+
+// standDay is the day the frames were drawn: the files of the set changed
+// then, not the day the stand is started.
+func standDay(t *testing.T) time.Time {
+	t.Helper()
+	zone, err := time.LoadLocation("Europe/Moscow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return time.Date(2026, 8, 10, 17, 4, 0, 0, zone)
+}
+
+// standFeeds serves the feeds as files; the league's behind a password that
+// is changed once it is subscribed.
+func standFeeds(t *testing.T, root string) (*httptest.Server, *atomic.Value) {
+	t.Helper()
 	var leaguePassword atomic.Value
 	leaguePassword.Store("season")
 	feeds := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -124,25 +181,28 @@ func TestStand(t *testing.T) {
 	}))
 	t.Cleanup(feeds.Close)
 
-	t.Setenv("CARREL_TIMEZONE", "Europe/Moscow")
-	b := startPlainOn(t, port, "127.0.0.1")
+	return feeds, &leaguePassword
+}
 
+// standSignIn makes the instance's administrator on its first run and signs
+// in.
+func standSignIn(b *plainBrowser) {
 	b.open("/login")
 	b.press("Create administrator", url.Values{"login": {standLogin}, "password": {standPassword}, "password2": {standPassword}}, nil)
 	b.press("Sign in", url.Values{"login": {standLogin}, "password": {standPassword}}, nil)
-	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
-		b.open("/app/settings/connections")
-		b.follow("Connect account")
-		b.press("Connect", url.Values{"label": {label}, "server": {servers[label].URL}, "login": {"alice"}, "password": {"secret"}}, nil)
-	}
-	b.open("/app/files")
-	b.follow("Connect account")
-	b.press("Connect", url.Values{"label": {"sftpgo · vps"}, "server": {files.URL + davtest.FileRoot}, "login": {"alice"}, "password": {"secret"}}, nil)
+}
 
+// standRails subscribes to the feeds and ticks the rails as the frames draw
+// them: every rail ticked, then the ones the frames draw off taken off. A
+// real account holds collections of its own beside the set's: with keep,
+// every source it does not keep — by the address its tick sends and its
+// name — is taken off as well.
+func standRails(t *testing.T, b *plainBrowser, feeds string, keep func(value, name string) bool) {
+	t.Helper()
 	// The subscriptions, before the ticks: the league's with its
 	// password, which stops fitting once the rails are ticked.
-	subscribe(t, b, "Праздники РФ", feeds.URL+"/feeds/ru-holidays.ics", "")
-	subscribe(t, b, "Расписание лиги", feeds.URL+"/feeds/league-season.ics", "season")
+	subscribe(t, b, "Праздники РФ", feeds+"/feeds/ru-holidays.ics", "")
+	subscribe(t, b, "Расписание лиги", feeds+"/feeds/league-season.ics", "season")
 
 	// Every rail ticked, then the ones the frames draw off taken off: the
 	// holidays stand in the calendar only, the league nowhere.
@@ -161,23 +221,79 @@ func TestStand(t *testing.T) {
 		{"tasks", "Праздники РФ"}, {"notes", "Общие с семьёй"}, {"files", "Public"},
 	} {
 		b.open("/app/" + off.section)
-		untick(t, b, off.name)
+		// A real account may hold one of the same name of its own: the
+		// set's is the one keep keeps.
+		untickWhere(t, b, off.name, func(n *html.Node) bool {
+			return strings.Contains(tickName(n), off.name) && (keep == nil || keep(attr(n, "value"), tickName(n)))
+		})
 	}
-	leaguePassword.Store("changed")
+	if keep == nil {
+		return
+	}
+	for _, section := range []string{"contacts", "calendar", "tasks", "notes", "files"} {
+		b.open("/app/" + section)
+		var off, names []string // the addresses the ticks send, and their names
+		for _, n := range b.page.all(func(n *html.Node) bool {
+			return (n.Data == "button" || n.Data == "input") && attr(n, "name") == "toggle"
+		}) {
+			// The row of the whole section sends the section's root; a
+			// source's row its own address under it.
+			if strings.Count(strings.Trim(attr(n, "value"), "/"), "/") < 2 {
+				continue
+			}
+			if !keep(attr(n, "value"), tickName(n)) {
+				off = append(off, attr(n, "value"))
+				names = append(names, tickName(n))
+			}
+		}
+		t.Logf("%s: not the set's, taken off: %q", section, names)
+		for _, value := range off {
+			b.open("/app/" + section)
+			untickWhere(t, b, value, func(n *html.Node) bool { return attr(n, "value") == value })
+		}
+	}
+}
 
-	// «Общий» on baikal: connected and ticked, and then its password stops
-	// fitting (README, step 6).
-	servers["baikal"].Refuse("REPORT", 401, "")
+// tickName is the name of the source a rail's tick is: its label, else its
+// hint, else its words.
+func tickName(n *html.Node) string {
+	if name := attr(n, "aria-label"); name != "" {
+		return name
+	}
+	if name := attr(n, "title"); name != "" {
+		return name
+	}
+	return words(n)
+}
 
+// standMockup serves the mockup under /mockups/ of the port above the
+// stand's and answers with its address.
+func standMockup(t *testing.T, port int, root string) string {
+	t.Helper()
 	mock := httptest.NewUnstartedServer(http.StripPrefix("/mockups/", http.FileServer(http.Dir(filepath.Dir(root)))))
 	if ln, err := net.Listen("tcp", "127.0.0.1:"+strconv.Itoa(port+1)); err == nil {
 		mock.Listener = ln
 	}
 	mock.Start()
 	t.Cleanup(mock.Close)
+	return mock.URL
+}
 
-	t.Logf("the stand: %s (login %s); the mockup: %s/mockups/carrel-ui-mockups.html; holding %s", b.origin, standLogin, mock.URL, wait)
-	time.Sleep(wait)
+// standWait holds the stand for wait, or until the file CARREL_STAND_STOP
+// names appears: a stand stopped that way still runs its cleanups, which a
+// killed one does not — and a stand on real servers takes away what it made
+// on them there.
+func standWait(t *testing.T, wait time.Duration) {
+	stop := os.Getenv("CARREL_STAND_STOP")
+	for end := time.Now().Add(wait); time.Now().Before(end); time.Sleep(time.Second) {
+		if stop == "" {
+			continue
+		}
+		if _, err := os.Stat(stop); err == nil {
+			t.Logf("stopped by %s", stop)
+			return
+		}
+	}
 }
 
 // The stand's administrator: test values of an instance that lives for the
@@ -219,12 +335,18 @@ var standSet = []standCollection{
 // untick takes a collection off its rail: the tick of its row, pressed.
 func untick(t *testing.T, b *plainBrowser, name string) {
 	t.Helper()
+	untickWhere(t, b, name, func(n *html.Node) bool { return strings.Contains(tickName(n), name) })
+}
+
+// untickWhere presses the first tick of the rail match picks; what is the
+// tick of which source is said as what.
+func untickWhere(t *testing.T, b *plainBrowser, what string, match func(*html.Node) bool) {
+	t.Helper()
 	btn := b.page.find(func(n *html.Node) bool {
-		return (n.Data == "button" || n.Data == "input") && attr(n, "name") == "toggle" &&
-			(strings.Contains(attr(n, "aria-label"), name) || strings.Contains(attr(n, "title"), name) || strings.Contains(words(n), name))
+		return (n.Data == "button" || n.Data == "input") && attr(n, "name") == "toggle" && match(n)
 	})
 	if btn == nil {
-		t.Errorf("%s: no tick of %q; buttons: %s", b.page.url.Path, name, b.page.buttons())
+		t.Errorf("%s: no tick of %q; buttons: %s", b.page.url.Path, what, b.page.buttons())
 		return
 	}
 	form := b.page.formOf(btn)

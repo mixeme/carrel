@@ -21,6 +21,10 @@ import (
 // an app password each. Every such turn is named below, next to the server it
 // belongs to.
 
+// LiveCredentials is liveCredEnv for a live run outside this package: the
+// acceptance stand on the test servers (cmd/carrel, TestLiveStand).
+func LiveCredentials() { liveCredEnv() }
+
 func liveCredEnv() {
 	data, err := os.ReadFile(credentialsFile())
 	if err != nil {

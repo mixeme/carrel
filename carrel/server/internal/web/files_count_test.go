@@ -97,10 +97,16 @@ func TestFileCollectionsCountTheirFilesAtEveryDepth(t *testing.T) {
 		t.Errorf("Documents again: %+v", r)
 	}
 
-	// Update collection list counts again.
+	// Update collection list counts again. A recount keeps the number it
+	// had and says nothing of counting meanwhile, so the page may stand
+	// before the walk asks: what is waited for is the walk's own listing
+	// (the full package under load, 17.11.2026).
 	before = sftp.CountRequests("PROPFIND", inside)
 	recount(t, app, "Documents")
 	counted(t, app)
+	for end := time.Now().Add(10 * time.Second); sftp.CountRequests("PROPFIND", inside) == before && time.Now().Before(end); {
+		time.Sleep(20 * time.Millisecond)
+	}
 	if sftp.CountRequests("PROPFIND", inside) == before {
 		t.Error("Update collection list did not count Documents again")
 	}

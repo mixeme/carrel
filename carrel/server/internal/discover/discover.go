@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/emersion/go-webdav/caldav"
@@ -172,6 +173,19 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 				found = append(found, addressBookToCollection(ab))
 			}
 			all = append(all, named(withHomeProps(ctx, client, cardHome, "address book", found, add))...)
+		}
+	}
+
+	// The files of the account: one storage, «Files» (s-files-6, s-plan-5).
+	// Nextcloud and ownCloud keep them at files/<id>/ beside
+	// principals/users/<id>/, and no property of the principal names it;
+	// a principal of another shape is not asked (docs/servers.md, SV-65).
+	if home := filesHomeOf(principal); home != "" {
+		if col, ok := filesHome(ctx, client, home); ok {
+			add(stepHomeSet, "files: "+home, true)
+			all = append(all, withHomeProps(ctx, client, home, "files", []Collection{col}, add)...)
+		} else {
+			add(stepHomeSet, "files: "+home+" is not a folder here", false)
 		}
 	}
 
@@ -491,6 +505,36 @@ func collectionNoun(col Collection) string {
 		}
 	}
 	return "a calendar"
+}
+
+// nextcloudPrincipal is the principal of a user on Nextcloud and ownCloud:
+// …/principals/users/<id>/, its files at …/files/<id>/.
+var nextcloudPrincipal = regexp.MustCompile(`^(.*)/principals/users/([^/]+)/?$`)
+
+// filesHomeOf is where a principal of that shape keeps its files; "" for
+// any other.
+func filesHomeOf(principal string) string {
+	m := nextcloudPrincipal.FindStringSubmatch(principal)
+	if m == nil {
+		return ""
+	}
+	return m[1] + "/files/" + m[2] + "/"
+}
+
+// filesHome is the storage at home when the server has a folder there —
+// a collection with neither the calendar nor the address-book mark —, named
+// «Files» as the frames name it (s-files-6), not by the user id Nextcloud
+// gives it.
+func filesHome(ctx context.Context, client *dav.Client, home string) (Collection, bool) {
+	ms, err := client.PropFind(ctx, home, dav.DepthZero, []xml.Name{propResourceType})
+	if err != nil || len(ms.Responses) == 0 {
+		return Collection{}, false
+	}
+	inner := string(ms.Responses[0].Props[propResourceType])
+	if !strings.Contains(inner, "collection") || resourceKind([]byte(inner)) != "" {
+		return Collection{}, false
+	}
+	return Collection{Path: home, DisplayName: "Files", Kinds: []view.Kind{view.KindFile}}, true
 }
 
 // fileCollections are the folders at the entered address. A PROPFIND of

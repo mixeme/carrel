@@ -1,7 +1,14 @@
 package discover
 
 import (
+	"bytes"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"net/http/httputil"
+	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -194,4 +201,100 @@ func TestAStorageAtAPathIsNotItsOwnFolder(t *testing.T) {
 	if len(res.Collections) != 1 || strings.TrimSuffix(res.Collections[0].Path, "/") != strings.TrimSuffix(davtest.FileRoot, "/") {
 		t.Errorf("an empty storage = %+v, want its own address alone", res.Collections)
 	}
+}
+
+// The files of an account on Nextcloud are one storage of that account,
+// «Files» (s-files-6: «nextcloud · Files · rw»; s-plan-5: «Files у
+// nextcloud (…/remote.php/dav/files/mix/)»). On the test servers' stand
+// (U-15.1) a Nextcloud account gave calendars and books and no files at all,
+// whatever address was entered: discovery found a principal and never asked
+// for files. Nextcloud keeps them at files/<id>/ beside
+// principals/users/<id>/, and no property of the principal names it.
+func TestAnAccountOnNextcloudHasItsFiles(t *testing.T) {
+	srv := davtest.New(t)
+	srv.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "work/", Name: "Work", SupportedComponentSet: []string{"VEVENT"}})
+	srv.SeedFolder(davtest.FileRoot + "Documents/")
+	nc := nextcloudShaped(t, srv, "mix")
+
+	res, trace, err := Run(t.Context(), loopbackGuard(), nc.URL+"/remote.php/dav", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var files []Collection
+	for _, c := range res.Collections {
+		if slices.Contains(c.Kinds, view.KindFile) {
+			files = append(files, c)
+		}
+	}
+	want := "/remote.php/dav/files/mix/"
+	if len(files) != 1 || files[0].Path != want || files[0].DisplayName != "Files" || res.FileOnly {
+		t.Errorf("the files of the account = %+v (fileOnly %v), want one storage «Files» at %s; trace %+v", files, res.FileOnly, want, trace.Steps)
+	}
+	if !slices.ContainsFunc(res.Collections, func(c Collection) bool { return c.DisplayName == "Work" }) {
+		t.Errorf("the calendar is gone: %+v", res.Collections)
+	}
+
+	// A principal of another shape is not asked for files: Baikal, Radicale
+	// and davtest's own keep none there.
+	res, _, err = Run(t.Context(), loopbackGuard(), srv.URL+davtest.Principal, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range res.Collections {
+		if slices.Contains(c.Kinds, view.KindFile) {
+			t.Errorf("a principal of another shape gave files: %+v", c)
+		}
+	}
+}
+
+// nextcloudShaped serves srv at Nextcloud's addresses for the user id: a
+// request's path is mapped to davtest's, and davtest's paths in the answer
+// back to Nextcloud's.
+func nextcloudShaped(t *testing.T, srv *davtest.Server, id string) *httptest.Server {
+	t.Helper()
+	pairs := [][2]string{
+		{"/remote.php/dav/principals/users/" + id + "/", davtest.Principal},
+		{"/remote.php/dav/calendars/" + id + "/", davtest.CalendarHome},
+		{"/remote.php/dav/addressbooks/users/" + id + "/", davtest.AddressBookHome},
+		{"/remote.php/dav/files/" + id + "/", davtest.FileRoot},
+	}
+	// The longer of davtest's paths first: they all begin with its
+	// principal's.
+	var back []string
+	for _, p := range []int{1, 2, 3, 0} {
+		back = append(back, pairs[p][1], pairs[p][0])
+	}
+	target, _ := url.Parse(srv.URL)
+	proxy := httputil.NewSingleHostReverseProxy(target)
+	direct := proxy.Director
+	proxy.Director = func(r *http.Request) {
+		direct(r)
+		p := r.URL.Path
+		mapped := false
+		for _, pair := range pairs {
+			if strings.HasPrefix(p, pair[0]) {
+				p, mapped = pair[1]+strings.TrimPrefix(p, pair[0]), true
+				break
+			}
+		}
+		if !mapped && strings.HasPrefix(p, "/remote.php/dav") {
+			p = davtest.Principal
+		}
+		r.URL.Path, r.URL.RawPath = p, ""
+	}
+	proxy.ModifyResponse = func(resp *http.Response) error {
+		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return err
+		}
+		body = []byte(strings.NewReplacer(back...).Replace(strings.ReplaceAll(string(body), srv.URL, "")))
+		resp.Body = io.NopCloser(bytes.NewReader(body))
+		resp.ContentLength = int64(len(body))
+		resp.Header.Set("Content-Length", strconv.Itoa(len(body)))
+		return nil
+	}
+	nc := httptest.NewServer(proxy)
+	t.Cleanup(nc.Close)
+	return nc
 }

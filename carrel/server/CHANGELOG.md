@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.5 — 2026-11-17
+
+Client `v0.11.37`. The client's acceptance (U-15.1) on our test servers:
+the mockup set given to an empty Carrel on Nextcloud, SOGo, Baikal and
+SFTPGo through its own screens.
+
+### For consumers
+
+- **An account on Nextcloud has its files** (S-6): one storage, «Files»,
+  at `…/remote.php/dav/files/<id>/` (s-files-6, s-plan-5). Discovery found
+  the principal and asked for calendars and address books only, so a
+  Nextcloud account had no files whatever address was entered — the files
+  address too: `.well-known` led from it to the principal. Asked only of a
+  principal at `…/principals/users/<id>/` (Nextcloud, ownCloud); the trace
+  has a `home-set` step `files: <address>`, bad when the server has no
+  folder there. Re-discovery of a connected Nextcloud account offers the
+  storage as added.
+- `davtest.SetFiles`, `davtest.SetFile` — a folder of the set as it is to
+  be put on a server (data, size, time), under `SeedSet`.
+- The acceptance stand on the test servers: `TestLiveStand` in
+  `cmd/carrel` (`-tags integration`, `CARREL_LIVE_STAND`,
+  `CARREL_STAND_STOP`); `integration.LiveCredentials` reads the owner's
+  credentials file for a run outside the package.
+
 ## v0.3.4 — 2026-11-17
 
 Client `v0.11.37`. The second round of the client's acceptance (U-15.1) on
