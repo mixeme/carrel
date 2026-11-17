@@ -484,7 +484,7 @@ func selection(p *view.FilesPage) w.Bar {
 func bar(b view.ListBar) w.Bar {
 	var parts []w.BarPart
 	if b.FilterForm != nil {
-		f := bind.Narrows(bind.Filter(b, filter), listMain)
+		f := bind.Narrows(bind.Filter(b, filter, "Filter"), listMain)
 		f.Variant = w.FilterH26W190
 		parts = append(parts, f)
 	}

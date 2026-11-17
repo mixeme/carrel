@@ -244,7 +244,7 @@ func head(p *view.NotesPage) w.Head {
 func bar(b view.ListBar) w.Bar {
 	var items []w.BarPart
 	if b.FilterForm != nil {
-		f := bind.Narrows(bind.Filter(b, filter), listMain)
+		f := bind.Narrows(bind.Filter(b, filter, "Filter"), listMain)
 		f.Variant = w.FilterH26W200
 		items = append(items, f)
 	}

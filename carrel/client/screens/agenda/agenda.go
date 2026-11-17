@@ -248,7 +248,7 @@ func bar(p *view.AgendaPage) w.Bar {
 	if b.FilterForm != nil {
 		// «Filter by word» first, as the notes' (s-agenda-1, -17): with a
 		// word the range goes, and what is found stands by day (s-agenda-31).
-		f := bind.Narrows(bind.Filter(b, filter), listMain)
+		f := bind.Narrows(bind.Filter(b, filter, "Filter"), listMain)
 		f.Variant = w.FilterH26W200
 		items = append(items, f)
 	}

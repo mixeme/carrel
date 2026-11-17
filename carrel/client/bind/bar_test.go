@@ -14,15 +14,15 @@ func TestFilter(t *testing.T) {
 		{Kind: view.InputHidden, Name: "sort", Value: "changed"},
 		{Kind: view.InputText, Name: "filter", Label: "Filter"},
 	}}}}}
-	same(t, "a filter that sends", bind.Filter(bar, "Filter the loaded cards"), w.Filter{
-		Query:   w.Query{Placeholder: "Filter the loaded cards", Label: "Filter the loaded cards", Name: "filter"},
+	same(t, "a filter that sends", bind.Filter(bar, "Filter the loaded cards", "Filter"), w.Filter{
+		Query:   w.Query{Placeholder: "Filter the loaded cards", Short: "Filter", Label: "Filter the loaded cards", Name: "filter"},
 		Waiting: true,
 		Action:  "/app/contacts",
 		Hidden:  []w.Hidden{{Name: "task", Value: "t"}, {Name: "sort", Value: "changed"}},
 	})
 	bar.Filter = "анна"
-	same(t, "what was typed", bind.Filter(bar, "Filter").Query.Value, "анна")
-	same(t, "no form", bind.Filter(view.ListBar{}, "Filter"), w.Filter{Query: w.Query{Placeholder: "Filter", Label: "Filter"}, Waiting: true})
+	same(t, "what was typed", bind.Filter(bar, "Filter", "").Query.Value, "анна")
+	same(t, "no form", bind.Filter(view.ListBar{}, "Filter", ""), w.Filter{Query: w.Query{Placeholder: "Filter", Label: "Filter"}, Waiting: true})
 }
 
 func TestCheckForm(t *testing.T) {

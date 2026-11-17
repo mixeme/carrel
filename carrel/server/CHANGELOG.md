@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.1 — 2026-11-17
+
+Typecase `e416059`, note 207 (the owner's decision of 16.11); client
+`v0.11.35`.
+
+### For consumers
+
+Nothing changes in what the server sends. The copy of the mockup is
+Typecase's `e416059`: a filter's hint gives way to its first word where the
+whole one does not fit the field («Filter» of «Filter by word»,
+`.tc-q__ph`); the look changes only in the agenda's filter (s-agenda-1 at
+1351 and 460, s-agenda-17, states-3, -6, -13, -15 at 460).
+
 ## v0.3.0 — 2026-11-17
 
 **Tagged:** `server-v0.3.0`.

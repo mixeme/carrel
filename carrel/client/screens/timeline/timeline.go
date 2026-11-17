@@ -169,7 +169,7 @@ func bar(p *view.ContactTimelinePage) w.Bar {
 	if p.Bar.FilterForm != nil {
 		// «Filter by word» first, as the agenda's (s-contacts-7; Typecase's
 		// note 154): it keeps the window and the kind.
-		f := bind.Narrows(bind.Filter(p.Bar, filter), listMain)
+		f := bind.Narrows(bind.Filter(p.Bar, filter, "Filter"), listMain)
 		f.Variant = w.FilterH26W200
 		items = append(items, f)
 	}

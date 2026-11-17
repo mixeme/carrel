@@ -14,11 +14,13 @@ import (
 // Filter is the bar's filter (ListBar.FilterForm) as a filter that sends
 // its query: the query's row under its name, what the person typed
 // (ListBar.Filter), the list's other choices as its hidden fields (task,
-// sort, tag), the screen's words its placeholder and accessible name.
+// sort, tag), the screen's words its placeholder and accessible name, short
+// the start of them that stands alone where the whole hint does not fit
+// (Query.Short, Typecase's note 207: «Filter» of «Filter by word»).
 // Without the form the filter sends nothing (Action is empty).
-func Filter(b view.ListBar, words string) w.Filter {
+func Filter(b view.ListBar, words, short string) w.Filter {
 	f := w.Filter{
-		Query:   w.Query{Value: string(b.Filter), Placeholder: words, Label: words},
+		Query:   w.Query{Value: string(b.Filter), Placeholder: words, Short: short, Label: words},
 		Waiting: b.Filter == "",
 	}
 	if b.FilterForm == nil {

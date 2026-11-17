@@ -179,13 +179,14 @@ func head(p *view.PublishedPage) w.Head {
 }
 
 // filter is «Filter by word»: a GET form of its one line, what it keeps
-// hidden going with it (the folder it is in).
+// hidden going with it (the folder it is in). Waiting, its hint gives way
+// to «Filter» where the whole one does not fit (Typecase's note 207).
 func filter(f view.Form) w.Filter {
 	out := w.Filter{Action: f.Action, Hidden: bind.Hidden(f), Variant: w.FilterH26W190}
 	for _, r := range bind.Rows(f) {
 		out.Query = w.Query{Label: string(r.Label), Name: r.Name, Value: string(r.Value)}
 		if r.Value == "" {
-			out.Query.Placeholder, out.Waiting = string(r.Label), true
+			out.Query.Placeholder, out.Query.Short, out.Waiting = string(r.Label), "Filter", true
 		}
 	}
 	// The cross while it holds a word (Typecase's note 129 p. 2); as one

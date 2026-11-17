@@ -194,7 +194,7 @@ func bar(p *view.ContactsListPage) w.Bar {
 	b := p.Bar
 	var items []w.BarPart
 	if b.FilterForm != nil {
-		f := bind.Narrows(bind.Filter(b, "Filter the loaded cards"), listMain)
+		f := bind.Narrows(bind.Filter(b, "Filter the loaded cards", "Filter"), listMain)
 		f.Variant = w.FilterH26W220
 		items = append(items, f)
 	}

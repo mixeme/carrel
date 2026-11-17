@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.35 — 2026-11-17
+
+Typecase `e416059`, note 207; server `v0.3.1`. The whole client suite
+passes.
+
+- Every filter that waits for a word carries the start of its hint that
+  stands alone where the whole hint does not fit: `Query.Short` «Filter»
+  of «Filter by word», «Filter this folder», «Filter by login» and
+  «Filter the loaded cards» (`bind.Filter` takes it from the screen; the
+  public page's filter sets it while it is empty). The field says the
+  whole hint or «Filter», never a cut word.
+
 ## v0.11.34 — 2026-11-16
 
 Typecase `e92dd5c`, note 206; server `v0.2.417`. The whole client suite
