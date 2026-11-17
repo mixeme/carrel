@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.37 — 2026-11-17
+
+Server `v0.3.3`; Typecase `e416059`. The first round of acceptance U-15.1
+on the stand of the mockup set (`CARREL_STAND`): a combined list and a
+search opened in a browser stayed without rows, because the end of their
+poll brought only the rail. The server now brings the page too (`main` out
+of band); the renderer already drew it — `TestTheEndOfAPollIsItsPage`
+holds that the event is HTML, the rail and the list in their templates.
+
 ## v0.11.36 — 2026-11-17
 
 Server `v0.3.2`; Typecase `e416059`. The client's stage 4: the drop sheets

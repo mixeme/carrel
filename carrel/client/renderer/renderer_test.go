@@ -150,3 +150,27 @@ func TestTheRailIsItsZone(t *testing.T) {
 		t.Errorf("the rail's form does not ask the rail's zone: %s", got[:poll])
 	}
 }
+
+// The end of a poll brings the page it stands on (C-7.3; U-15.1, found on
+// the acceptance stand): the bar as it ended, and out of band the rail and
+// the list as it reads after the poll — its rows are what the poll brought.
+// All of it HTML, the data lines of one event.
+func TestTheEndOfAPollIsItsPage(t *testing.T) {
+	rd := renderer.New("")
+	rail := view.Rail{Nav: []view.NavRow{{ID: "nav.contacts", Label: "Contacts", On: true}}}
+	list := view.ContactsListPage{Shell: view.Shell{Title: "Combined address book", Rail: rail},
+		Groups: []view.ContactGroup{{Rubric: "A", Count: 1, Rows: []view.ContactRow{{Name: "Ada Lovelace", Href: "/app/contacts/a/b/ada"}}}}}
+	var buf bytes.Buffer
+	if err := rd.Event(&buf, render.EventPollFinished, render.TargetPoll, view.PollBar{TaskID: "t1"},
+		[]render.OOB{{Target: render.TargetRail, Body: rail}, {Target: render.TargetMain, Body: list}}); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if !strings.HasPrefix(got, "event: poll-finished\n") || strings.Contains(got, `"target"`) {
+		t.Fatalf("the end of a poll is not drawn: %.400s", got)
+	}
+	rails, main := strings.Index(got, `<template data-tc-zone="rail">`), strings.Index(got, `<template data-tc-zone="main">`)
+	if rails < 0 || main < rails || !strings.Contains(got[main:], "Ada Lovelace") {
+		t.Errorf("the end of a poll = %.1200s", got)
+	}
+}

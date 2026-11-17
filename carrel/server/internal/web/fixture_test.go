@@ -569,43 +569,6 @@ func mockupRoot(t *testing.T) string {
 	return root
 }
 
-// splitRecords cuts a file of the set into one body per record: the DAV
-// servers of the world hold one object per address, and so does davtest.
-func splitRecords(body string) []string {
-	body = strings.ReplaceAll(body, "\r\n", "\n")
-	if strings.Contains(body, "BEGIN:VCARD") {
-		var out []string
-		for _, part := range strings.SplitAfter(body, "END:VCARD\n") {
-			if strings.Contains(part, "BEGIN:VCARD") {
-				out = append(out, strings.TrimLeft(part, "\n"))
-			}
-		}
-		return out
-	}
-	// The head is everything before the first component of the set: the
-	// calendar's own lines and its VTIMEZONEs. Cutting at the first
-	// «BEGIN:V» left the zones behind, and an event whose TZID nothing
-	// defines is an event nobody can place.
-	cut := len(body)
-	for _, comp := range []string{"BEGIN:VEVENT", "BEGIN:VTODO", "BEGIN:VJOURNAL"} {
-		if at := strings.Index(body, comp); at >= 0 && at < cut {
-			cut = at
-		}
-	}
-	head := body[:cut]
-	var out []string
-	for _, comp := range []string{"VEVENT", "VTODO", "VJOURNAL"} {
-		for _, part := range strings.SplitAfter(body, "END:"+comp+"\n") {
-			if !strings.Contains(part, "BEGIN:"+comp) {
-				continue
-			}
-			at := strings.Index(part, "BEGIN:"+comp)
-			out = append(out, head+part[at:]+"END:VCALENDAR\n")
-		}
-	}
-	return out
-}
-
 var uidLineRe = regexp.MustCompile(`(?m)^UID:(.+)$`)
 
 func newMockupApp(t *testing.T) *mockupApp {
@@ -653,7 +616,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 			if err != nil {
 				t.Fatal(err)
 			}
-			records = append(records, splitRecords(string(data))...)
+			records = append(records, davtest.SplitRecords(string(data))...)
 		}
 		for i, rec := range records {
 			name := "rec" + string(rune('a'+i))
@@ -1593,7 +1556,7 @@ func seedMockupWhole(t *testing.T, app *mockupApp) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, rec := range splitRecords(string(body)) {
+	for _, rec := range davtest.SplitRecords(string(body)) {
 		if strings.Contains(rec, "UID:"+chemodan.uid) {
 			rec = chemodanCopy.edit(strings.Replace(rec, "UID:"+chemodan.uid, "UID:"+chemodanCopy.rec.uid, 1))
 			app.servers[chemodanCopy.rec.account].Seed(davtest.CalendarHome+chemodanCopy.rec.slug+"/"+chemodanCopy.rec.uid+".ics", rec)
@@ -1704,7 +1667,7 @@ func linkMockupCopies(t *testing.T, app *mockupApp, kind view.Kind, group string
 		t.Fatal(err)
 	}
 	var orig string
-	for _, one := range splitRecords(string(body)) {
+	for _, one := range davtest.SplitRecords(string(body)) {
 		if strings.Contains(one, "UID:"+of.uid) {
 			orig = one
 		}
@@ -4095,7 +4058,7 @@ func setRecord(t *testing.T, file, uid string) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, one := range splitRecords(string(body)) {
+	for _, one := range davtest.SplitRecords(string(body)) {
 		if strings.Contains(one, "UID:"+uid+"\n") {
 			return one
 		}

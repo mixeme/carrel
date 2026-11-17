@@ -45,12 +45,21 @@ type plainPage struct {
 // or host), and a browser at its door.
 func startPlain(t *testing.T, allow ...string) *plainBrowser {
 	t.Helper()
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
+	return startPlainOn(t, 0, allow...)
+}
+
+// startPlainOn is startPlain on a port of the caller's (the acceptance
+// stand's, TestStand); 0 takes one the machine has free.
+func startPlainOn(t *testing.T, port int, allow ...string) *plainBrowser {
+	t.Helper()
+	if port == 0 {
+		ln, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		port = ln.Addr().(*net.TCPAddr).Port
+		ln.Close()
 	}
-	port := ln.Addr().(*net.TCPAddr).Port
-	ln.Close()
 	t.Setenv("CARREL_DATA_DIR", t.TempDir())
 	t.Setenv("CARREL_BIND", "127.0.0.1")
 	t.Setenv("CARREL_PORT", strconv.Itoa(port))

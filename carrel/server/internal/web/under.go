@@ -67,6 +67,17 @@ func (s *Server) underOf(r *http.Request, back, fallback string) *view.Under {
 	if err != nil {
 		return nil
 	}
+	body, ok := s.pageAt(r, u)
+	if !ok {
+		return nil
+	}
+	return underPage(body)
+}
+
+// pageAt is the page the address u answers a GET with, asked as r is (its
+// session), the same handler asked the same way; false — it answers no
+// page, or one that fails.
+func (s *Server) pageAt(r *http.Request, u *url.URL) (any, bool) {
 	caught := &caughtPage{}
 	sub := r.Clone(context.WithValue(r.Context(), underKey{}, caught))
 	sub.Method, sub.URL, sub.RequestURI, sub.Body, sub.Form, sub.PostForm = http.MethodGet, u, u.RequestURI(), http.NoBody, nil, nil
@@ -75,10 +86,7 @@ func (s *Server) underOf(r *http.Request, back, fallback string) *view.Under {
 	// Served by the mux, not by its Handler: only ServeHTTP gives the
 	// request the values of its pattern ({uid} of a record's page).
 	s.mux.ServeHTTP(&discardWriter{}, sub)
-	if caught.status != http.StatusOK {
-		return nil
-	}
-	return underPage(caught.body)
+	return caught.body, caught.status == http.StatusOK
 }
 
 // sheetBack is the page a sheet was opened from, to stand over and to go

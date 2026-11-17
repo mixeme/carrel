@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.3 — 2026-11-17
+
+Client `v0.11.37`. The first round of the client's acceptance (U-15.1) on
+the stand of the mockup set.
+
+### For consumers
+
+- **The end of a poll brings its page** (C-7.3, C-7.4): `poll-finished` and
+  the fallback poll's last answer carry, after the rail, `main` out of band
+  — the page the bar stands on as its address answers after the poll:
+  `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`, `SearchPage`,
+  `ContactTimelinePage`. A combined list, a search and a timeline are drawn
+  before the servers answer; until now the rows they brought never reached
+  the page the person had open — the list stayed empty, «0 records so
+  far», on every load.
+- **`TestStand`** (`cmd/carrel`, runs only with `CARREL_STAND=<how long>`):
+  the acceptance stand — the records of the frames on stands of DAV
+  servers, a file server and feeds, and an empty instance given them
+  through its screens (the first run, Connect, the rails' ticks, the
+  subscriptions); held on `127.0.0.1:8099` (`CARREL_STAND_PORT`), the
+  mockup on the port above it under `/mockups/`.
+- `davtest.SplitRecords` — the cutting of a file of the set into records,
+  shared by the fixtures and the stand.
+
 ## v0.3.2 — 2026-11-17
 
 Client `v0.11.36`: the drop sheets of the client's stage 4 (Typecase's note

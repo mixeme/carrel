@@ -72,7 +72,7 @@ func TestTheEndOfAPollBringsTheRail(t *testing.T) {
 		} `json:"extra"`
 	}
 	data := strings.TrimSpace(strings.SplitN(body[at+len("event: poll-finished\ndata: "):], "\n", 2)[0])
-	if err := json.Unmarshal([]byte(data), &end); err != nil || end.Target != "poll" || end.Body.Running || len(end.Extra) != 1 || end.Extra[0].Target != "rail" {
+	if err := json.Unmarshal([]byte(data), &end); err != nil || end.Target != "poll" || end.Body.Running || len(end.Extra) == 0 || end.Extra[0].Target != "rail" {
 		t.Fatalf("poll-finished carries %s, want the bar and the rail out of band (%v)", data, err)
 	}
 	rail := end.Extra[0].Body
@@ -91,7 +91,86 @@ func TestTheEndOfAPollBringsTheRail(t *testing.T) {
 		} `json:"extra"`
 	}
 	raw := f.h.do(asPoll(get("/app/search/progress/"+task+"/poll", f.sess))).Body.Bytes()
-	if err := json.Unmarshal(raw, &poll); err != nil || poll.Target != "poll" || len(poll.Extra) != 1 || poll.Extra[0].Target != "rail" {
+	if err := json.Unmarshal(raw, &poll); err != nil || poll.Target != "poll" || len(poll.Extra) == 0 || poll.Extra[0].Target != "rail" {
 		t.Errorf("the finished poll by the fallback = %s, want the bar and the rail out of band", raw)
+	}
+}
+
+// U-15.1, found on the acceptance stand: a combined list and a search are
+// drawn when they are opened, before the servers answer, and what the poll
+// brings is their rows. The end of the poll brings the page as it reads
+// after it (C-7.3): main out of band, after the rail — in the stream's
+// poll-finished and in the fallback poll's last answer. Without it the page
+// the person opened stays without rows.
+func TestTheEndOfAPollBringsItsPage(t *testing.T) {
+	srv := searchServer(t)
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.Seed(searchBook+"ada.vcf", adaCard())
+	srv.Seed(searchBook+"bob.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob Builder\nEND:VCARD\n")
+	f := connectFixture(t, srv, searchBook, nil)
+	tickAll(t, f.h, f.sess)
+
+	mainOf := func(what, data string) json.RawMessage {
+		t.Helper()
+		var end struct {
+			Extra []struct {
+				Target string          `json:"target"`
+				Body   json.RawMessage `json:"body"`
+			} `json:"extra"`
+		}
+		if err := json.Unmarshal([]byte(data), &end); err != nil {
+			t.Fatalf("%s: %v in %.400s", what, err, data)
+		}
+		for _, x := range end.Extra {
+			if x.Target == "main" {
+				return x.Body
+			}
+		}
+		t.Fatalf("%s carries no main out of band: %.400s", what, data)
+		return nil
+	}
+	finished := func(task string) string {
+		t.Helper()
+		body := f.h.do(get("/app/search/progress/"+task, f.sess)).Body.String()
+		at := strings.Index(body, "event: poll-finished\ndata: ")
+		if at < 0 {
+			t.Fatalf("no poll-finished:\n%s", body)
+		}
+		return strings.TrimSpace(strings.SplitN(body[at+len("event: poll-finished\ndata: "):], "\n", 2)[0])
+	}
+	names := func(groups []view.ContactGroup) []string {
+		var out []string
+		for _, g := range groups {
+			for _, r := range g.Rows {
+				out = append(out, string(r.Name))
+			}
+		}
+		return out
+	}
+
+	list := decode[view.ContactsListPage](t, f.h.do(get("/app/contacts", f.sess)))
+	var page view.ContactsListPage
+	if err := json.Unmarshal(mainOf("the list's poll-finished", finished(list.Poll.TaskID)), &page); err != nil {
+		t.Fatal(err)
+	}
+	if got := names(page.Groups); len(got) != 2 {
+		t.Errorf("the list at the end of its poll shows %v, want Ada and Bob", got)
+	}
+	if page.Poll == nil || page.Poll.Running || page.Poll.TaskID != list.Poll.TaskID {
+		t.Errorf("the list at the end stands on another poll or a running one: %+v", page.Poll)
+	}
+	raw := f.h.do(asPoll(get("/app/search/progress/"+list.Poll.TaskID+"/poll", f.sess))).Body.String()
+	page = view.ContactsListPage{}
+	if err := json.Unmarshal(mainOf("the list's last fallback answer", raw), &page); err != nil || len(names(page.Groups)) != 2 {
+		t.Errorf("the list by the fallback poll at the end: %v, %v", names(page.Groups), err)
+	}
+
+	found := search(t, f.h, f.sess, "q=Ada")
+	var results view.SearchPage
+	if err := json.Unmarshal(mainOf("the search's poll-finished", finished(found.Poll.TaskID)), &results); err != nil {
+		t.Fatal(err)
+	}
+	if len(results.Results) == 0 {
+		t.Errorf("the search at the end of its poll shows nothing: %+v", results)
 	}
 }

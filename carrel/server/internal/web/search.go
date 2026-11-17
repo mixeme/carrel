@@ -1406,6 +1406,9 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 			if rail := s.railAtTheEnd(sess, t, snap, r.URL.Query()); rail != nil {
 				extra = []render.OOB{{Target: render.TargetRail, Body: stampView(*rail, token, s.basePath)}}
 			}
+			if page, ok := s.pageAtTheEnd(r, t, r.URL.Query()); ok {
+				extra = append(extra, render.OOB{Target: render.TargetMain, Body: stampView(page, token, s.basePath)})
+			}
 			_ = s.render.Event(w, render.EventPollFinished, render.TargetPoll, bar, extra)
 			_ = rc.Flush()
 			return
@@ -1446,6 +1449,9 @@ func (s *Server) getSearchProgressPoll(w http.ResponseWriter, r *http.Request) {
 		if rail := s.railAtTheEnd(sess, t, snap, r.URL.Query()); rail != nil {
 			extra = append(extra, render.OOB{Target: render.TargetRail, Body: *rail})
 		}
+		if page, ok := s.pageAtTheEnd(r, t, r.URL.Query()); ok {
+			extra = append(extra, render.OOB{Target: render.TargetMain, Body: page})
+		}
 	}
 	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), snap, owner), extra)
 }
@@ -1483,6 +1489,39 @@ func (s *Server) railAtTheEnd(sess *session.Session, t any, snap fanout.Snapshot
 		return nil
 	}
 	return &rail
+}
+
+// pageAtTheEnd is the page a finished poll stands on, as its address
+// answers it now (C-7.3): a combined list, a search or a person's timeline
+// is drawn when it is opened, before the servers answer, and its rows are
+// what the poll brought — the end brings them, as main. query is the page's
+// (PollBar.Stream carries it); the list is read from this poll, the search
+// and the timeline from the one their page keeps. false — the page is not
+// there any more.
+func (s *Server) pageAtTheEnd(r *http.Request, t any, query url.Values) (any, bool) {
+	var at string
+	switch v := t.(type) {
+	case *fanout.Task:
+		at = searchHref(v.Snapshot().Query.Text)
+	case *timelineTask:
+		at = v.page
+	case *listTask:
+		at = withQuery(v.page, "task", v.ID())
+	default:
+		return nil, false
+	}
+	u, err := url.Parse(at)
+	if err != nil {
+		return nil, false
+	}
+	q := u.Query()
+	for k, vs := range pageQuery(query) {
+		if _, own := q[k]; !own {
+			q[k] = vs
+		}
+	}
+	u.RawQuery = q.Encode()
+	return s.pageAt(r, u)
 }
 
 // postSearchProgressRetry asks one source again and nobody else (S-15.1);
