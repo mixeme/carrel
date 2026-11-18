@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.6 — 2026-11-18
+
+Client `v0.11.37`.
+
+### For consumers
+
+- **New collection: an address the server's trash bin holds is refused in
+  words of its own** (S-12.2, SV-30; the owner's decision of 18.11.2026).
+  Nextcloud keeps a deleted calendar at its address until the trash bin is
+  emptied, and the person sees nothing there. The sheet's list of taken
+  addresses asks `nc:deleted-at` too; such an address is refused at Name —
+  «Something deleted at lichnyi/ is still in this server's trash bin. Give
+  it another name, or empty the trash bin on the server.» — or, typed by
+  hand, at Address — «Something deleted at this address is still in the
+  server's trash bin.» Nothing is sent to the server. An address held by a
+  live collection keeps «Something already lives at …».
+- `davtest`: a home's `PROPFIND` asking `deleted-at` is answered with the
+  trash bin marks, as Nextcloud answers it.
+
 ## v0.3.5 — 2026-11-17
 
 Client `v0.11.37`. The client's acceptance (U-15.1) on our test servers:

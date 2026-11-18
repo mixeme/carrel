@@ -8,6 +8,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/view"
+	"github.com/emersion/go-webdav/caldav"
 )
 
 func menuHref(t *testing.T, menu []view.MenuItem, id string) string {
@@ -104,6 +105,32 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 // keeps what the server holds — a swatch kept here alone would be one no
 // other client draws, while C-10 went on calling it the colour the server
 // sent.
+// A calendar deleted on Nextcloud stays in its trash bin at its address
+// (docs/servers.md, SV-30): the address is taken by something the person no
+// longer sees, and the refusal says so (the owner's decision of 18.11.2026).
+func TestAnAddressHeldByTheServersTrashBinSaysSo(t *testing.T) {
+	f := calendarFixture(t, nil)
+	gone := davtest.CalendarHome + "lichnyi/"
+	f.srv.AddCalendar(caldav.Calendar{Path: gone, Name: "Личный"})
+	f.srv.Trash(gone, "2026-11-17T21:53:30+00:00")
+
+	post := func(v url.Values) view.CollectionNewSheet {
+		t.Helper()
+		v.Set("account", f.id)
+		v.Set("components", "VEVENT")
+		return decode[view.CollectionNewSheet](t, f.h.do(postForm("/app/collections/new?kind=event", f.sess, v)))
+	}
+	if row := rowNamed(t, post(url.Values{"name": {"Личный"}}).Form, "name"); row.Error != "Something deleted at lichnyi/ is still in this server's trash bin. Give it another name, or empty the trash bin on the server." {
+		t.Errorf("name held by the trash bin: %+v", row)
+	}
+	if row := rowNamed(t, post(url.Values{"name": {"Мой"}, "address": {"lichnyi"}}).Form, "address"); row.Error != "Something deleted at this address is still in the server's trash bin." {
+		t.Errorf("address held by the trash bin: %+v", row)
+	}
+	if n := f.srv.CountRequests("MKCALENDAR", ""); n != 0 {
+		t.Errorf("%d MKCALENDAR sent to an address the trash bin holds", n)
+	}
+}
+
 func TestCreateSettlesAColourTheServerDroppedAtCreation(t *testing.T) {
 	f := calendarFixture(t, nil)
 	f.srv.CreateDropsColour = true
