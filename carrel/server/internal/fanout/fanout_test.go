@@ -444,18 +444,18 @@ func (s *askingSource) Run(ctx context.Context, q Query) ([]Item, error) {
 }
 
 func TestASourceIsGivenItsShareForEveryAsk(t *testing.T) {
-	// Four asks of 20ms each against a 50ms-per-ask budget: 80ms of work
-	// under 200ms. With the old whole-source budget of 50ms it would be cut
-	// off after the second, so the two rules still tell each other apart —
-	// but the slack is 120ms rather than the 30ms this test used to leave.
-	// Thirty was not enough: a 40ms sleep on a loaded machine overruns, the
-	// budget ends the run, Run returns before closing the channel, and the
-	// test waits three seconds for something that already gave up
-	// (a full run on 23.09.2026 caught exactly that).
-	src := &askingSource{id: "s", asks: 4, each: 20 * time.Millisecond, done: make(chan struct{})}
+	// Four asks of 100ms each against a 300ms-per-ask budget: 400ms of work
+	// under 1200ms. With the old whole-source budget of 300ms it would be
+	// cut off in the third, so the two rules still tell each other apart,
+	// with 800ms of slack. Thirty, then 120, were not enough: a sleep on a
+	// loaded machine overruns, the budget ends the run, Run returns before
+	// closing the channel, and the test waits three seconds for something
+	// that already gave up (full runs on 23.09.2026 and, the machine at
+	// 100% beside another package's tests, on 18.11.2026).
+	src := &askingSource{id: "s", asks: 4, each: 100 * time.Millisecond, done: make(chan struct{})}
 	task, err := Start("t", Query{}, []Source{src}, Options{
 		Parallelism:   2,
-		SourceTimeout: 50 * time.Millisecond,
+		SourceTimeout: 300 * time.Millisecond,
 		TotalTimeout:  5 * time.Second,
 	})
 	if err != nil {
