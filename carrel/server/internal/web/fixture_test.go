@@ -833,7 +833,7 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`→ [0-9a-f]{32}\b`).ReplaceAllString(s, "→ 9d04-77c1")
 	// How long a feed took to read is the machine's (0 ms, 1 ms): the frames
 	// draw a number, any one.
-	s = regexp.MustCompile(`"took":"\d+ ms"`).ReplaceAllString(s, `"took":"0 ms"`)
+	s = regexp.MustCompile(`"took":"(\d+ ms|\d+\.\d s)"`).ReplaceAllString(s, `"took":"0 ms"`)
 	for frame, feed := range a.feeds {
 		u, _ := url.Parse(frame)
 		s = strings.ReplaceAll(s, feed.URL, u.Scheme+"://"+u.Host)
@@ -860,9 +860,10 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	// Another session's public ID in its End (account-1).
 	s = regexp.MustCompile(`op=end(\\u0026|&)s=[0-9a-f]{16}`).ReplaceAllString(s, "op=end${1}s=session")
-	// How long a feed's fetch took on this machine (s-profile-1, -10).
-	s = regexp.MustCompile(`(→ 200 · )\d+ ms`).ReplaceAllString(s, "${1}0 ms")
-	s = regexp.MustCompile(`("took": ?")\d+ ms"`).ReplaceAllString(s, `${1}0 ms"`)
+	// How long a feed's fetch took on this machine (s-profile-1, -10) — past
+	// 100 ms in seconds, «0.1 s» (the Windows gates under load, 18.11.2026).
+	s = regexp.MustCompile(`(→ 200 · )(\d+ ms|\d+\.\d s)`).ReplaceAllString(s, "${1}0 ms")
+	s = regexp.MustCompile(`("took": ?")(\d+ ms|\d+\.\d s)"`).ReplaceAllString(s, `${1}0 ms"`)
 	// A backup job's and a run's ID (s-backup-1): the frames name them by
 	// what they are.
 	// Numbered in the order they appear: the forms of two jobs' rows are
