@@ -183,3 +183,31 @@ func TestEncodeFoldsLongLines(t *testing.T) {
 		t.Errorf("the attachment came back as %d octets, err %v", len(data), err)
 	}
 }
+
+// Stalwart keeps an inline file that reads as text as text: VALUE=BINARY
+// without ENCODING=BASE64, the value escaped as TEXT (docs/servers.md,
+// SV-67). Read as base64 it was three quarters of its size and its data was
+// noise (acceptance on our test servers, 18.11.2026). A value of base64
+// without the parameter is still base64.
+func TestAnInlineFileKeptAsTextIsItsText(t *testing.T) {
+	doc := "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Stalwart//EN\r\nBEGIN:VEVENT\r\nUID:e2\r\n" +
+		"DTSTAMP:20260101T000000Z\r\nDTSTART:20260810T100000Z\r\nSUMMARY:Sync\r\n" +
+		`ATTACH;FILENAME=release.md;FMTTYPE=text/markdown;VALUE=BINARY:# Release\n\n- check the build\, sign off\; done \\ ok` + "\r\n" +
+		"ATTACH;VALUE=BINARY;FMTTYPE=image/png:" + base64.StdEncoding.EncodeToString([]byte(pngData)) + "\r\n" +
+		"END:VEVENT\r\nEND:VCALENDAR\r\n"
+	obj, err := Parse("/c/e2.ics", "etag-1", strings.NewReader(doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "# Release\n\n- check the build, sign off; done \\ ok"
+	list := Attachments(obj)
+	if len(list) != 2 || !list[0].Inline || list[0].Size != int64(len(want)) || list[1].Size != int64(len(pngData)) {
+		t.Fatalf("attachments = %+v, want sizes %d and %d", list, len(want), len(pngData))
+	}
+	if _, data, err := AttachmentData(obj, 0); err != nil || string(data) != want {
+		t.Errorf("text kept as text = %q, %v; want %q", data, err, want)
+	}
+	if _, data, err := AttachmentData(obj, 1); err != nil || string(data) != pngData {
+		t.Errorf("base64 without ENCODING = %q, %v", data, err)
+	}
+}

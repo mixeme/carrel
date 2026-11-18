@@ -500,6 +500,7 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		}
 		page.Actions = []view.Action{done}
 	case st.draft != nil:
+		st.draft = fitDraft(st.draft, st.dest)
 		page.Step = view.ImportStepPreview
 		page.Subtitle = importSubtitle(st.draft)
 		page.Counts = importCounts(st.draft, st.taken)
@@ -1447,7 +1448,37 @@ func (s *Server) importPreview(ctx context.Context, c *collectionCtx, d *importD
 				Actions: []view.Action{{ID: "import.again", Label: "Try again", Href: s.importHref(c, "", dest.conn.ID, dest.col.Path), Method: "GET", Enabled: true}}})
 		}
 	}
-	return []view.ImportTable{previewTable(c.spec.kind, d, taken)}, taken, notices, unanswered
+	return []view.ImportTable{previewTable(c.spec.kind, fitDraft(d, dest), taken)}, taken, notices, unanswered
+}
+
+// fitDraft is the draft as the collection chosen can take it: a record
+// larger than its max-resource-size (RFC 4791) is not sent — it stands among
+// what is not written, with the sizes (S-19). Stalwart takes records up to
+// 512 KB and answers a larger one with 412 (acceptance on our test servers,
+// 18.11.2026). The draft kept in the session is not changed: another
+// collection may take it.
+func fitDraft(d *importDraft, dest *collectionCtx) *importDraft {
+	if d == nil || dest == nil || dest.col.MaxResourceSize <= 0 {
+		return d
+	}
+	limit := dest.col.MaxResourceSize
+	var fit []importRecord
+	var over []importSkip
+	for _, rec := range d.Records {
+		if n := int64(len(rec.Doc)); n > limit {
+			over = append(over, importSkip{What: rec.File, Title: rec.Title, Detail: rec.Detail, Failed: true,
+				Reason: fmt.Sprintf("Too large: %s — %s takes records up to %s", formatSize(n), dest.stamp(), formatSize(limit))})
+			continue
+		}
+		fit = append(fit, rec)
+	}
+	if len(over) == 0 {
+		return d
+	}
+	out := *d
+	out.Records = fit
+	out.Skipped = append(over, d.Skipped...)
+	return &out
 }
 
 // intoNoun is what «Into» chooses, by kind (s-io-17, -19).
@@ -1612,6 +1643,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		return
 	}
 	ctx := r.Context()
+	d = fitDraft(d, dest)
 	taken, err := destUIDs(ctx, dest)
 	if err != nil {
 		// The same screen as the preview's: the table stays (s-io-19).
@@ -1754,8 +1786,15 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 			}
 		}
 		if err != nil {
+			// The request and the answer, as the menu of refusals writes a
+			// refusal (states-16): «PUT …/5c81.ics → 400 Bad Request».
+			why := err.Error()
+			var se *dav.StatusError
+			if errors.As(err, &se) && se.Method != "" {
+				why = refusalAnswer(view.SourceError, err, "")
+			}
 			report.Failed++
-			report.Failures = append(report.Failures, text(rec.Title+" · "+err.Error()))
+			report.Failures = append(report.Failures, text(rec.Title+" · "+why))
 			continue
 		}
 		if over != nil {

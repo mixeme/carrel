@@ -349,16 +349,31 @@ func untickWhere(t *testing.T, b *plainBrowser, what string, match func(*html.No
 		t.Errorf("%s: no tick of %q; buttons: %s", b.page.url.Path, what, b.page.buttons())
 		return
 	}
-	form := b.page.formOf(btn)
-	fields := b.page.fieldsOf(form)
-	fields.Set("toggle", attr(btn, "value"))
-	u, _ := b.page.url.Parse(attr(form, "action"))
-	if a := attr(btn, "formaction"); a != "" {
-		u, _ = b.page.url.Parse(a)
+	// A tick turns its row over: pressed only while it is on, and looked at
+	// again after — a row already off would come back on.
+	at := b.page.url.RequestURI()
+	for try := 0; attr(btn, "aria-pressed") != "false"; try++ {
+		if try == 3 {
+			t.Errorf("%s: the tick of %q stays on", at, what)
+			return
+		}
+		form := b.page.formOf(btn)
+		fields := b.page.fieldsOf(form)
+		fields.Set("toggle", attr(btn, "value"))
+		u, _ := b.page.url.Parse(attr(form, "action"))
+		if a := attr(btn, "formaction"); a != "" {
+			u, _ = b.page.url.Parse(a)
+		}
+		req, _ := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(fields.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		b.do(req)
+		b.open(at)
+		if btn = b.page.find(func(n *html.Node) bool {
+			return (n.Data == "button" || n.Data == "input") && attr(n, "name") == "toggle" && match(n)
+		}); btn == nil {
+			return
+		}
 	}
-	req, _ := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(fields.Encode()))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	b.do(req)
 }
 
 // subscribe subscribes to a feed from the calendar's rail.

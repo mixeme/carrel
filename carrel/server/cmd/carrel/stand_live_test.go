@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -22,6 +23,7 @@ import (
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/view"
 )
 
 // The acceptance stand on our test servers (U-15.1): what TestStand does
@@ -33,13 +35,17 @@ import (
 // first, at their sizes, for an upload of 100 MB through a form is not what
 // is under test.
 //
-// The accounts are the test servers' of credentials.txt, never a person's
-// mailbox (Yandex, Google, iCloud, Mail.ru: the set's events have
-// attendees): nextcloud is Nextcloud, «radicale · vps» SOGo — a second
-// server, for one principal cannot be connected twice —, baikal Baikal, and
-// «sftpgo · vps» a folder carrel-set of SFTPGo. What the stand makes there it
-// takes away when it ends: run it with CARREL_STAND_STOP, and end it by
-// making that file, not by killing it.
+// The accounts of the set are played by our test servers. By default
+// nextcloud is Nextcloud, «radicale · vps» SOGo — a second server, for one
+// principal cannot be connected twice —, baikal Baikal, and «sftpgo · vps» a
+// folder carrel-set of SFTPGo. CARREL_STAND_ACCOUNTS gives others, by the
+// set's label and liveServers' name: «nextcloud=davis,radicale ·
+// vps=radicale,baikal=stalwart,sftpgo · vps=opencloud». The Linux machine's
+// stands are reached through scripts/linux-stands.sh and its tunnel. The
+// set is not only for the servers it names: through Carrel's screens a
+// server shows what its live suites do not (the owner, 18.11.2026). What
+// the stand makes it takes away when it ends: run it with
+// CARREL_STAND_STOP, and end it by making that file, not by killing it.
 //
 //	CARREL_LIVE_STAND=3h CARREL_STAND_STOP=<file> go test -tags integration -run TestLiveStand -timeout 0 -v ./cmd/carrel
 func TestLiveStand(t *testing.T) {
@@ -47,20 +53,26 @@ func TestLiveStand(t *testing.T) {
 	port, root := standPort(t), standRoot(t)
 	integration.LiveCredentials()
 
-	type account struct{ label, server, user, pass string }
-	env := func(name string) string {
-		v := os.Getenv(name)
-		if v == "" {
-			t.Skip(name + " is not in credentials.txt")
+	cast := map[string]string{"nextcloud": "nextcloud", "radicale · vps": "sogo", "baikal": "baikal", "sftpgo · vps": "sftpgo"}
+	for _, pair := range strings.Split(os.Getenv("CARREL_STAND_ACCOUNTS"), ",") {
+		if label, name, ok := strings.Cut(pair, "="); ok {
+			cast[strings.TrimSpace(label)] = strings.TrimSpace(name)
 		}
-		return v
 	}
-	accounts := []account{
-		{"nextcloud", env("CARREL_NEXTCLOUD_URL"), env("CARREL_NEXTCLOUD_USER"), env("CARREL_NEXTCLOUD_PASS")},
-		{"radicale · vps", env("CARREL_SOGO_CAL_URL"), env("CARREL_SOGO_USER"), env("CARREL_SOGO_PASS")},
-		{"baikal", env("CARREL_BAIKAL_URL"), env("CARREL_BAIKAL_USER"), env("CARREL_BAIKAL_PASS")},
+	play := func(label string) account {
+		a := liveServer(t, cast[label])
+		a.label = label
+		if strings.HasPrefix(a.server, "http://127.0.0.1:") {
+			// A stand of the Linux machine through the tunnel: Carrel's
+			// guard lets it be reached, as the integration suites' does.
+			t.Setenv("CARREL_DAV_SSRF_ALLOWLIST", "127.0.0.1")
+		}
+		t.Logf("%s is %s: %s", label, a.name, a.server)
+		return a
 	}
-	files := account{"sftpgo · vps", strings.TrimSuffix(env("CARREL_SFTPGO_URL"), "/") + "/carrel-set/", env("CARREL_SFTPGO_USER"), env("CARREL_SFTPGO_PASS")}
+	accounts := []account{play("nextcloud"), play("radicale · vps"), play("baikal")}
+	files := play("sftpgo · vps")
+	files.server = strings.TrimSuffix(files.server, "/") + "/carrel-set/"
 
 	cfg, err := conf.Load()
 	if err != nil {
@@ -75,8 +87,8 @@ func TestLiveStand(t *testing.T) {
 	for _, col := range standSet {
 		setNames[col.name] = true
 	}
-	var ncFiles string
-	for _, a := range accounts {
+	var ncFiles, filesName string
+	for i, a := range accounts {
 		res, _, err := discover.Run(ctx, guard, a.server, a.user, a.pass, "")
 		if err != nil {
 			t.Fatalf("%s: discovery: %v", a.label, err)
@@ -84,8 +96,10 @@ func TestLiveStand(t *testing.T) {
 		before := map[string]bool{}
 		for _, c := range res.Collections {
 			before[c.Path] = true
-			if m := nextcloudFiles.FindStringSubmatch(c.Path); m != nil {
-				ncFiles = m[1]
+			// «Files» of the frames (s-files-6) is the file storage of
+			// nextcloud's account, whichever server plays it.
+			if i == 0 && ncFiles == "" && slices.Contains(c.Kinds, view.KindFile) {
+				ncFiles, filesName = c.Path, c.DisplayName
 			}
 		}
 		a := a
@@ -126,8 +140,12 @@ func TestLiveStand(t *testing.T) {
 				size = int64(len(f.Data))
 			}
 			body := io.MultiReader(strings.NewReader(f.Data), io.LimitReader(zeros{}, size-int64(len(f.Data))))
-			liveSend(t, a.user, a.pass, "PUT", base+escapePath(f.Rel), body, size,
-				map[string]string{"X-OC-Mtime": strconv.FormatInt(f.At.Unix(), 10)})
+			// A file the server does not take stays out, and the run goes
+			// on: Davis's image refuses 88 MB with 500 (its PHP limits).
+			if code := liveTry(t, a.user, a.pass, "PUT", base+escapePath(f.Rel), body, size,
+				map[string]string{"X-OC-Mtime": strconv.FormatInt(f.At.Unix(), 10)}); code >= 300 {
+				t.Logf("%s (%s): PUT %s of %d bytes → %d — the set's file stays out", a.label, a.name, f.Rel, size, code)
+			}
 		}
 	}
 	liveSend(t, files.user, files.pass, "DELETE", files.server, nil, 0, nil)
@@ -142,7 +160,9 @@ func TestLiveStand(t *testing.T) {
 		put(files, files.server+folder+"/", set)
 	}
 	if ncFiles == "" {
-		t.Error("nextcloud: discovery names no storage «Files» (s-files-6)")
+		// A server of calendars and contacts only (Radicale, Stalwart):
+		// the frames of «Files» are not for it.
+		t.Logf("nextcloud (%s): discovery names no file storage — «Files» of s-files-6 is not there", accounts[0].name)
 	} else {
 		// «Files» is the account's files home itself: what the set has
 		// for it goes in at its top, beside what the account holds, and
@@ -176,10 +196,12 @@ func TestLiveStand(t *testing.T) {
 		b.open("/app/settings/connections")
 		b.follow("Connect account")
 		b.press("Connect", url.Values{"label": {a.label}, "server": {a.server}, "login": {a.user}, "password": {a.pass}}, nil)
+		connected(t, b, a)
 	}
 	b.open("/app/files")
 	b.follow("Connect account")
 	b.press("Connect", url.Values{"label": {files.label}, "server": {files.server}, "login": {files.user}, "password": {files.pass}}, nil)
+	connected(t, b, files)
 
 	// The collections, made by Carrel in the order of the set — a server
 	// lists them in the order they were made, and the rails of the frames
@@ -197,7 +219,10 @@ func TestLiveStand(t *testing.T) {
 		}
 		b.open("/app/collections/new?kind=" + kind)
 		ids[col.account] = optionOf(t, b, "account", col.account)
-		set := url.Values{"account": {ids[col.account]}, "name": {col.name}, "colour": {col.colour}}
+		// The address of the set, typed: the frames draw the set's
+		// (…/lichnyj/, …/arhiv/), and Carrel's own from the name is another
+		// (lichnyi, arkhiv: architecture.md's table).
+		set := url.Values{"account": {ids[col.account]}, "name": {col.name}, "colour": {col.colour}, "address": {col.slug}}
 		for _, c := range col.comps {
 			set.Add("components", c)
 		}
@@ -205,9 +230,9 @@ func TestLiveStand(t *testing.T) {
 		// A server with a trash bin keeps a deleted collection at its
 		// address (SV-30): the set's of an earlier run, there for 30 days.
 		// The person types another address, as the refusal asks.
-		if m := takenAt.FindStringSubmatch(b.page.text()); m != nil && strings.HasPrefix(b.page.url.Path, "/app/collections/new") {
-			again := m[1] + "-" + strconv.FormatInt(time.Now().Unix()%100000, 10)
-			t.Logf("%s · %s: «%s» — the address typed instead: %s", col.account, col.name, m[0], again)
+		if takenAt.MatchString(b.page.text()) && strings.HasPrefix(b.page.url.Path, "/app/collections/new") {
+			again := col.slug + "-" + strconv.FormatInt(time.Now().Unix()%100000, 10)
+			t.Logf("%s · %s: «%s» — the address typed instead: %s", col.account, col.name, takenAt.FindString(b.page.text()), again)
 			set.Set("address", again)
 			b.press("Create", set, nil)
 		}
@@ -255,13 +280,16 @@ func TestLiveStand(t *testing.T) {
 
 	standRails(t, b, feeds.URL, func(value, name string) bool {
 		for _, col := range standSet {
-			if strings.Contains(value, "/"+ids[col.account]+"/") && strings.Contains(name, col.name) {
+			// A set's collection in the section of its kind: a server that
+			// keeps every component in a calendar (Xandikos, SV-43; SOGo,
+			// SV-64) shows «Проекты» among the notebooks too.
+			if strings.Contains(value, "/"+ids[col.account]+"/") && strings.Contains(name, col.name) && shownIn(col, value) {
 				return true
 			}
 		}
 		// The feeds, and the storages: «Files» is the files home of
 		// nextcloud's account (s-files-6).
-		if strings.HasPrefix(value, "/app/files/") && strings.Contains(name, "Files") {
+		if strings.HasPrefix(value, "/app/files/") && filesName != "" && strings.Contains(name, filesName) {
 			return true
 		}
 		for _, n := range []string{"Праздники РФ", "Расписание лиги", "Documents", "Public"} {
@@ -285,10 +313,64 @@ func TestLiveStand(t *testing.T) {
 }
 
 var (
-	nextcloudFiles = regexp.MustCompile(`^(.*/remote\.php/dav/files/[^/]+/)`)
-	importRun      = regexp.MustCompile(`^\s*Import \d`)
-	takenAt        = regexp.MustCompile(`Something already lives at (\S+)/ on this server[^.]*\.`)
+	importRun = regexp.MustCompile(`^\s*Import \d`)
+	takenAt   = regexp.MustCompile(`Something (?:already lives|deleted) at [^.]*\.`)
 )
+
+type account struct{ label, name, server, user, pass string }
+
+// liveServer is one of our test servers by its name: those of
+// credentials.txt, and the Linux machine's stands (scripts/linux-stands.sh)
+// through the tunnel at CARREL_STANDS_HOST, 127.0.0.1 by default, with the
+// accounts the stands make.
+func liveServer(t *testing.T, name string) account {
+	t.Helper()
+	env := func(v string) string {
+		s := os.Getenv(v)
+		if s == "" {
+			t.Skip(v + " is not in credentials.txt")
+		}
+		return s
+	}
+	host := os.Getenv("CARREL_STANDS_HOST")
+	if host == "" {
+		host = "127.0.0.1"
+	}
+	a := account{name: name}
+	switch name {
+	case "nextcloud", "baikal", "sftpgo", "opencloud":
+		up := strings.ToUpper(name)
+		a.server, a.user, a.pass = env("CARREL_"+up+"_URL"), env("CARREL_"+up+"_USER"), env("CARREL_"+up+"_PASS")
+	case "sogo":
+		a.server, a.user, a.pass = env("CARREL_SOGO_CAL_URL"), env("CARREL_SOGO_USER"), env("CARREL_SOGO_PASS")
+	case "radicale":
+		a.server, a.user, a.pass = "http://"+host+":15232/test/", "test", "test"
+	case "stalwart":
+		a.server, a.user, a.pass = "http://"+host+":18088/", "carrel@carrel.test", "carrel-pass"
+	case "xandikos":
+		a.server, a.user = "http://"+host+":18081/", "carrel"
+	case "davis":
+		a.server, a.user, a.pass = "http://"+host+":18082/dav/", "carrel", "carrel-pass"
+	case "davis-files":
+		// Davis's files home of the account, as a plain WebDAV address.
+		a.server, a.user, a.pass = "http://"+host+":18082/dav/home/carrel/", "carrel", "carrel-pass"
+	case "davical":
+		a.server, a.user, a.pass = "http://"+host+":18083/caldav.php/", "carrel", "carrel-pass"
+	default:
+		t.Fatalf("no test server %q", name)
+	}
+	return a
+}
+
+// connected ends the run when Connect did not connect: the sheet is still
+// there, and what it says is the finding.
+func connected(t *testing.T, b *plainBrowser, a account) {
+	t.Helper()
+	if strings.HasSuffix(b.page.url.Path, "/new") || strings.Contains(b.page.text(), "Could not connect") {
+		t.Fatalf("%s (%s, %s): Connect did not connect — %s: %.1500s", a.label, a.name, a.server, b.page.url, b.page.text())
+	}
+	t.Logf("%s (%s) connected: %s", a.label, a.name, b.page.url.Path)
+}
 
 // optionOf is the value of the option of the select named name whose words
 // hold label.
@@ -312,15 +394,7 @@ func optionOf(t *testing.T, b *plainBrowser, name, label string) string {
 // account may hold one of the same name of its own.
 func collectionHref(t *testing.T, b *plainBrowser, col standCollection, id string) string {
 	t.Helper()
-	section := "calendar"
-	switch {
-	case col.comps == nil:
-		section = "contacts"
-	case len(col.comps) == 1 && col.comps[0] == "VTODO":
-		section = "tasks"
-	case len(col.comps) == 1 && col.comps[0] == "VJOURNAL":
-		section = "notes"
-	}
+	section := sectionOf(col)
 	b.open("/app/" + section)
 	// The rail's row of a source is its tick, which sends its address.
 	tick := b.page.find(func(n *html.Node) bool {
@@ -333,9 +407,49 @@ func collectionHref(t *testing.T, b *plainBrowser, col standCollection, id strin
 	return attr(tick, "value")
 }
 
+// sectionOf is the section a collection of the set is shown in: Работа,
+// of events and tasks, in the calendar.
+func sectionOf(col standCollection) string {
+	switch {
+	case col.comps == nil:
+		return "contacts"
+	case len(col.comps) == 1 && col.comps[0] == "VTODO":
+		return "tasks"
+	case len(col.comps) == 1 && col.comps[0] == "VJOURNAL":
+		return "notes"
+	}
+	return "calendar"
+}
+
+// shownIn reports whether a rail's row of section (its tick's value) is
+// where the set has col: a calendar of events and tasks (Работа) in the
+// calendar and the tasks alike.
+func shownIn(col standCollection, value string) bool {
+	if col.comps == nil {
+		return strings.HasPrefix(value, "/app/contacts/")
+	}
+	for _, c := range col.comps {
+		section := map[string]string{"VEVENT": "calendar", "VTODO": "tasks", "VJOURNAL": "notes"}[c]
+		if strings.HasPrefix(value, "/app/"+section+"/") {
+			return true
+		}
+	}
+	return false
+}
+
 // liveSend sends one request to a test server and answers with its status;
 // a refusal other than a missing thing on DELETE and PROPFIND ends the run.
 func liveSend(t *testing.T, user, pass, method, address string, body io.Reader, size int64, head map[string]string) int {
+	t.Helper()
+	code := liveTry(t, user, pass, method, address, body, size, head)
+	if code >= 300 && !(code == http.StatusNotFound && (method == "DELETE" || method == "PROPFIND")) {
+		t.Fatalf("%s %s: %d %s", method, address, code, http.StatusText(code))
+	}
+	return code
+}
+
+// liveTry is liveSend that leaves a refusal to its caller.
+func liveTry(t *testing.T, user, pass, method, address string, body io.Reader, size int64, head map[string]string) int {
 	t.Helper()
 	req, err := http.NewRequest(method, address, body)
 	if err != nil {
@@ -354,9 +468,6 @@ func liveSend(t *testing.T, user, pass, method, address string, body io.Reader, 
 	}
 	_, _ = io.Copy(io.Discard, resp.Body)
 	resp.Body.Close()
-	if resp.StatusCode >= 300 && !(resp.StatusCode == http.StatusNotFound && (method == "DELETE" || method == "PROPFIND")) {
-		t.Fatalf("%s %s: %s", method, address, resp.Status)
-	}
 	return resp.StatusCode
 }
 

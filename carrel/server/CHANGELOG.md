@@ -17,6 +17,50 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.7 — 2026-11-18
+
+Client `v0.11.37`. The client's acceptance (U-15.1) on the Linux machine's
+stands: the mockup set through Carrel's screens on Radicale, Stalwart,
+Xandikos, Davis and DAViCal, each as the set's main account, files on
+OpenCloud, SFTPGo and Davis (docs/servers.md, «Стенды Linux-машины через
+экраны Carrel»).
+
+### For consumers
+
+- **An account with nothing in it yet connects** (S-6). Its server named
+  where its collections go; the first one is made there. Connect refused
+  it at «0 collection(s)» — a new Radicale account could not be used. The
+  trace says «0 collection(s): none yet — new ones go to the home».
+- **The scheduling boxes are not collections** (S-6, SV-68). DAViCal keeps
+  `.in/` and `.out/` in the calendar home as plain calendars; discovery
+  asks the principal's `schedule-inbox-URL` with `schedule-outbox-URL` and
+  leaves both out — «2 scheduling boxes (inbox, outbox) left out».
+- **An account on Davis has its files** (S-6, SV-65): «Files» at
+  `…/dav/home/<id>/` beside the principal `…/dav/principals/<id>/`.
+  Baikal's principal has that shape and no such folder: the trace says
+  «files: none at …», not a fault.
+- **A file kept in a record as text is read as text** (S-20, SV-67):
+  Stalwart keeps an inline file that reads as UTF-8 with `VALUE=BINARY`
+  and no `ENCODING=BASE64`, escaped as TEXT. It was read as base64: three
+  quarters of its size, its data noise.
+- **Import leaves a record its collection cannot take** (S-19, SV-67): the
+  size is checked against the collection's `max-resource-size` before
+  writing. Its preview row says «Too large: 573 KB — nextcloud · Записи
+  takes records up to 512 KB», Import does not count it, the report has it
+  under «Failed». Stalwart answered such a record 412, which the import
+  read as a UID held elsewhere.
+- **A server's refusal in the import report is the request and the answer**
+  (S-19, SV-66): «Заметка со встречи 10.08 · PUT …/5c81-77aa-0d64.ics → 400
+  Bad Request», not «dav: HTTP 400: Bad Request».
+- `davtest`: `ScheduleInbox`.
+- The acceptance stand: `CARREL_STAND_ACCOUNTS` casts the set's accounts
+  onto any of our servers; `scripts/linux-stands.sh` holds the Linux
+  machine's stands up on ports of their own (`testdata/stands-ports.yml`);
+  the stand types the set's addresses; a tick of a rail is pressed only
+  while it is on, and a form taken before a 429 is not sent again.
+- Tests under load: `fanout.TestASourceIsGivenItsShareForEveryAsk` with
+  800 ms of slack; the fixtures' feed trace takes «0.1 s» as «0 ms».
+
 ## v0.3.6 — 2026-11-18
 
 Client `v0.11.37`.

@@ -58,3 +58,36 @@ func TestNoPrincipalLeavesSchedulingUnknown(t *testing.T) {
 		t.Errorf("scheduling = %q, want unknown", res.Scheduling)
 	}
 }
+
+// DAViCal keeps the scheduling boxes in the calendar home and calls them
+// calendars (.in/ and .out/), resourcetype calendar and nothing of RFC 6638
+// (acceptance on our test servers, 18.11.2026: «Carrel Inbox» and «Carrel
+// Outbox» stood in every rail). The principal names them; discovery leaves
+// them out and says so on the trace.
+func TestTheSchedulingBoxesAreNotCollections(t *testing.T) {
+	srv := davtest.New(t)
+	in, out := davtest.CalendarHome+"inbox/", davtest.CalendarHome+"outbox/"
+	srv.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "work/", Name: "Work"})
+	srv.AddCalendar(caldav.Calendar{Path: in, Name: "Carrel Inbox"})
+	srv.AddCalendar(caldav.Calendar{Path: out, Name: "Carrel Outbox"})
+	srv.ScheduleInbox, srv.ScheduleOutbox = in, out
+
+	res, trace, err := Run(t.Context(), loopbackGuard(), srv.URL, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, c := range res.Collections {
+		names = append(names, c.DisplayName)
+	}
+	if !slices.Equal(names, []string{"Work"}) {
+		t.Errorf("collections = %q, want Work alone", names)
+	}
+	said := false
+	for _, s := range trace.Steps {
+		said = said || s.Detail == "2 scheduling boxes (inbox, outbox) left out"
+	}
+	if !said || res.Scheduling != SchedulingYes {
+		t.Errorf("trace = %+v, scheduling %q", trace.Steps, res.Scheduling)
+	}
+}

@@ -144,6 +144,14 @@ func (b *plainBrowser) send(req *http.Request) (*http.Response, error) {
 		}
 		resp.Body.Close()
 		time.Sleep(time.Second)
+		// Told 429 at the end of a redirect: the form was taken, and only
+		// the page it leads to is asked again — a tick sent twice is a tick
+		// taken back (the acceptance stand, 18.11.2026).
+		if resp.Request != nil && resp.Request.URL.String() != req.URL.String() {
+			again, _ := http.NewRequest(http.MethodGet, resp.Request.URL.String(), nil)
+			again.Header = req.Header.Clone()
+			req, body = again, nil
+		}
 	}
 }
 

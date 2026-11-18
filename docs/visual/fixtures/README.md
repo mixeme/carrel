@@ -60,13 +60,33 @@ Typecase 267).
 (`baikal`) и в папку `carrel-set` SFTPGo (`sftpgo · vps`); файлы набора
 кладутся на серверы до Carrel, с размерами и временем кадров
 (`X-OC-Mtime` — оба сервера его берут). Адреса и пароли — из
-`myenv/carrel/credentials.txt` владельца, личных ящиков (Yandex, Google,
-iCloud, Mail.ru) стенд не трогает: у событий набора есть участники.
+`myenv/carrel/credentials.txt` владельца. Адрес коллекции стенд вписывает
+из набора (`lichnyj`, `arhiv`): кадры рисуют эти, а Carrel из имени выводит
+свои (`lichnyi`, `arkhiv`).
 
 ```bash
 cd carrel/server
 CARREL_LIVE_STAND=3h CARREL_STAND_STOP=<файл> go test -tags integration -run TestLiveStand -timeout 0 -v ./cmd/carrel
 ```
+
+Кто играет учётные записи набора, задаёт `CARREL_STAND_ACCOUNTS` — по
+подписи набора и имени сервера: `nextcloud`, `sogo`, `baikal`, `sftpgo`,
+`opencloud`, стенды Linux-машины `radicale`, `stalwart`, `xandikos`,
+`davis`, `davical` и `davis-files` (домашний каталог файлов Davis):
+
+```bash
+CARREL_STAND_ACCOUNTS="nextcloud=davis,radicale · vps=radicale,baikal=davical,sftpgo · vps=opencloud" CARREL_LIVE_STAND=3h CARREL_STAND_STOP=<файл> go test -tags integration -run TestLiveStand -timeout 0 -v ./cmd/carrel
+```
+
+Стенды Linux-машины поднимает `scripts/linux-stands.sh up` (проект
+`carrel-stands`, свои порты — `testdata/stands-ports.yml`, ворота с ним не
+сталкиваются), снимает `down`; с Windows до них — один туннель, команда в
+голове скрипта. Сверка экранов — с тем же набором на davtest (`TestStand` на
+другом `CARREL_STAND_PORT`): строки и страницы записей двух окон сравниваются
+текстом. Набор не требует, чтобы сервер был назван в нём: через экраны
+сервер показывает то, чего не видят его наборы тестов (решение владельца
+18.11.2026; первый круг — servers.md, «Стенды Linux-машины через экраны
+Carrel»).
 
 Останавливать — созданием файла `CARREL_STAND_STOP`, не снятием процесса:
 так стенд убирает с серверов то, что завёл. Чего он не воспроизводит:
@@ -101,9 +121,9 @@ CARREL_LIVE_STAND=3h CARREL_STAND_STOP=<файл> go test -tags integration -run
    `#3F6E8C`,
    Архив и Дни рождения — `#A05A2C`, Команда, Проекты и Дневник — `#6B4E7A`,
    Дежурства — `#8C6239`. Коллекции создаются самим Carrel (**New
-   collection**); Radicale до первой коллекции подключить нельзя — discovery
-   не находит ничего и отказывает, поэтому одну на нём заводят через
-   `MKCALENDAR` руками.
+   collection**); пустая учётная запись (Radicale до первой коллекции)
+   подключается с `v0.3.7` — прежде её приходилось начинать `MKCALENDAR`
+   руками.
 
    Компоненты у коллекции — те, что она держит: Дела — `VTODO`, Записи,
    Дневник и Общие с семьёй — `VJOURNAL`, Работа — `VEVENT` и `VTODO` (в неё идут и
