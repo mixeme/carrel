@@ -890,7 +890,9 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		s.principalProps(w)
 		return
 	}
-	if r.Method == "PROPFIND" && (p == CalendarHome || p == AddressBookHome) && bytes.Contains(body, []byte("getctag")) {
+	// Nextcloud tells of its trash bin to any request asking deleted-at, the
+	// create sheet's list of taken addresses too (SV-30).
+	if r.Method == "PROPFIND" && (p == CalendarHome || p == AddressBookHome) && (bytes.Contains(body, []byte("getctag")) || bytes.Contains(body, []byte("deleted-at"))) {
 		s.homeProps(w, p)
 		return
 	}

@@ -30,6 +30,8 @@ var (
 	propResourceType  = xml.Name{Space: "DAV:", Local: "resourcetype"}
 	propCalendarColor = xml.Name{Space: "http://apple.com/ns/ical/", Local: "calendar-color"}
 	propComponentSet  = xml.Name{Space: nsCalDAV, Local: "supported-calendar-component-set"}
+	// propDeletedAt is Nextcloud's mark of what its trash bin holds (SV-30).
+	propDeletedAt = xml.Name{Space: "http://nextcloud.com/ns", Local: "deleted-at"}
 )
 
 // calendarParts are what a new calendar can hold, in the order the catalog
@@ -333,7 +335,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, connLabel(conn), "home", "PROPFIND", home, err)))
 		return
 	}
-	taken, err := childSegments(r.Context(), client, home)
+	taken, trashed, err := homeChildren(r.Context(), client, home)
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, connLabel(conn), "home", "PROPFIND", home, err)))
 		return
@@ -342,14 +344,25 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	// is refused, never given a number of its own (the owner's decision of
 	// 16.10.2026, Кл5): the person sees the address before the save, and
 	// the save makes that one or none.
+	// An address the server's trash bin holds is refused in words of its
+	// own: the person sees nothing there (the owner's decision of
+	// 18.11.2026, SV-30).
 	segment := f.address
 	switch {
+	case segment == "" && trashed[strings.ToLower(collectionSlug(f.name))]:
+		f.errs["name"] = text("Something deleted at " + collectionSlug(f.name) + "/ is still in this server's trash bin. Give it another name, or empty the trash bin on the server.")
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
+		return
 	case segment == "" && taken[strings.ToLower(collectionSlug(f.name))]:
 		f.errs["name"] = text("Something already lives at " + collectionSlug(f.name) + "/ on this server. Give it another name.")
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
 		return
 	case segment == "":
 		segment = collectionSlug(f.name)
+	case trashed[strings.ToLower(segment)]:
+		f.errs["address"] = text("Something deleted at this address is still in the server's trash bin.")
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
+		return
 	case taken[strings.ToLower(segment)]:
 		f.errs["address"] = text("Something already lives at this address on the server.")
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
@@ -739,20 +752,33 @@ func createRequest(f collectionForm) (string, []dav.Prop, []view.Kind) {
 // childSegments lists the last segments of what the home already holds, in
 // lower case, for the numeric suffix (S-12.2).
 func childSegments(ctx context.Context, client *dav.Client, home string) (map[string]bool, error) {
-	ms, err := client.PropFind(ctx, home, dav.DepthOne, []xml.Name{propResourceType})
+	taken, _, err := homeChildren(ctx, client, home)
+	return taken, err
+}
+
+// homeChildren is childSegments with the segments the server's own trash bin
+// holds told apart: Nextcloud keeps a deleted calendar at its address and
+// says so only to a request asking nc:deleted-at (docs/servers.md, SV-30).
+// They are taken too; trashed says which.
+func homeChildren(ctx context.Context, client *dav.Client, home string) (taken, trashed map[string]bool, err error) {
+	ms, err := client.PropFind(ctx, home, dav.DepthOne, []xml.Name{propResourceType, propDeletedAt})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	self := strings.TrimSuffix(hrefPath(home), "/")
-	taken := map[string]bool{}
+	taken, trashed = map[string]bool{}, map[string]bool{}
 	for _, resp := range ms.Responses {
 		p := strings.TrimSuffix(hrefPath(resp.Href), "/")
 		if p == self || p == "" {
 			continue
 		}
-		taken[strings.ToLower(p[strings.LastIndex(p, "/")+1:])] = true
+		segment := strings.ToLower(p[strings.LastIndex(p, "/")+1:])
+		taken[segment] = true
+		if strings.TrimSpace(string(resp.Props[propDeletedAt])) != "" {
+			trashed[segment] = true
+		}
 	}
-	return taken, nil
+	return taken, trashed, nil
 }
 
 func hrefPath(href string) string {

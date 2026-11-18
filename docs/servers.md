@@ -1160,8 +1160,13 @@ Nextcloud — тот же sabre).
   держит адрес удалённого календаря: календарь с тем же именем лист Carrel
   не заводит — «Something already lives at lichnyi/ on this server. Give it
   another name.», хотя ничего с таким именем человек у себя не видит.
-  Адрес можно вписать другой; слова о корзине для этого случая ждут
-  владельца.
+  Адрес можно вписать другой. Решение владельца 18.11.2026: отказ говорит
+  о корзине. Список занятых адресов листа (`homeChildren`) спрашивает и
+  `nc:deleted-at`; адрес из корзины отказывается у Name — «Something
+  deleted at lichnyi/ is still in this server's trash bin. Give it another
+  name, or empty the trash bin on the server.», вписанный руками — у
+  Address: «Something deleted at this address is still in the server's
+  trash bin.» Сторож — `TestAnAddressHeldByTheServersTrashBinSaysSo`.
 
 ### SV-57. Число в папке говорит только Nextcloud, размеров картинки не даёт никто
 
