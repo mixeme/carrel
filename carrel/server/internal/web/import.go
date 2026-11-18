@@ -1611,6 +1611,11 @@ func destRecords(ctx context.Context, dest *collectionCtx) (map[string]*model.Ob
 		return out, nil
 	}
 	for _, p := range calendarParts {
+		// Asked about what it holds alone: Mail.ru answers a question about
+		// tasks in a calendar of events with 400 (docs/servers.md, SV-71).
+		if !dest.col.Has(p.kind) {
+			continue
+		}
 		objs, _, err := dest.cal.Query(ctx, dest.col.Path, p.component, nil, nil)
 		if err != nil {
 			return nil, err

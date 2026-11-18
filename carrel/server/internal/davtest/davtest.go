@@ -141,6 +141,12 @@ type Server struct {
 	// normally.
 	RefuseUIDTextMatch bool
 
+	// EventQueriesOnly answers 400 to a calendar-query whose filter asks
+	// for tasks or notes, the way Mail.ru does (docs/servers.md, SV-71):
+	// its calendars hold events, and a question about anything else is a
+	// bad request.
+	EventQueriesOnly bool
+
 	// RefuseEventWithoutEnd answers 404 with an empty body to a PUT of a
 	// VEVENT that has DTSTART and neither DTEND nor DURATION, timed or
 	// all-day, the way iCloud does (docs/servers.md, SV-53), although RFC
@@ -219,6 +225,12 @@ type Server struct {
 	// holds one child it did not hold before.
 	CreateAssignsItsOwnAddress bool
 
+	// ListsNewLate leaves a calendar made by MKCALENDAR out of that many
+	// listings of the home after it, the way Yandex does for a moment
+	// (docs/servers.md, SV-62): the home read right after the create does
+	// not hold it yet.
+	ListsNewLate int
+
 	// RefuseUnsizedPUT answers 400 to a PUT that carries no Content-Length,
 	// the way OpenCloud behind Apache does past a few kilobytes
 	// (docs/servers.md, SV-15). It is how the rule "the length goes with the
@@ -263,6 +275,7 @@ type Server struct {
 	books     map[string]carddav.AddressBook
 	colours   map[string]string
 	trashed   map[string]string // collection -> the time the server says it was deleted
+	late      map[string]int    // collection -> listings of the home it is left out of yet
 	ctags     map[string]int
 	objects   map[string]object
 	refuse    map[string]refusal
@@ -299,6 +312,7 @@ func New(t testing.TB) *Server {
 		books:     make(map[string]carddav.AddressBook),
 		colours:   make(map[string]string),
 		trashed:   make(map[string]string),
+		late:      make(map[string]int),
 		ctags:     make(map[string]int),
 		objects:   make(map[string]object),
 		sent:      make(map[string][]byte),
@@ -798,6 +812,13 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"/>`)
 		return
 	}
+	if s.EventQueriesOnly && r.Method == "REPORT" && bytes.Contains(body, []byte("calendar-query")) &&
+		(bytes.Contains(body, []byte(`name="VTODO"`)) || bytes.Contains(body, []byte(`name="VJOURNAL"`))) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = io.WriteString(w, `{"title":"bad request","type":"caldav"}`)
+		return
+	}
 	if s.RefuseUIDTextMatch && r.Method == "REPORT" && bytes.Contains(body, []byte("calendar-query")) &&
 		bytes.Contains(body, []byte("text-match")) && bytes.Contains(body, []byte(`name="UID"`)) {
 		s.mu.Lock()
@@ -1002,7 +1023,9 @@ func (s *Server) homeProps(w http.ResponseWriter, home string) {
 	var paths []string
 	if home == CalendarHome {
 		for p := range s.calendars {
-			paths = append(paths, p)
+			if !s.listedLate(p) {
+				paths = append(paths, p)
+			}
 		}
 	} else {
 		for p := range s.books {
@@ -1149,6 +1172,11 @@ func (s *Server) mkcalendar(w http.ResponseWriter, p string, body []byte) {
 		s.mu.Unlock()
 	}
 	s.AddCalendar(caldav.Calendar{Path: key, Name: req.Prop.Name, SupportedComponentSet: comps})
+	if s.ListsNewLate > 0 {
+		s.mu.Lock()
+		s.late[key] = s.ListsNewLate
+		s.mu.Unlock()
+	}
 	colour := strings.TrimSpace(req.Prop.Colour)
 	if colour != "" && !s.CreateDropsColour {
 		s.SetColour(key, colour)
@@ -1442,11 +1470,32 @@ func (b calBackend) CreateCalendar(_ context.Context, c *caldav.Calendar) error 
 	return nil
 }
 
+// ListLate leaves a calendar out of the next n listings of the home: one
+// the server made a moment ago and lists late (SV-62).
+func (s *Server) ListLate(collection string, n int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.late[collectionKey(collection)] = n
+}
+
+// listedLate reports whether a calendar is still left out of the home's
+// listing (ListsNewLate), and counts the listing. The caller holds s.mu.
+func (s *Server) listedLate(p string) bool {
+	if s.late[p] <= 0 {
+		return false
+	}
+	s.late[p]--
+	return true
+}
+
 func (b calBackend) ListCalendars(context.Context) ([]caldav.Calendar, error) {
 	b.s.mu.Lock()
 	defer b.s.mu.Unlock()
 	var out []caldav.Calendar
 	for _, c := range b.s.calendars {
+		if b.s.listedLate(c.Path) {
+			continue
+		}
 		out = append(out, c)
 	}
 	sort.Slice(out, func(i, j int) bool { return b.s.listedBefore(out[i].Path, out[j].Path) })

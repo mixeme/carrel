@@ -366,12 +366,16 @@ func fromReports(cos []caldav.CalendarObject, component string) ([]*model.Object
 
 // fromReport turns a REPORT entry into a record. go-webdav hands the body over
 // decoded, so it is encoded once to become the document the record keeps; the
-// encoder refuses what RFC 5545 forbids (a VEVENT without DTSTAMP), and that
-// refusal is what makes the entry unreadable.
+// encoder refuses what RFC 5545 forbids, and that refusal is what makes the
+// entry unreadable. A missing DTSTAMP is not among it: the stamp is the
+// record's mark, not its content (S-7.1), and Yandex keeps tasks without one
+// (docs/servers.md, SV-69) — the record is read with the stamp it has the
+// best word for.
 func fromReport(co caldav.CalendarObject) (*model.Object, error) {
 	if co.Data == nil {
 		return nil, errors.New("the reply carried no calendar data")
 	}
+	stampMissing(co.Data, co.ModTime)
 	var buf bytes.Buffer
 	if err := encodeCalendar(&buf, co.Data); err != nil {
 		return nil, err
@@ -382,6 +386,39 @@ func fromReport(co caldav.CalendarObject) (*model.Object, error) {
 	}
 	obj.Modified = co.ModTime
 	return obj, nil
+}
+
+// stampMissing gives a component of a record that has no DTSTAMP the one it
+// has the best word for: its LAST-MODIFIED, else its CREATED, else modified
+// (the answer's time), else now — in UTC, as RFC 5545 has it.
+func stampMissing(data *ical.Calendar, modified time.Time) {
+	for _, c := range data.Children {
+		switch c.Name {
+		case ical.CompEvent, ical.CompToDo, ical.CompJournal:
+		default:
+			continue
+		}
+		if c.Props.Get(ical.PropDateTimeStamp) != nil {
+			continue
+		}
+		value := ""
+		for _, name := range []string{ical.PropLastModified, ical.PropCreated} {
+			if p := c.Props.Get(name); p != nil && strings.HasSuffix(strings.TrimSpace(p.Value), "Z") {
+				value = strings.TrimSpace(p.Value)
+				break
+			}
+		}
+		if value == "" {
+			at := modified
+			if at.IsZero() {
+				at = time.Now()
+			}
+			value = at.UTC().Format("20060102T150405Z")
+		}
+		p := ical.NewProp(ical.PropDateTimeStamp)
+		p.Value = value
+		c.Props.Set(p)
+	}
 }
 
 func reportUID(co caldav.CalendarObject) string {

@@ -104,7 +104,9 @@ func decodedICS(t *testing.T, ics string) *ical.Calendar {
 func TestQueryNamesUnreadableAndKeepsTheRest(t *testing.T) {
 	p, err := New(stubReports{objs: []caldav.CalendarObject{
 		{Path: work + "good.ics", ETag: `"g"`, Data: decodedICS(t, vevent("good", "20260115T100000Z", "Good"))},
-		{Path: work + "bad.ics", ETag: `"b"`, Data: decodedICS(t, "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//T//EN\nBEGIN:VEVENT\nUID:bad\nDTSTART:20260116T100000Z\nEND:VEVENT\nEND:VCALENDAR\n")},
+		// Both an end and a duration, which RFC 5545 forbids. (A missing
+		// DTSTAMP was the example once; it is read now — SV-69.)
+		{Path: work + "bad.ics", ETag: `"b"`, Data: decodedICS(t, "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//T//EN\nBEGIN:VEVENT\nUID:bad\nDTSTAMP:20260101T000000Z\nDTSTART:20260116T100000Z\nDTEND:20260116T110000Z\nDURATION:PT1H\nEND:VEVENT\nEND:VCALENDAR\n")},
 	}})
 	if err != nil {
 		t.Fatal(err)
