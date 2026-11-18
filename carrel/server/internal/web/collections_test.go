@@ -191,6 +191,60 @@ func TestCreateWhereTheServerPicksTheAddress(t *testing.T) {
 	decode[view.AgendaPage](t, f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(placed), f.sess)))
 }
 
+// Yandex puts a new calendar at an address of its own and, for a moment,
+// does not list it in the home (docs/servers.md, SV-19, SV-62): the home
+// read once right after the create held nothing new, and the sheet said
+// «Made, but not at the address it was given … could not tell which» to
+// every calendar made there (acceptance on our test servers, 18.11.2026).
+// The home is read again for a short while.
+func TestCreateFindsACalendarTheServerListsLate(t *testing.T) {
+	f := calendarFixture(t, nil)
+	f.srv.CreateAssignsItsOwnAddress = true
+	f.srv.ListsNewLate = 2
+
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess,
+		url.Values{"account": {f.id}, "name": {"Trips"}, "components": {"VEVENT"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
+	}
+	found := false
+	for _, c := range catalogOf(t, f).Collections {
+		if cal, ok := f.srv.Calendar(c.Path); ok && cal.Name == "Trips" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("the calendar the server listed late is not in the catalog")
+	}
+}
+
+// A calendar made a moment before and listed late is new in the home too
+// when the next one is made (Yandex, SV-62: «Записи» then «Дневник» on the
+// acceptance stand, 18.11.2026): of two new children, the new collection is
+// the one with the name it was given.
+func TestCreateTellsItsCalendarByNameAmongTwoNew(t *testing.T) {
+	f := calendarFixture(t, nil)
+	f.srv.CreateAssignsItsOwnAddress = true
+	other := davtest.CalendarHome + "events-900/"
+	f.srv.AddCalendar(caldav.Calendar{Path: other, Name: "Записи"})
+	f.srv.ListLate(other, 1) // the sheet's read of the home does not see it
+
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess,
+		url.Values{"account": {f.id}, "name": {"Дневник"}, "components": {"VEVENT"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create: %d %.600s", rec.Code, rec.Body.String())
+	}
+	var named []string
+	for _, c := range catalogOf(t, f).Collections {
+		if c.Path != f.col {
+			named = append(named, c.Name)
+		}
+	}
+	if len(named) != 1 || named[0] != "Дневник" {
+		t.Errorf("the catalog took %q, want Дневник alone", named)
+	}
+}
+
 // An address typed by hand is kept as typed, refused when it is not one
 // segment, and not suffixed when taken: the person chose it.
 func TestNewAddressBookWithAddressByHand(t *testing.T) {

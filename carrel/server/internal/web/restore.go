@@ -1375,7 +1375,7 @@ func (s *Server) newCollectionOn(ctx context.Context, conn sealed.Connection, ki
 	if err := client.MkColProps(ctx, method, p, props); err != nil {
 		return sealed.Collection{}, fmt.Errorf("%s %s: %w", method, p, err)
 	}
-	settled, err := settlePath(ctx, client, home, p, taken)
+	settled, err := settlePath(ctx, client, home, p, name, taken)
 	if err != nil {
 		return sealed.Collection{}, err
 	}

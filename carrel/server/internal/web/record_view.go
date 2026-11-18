@@ -491,6 +491,11 @@ func typedLabel(label string, params map[string]string) string {
 	var parts []string
 	for _, one := range strings.Split(t, ",") {
 		one = strings.ToLower(strings.TrimSpace(one))
+		if notLabels[one] {
+			// A preference or the format's default, not a kind of the
+			// value (Google's TYPE=pref): the form leaves it out too.
+			continue
+		}
 		if w, ok := typeWords[one]; ok {
 			one = w
 		}

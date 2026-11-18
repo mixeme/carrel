@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.8 — 2026-11-18
+
+Client `v0.11.37`. The client's acceptance (U-15.1) on the public services'
+test accounts — Yandex, Google, iCloud, Mail.ru — through Carrel's screens
+(docs/servers.md, «Публичные сервисы через экраны Carrel»).
+
+### For consumers
+
+- **A record without DTSTAMP is read** (S-7.1, SV-69): its stamp is taken
+  from LAST-MODIFIED, else CREATED, else the answer's time. Yandex keeps
+  tasks without one, and every task of it was «not shown: invalid
+  iCalendar».
+- **A collection the server put at its own address is found when listed
+  late** (S-12.2, SV-62): the home is read again for up to 5 s, and of two
+  new children the one with the name sent is taken. Every calendar made on
+  Yandex said «Made, but not at the address it was given».
+- **Import asks a collection only about what it holds** (S-19, SV-71):
+  Mail.ru answers a query for tasks in a calendar of events with 400, which
+  made the calendar «did not answer» — nothing could be imported into it.
+- **A value's label leaves out what is no kind** (SV-73): Google's
+  `TYPE=pref`, vCard 3's `INTERNET` and `VOICE` — «Phone · mobile», not
+  «Phone · mobile, pref», as the edit form has it.
+- `davtest`: `ListsNewLate`, `ListLate`, `EventQueriesOnly`.
+- The acceptance stand: `yandex`, `google`, `icloud`, `mailru` in
+  `CARREL_STAND_ACCOUNTS`; a slot of two addresses is two connections; a
+  collection the server would not make takes the set's records into one it
+  holds, and what the import added is deleted after; an `href` with
+  attributes is read (Yandex's).
+
 ## v0.3.7 — 2026-11-18
 
 Client `v0.11.37`. The client's acceptance (U-15.1) on the Linux machine's

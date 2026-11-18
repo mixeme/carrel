@@ -211,6 +211,11 @@ Graph, протоколы другого устройства. Самая рас
 | SV-24 | Google | контакты и календари на разных хостах; рекомендованный `caldav/v2` требует OAuth | подключение на протокол, как у Yandex; прямой путь обнаружения работает без правок | `TestGoogleContactInTheOnlyBook`, `TestLiveDiscoveryReport` |
 | SV-25 | Google | новую карточку называет сам и переписывает её `UID`; `Location` при этом шлёт | созданную запись перечитывает по адресу, куда писал, и берёт личность оттуда; нигде не нашлась — говорит и ведёт в коллекцию | `TestCreateWhereTheServerRewritesTheUID`, `TestGoogleContactInTheOnlyBook` |
 | SV-30 | Nextcloud | удалённый календарь остаётся по адресу и в доме, и называет себя календарём — пока не спросишь про `nc:deleted-at` | обход спрашивает об этом в том же запросе и помеченное удалённым не берёт; след говорит, сколько пропущено | `TestDiscoverySkipsWhatTheServerPutInItsTrashBin`, `TestNextcloudCollectionDelete` |
+| SV-73 | Google | событию дописывает свои напоминания («10 minutes before · 30 minutes before», у события на весь день — «1 day before, 23:30»), `STATUS:CONFIRMED` и организатора участником; карточке — `TYPE=pref` у телефона и почты, `CATEGORIES` карточки не хранит | дописанное — запись сервера, Carrel показывает её как есть; `pref` и прочие слова формата (`INTERNET`, `VOICE`) в подписи значения не стоят — «Phone · mobile», как в форме (`v0.3.8`) | `web.TestATypedLabelLeavesOutWhatIsNoKind`; живьём — `TestLiveStand` |
+| SV-72 | Mail.ru | событие с участниками, чей организатор — не владелец учётной записи, отвергает 403 | запись не пишется, отчёт импорта называет запрос и ответ (SV-66) | живьём — `TestLiveStand` |
+| SV-71 | Mail.ru | `calendar-query` с фильтром `VTODO` или `VJOURNAL` — 400 `{"title":"bad request","type":"caldav"}`: календарь держит события | импорт спрашивает коллекцию только о том, что она держит; прежде один отказ делал весь календарь «did not answer», и импорт в Mail.ru был выключен (S-19, `v0.3.8`) | `web.TestImportAsksACalendarOnlyAboutWhatItHolds` (`davtest.EventQueriesOnly`); живьём — `TestLiveStand` |
+| SV-70 | Yandex | запись с UID, который на учётной записи уже был и удалён, принимает 201 и не хранит | отчёт импорта: «Not kept by the server · … · not there after it was written»; правки нет | живьём — `TestLiveStand` |
+| SV-69 | Yandex | задачу хранит без `DTSTAMP` | запись без `DTSTAMP` читается, отметка берётся из `LAST-MODIFIED`, `CREATED` или времени ответа; прежде все задачи Yandex были «not shown: invalid iCalendar» (S-7.1, `v0.3.8`) | `cal.TestARecordWithoutItsStampIsRead`; живьём — `TestLiveStand` |
 | SV-68 | DAViCal | ящики планирования лежат в календарном доме как обычные календари: `.in/` и `.out/`, `resourcetype` — `calendar`, признаков RFC 6638 нет; называют их только `schedule-inbox-URL` и `schedule-outbox-URL` принципала | обход спрашивает у принципала оба адреса и оставляет ящики вне списка, след говорит «2 scheduling boxes (inbox, outbox) left out» (S-6, `v0.3.7`); до того «Carrel Inbox» и «Carrel Outbox» стояли в каждом рейле | `discover.TestTheSchedulingBoxesAreNotCollections`; живьём — `TestLiveStand` |
 | SV-67 | Stalwart | вложение в записи, которое читается как текст UTF-8, хранит текстом: `VALUE=BINARY` без `ENCODING=BASE64`, значение с экранированием TEXT; объявляет `max-resource-size` 524288 и запись крупнее отвергает 412 с условием `max-resource-size` | такое вложение читается как текст — размер и данные верные (S-20, `v0.3.7`); импорт сверяет размер записи с `max-resource-size` коллекции до записи: крупная в предпросмотре «Too large: …», на сервер не уходит (S-19) | `cal.TestAnInlineFileKeptAsTextIsItsText`, `web.TestImportLeavesARecordTheCollectionCannotTake`; живьём — `TestLiveStand` |
 | SV-66 | Radicale | заметку (`VJOURNAL`) с двумя `DESCRIPTION` отвергает 400 «Bad Request»; RFC 5545 §3.6.3 разрешает их несколько, причина — только в журнале сервера | запись не пишется, отчёт импорта называет запрос и ответ: «… · PUT …/5c81-77aa-0d64.ics → 400 Bad Request» (S-19, `v0.3.7`); `DESCRIPTION` Carrel не склеивает — запись как пришла | `web.TestImportSaysWhatTheServerRefused`; живьём — `TestLiveStand` |
@@ -1014,6 +1019,17 @@ Nextcloud — тот же sabre).
   перечитывание её находит. Живой набор перечитывает 404 до 10 с
   (`getSettled`, `matrixSave`, `makeCollection`): запись, которой нет на
   самом деле, нет и после ожидания. Правки Carrel нет.
+- **Новый календарь** (18.11.2026, стенд приёмки): `MKCALENDAR` по своему
+  адресу (SV-19), а дом, прочитанный сразу, нового ещё не называет — лист
+  писал «Made, but not at the address it was given … could not tell which»
+  на каждый календарь. Созданный перед ним и показанный с опозданием
+  оказывался новым рядом — два новых, и выбрать было нельзя. С `v0.3.8`
+  дом перечитывается до 5 с (по 0,5 с), а из двух новых берётся тот, чьё
+  имя отправлено (`web.settlePath`, `namedAmong`). Сторожа —
+  `TestCreateFindsACalendarTheServerListsLate` (`davtest.ListsNewLate`),
+  `TestCreateTellsItsCalendarByNameAmongTwoNew` (`davtest.ListLate`).
+  Страница нового календаря, открытая сразу, может получить на `REPORT`
+  404 — «is unavailable», «Try again» снимает.
 - **Проверка.** Живьём — `TestYandexForms/matrix`.
 
 ---
@@ -2072,3 +2088,86 @@ SV-54.
   — «2 scheduling boxes (inbox, outbox) left out» (S-6, `v0.3.7`).
 - **Сторож.** `discover.TestTheSchedulingBoxesAreNotCollections`; живьём —
   `TestLiveStand`.
+
+## Публичные сервисы через экраны Carrel (18.11.2026)
+
+Набор кадров заведён экранами Carrel на тестовых учётных записях Yandex,
+Google, iCloud и Mail.ru (решение владельца 18.11.2026: учётные записи
+тестовые, данные в них — норма, после теста всё убирается). Каждый сервис —
+главной учётной записью набора (`CARREL_STAND_ACCOUNTS="nextcloud=yandex"` и
+т. д.), остальные места — SOGo, Baikal, SFTPGo. Где коллекцию завести
+нельзя, стенд кладёт записи в уже существующую того же рода и после теста
+удаляет из неё новое. Экраны сверены текстом с davtest без колонки
+источника.
+
+- **Yandex.** Любой из двух адресов (`caldav.yandex.ru`, `carddav.yandex.ru`)
+  отдаёт и календари, и книгу — хватает одного подключения. Вторую книгу не
+  заводит (`MKCOL` — 405, SV-20). Календарь держит один род: «Работа»
+  (`VEVENT` и `VTODO`) стала календарём событий, блокнот — тоже («The server
+  did not take notes»). **Задачи теперь хранит** (в списке, заведённом для
+  `VTODO`; прежняя запись SV-34 «задачу не хранит» устарела), но без
+  `DTSTAMP` (SV-69), без напоминаний, тегов, вложения и `RELATED-TO`. Новый
+  календарь — SV-62. Запись с UID, который учётная запись уже держала, —
+  SV-70.
+- **Google.** Ничего не заводит (`MKCALENDAR` — 404, `MKCOL` — 400, SV-24);
+  задач и заметок нет. Дописывает своё — SV-73. События и карточки в
+  остальном совпали.
+- **iCloud.** Заводить перестал: `MKCALENDAR` — 403 «no DAV:bind on the
+  calendar home-set» (до 30.09.2026 календари заводились, SV-52), `MKCOL`
+  книги — 403. Заметок нет (SV-52). Остальное — контакты, события с
+  «Синк-апом» целиком, задачи — совпало с davtest.
+- **Mail.ru.** Ссылка на один календарь (SV-22); книги, задач и заметок нет.
+  Запрос о задачах — 400 (SV-71); событие с чужим организатором — 403
+  (SV-72); владельца дописывает участником и теряет `STATUS` (SV-36).
+
+### SV-69. Задача без DTSTAMP
+
+- **Сервер.** Yandex. Задача, записанная с `DTSTAMP`, читается без него.
+- **Чем грозило.** go-ical отказывается кодировать компонент без `DTSTAMP`,
+  и Carrel показывал «4 records not shown: invalid iCalendar» — ни одной
+  задачи Yandex.
+- **Carrel.** `DTSTAMP` — отметка записи, не её содержание (S-7.1): записи
+  без него дописывается отметка из `LAST-MODIFIED`, иначе `CREATED`, иначе
+  времени ответа (`cal.stampMissing`, `v0.3.8`). Запрещённое иначе (конец и
+  длительность сразу) по-прежнему «invalid iCalendar».
+- **Сторож.** `cal.TestARecordWithoutItsStampIsRead`.
+
+### SV-70. UID удалённой записи не берётся снова
+
+- **Сервер.** Yandex. `PUT` записи с UID, который учётная запись держала и
+  удалила (UID «Синк-апа» набора — от прежних прогонов), — 201, а `GET` через
+  4 и 8 с — 404. Та же запись с новым UID хранится.
+- **Carrel.** Отчёт импорта честен: «Not kept by the server · Синк-ап по
+  релизу · not there after it was written». Правки нет.
+
+### SV-71. Вопрос о задачах в календаре событий — 400
+
+- **Сервер.** Mail.ru. `calendar-query` с `comp-filter` `VTODO` или
+  `VJOURNAL` — 400 `{"title":"bad request","type":"caldav"}`; с `VEVENT` — 207.
+- **Чем грозило.** Импорт спрашивал коллекцию обо всех трёх родах, и отказ
+  на одном делал её «did not answer» — «Import N events» выключен, в
+  Mail.ru ничего не импортировать.
+- **Carrel.** Коллекция спрашивается только о том, что держит
+  (`destRecords`, `v0.3.8`).
+- **Сторож.** `web.TestImportAsksACalendarOnlyAboutWhatItHolds`
+  (`davtest.EventQueriesOnly`).
+
+### SV-72. Событие с чужим организатором — 403
+
+- **Сервер.** Mail.ru. «Синк-ап» набора (организатор `mix@example.org`,
+  участники) — 403; без `ATTENDEE` и `ORGANIZER` та же запись — 201.
+- **Carrel.** «Failed · Синк-ап по релизу · PUT …/8f1c-4a02-b7d3.ics → 403
+  Forbidden». Правки нет.
+
+### SV-73. Google дописывает своё
+
+- **Сервер.** Событию — свои напоминания («10 minutes before · 30 minutes
+  before»; у события на весь день — «1 day before, 23:30»),
+  `STATUS:CONFIRMED`, организатора участником («5 attendees» вместо 4).
+  Карточке — `TYPE=pref` у телефона и почты; `CATEGORIES` карточки не
+  хранит.
+- **Carrel.** Дописанное показывается как есть — это запись сервера. Подпись
+  значения карточки показывала «Phone · mobile, pref»: `pref` (и `INTERNET`,
+  `VOICE` vCard 3) — не вид значения; с `v0.3.8` подпись их не несёт, как и
+  форма правки (`notLabels`).
+- **Сторож.** `web.TestATypedLabelLeavesOutWhatIsNoKind`.

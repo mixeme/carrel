@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
@@ -378,7 +379,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, connLabel(conn), "create", method, path, err)))
 		return
 	}
-	settled, err := settlePath(r.Context(), client, home, path, taken)
+	settled, err := settlePath(r.Context(), client, home, path, f.name, taken)
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, lostCollection(conn, method, path, err,
 			"It is not in the list here: run re-discovery on this connection to take in what the server holds.")))
@@ -604,18 +605,67 @@ func liveColour(ctx context.Context, client *dav.Client, path string) string {
 // create is where the collection went. None, or more than one — someone else
 // created one at the same moment — is not guessed at, because a catalog entry
 // that points at nothing is worse than saying so.
-func settlePath(ctx context.Context, client *dav.Client, home, path string, before map[string]bool) (string, error) {
+// settleWait is how long a home is read again for a collection the server
+// made and does not list yet, a read every settleStep (SV-62).
+const (
+	settleWait = 5 * time.Second
+	settleStep = 500 * time.Millisecond
+)
+
+func settlePath(ctx context.Context, client *dav.Client, home, path, name string, before map[string]bool) (string, error) {
 	if _, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{propResourceType}); err == nil {
 		return path, nil
 	}
 	fresh, err := newChildren(ctx, client, home, before)
+	// Yandex lists a calendar it has just made a moment later (SV-62): the
+	// home is read again for a short while before Carrel says it cannot
+	// tell where the server put it.
+	for wait := settleWait; err == nil && len(fresh) == 0 && wait > 0; wait -= settleStep {
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
+		case <-time.After(settleStep):
+		}
+		fresh, err = newChildren(ctx, client, home, before)
+	}
 	if err != nil {
 		return "", fmt.Errorf("nothing at %s, and %s could not be read again: %w", path, home, err)
+	}
+	if len(fresh) > 1 && name != "" {
+		// Another collection made a moment before and listed late is new
+		// here too (SV-62): the one is the one with the name it was given.
+		fresh = namedAmong(ctx, client, home, fresh, name)
 	}
 	if len(fresh) != 1 {
 		return "", fmt.Errorf("nothing at %s, and %s holds %d new collections", path, home, len(fresh))
 	}
 	return strings.TrimSuffix(home, "/") + "/" + fresh[0] + "/", nil
+}
+
+// namedAmong are the segments of the home's children whose display name is
+// name; all of them when the home does not say.
+func namedAmong(ctx context.Context, client *dav.Client, home string, segs []string, name string) []string {
+	ms, err := client.PropFind(ctx, home, dav.DepthOne, []xml.Name{propDisplayName})
+	if err != nil {
+		return segs
+	}
+	named := map[string]bool{}
+	for _, resp := range ms.Responses {
+		p := strings.TrimSuffix(hrefPath(resp.Href), "/")
+		if strings.TrimSpace(string(resp.Props[propDisplayName])) == name {
+			named[p[strings.LastIndex(p, "/")+1:]] = true
+		}
+	}
+	var out []string
+	for _, s := range segs {
+		if named[s] {
+			out = append(out, s)
+		}
+	}
+	if len(out) == 0 {
+		return segs
+	}
+	return out
 }
 
 // newChildren are the children of the home that before does not name. The

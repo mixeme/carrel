@@ -387,7 +387,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	// Where it actually landed, before anything is copied into it: a server
 	// that picks its own address (SV-19) would otherwise take every record at
 	// an address that holds nothing.
-	settled, err := settlePath(ctx, client, home, newPath, taken)
+	settled, err := settlePath(ctx, client, home, newPath, f.name, taken)
 	if err != nil {
 		return "", lostCollection(m.dest, method, newPath, err,
 			label+" on "+connLabel(m.conn)+" is as it was: run re-discovery on that connection to see what the server made.")

@@ -49,3 +49,29 @@ func TestImportLeavesARecordTheCollectionCannotTake(t *testing.T) {
 		t.Errorf("%d PUT sent, want the light one alone", n)
 	}
 }
+
+// Mail.ru answers 400 to a calendar-query for tasks or notes: its calendars
+// hold events (docs/servers.md, SV-71). The import asked a calendar of
+// events about all three, and the one refusal made the whole calendar «did
+// not answer» — nothing could be imported into Mail.ru (acceptance on our
+// test servers, 18.11.2026). A collection is asked about what it holds.
+func TestImportAsksACalendarOnlyAboutWhatItHolds(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	srv.EventQueriesOnly = true
+	main := davtest.CalendarHome + "main/"
+	srv.AddCalendar(caldav.Calendar{Path: main, Name: "Основной", SupportedComponentSet: []string{"VEVENT"}})
+	f := connectFixture(t, srv, main, nil)
+
+	file := "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//T//EN\r\nBEGIN:VEVENT\r\nUID:one\r\nDTSTAMP:20260810T060000Z\r\n" +
+		"DTSTART:20260810T100000Z\r\nDTEND:20260810T110000Z\r\nSUMMARY:Одно\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+	page := decode[view.ImportPage](t, f.h.do(get(f.path("calendar")+"/import", f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "one.ics", []byte(file))))
+	if run := actionByID(page.Actions, "import.run"); run == nil || !run.Enabled {
+		t.Fatalf("Import = %+v, notices %+v", run, page.Notices)
+	}
+	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
+	if r := page.Report; r == nil || r.Created != 1 || r.Lost != 0 {
+		t.Errorf("report = %+v", r)
+	}
+}

@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -59,20 +60,46 @@ func TestLiveStand(t *testing.T) {
 			cast[strings.TrimSpace(label)] = strings.TrimSpace(name)
 		}
 	}
-	play := func(label string) account {
-		a := liveServer(t, cast[label])
-		a.label = label
-		if strings.HasPrefix(a.server, "http://127.0.0.1:") {
-			// A stand of the Linux machine through the tunnel: Carrel's
-			// guard lets it be reached, as the integration suites' does.
-			t.Setenv("CARREL_DAV_SSRF_ALLOWLIST", "127.0.0.1")
+	// A slot of the set is one connection, or two where the service has its
+	// calendars and its contacts at two addresses (Yandex, Google, iCloud):
+	// the contacts' connection is «‹slot› contacts», for two connections
+	// cannot have one label.
+	play := func(slot string) []account {
+		conns := liveServer(t, cast[slot])
+		for i := range conns {
+			conns[i].slot, conns[i].label = slot, slot
+			if i > 0 {
+				conns[i].label = slot + " contacts"
+			}
+			if strings.HasPrefix(conns[i].server, "http://127.0.0.1:") {
+				// A stand of the Linux machine through the tunnel: Carrel's
+				// guard lets it be reached, as the integration suites' does.
+				t.Setenv("CARREL_DAV_SSRF_ALLOWLIST", "127.0.0.1")
+			}
+			t.Logf("%s is %s: %s", conns[i].label, conns[i].name, conns[i].server)
 		}
-		t.Logf("%s is %s: %s", label, a.name, a.server)
-		return a
+		return conns
 	}
-	accounts := []account{play("nextcloud"), play("radicale · vps"), play("baikal")}
-	files := play("sftpgo · vps")
+	var accounts []account
+	for _, slot := range []string{"nextcloud", "radicale · vps", "baikal"} {
+		accounts = append(accounts, play(slot)...)
+	}
+	files := play("sftpgo · vps")[0]
 	files.server = strings.TrimSuffix(files.server, "/") + "/carrel-set/"
+	// connOf is the connection a collection of the set goes to: a book to
+	// the contacts' one where the slot has two.
+	connOf := func(col standCollection) account {
+		var found account
+		for _, a := range accounts {
+			if a.slot != col.account {
+				continue
+			}
+			if found.label == "" || (col.comps == nil && strings.HasSuffix(a.label, " contacts")) {
+				found = a
+			}
+		}
+		return found
+	}
 
 	cfg, err := conf.Load()
 	if err != nil {
@@ -98,7 +125,7 @@ func TestLiveStand(t *testing.T) {
 			before[c.Path] = true
 			// «Files» of the frames (s-files-6) is the file storage of
 			// nextcloud's account, whichever server plays it.
-			if i == 0 && ncFiles == "" && slices.Contains(c.Kinds, view.KindFile) {
+			if i == 0 && a.slot == "nextcloud" && ncFiles == "" && slices.Contains(c.Kinds, view.KindFile) {
 				ncFiles, filesName = c.Path, c.DisplayName
 			}
 		}
@@ -206,7 +233,13 @@ func TestLiveStand(t *testing.T) {
 	// The collections, made by Carrel in the order of the set — a server
 	// lists them in the order they were made, and the rails of the frames
 	// have that order —, then each file imported into its collection.
-	ids := map[string]string{}
+	ids := map[string]string{} // connection label → its ID in Carrel
+	// into is where a collection the server would not make takes the set's
+	// records: a collection the account already holds (Google makes none,
+	// Mail.ru gives one calendar). What the import adds there is taken
+	// away at the end.
+	into := map[string]string{}
+	skipped := map[string]bool{}
 	for _, col := range standSet {
 		kind := "event"
 		switch {
@@ -217,33 +250,73 @@ func TestLiveStand(t *testing.T) {
 		case len(col.comps) == 1 && col.comps[0] == "VJOURNAL":
 			kind = "note"
 		}
+		conn := connOf(col)
 		b.open("/app/collections/new?kind=" + kind)
-		ids[col.account] = optionOf(t, b, "account", col.account)
+		id := optionOr(b, "account", conn.label)
+		if id != "" {
+			ids[conn.label] = id
+		} else if ids[conn.label] == "" {
+			// The sheet does not offer it: no home for this kind there
+			// (Mail.ru gives one calendar, and no book). Its ID from the rail.
+			if v := firstOf(b, sectionOf(col), "", conn.label); v != "" {
+				ids[conn.label] = idOf(v)
+			}
+		}
 		// The address of the set, typed: the frames draw the set's
 		// (…/lichnyj/, …/arhiv/), and Carrel's own from the name is another
 		// (lichnyi, arkhiv: architecture.md's table).
-		set := url.Values{"account": {ids[col.account]}, "name": {col.name}, "colour": {col.colour}, "address": {col.slug}}
+		set := url.Values{"account": {id}, "name": {col.name}, "colour": {col.colour}, "address": {col.slug}}
 		for _, c := range col.comps {
 			set.Add("components", c)
 		}
-		b.press("Create", set, nil)
-		// A server with a trash bin keeps a deleted collection at its
-		// address (SV-30): the set's of an earlier run, there for 30 days.
-		// The person types another address, as the refusal asks.
-		if takenAt.MatchString(b.page.text()) && strings.HasPrefix(b.page.url.Path, "/app/collections/new") {
-			again := col.slug + "-" + strconv.FormatInt(time.Now().Unix()%100000, 10)
-			t.Logf("%s · %s: «%s» — the address typed instead: %s", col.account, col.name, takenAt.FindString(b.page.text()), again)
-			set.Set("address", again)
+		if id != "" {
 			b.press("Create", set, nil)
+			// A server with a trash bin keeps a deleted collection at its
+			// address (SV-30): the set's of an earlier run, there for 30
+			// days. The person types another address, as the refusal asks.
+			if takenAt.MatchString(b.page.text()) && strings.HasPrefix(b.page.url.Path, "/app/collections/new") {
+				again := col.slug + "-" + strconv.FormatInt(time.Now().Unix()%100000, 10)
+				t.Logf("%s · %s: «%s» — the address typed instead: %s", col.account, col.name, takenAt.FindString(b.page.text()), again)
+				set.Set("address", again)
+				b.press("Create", set, nil)
+			}
 		}
-		if strings.HasPrefix(b.page.url.Path, "/app/collections/new") {
-			t.Fatalf("%s · %s not made: %.900s", col.account, col.name, b.page.text())
+		if id == "" || strings.HasPrefix(b.page.url.Path, "/app/collections/new") {
+			why := "no connection of " + col.account + " holds " + kind + "s"
+			if id != "" {
+				why = pageSays(b)
+			}
+			value := firstOf(b, sectionOf(col), ids[conn.label], conn.label)
+			if value == "" {
+				t.Logf("%s (%s) · %s not made: %s — and no %s there to take its records; left out", conn.label, conn.name, col.name, why, kind)
+				skipped[col.account+"/"+col.name] = true
+				continue
+			}
+			into[col.account+"/"+col.name] = value
+			t.Logf("%s (%s) · %s not made: %s — its records go into %s", conn.label, conn.name, col.name, why, value)
+			path, _ := url.PathUnescape(value[strings.LastIndex(value, "/")+1:])
+			held := liveHrefs(t, conn, path)
+			t.Cleanup(func() {
+				for h := range liveHrefs(t, conn, path) {
+					if !held[h] {
+						u, _ := url.Parse(conn.server)
+						u.Path, u.RawPath = h, ""
+						if code := liveTry(t, conn.user, conn.pass, "DELETE", u.String(), nil, 0, nil); code >= 300 && code != http.StatusNotFound {
+							t.Errorf("left on %s: %s (%d)", conn.label, h, code)
+						}
+					}
+				}
+			})
+			continue
 		}
 		if col.readOnly {
 			t.Logf("%s · %s: the account's own collection, written to — not read-only as the set has it", col.account, col.name)
 		}
 	}
 	for _, col := range standSet {
+		if skipped[col.account+"/"+col.name] {
+			continue
+		}
 		for _, file := range col.files {
 			data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(file)))
 			if err != nil {
@@ -260,10 +333,37 @@ func TestLiveStand(t *testing.T) {
 			}
 			// Работа holds events and tasks: each file goes in by the import
 			// of its kind.
-			at := regexp.MustCompile(`^/app/[a-z]+/`).ReplaceAllString(collectionHref(t, b, col, ids[col.account]), "/app/"+section+"/")
+			href := into[col.account+"/"+col.name]
+			if href == "" {
+				href = collectionHref(t, b, col, ids[connOf(col).label])
+			}
+			if href == "" {
+				// Made, and not a collection of its kind here: the server
+				// keeps another set of components than was asked (Yandex
+				// keeps no notes).
+				t.Logf("%s into %s · %s: it is not in the rail of %s — the server did not keep it as one", file, col.account, col.name, sectionOf(col))
+				continue
+			}
+			at := regexp.MustCompile(`^/app/[a-z]+/`).ReplaceAllString(href, "/app/"+section+"/")
 			b.open(at + "/import")
-			if !strings.HasSuffix(b.page.url.Path, "/import") {
-				t.Fatalf("%s/import went to %s: %.600s", at, b.page.url, b.page.text())
+			if b.page.find(isButton("Preview file")) == nil {
+				// A preview left from the file before: Cancel, and again.
+				if b.page.find(isButton("Cancel")) != nil {
+					b.press("Cancel", nil, nil)
+				} else if a := b.page.find(func(n *html.Node) bool { return n.Data == "a" && strings.TrimSpace(words(n)) == "Cancel" }); a != nil {
+					b.go_(attr(a, "href"))
+				}
+				b.open(at + "/import")
+			}
+			if b.page.status == http.StatusNotFound {
+				// The collection is not one of this kind here: the server
+				// kept another set of components (Yandex: Работа of events).
+				t.Logf("%s into %s · %s: not a collection of %s here (404) — the server did not keep it as one", file, col.account, col.name, section)
+				continue
+			}
+			if !strings.HasSuffix(b.page.url.Path, "/import") || b.page.find(isButton("Preview file")) == nil {
+				t.Errorf("%s into %s · %s: the import is not there — %d at %s: %.900s", file, col.account, col.name, b.page.status, b.page.url, b.page.text())
+				continue
 			}
 			b.press("Preview file", nil, map[string][2]string{"file": {filepath.Base(file), string(data)}})
 			run := b.page.find(func(n *html.Node) bool {
@@ -271,6 +371,12 @@ func TestLiveStand(t *testing.T) {
 			})
 			if run == nil {
 				t.Errorf("%s into %s: no Import after the preview: %.600s", file, col.name, b.page.text())
+				continue
+			}
+			if strings.HasPrefix(strings.TrimSpace(words(run)+attr(run, "value")), "Import 0") {
+				// Into a collection that took another's records: what this
+				// file holds is there already (Архив's cards are Контакты's).
+				t.Logf("%s into %s · %s: nothing new for it there — %s", file, col.account, col.name, strings.TrimSpace(words(run)))
 				continue
 			}
 			b.press(strings.TrimSpace(words(run)+attr(run, "value")), nil, nil)
@@ -283,7 +389,11 @@ func TestLiveStand(t *testing.T) {
 			// A set's collection in the section of its kind: a server that
 			// keeps every component in a calendar (Xandikos, SV-43; SOGo,
 			// SV-64) shows «Проекты» among the notebooks too.
-			if strings.Contains(value, "/"+ids[col.account]+"/") && strings.Contains(name, col.name) && shownIn(col, value) {
+			if strings.Contains(value, "/"+ids[connOf(col).label]+"/") && strings.Contains(name, col.name) && shownIn(col, value) {
+				return true
+			}
+			// The collection that took a set's records in its stead.
+			if v := into[col.account+"/"+col.name]; v != "" && afterSection(v) == afterSection(value) && shownIn(col, value) {
 				return true
 			}
 		}
@@ -314,16 +424,21 @@ func TestLiveStand(t *testing.T) {
 
 var (
 	importRun = regexp.MustCompile(`^\s*Import \d`)
+	hrefIn    = regexp.MustCompile(`<(?:[A-Za-z0-9]+:)?href(?:\s[^>]*)?>([^<]+)</(?:[A-Za-z0-9]+:)?href>`)
 	takenAt   = regexp.MustCompile(`Something (?:already lives|deleted) at [^.]*\.`)
 )
 
-type account struct{ label, name, server, user, pass string }
+// account is one connection the stand makes: label is its name in Carrel,
+// slot the set's account it plays («nextcloud»), name the server.
+type account struct{ label, slot, name, server, user, pass string }
 
 // liveServer is one of our test servers by its name: those of
 // credentials.txt, and the Linux machine's stands (scripts/linux-stands.sh)
 // through the tunnel at CARREL_STANDS_HOST, 127.0.0.1 by default, with the
-// accounts the stands make.
-func liveServer(t *testing.T, name string) account {
+// accounts the stands make. A service with its calendars and its contacts
+// at two addresses gives two connections, the calendars' first; Mail.ru
+// gives a link to one calendar (SV-22).
+func liveServer(t *testing.T, name string) []account {
 	t.Helper()
 	env := func(v string) string {
 		s := os.Getenv(v)
@@ -356,10 +471,135 @@ func liveServer(t *testing.T, name string) account {
 		a.server, a.user, a.pass = "http://"+host+":18082/dav/home/carrel/", "carrel", "carrel-pass"
 	case "davical":
 		a.server, a.user, a.pass = "http://"+host+":18083/caldav.php/", "carrel", "carrel-pass"
+	case "yandex":
+		// Either host of Yandex gives the calendars and the book alike
+		// (acceptance, 18.11.2026): one connection, as a person makes.
+		a.server, a.user, a.pass = env("CARREL_YANDEX_CALDAV_URL"), env("CARREL_YANDEX_CALDAV_USER"), env("CARREL_YANDEX_CALDAV_PASS")
+	case "google", "icloud":
+		up := strings.ToUpper(name)
+		a.server, a.user, a.pass = env("CARREL_"+up+"_CALDAV_URL"), env("CARREL_"+up+"_CALDAV_USER"), env("CARREL_"+up+"_CALDAV_PASS")
+		card := account{name: name, server: env("CARREL_" + up + "_CARDDAV_URL"), user: env("CARREL_" + up + "_CARDDAV_USER"), pass: env("CARREL_" + up + "_CARDDAV_PASS")}
+		return []account{a, card}
+	case "mailru":
+		a.server, a.user, a.pass = env("CARREL_MAILRU_URL"), env("CARREL_MAILRU_USER"), env("CARREL_MAILRU_PASS")
 	default:
 		t.Fatalf("no test server %q", name)
 	}
-	return a
+	return []account{a}
+}
+
+// optionOr is optionOf that answers "" when no option has the label: a
+// whole word of it, so «nextcloud» is not «nextcloud contacts».
+func optionOr(b *plainBrowser, name, label string) string {
+	sel := b.page.find(func(n *html.Node) bool { return n.Data == "select" && attr(n, "name") == name })
+	if sel == nil {
+		return ""
+	}
+	for _, o := range nodes(sel, "option") {
+		w := words(o)
+		if w == label || strings.HasPrefix(w, label+" ·") || strings.HasPrefix(w, label+" (") {
+			return optionValue(o)
+		}
+	}
+	return ""
+}
+
+// railOf is the addresses the ticks of a connection's rows send in the
+// rail of section, in order: the rows under the rubric that is its label.
+func railOf(b *plainBrowser, section, label string) []string {
+	b.open("/app/" + section)
+	var out []string
+	under := false
+	for _, n := range b.page.all(func(n *html.Node) bool {
+		return strings.Contains(" "+attr(n, "class")+" ", " tc-rubric ") || attr(n, "name") == "toggle"
+	}) {
+		if attr(n, "name") != "toggle" {
+			under = strings.TrimSpace(words(n)) == label
+			continue
+		}
+		if under && strings.Count(strings.Trim(attr(n, "value"), "/"), "/") >= 3 {
+			out = append(out, attr(n, "value"))
+		}
+	}
+	return out
+}
+
+// firstOf is the first collection of section on the connection id, or of
+// label when its ID is not known yet.
+func firstOf(b *plainBrowser, section, id, label string) string {
+	for _, v := range railOf(b, section, label) {
+		if id == "" || strings.HasPrefix(v, "/app/"+section+"/"+id+"/") {
+			return v
+		}
+	}
+	return ""
+}
+
+// idOf is the connection of a rail's address: /app/‹section›/‹id›/….
+func idOf(value string) string {
+	parts := strings.Split(strings.Trim(value, "/"), "/")
+	if len(parts) < 3 {
+		return ""
+	}
+	return parts[2]
+}
+
+// afterSection is a rail's address without its section: the same
+// collection in every section.
+func afterSection(value string) string {
+	parts := strings.SplitN(strings.Trim(value, "/"), "/", 3)
+	if len(parts) < 3 {
+		return value
+	}
+	return parts[2]
+}
+
+// pageSays is what a refused form says: its errors and alerts, else the
+// start of the page's words.
+func pageSays(b *plainBrowser) string {
+	var said []string
+	for _, n := range b.page.all(func(n *html.Node) bool {
+		c := attr(n, "class")
+		return attr(n, "role") == "alert" || strings.Contains(c, "__error") || strings.Contains(c, "is-error")
+	}) {
+		if w := strings.TrimSpace(words(n)); w != "" {
+			said = append(said, w)
+		}
+	}
+	if len(said) == 0 {
+		return fmt.Sprintf("%.300s", b.page.text())
+	}
+	return strings.Join(said, " | ")
+}
+
+// liveHrefs are the paths of the records a collection holds, by a
+// PROPFIND of depth 1 straight to its server.
+func liveHrefs(t *testing.T, a account, path string) map[string]bool {
+	t.Helper()
+	u, _ := url.Parse(a.server)
+	u.Path, u.RawPath = path, ""
+	req, _ := http.NewRequest("PROPFIND", u.String(), strings.NewReader(`<?xml version="1.0"?><propfind xmlns="DAV:"><prop><getetag/></prop></propfind>`))
+	req.Header.Set("Depth", "1")
+	req.Header.Set("Content-Type", "application/xml")
+	req.SetBasicAuth(a.user, a.pass)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Errorf("%s: PROPFIND %s: %v", a.label, path, err)
+		return nil
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	out := map[string]bool{}
+	for _, m := range hrefIn.FindAllStringSubmatch(string(body), -1) {
+		h := m[1]
+		if hu, err := url.Parse(h); err == nil {
+			h = hu.Path
+		}
+		if strings.TrimSuffix(h, "/") != strings.TrimSuffix(path, "/") {
+			out[h] = true
+		}
+	}
+	return out
 }
 
 // connected ends the run when Connect did not connect: the sheet is still
@@ -402,7 +642,7 @@ func collectionHref(t *testing.T, b *plainBrowser, col standCollection, id strin
 			strings.HasPrefix(attr(n, "value"), "/app/"+section+"/"+id+"/") && strings.Contains(tickName(n), col.name)
 	})
 	if tick == nil {
-		t.Fatalf("/app/%s: no tick of %s on %s; buttons: %s", section, col.name, id, b.page.buttons())
+		return ""
 	}
 	return attr(tick, "value")
 }

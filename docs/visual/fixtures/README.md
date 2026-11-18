@@ -72,7 +72,13 @@ CARREL_LIVE_STAND=3h CARREL_STAND_STOP=<файл> go test -tags integration -run
 Кто играет учётные записи набора, задаёт `CARREL_STAND_ACCOUNTS` — по
 подписи набора и имени сервера: `nextcloud`, `sogo`, `baikal`, `sftpgo`,
 `opencloud`, стенды Linux-машины `radicale`, `stalwart`, `xandikos`,
-`davis`, `davical` и `davis-files` (домашний каталог файлов Davis):
+`davis`, `davical` и `davis-files` (домашний каталог файлов Davis), и
+тестовые учётные записи сервисов `yandex`, `google`, `icloud`, `mailru`. У
+Google и iCloud календари и контакты на двух адресах — два подключения,
+контакты под подписью «‹место› contacts». Где сервер коллекцию не заводит
+(Google, iCloud, книга Yandex, Mail.ru с одним календарём), записи идут в
+уже существующую того же рода, а после теста новое из неё удаляется по
+списку до импорта:
 
 ```bash
 CARREL_STAND_ACCOUNTS="nextcloud=davis,radicale · vps=radicale,baikal=davical,sftpgo · vps=opencloud" CARREL_LIVE_STAND=3h CARREL_STAND_STOP=<файл> go test -tags integration -run TestLiveStand -timeout 0 -v ./cmd/carrel
