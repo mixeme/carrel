@@ -211,7 +211,10 @@ Graph, протоколы другого устройства. Самая рас
 | SV-24 | Google | контакты и календари на разных хостах; рекомендованный `caldav/v2` требует OAuth | подключение на протокол, как у Yandex; прямой путь обнаружения работает без правок | `TestGoogleContactInTheOnlyBook`, `TestLiveDiscoveryReport` |
 | SV-25 | Google | новую карточку называет сам и переписывает её `UID`; `Location` при этом шлёт | созданную запись перечитывает по адресу, куда писал, и берёт личность оттуда; нигде не нашлась — говорит и ведёт в коллекцию | `TestCreateWhereTheServerRewritesTheUID`, `TestGoogleContactInTheOnlyBook` |
 | SV-30 | Nextcloud | удалённый календарь остаётся по адресу и в доме, и называет себя календарём — пока не спросишь про `nc:deleted-at` | обход спрашивает об этом в том же запросе и помеченное удалённым не берёт; след говорит, сколько пропущено | `TestDiscoverySkipsWhatTheServerPutInItsTrashBin`, `TestNextcloudCollectionDelete` |
-| SV-65 | Nextcloud, ownCloud | файлы учётной записи лежат по `…/files/<id>/` рядом с принципалом `…/principals/users/<id>/`, но ни одно свойство принципала этого адреса не называет; адрес файлов, введённый сам, `.well-known` уводит к принципалу | принципала такого вида обход спрашивает и об адресе файлов: папка там — хранилище «Files» той же учётной записи (S-6, `v0.3.5`); до того учётная запись Nextcloud оставалась без файлов при любом адресе | `discover.TestAnAccountOnNextcloudHasItsFiles` (davtest по адресам Nextcloud); живьём — стенд приёмки `TestLiveStand` |
+| SV-68 | DAViCal | ящики планирования лежат в календарном доме как обычные календари: `.in/` и `.out/`, `resourcetype` — `calendar`, признаков RFC 6638 нет; называют их только `schedule-inbox-URL` и `schedule-outbox-URL` принципала | обход спрашивает у принципала оба адреса и оставляет ящики вне списка, след говорит «2 scheduling boxes (inbox, outbox) left out» (S-6, `v0.3.7`); до того «Carrel Inbox» и «Carrel Outbox» стояли в каждом рейле | `discover.TestTheSchedulingBoxesAreNotCollections`; живьём — `TestLiveStand` |
+| SV-67 | Stalwart | вложение в записи, которое читается как текст UTF-8, хранит текстом: `VALUE=BINARY` без `ENCODING=BASE64`, значение с экранированием TEXT; объявляет `max-resource-size` 524288 и запись крупнее отвергает 412 с условием `max-resource-size` | такое вложение читается как текст — размер и данные верные (S-20, `v0.3.7`); импорт сверяет размер записи с `max-resource-size` коллекции до записи: крупная в предпросмотре «Too large: …», на сервер не уходит (S-19) | `cal.TestAnInlineFileKeptAsTextIsItsText`, `web.TestImportLeavesARecordTheCollectionCannotTake`; живьём — `TestLiveStand` |
+| SV-66 | Radicale | заметку (`VJOURNAL`) с двумя `DESCRIPTION` отвергает 400 «Bad Request»; RFC 5545 §3.6.3 разрешает их несколько, причина — только в журнале сервера | запись не пишется, отчёт импорта называет запрос и ответ: «… · PUT …/5c81-77aa-0d64.ics → 400 Bad Request» (S-19, `v0.3.7`); `DESCRIPTION` Carrel не склеивает — запись как пришла | `web.TestImportSaysWhatTheServerRefused`; живьём — `TestLiveStand` |
+| SV-65 | Nextcloud, ownCloud, Davis | файлы учётной записи лежат по `…/files/<id>/` рядом с принципалом `…/principals/users/<id>/` (Davis — `…/home/<id>/` рядом с `…/principals/<id>/`), но ни одно свойство принципала этого адреса не называет; адрес файлов, введённый сам, `.well-known` уводит к принципалу | принципала такого вида обход спрашивает и об адресе файлов: папка там — хранилище «Files» той же учётной записи (S-6, `v0.3.5`, Davis — `v0.3.7`); до того учётная запись Nextcloud оставалась без файлов при любом адресе | `discover.TestAnAccountOnNextcloudHasItsFiles`, `TestAnAccountOnDavisHasItsFiles` (davtest по их адресам); живьём — стенд приёмки `TestLiveStand` |
 | SV-64 | SoGo | календарь, заведённый с одним `VEVENT`, после создания сообщает состав шире: в рейле задач он стоит рядом со списками задач, с нулём | ничего: каталог берёт состав, который сервер назвал после создания (`settleComponents`, S-12.2), и показывает его | сторожа нет; найдено стендом приёмки на тестовых серверах 17.11.2026 |
 | SV-63 | Nextcloud | после неверных паролей с адреса отвечает на всякий запрос с него, верный пароль тоже, через 25 с — часами (защита от подбора) | ждёт: предел ответа DAV по умолчанию 30 с (`CARREL_DAV_REQUEST_TIMEOUT`), работа медленная, но идёт; живой набор неверного пароля Nextcloud не шлёт (`holdsAGrudge`) | замер 16.11.2026: три `PROPFIND` с верным паролем — 25,5 с каждый |
 | SV-62 | Yandex | `DURATION` хранит как `DTEND`; присланную запись иногда меняет сам, и метка версии сдвигается без правки; на миг после записи отвечает на её `GET` 404 и не отдаёт её в `REPORT` | форма показывает конец, правка пишет `DTEND`; сдвиг под формой — лист конфликта (C-9), как на чужую правку; запись, не найденная при чтении после сохранения, — сохранение стоит, отчёта о потере нет; правки нет | живьём — сверка `TestYandexForms/matrix`; живой набор перечитывает 404 до 10 с (`getSettled`) |
@@ -1124,6 +1127,17 @@ Nextcloud — тот же sabre).
   об адресе `…/files/<id>/` (`PROPFIND` глубины 0); папка там — хранилище
   «Files» той же учётной записи, её папки — папки в нём (S-6, `v0.3.5`).
   Принципал другого вида о файлах не спрашивают.
+- **Davis** (18.11.2026, стенд приёмки на стендах Linux-машины) — то же:
+  файлы по `/dav/home/<id>/` (`WEBDAV_ENABLED`) рядом с принципалом
+  `/dav/principals/<id>/`. Учётная запись Davis тоже стояла без «Files».
+  Принципала вида `…/principals/<id>/` обход спрашивает об `…/home/<id>/`
+  (`v0.3.7`). Тот же вид у Baikal (`/dav.php/principals/<id>/`), а файлов у
+  него нет — `/dav.php/home/<id>/` отвечает 404; поэтому отсутствие папки
+  у такого принципала не сбой: след пишет «files: none at …» спокойно.
+  Сторож — `discover.TestAnAccountOnDavisHasItsFiles`. Адрес файлов Davis,
+  введённый сам (`/dav/home/<id>/…`), отвечает принципалом, и подключение
+  берёт учётную запись (её «Files», календари и книги), а не папки этого
+  адреса — по общему правилу S-6.
 - **Сторож.** `discover.TestAnAccountOnNextcloudHasItsFiles` — davtest за
   прокси, который отдаёт его по адресам Nextcloud; живьём — `TestLiveStand`
   (`cmd/carrel`, `-tags integration`).
@@ -1997,3 +2011,64 @@ SV-54.
   `card.TestAnHonestCardMissSaysNothingMore`,
   `card.TestTheCardCheckReadsThroughReadWhole` на `davtest`
   (`CardTextMatchFindsNothing`); живьём — `TestDAViCalSearch`.
+
+## Стенды Linux-машины через экраны Carrel (18.11.2026)
+
+Набор кадров (`docs/visual/fixtures`) заведён экранами Carrel поочерёдно
+на Radicale, Stalwart, Xandikos, Davis и DAViCal — каждый побывал главной
+учётной записью набора — и на OpenCloud, SFTPGo и Davis для файлов
+(`TestLiveStand`, `CARREL_STAND_ACCOUNTS`; стенды — `scripts/linux-stands.sh`
+на своих портах). Строки списков и страницы записей сверены с тем же набором
+на davtest; расхождения — ниже и в SV-65.
+
+### SV-66. Заметка с двумя DESCRIPTION — 400
+
+- **Сервер.** Radicale 3.5.4. `PUT` заметки с двумя `DESCRIPTION` («Заметка
+  со встречи 10.08» набора) — 400 «Bad Request»; в журнале сервера:
+  «VJOURNAL components cannot contain more than 1 DESCRIPTION». RFC 5545
+  §3.6.3 разрешает `DESCRIPTION` у `VJOURNAL` несколько раз.
+- **Чем грозило.** Отчёт импорта писал «dav: HTTP 400: Bad Request» — ни
+  запроса, ни адреса.
+- **Carrel.** Запись не пишется — она такая, какой пришла, и склеивать её
+  `DESCRIPTION` за человека Carrel не станет. Строка отказа в отчёте — как в
+  меню отказов (states-16): «Заметка со встречи 10.08 · PUT
+  /test/zapisi/5c81-77aa-0d64.ics → 400 Bad Request» (`v0.3.7`).
+- **Сторож.** `web.TestImportSaysWhatTheServerRefused`; живьём —
+  `TestLiveStand`.
+
+### SV-67. Вложение-текст хранится текстом; запись крупнее 512 КБ — 412
+
+- **Сервер.** Stalwart 0.16. Вложение в записи (`ATTACH;VALUE=BINARY;
+  ENCODING=BASE64`), чьи байты читаются как текст UTF-8, хранит и отдаёт
+  текстом: `ENCODING` выброшен, `VALUE=BINARY` остался, значение — с
+  экранированием TEXT (`# Release checklist\n…`). У PDF-заглушки набора — то
+  же. Коллекции объявляют `max-resource-size` 524288; запись крупнее —
+  412 с условием `CALDAV:max-resource-size` в теле.
+- **Чем грозило.** Carrel читал такое значение как base64: размер — три
+  четверти («96 KB» вместо «128 KB», «1.9 KB» вместо «3 KB»), скачанный
+  файл — мусор. Заметка набора в 573 КБ получала 412, импорт принимал его за
+  занятое имя, писал под другим и получал 412 снова.
+- **Carrel.** Значение при `VALUE=BINARY` без `ENCODING=BASE64`, которое
+  base64 быть не может, — файл текстом: экранирование снимается, размер и
+  данные верные (`cal.keptAsText`, `v0.3.7`). Импорт сверяет размер записи с
+  `max-resource-size` коллекции до записи (как вложения, S-20): крупная в
+  предпросмотре «Too large: 573 KB — nextcloud · Записи takes records up to
+  512 KB», в «Import N» не входит, на сервер не уходит, в отчёте — под
+  «Failed» с теми же словами.
+- **Сторож.** `cal.TestAnInlineFileKeptAsTextIsItsText`,
+  `web.TestImportLeavesARecordTheCollectionCannotTake`; живьём —
+  `TestLiveStand`.
+
+### SV-68. Ящики планирования — обычные календари
+
+- **Сервер.** DAViCal 1.1.12. В календарном доме — `.in/` («Carrel Inbox»)
+  и `.out/` («Carrel Outbox»), `resourcetype` у обоих — `collection` и
+  `calendar`, без `schedule-inbox`/`schedule-outbox` RFC 6638. Ящики
+  называют только `schedule-inbox-URL` и `schedule-outbox-URL` принципала.
+- **Чем грозило.** Оба стояли в рейлах календаря, задач и заметок как
+  календари человека.
+- **Carrel.** Обход спрашивает у принципала и `schedule-inbox-URL` (в том же
+  запросе, что `schedule-outbox-URL`) и оставляет оба ящика вне списка; след
+  — «2 scheduling boxes (inbox, outbox) left out» (S-6, `v0.3.7`).
+- **Сторож.** `discover.TestTheSchedulingBoxesAreNotCollections`; живьём —
+  `TestLiveStand`.

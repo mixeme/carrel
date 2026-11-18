@@ -47,7 +47,11 @@ func Attachments(obj *model.Object) []Attachment {
 		}
 		if binaryValue(v.Params) {
 			a.Inline = true
-			a.Size = int64(len(strings.TrimRight(stripSpace(v.Text), "=")) * 3 / 4)
+			if keptAsText(v) {
+				a.Size = int64(len(unescapeText(v.Text)))
+			} else {
+				a.Size = int64(len(strings.TrimRight(stripSpace(v.Text), "=")) * 3 / 4)
+			}
 		} else {
 			a.URI = strings.TrimSpace(v.Text)
 			if n, err := strconv.ParseInt(v.Params["SIZE"], 10, 64); err == nil && n >= 0 {
@@ -66,7 +70,11 @@ func AttachmentData(obj *model.Object, index int) (Attachment, []byte, error) {
 	if index < 0 || index >= len(list) || !list[index].Inline {
 		return Attachment{}, nil, ErrNoAttachment
 	}
-	raw := stripSpace(obj.Props()[ical.PropAttach][index].Text)
+	v := obj.Props()[ical.PropAttach][index]
+	if keptAsText(v) {
+		return list[index], []byte(unescapeText(v.Text)), nil
+	}
+	raw := stripSpace(v.Text)
 	data, err := base64.StdEncoding.DecodeString(raw)
 	if err != nil {
 		data, err = base64.RawStdEncoding.DecodeString(strings.TrimRight(raw, "="))
@@ -140,6 +148,48 @@ func Detach(obj *model.Object, index int) ([]model.PatchOp, error) {
 
 func binaryValue(params map[string]string) bool {
 	return strings.EqualFold(params[ical.ParamValue], "BINARY") || strings.EqualFold(params[ical.ParamEncoding], "BASE64")
+}
+
+// keptAsText reports whether an inline file is written as text, not as
+// base64: VALUE=BINARY without ENCODING=BASE64, and a value base64 cannot
+// be — Stalwart keeps a file that reads as text so, escaped as TEXT
+// (docs/servers.md, SV-67). RFC 5545 has BINARY in base64 always; a value
+// of base64 without the parameter is read as base64.
+func keptAsText(v model.RawValue) bool {
+	if strings.EqualFold(v.Params[ical.ParamEncoding], "BASE64") {
+		return false
+	}
+	raw := stripSpace(v.Text)
+	for _, r := range raw {
+		if !(r >= 'A' && r <= 'Z' || r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '+' || r == '/' || r == '=') {
+			return true
+		}
+	}
+	_, err := base64.StdEncoding.DecodeString(raw)
+	if err != nil {
+		_, err = base64.RawStdEncoding.DecodeString(strings.TrimRight(raw, "="))
+	}
+	return err != nil
+}
+
+// unescapeText is a TEXT value as written, its escapes taken away (RFC 5545
+// §3.3.11): \n and \N a line break, \\ \; \, the character.
+func unescapeText(s string) string {
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		if s[i] != '\\' || i+1 == len(s) {
+			b.WriteByte(s[i])
+			continue
+		}
+		i++
+		switch s[i] {
+		case 'n', 'N':
+			b.WriteByte('\n')
+		default:
+			b.WriteByte(s[i])
+		}
+	}
+	return b.String()
 }
 
 func stripSpace(s string) string {

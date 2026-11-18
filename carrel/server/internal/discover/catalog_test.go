@@ -210,6 +210,56 @@ func TestAStorageAtAPathIsNotItsOwnFolder(t *testing.T) {
 // whatever address was entered: discovery found a principal and never asked
 // for files. Nextcloud keeps them at files/<id>/ beside
 // principals/users/<id>/, and no property of the principal names it.
+// Davis keeps an account's files at …/dav/home/<id>/ beside its principal
+// …/dav/principals/<id>/, and the principal does not say so either
+// (docs/servers.md, SV-65; acceptance on our test servers, 18.11.2026). A
+// principal of that shape on a server without the folder (Baikal:
+// …/dav.php/principals/<id>/) is asked and stands without files, the trace
+// unworried.
+func TestAnAccountOnDavisHasItsFiles(t *testing.T) {
+	srv := davtest.New(t)
+	srv.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "work/", Name: "Work", SupportedComponentSet: []string{"VEVENT"}})
+	srv.SeedFolder(davtest.FileRoot + "Documents/")
+	davis := davisShaped(t, srv, "carrel")
+
+	res, trace, err := Run(t.Context(), loopbackGuard(), davis.URL+"/dav/", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var files []Collection
+	for _, c := range res.Collections {
+		if slices.Contains(c.Kinds, view.KindFile) {
+			files = append(files, c)
+		}
+	}
+	if want := "/dav/home/carrel/"; len(files) != 1 || files[0].Path != want || files[0].DisplayName != "Files" {
+		t.Errorf("the files of the account = %+v, want one storage «Files» at %s; trace %+v", files, want, trace.Steps)
+	}
+
+	bare := davtest.New(t)
+	bare.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "work/", Name: "Work", SupportedComponentSet: []string{"VEVENT"}})
+	// Only Baikal's own addresses: the folder is not there.
+	baikal := shapedAs(t, bare, "/dav.php/principals/carrel/", [][2]string{
+		{"/dav.php/principals/carrel/", davtest.Principal},
+		{"/dav.php/calendars/carrel/", davtest.CalendarHome},
+		{"/dav.php/addressbooks/carrel/", davtest.AddressBookHome},
+	})
+	res, trace, err = Run(t.Context(), loopbackGuard(), baikal.URL+"/dav.php/principals/carrel/", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range res.Collections {
+		if slices.Contains(c.Kinds, view.KindFile) {
+			t.Errorf("Baikal-shaped: a storage %+v", c)
+		}
+	}
+	for _, s := range trace.Steps {
+		if s.State != view.CheckOK && strings.Contains(string(s.Detail), "files") {
+			t.Errorf("Baikal-shaped: the trace worries about files: %+v", s)
+		}
+	}
+}
+
 func TestAnAccountOnNextcloudHasItsFiles(t *testing.T) {
 	srv := davtest.New(t)
 	srv.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "work/", Name: "Work", SupportedComponentSet: []string{"VEVENT"}})
@@ -252,17 +302,36 @@ func TestAnAccountOnNextcloudHasItsFiles(t *testing.T) {
 // back to Nextcloud's.
 func nextcloudShaped(t *testing.T, srv *davtest.Server, id string) *httptest.Server {
 	t.Helper()
-	pairs := [][2]string{
+	return shapedAs(t, srv, "/remote.php/dav", [][2]string{
 		{"/remote.php/dav/principals/users/" + id + "/", davtest.Principal},
 		{"/remote.php/dav/calendars/" + id + "/", davtest.CalendarHome},
 		{"/remote.php/dav/addressbooks/users/" + id + "/", davtest.AddressBookHome},
 		{"/remote.php/dav/files/" + id + "/", davtest.FileRoot},
-	}
+	})
+}
+
+// davisShaped is srv behind the addresses of Davis (sabre/dav, symfony):
+// …/dav/principals/<id>/, its files at …/dav/home/<id>/ (WEBDAV_ENABLED).
+func davisShaped(t *testing.T, srv *davtest.Server, id string) *httptest.Server {
+	t.Helper()
+	return shapedAs(t, srv, "/dav", [][2]string{
+		{"/dav/principals/" + id + "/", davtest.Principal},
+		{"/dav/calendars/" + id + "/", davtest.CalendarHome},
+		{"/dav/addressbooks/" + id + "/", davtest.AddressBookHome},
+		{"/dav/home/" + id + "/", davtest.FileRoot},
+	})
+}
+
+// shapedAs is srv behind another server's addresses: pairs map them to
+// davtest's, the principal first; whatever else is under root is the
+// principal.
+func shapedAs(t *testing.T, srv *davtest.Server, root string, pairs [][2]string) *httptest.Server {
+	t.Helper()
 	// The longer of davtest's paths first: they all begin with its
 	// principal's.
 	var back []string
-	for _, p := range []int{1, 2, 3, 0} {
-		back = append(back, pairs[p][1], pairs[p][0])
+	for _, pair := range append(append([][2]string(nil), pairs[1:]...), pairs[0]) {
+		back = append(back, pair[1], pair[0])
 	}
 	target, _ := url.Parse(srv.URL)
 	proxy := httputil.NewSingleHostReverseProxy(target)
@@ -277,7 +346,7 @@ func nextcloudShaped(t *testing.T, srv *davtest.Server, id string) *httptest.Ser
 				break
 			}
 		}
-		if !mapped && strings.HasPrefix(p, "/remote.php/dav") {
+		if !mapped && strings.HasPrefix(p, root) {
 			p = davtest.Principal
 		}
 		r.URL.Path, r.URL.RawPath = p, ""

@@ -1,0 +1,21 @@
+# The Linux machine's stands on ports of their own, for the acceptance stand
+# (scripts/linux-stands.sh, TestLiveStand): the gates bring the same stands up
+# on the ports of docker-compose.linux.yml and take them down with `down -v`,
+# and a stand held for hours must not stand in their way, nor fall with them.
+services:
+  radicale:
+    ports: !override
+      - "127.0.0.1:15232:5232"
+  stalwart:
+    ports: !override
+      - "127.0.0.1:18088:8088"
+      - "127.0.0.1:18089:8080"
+  xandikos:
+    ports: !override
+      - "127.0.0.1:18081:8000"
+  davis:
+    ports: !override
+      - "127.0.0.1:18082:9000"
+  davical:
+    ports: !override
+      - "127.0.0.1:18083:80"

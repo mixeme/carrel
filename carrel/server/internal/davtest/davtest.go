@@ -248,6 +248,10 @@ type Server struct {
 	// property 404, as Radicale and Xandikos do.
 	ScheduleOutbox string
 
+	// ScheduleInbox is the principal's schedule-inbox-URL. Empty, the
+	// principal answers the property 404.
+	ScheduleInbox string
+
 	// UserAddresses are the principal's calendar-user-address-set, as the
 	// server writes them: mailto: addresses and, often, the principal's
 	// own path beside them (RFC 6638 §2.4.1).
@@ -961,6 +965,11 @@ func (s *Server) principalProps(w http.ResponseWriter) {
 		found.WriteString(`<C:schedule-outbox-URL><D:href>` + escape(s.ScheduleOutbox) + `</D:href></C:schedule-outbox-URL>`)
 	} else {
 		missing.WriteString(`<C:schedule-outbox-URL/>`)
+	}
+	if s.ScheduleInbox != "" {
+		found.WriteString(`<C:schedule-inbox-URL><D:href>` + escape(s.ScheduleInbox) + `</D:href></C:schedule-inbox-URL>`)
+	} else {
+		missing.WriteString(`<C:schedule-inbox-URL/>`)
 	}
 	if len(s.UserAddresses) > 0 {
 		found.WriteString(`<C:calendar-user-address-set>`)

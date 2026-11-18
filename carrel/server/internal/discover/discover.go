@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/emersion/go-webdav/caldav"
@@ -52,6 +53,7 @@ var (
 	// has an outbox, and may send letters when an attendee is changed; the
 	// address set says which addresses are the person's own (S-15.4).
 	propScheduleOutbox = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "schedule-outbox-URL"}
+	propScheduleInbox  = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "schedule-inbox-URL"}
 	propUserAddresses  = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "calendar-user-address-set"}
 )
 
@@ -138,7 +140,8 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 	add(stepPrincipal, principal, true)
 
 	res := &Result{BaseURL: endpoint, Principal: principal}
-	res.Scheduling, res.Addresses = scheduling(ctx, client, principal, add)
+	var boxes []string
+	res.Scheduling, res.Addresses, boxes = scheduling(ctx, client, principal, add)
 	var all []Collection
 	calHome, err := client.CalDAV().FindCalendarHomeSet(ctx, principal)
 	if err != nil {
@@ -178,22 +181,51 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 
 	// The files of the account: one storage, «Files» (s-files-6, s-plan-5).
 	// Nextcloud and ownCloud keep them at files/<id>/ beside
-	// principals/users/<id>/, and no property of the principal names it;
-	// a principal of another shape is not asked (docs/servers.md, SV-65).
-	if home := filesHomeOf(principal); home != "" {
+	// principals/users/<id>/, Davis at home/<id>/ beside principals/<id>/,
+	// and no property of the principal names it; a principal of another
+	// shape is not asked (docs/servers.md, SV-65).
+	if home, sure := filesHomeOf(principal); home != "" {
 		if col, ok := filesHome(ctx, client, home); ok {
 			add(stepHomeSet, "files: "+home, true)
 			all = append(all, withHomeProps(ctx, client, home, "files", []Collection{col}, add)...)
+		} else if !sure {
+			// The shape of Davis is Baikal's too, and Baikal keeps no
+			// files: no folder there is no fault.
+			add(stepHomeSet, "files: none at "+home, true)
 		} else {
 			add(stepHomeSet, "files: "+home+" is not a folder here", false)
 		}
 	}
 
-	add(stepCollections, fmt.Sprintf("%d collection(s)", len(all)), len(all) > 0)
+	// OK means the run reached collections or a home for them, not merely
+	// that it did not crash: a principal whose home-sets both failed is a bad
+	// check on the screen. An account with nothing in it yet is not: its
+	// server named where its collections go, and the first one is made
+	// there (S-12) — a new account on Radicale is empty (acceptance on our
+	// test servers, 18.11.2026).
+	// The scheduling boxes are not calendars of the person, whatever their
+	// resource type says: DAViCal keeps .in/ and .out/ in the calendar home
+	// as plain calendars (acceptance on our test servers, 18.11.2026).
+	if len(boxes) > 0 {
+		kept := all[:0]
+		for _, c := range all {
+			if !slices.ContainsFunc(boxes, func(b string) bool { return hrefKey(b) == hrefKey(c.Path) }) {
+				kept = append(kept, c)
+			}
+		}
+		if n := len(all) - len(kept); n > 0 {
+			add(stepCollections, fmt.Sprintf("%d scheduling box%s (inbox, outbox) left out", n, map[bool]string{true: "", false: "es"}[n == 1]), true)
+		}
+		all = kept
+	}
+	homed := res.CalendarHome != "" || res.AddressBookHome != ""
+	if len(all) == 0 && homed {
+		add(stepCollections, "0 collection(s): none yet — new ones go to the home", true)
+	} else {
+		add(stepCollections, fmt.Sprintf("%d collection(s)", len(all)), len(all) > 0)
+	}
 	trace.Steps = steps
-	// OK means the run reached collections, not merely that it did not crash:
-	// a principal whose home-sets both failed is a bad check on the screen.
-	trace.OK = len(all) > 0
+	trace.OK = len(all) > 0 || homed
 	res.Collections = all
 	return res, trace, nil
 }
@@ -253,14 +285,15 @@ func withHomeProps(ctx context.Context, client *dav.Client, home, label string, 
 }
 
 // scheduling asks the principal, in one depth-0 PROPFIND, whether it has a
-// schedule-outbox-URL and which calendar addresses are the person's. A
+// schedule-outbox-URL and which calendar addresses are the person's, and
+// where its scheduling boxes are (boxes: the inbox and the outbox). A
 // refusal is not a failure of the run: nothing else depends on it, and the
 // answer stays unknown — which the rewrite sheet says as it is (S-15.4).
-func scheduling(ctx context.Context, client *dav.Client, principal string, add func(string, string, bool)) (string, []string) {
-	ms, err := client.PropFind(ctx, principal, dav.DepthZero, []xml.Name{propScheduleOutbox, propUserAddresses})
+func scheduling(ctx context.Context, client *dav.Client, principal string, add func(string, string, bool)) (string, []string, []string) {
+	ms, err := client.PropFind(ctx, principal, dav.DepthZero, []xml.Name{propScheduleOutbox, propScheduleInbox, propUserAddresses})
 	if err != nil {
 		add(stepScheduling, "not answered: "+formatErr(err), false)
-		return SchedulingUnknown, nil
+		return SchedulingUnknown, nil, nil
 	}
 	var r *dav.Response
 	for i := range ms.Responses {
@@ -270,7 +303,7 @@ func scheduling(ctx context.Context, client *dav.Client, principal string, add f
 	}
 	if r == nil {
 		add(stepScheduling, "not answered: the principal is not in the reply", false)
-		return SchedulingUnknown, nil
+		return SchedulingUnknown, nil, nil
 	}
 	var addresses []string
 	for _, h := range hrefs(r.Props[propUserAddresses]) {
@@ -278,12 +311,13 @@ func scheduling(ctx context.Context, client *dav.Client, principal string, add f
 			addresses = append(addresses, strings.ToLower(strings.TrimSpace(h[len("mailto:"):])))
 		}
 	}
+	boxes := append(hrefs(r.Props[propScheduleInbox]), hrefs(r.Props[propScheduleOutbox])...)
 	if len(hrefs(r.Props[propScheduleOutbox])) == 0 {
 		add(stepScheduling, "no schedule-outbox-URL: the server does not schedule", true)
-		return SchedulingNo, addresses
+		return SchedulingNo, addresses, boxes
 	}
 	add(stepScheduling, fmt.Sprintf("schedule-outbox-URL announced; %d own address(es)", len(addresses)), true)
-	return SchedulingYes, addresses
+	return SchedulingYes, addresses, boxes
 }
 
 // hrefs reads the DAV:href values out of a property's inner XML, by local
@@ -508,17 +542,24 @@ func collectionNoun(col Collection) string {
 }
 
 // nextcloudPrincipal is the principal of a user on Nextcloud and ownCloud:
-// …/principals/users/<id>/, its files at …/files/<id>/.
-var nextcloudPrincipal = regexp.MustCompile(`^(.*)/principals/users/([^/]+)/?$`)
+// …/principals/users/<id>/, its files at …/files/<id>/. davisPrincipal is
+// Davis's, …/principals/<id>/, its files at …/home/<id>/ (WEBDAV_ENABLED) —
+// and Baikal's, which keeps none.
+var (
+	nextcloudPrincipal = regexp.MustCompile(`^(.*)/principals/users/([^/]+)/?$`)
+	davisPrincipal     = regexp.MustCompile(`^(.*)/principals/([^/]+)/?$`)
+)
 
-// filesHomeOf is where a principal of that shape keeps its files; "" for
-// any other.
-func filesHomeOf(principal string) string {
-	m := nextcloudPrincipal.FindStringSubmatch(principal)
-	if m == nil {
-		return ""
+// filesHomeOf is where a principal of those shapes keeps its files; "" for
+// any other. sure: the server of that shape always has them (Nextcloud).
+func filesHomeOf(principal string) (home string, sure bool) {
+	if m := nextcloudPrincipal.FindStringSubmatch(principal); m != nil {
+		return m[1] + "/files/" + m[2] + "/", true
 	}
-	return m[1] + "/files/" + m[2] + "/"
+	if m := davisPrincipal.FindStringSubmatch(principal); m != nil {
+		return m[1] + "/home/" + m[2] + "/", false
+	}
+	return "", false
 }
 
 // filesHome is the storage at home when the server has a folder there —

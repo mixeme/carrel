@@ -429,3 +429,23 @@ func TestRefusedCreateOffersBackAndAgain(t *testing.T) {
 		t.Errorf("Try again: failure %+v, sent %d", again.Failure, f.srv.CountRequests("MKCALENDAR", "")-tries)
 	}
 }
+
+// An account with nothing in it yet is connected: its server named where
+// its calendars and address books go, and that is where Carrel makes the
+// first one (S-6, S-12). A new account on Radicale is empty; Connect
+// refused it at «0 collection(s)» (acceptance on our test servers,
+// 18.11.2026), and nothing could be made there.
+func TestAnEmptyAccountIsConnectedAndTakesItsFirstCollection(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	f := connectFixture(t, srv, "", nil)
+
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess, url.Values{
+		"account": {f.id}, "name": {"Личный"}, "components": {"VEVENT"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create in the empty account: %d %s", rec.Code, rec.Body.String())
+	}
+	if _, ok := srv.Calendar(davtest.CalendarHome + "lichnyi/"); !ok {
+		t.Error("the first calendar is not on the server")
+	}
+}

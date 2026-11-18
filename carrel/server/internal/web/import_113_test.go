@@ -132,3 +132,21 @@ func TestImportNamesTheMembersOfAZipInASet(t *testing.T) {
 		t.Errorf("a member = %q", row)
 	}
 }
+
+// A record the server refuses to take is «‹name› · ‹request› → ‹code›»
+// under «Failed», as the menu of refusals writes a refusal (states-16): not
+// the error of Go. Radicale refuses a note with two DESCRIPTION — RFC 5545
+// lets a VJOURNAL have several — with a bare 400 (acceptance on our test
+// servers, 18.11.2026); the report said «dav: HTTP 400: Bad Request».
+func TestImportSaysWhatTheServerRefused(t *testing.T) {
+	f := importFixture(t)
+	f.srv.RefuseAt("PUT", peopleBook+"vera.vcf", 400, "Bad Request")
+	cards := "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:vera\r\nFN:Вера Лебедева\r\nEND:VCARD\r\n"
+	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "vera.vcf", []byte(cards))))
+	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
+	want := "Вера Лебедева · PUT " + peopleBook + "vera.vcf → 400 Bad Request"
+	if r := page.Report; r == nil || r.Failed != 1 || len(r.Failures) != 1 || string(r.Failures[0]) != want {
+		t.Errorf("report = %+v, want the failure %q", page.Report, want)
+	}
+}
