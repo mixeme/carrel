@@ -299,6 +299,7 @@
   "note": null,
   "notes": [],
   "notices": [],
+  "places": true,
   "range": null,
   "readOnly": true,
   "strip": {

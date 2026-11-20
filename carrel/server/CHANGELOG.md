@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.11 — 2026-11-20
+
+Client `v0.11.40`. The client's acceptance (U-15.1), round 6, on the stand
+of the set: edits, settings, public pages.
+
+### For consumers
+
+- **A published calendar says whether its link shows places**
+  (`PublishedPage.Places`): «Location» ticked, or a link made before the
+  ticks. With it, a row without a place is drawn «—», as every list draws
+  nothing (s-publish-6); without it the column stays empty (s-publish-24).
+- Edits of every kind were saved on the stand and read back on the DAV
+  server: only the field changed and the stamps (DTSTAMP, LAST-MODIFIED,
+  REV) differ; alarms, attachments, the zone and foreign properties stay.
+- The stand (`TestStand`) now names the person's address on its servers,
+  turns mail on through the administrator's sheet, and decides the set's
+  duplicates on their screen («Take one out», Link them).
+
 ## v0.3.10 — 2026-11-20
 
 Client `v0.11.39`; Typecase `844da2f` (notes 211, 212).

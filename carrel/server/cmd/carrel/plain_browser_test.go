@@ -198,6 +198,33 @@ func (b *plainBrowser) press(text string, set url.Values, files map[string][2]st
 	if btn == nil {
 		b.t.Fatalf("%s: no button %q; buttons: %s", b.page.url.Path, text, b.page.buttons())
 	}
+	return b.pressButton(btn, text, set, files)
+}
+
+// pressIn presses the button that says text in the form whose words hold
+// scope: a decision of one card among cards with the same buttons (a group
+// of the duplicates screen by its name).
+func (b *plainBrowser) pressIn(scope, text string, set url.Values) *plainPage {
+	b.t.Helper()
+	btn := b.page.find(func(n *html.Node) bool {
+		if n.Data != "button" || (attr(n, "type") != "" && attr(n, "type") != "submit") {
+			return false
+		}
+		if !strings.Contains(words(n), text) {
+			return false
+		}
+		form := b.page.formOf(n)
+		return form != nil && strings.Contains(words(form), scope)
+	})
+	if btn == nil {
+		b.t.Fatalf("%s: no button %q in a form that says %q; buttons: %s", b.page.url.Path, text, scope, b.page.buttons())
+	}
+	return b.pressButton(btn, text, set, nil)
+}
+
+// pressButton sends the form of btn as press does.
+func (b *plainBrowser) pressButton(btn *html.Node, text string, set url.Values, files map[string][2]string) *plainPage {
+	b.t.Helper()
 	form := b.page.formOf(btn)
 	if form == nil {
 		b.t.Fatalf("%s: the button %q sends no form", b.page.url.Path, text)
