@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.42 — 2026-11-20
+
+Server `v0.4.0`; Typecase `803b3b2` — the release `typecase/v0.12.0` (note
+214). The library, its styles, scripts and the mockup are the same as at
+`5481c8a`; only Typecase's own catalog changed. Nothing in the client
+changes.
+
 ## v0.11.41 — 2026-11-20
 
 Server `v0.3.11`; Typecase `5481c8a` (note 213). A page drawn with its sheet
