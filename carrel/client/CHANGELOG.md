@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.41 — 2026-11-20
+
+Server `v0.3.11`; Typecase `5481c8a` (note 213). A page drawn with its sheet
+open (a sheet's own address) prints the top bar and the shell's body under
+the scrim `inert`: the first Tab and a press no longer reach under it, with
+no script too. Nothing in the client changes; the whole client suite passes
+on it.
+
 ## v0.11.40 — 2026-11-20
 
 Server `v0.3.11`; Typecase `844da2f`. A published calendar whose link shows
