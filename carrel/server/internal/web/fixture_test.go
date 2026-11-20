@@ -2608,6 +2608,15 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		app.compare(t, "app-collections-new/refused.json", app.h.do(postForm("/app/collections/new?kind=event", app.sess, url.Values{
 			"account": {app.realAccount(t, "lichnyj")}, "name": {"Поездки"}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
 		})))
+		// The address the name gives held by the server's trash bin
+		// (s-profile-38, SV-30; Typecase's notes 210 and 215): refused at
+		// Name.
+		trashed := davtest.CalendarHome + "poezdki/"
+		app.servers["nextcloud"].AddCalendar(caldav.Calendar{Path: trashed, Name: "Поездки"})
+		app.servers["nextcloud"].Trash(trashed, "2026-08-09T21:53:30+00:00")
+		app.compare(t, "app-collections-new/trash.json", app.h.do(postForm("/app/collections/new?kind=event", app.sess, url.Values{
+			"account": {app.realAccount(t, "lichnyj")}, "name": {"Поездки"}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
+		})))
 	})
 	// Export from the combined calendar (s-agenda-30): the sheet over the
 	// week its poll answered; last, as the week warms the counts of the rail.

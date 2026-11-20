@@ -4,6 +4,16 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.43 — 2026-11-20
+
+Server `v0.4.0`; Typecase `2c98ede` (note 215: tasks 270 and 271). The
+mockup's frames now say what the set holds and what Carrel shows: whole
+collections counted in the calendar rail in the server's order, the address
+from the street, the group card named by its first record, both of Анна's
+addresses and «Дела» by link, the first line as the excerpt. The new
+collection's sheet is held against `s-profile-38` again (the address held
+by the server's trash bin), without a width of its own.
+
 ## v0.11.42 — 2026-11-20
 
 Server `v0.4.0`; Typecase `803b3b2` — the release `typecase/v0.12.0` (note

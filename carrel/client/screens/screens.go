@@ -230,7 +230,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.CollectionNewSheet) },
-		Frames: []string{"s-profile-5", "s-profile-6", "s-profile-20", "s-profile-21", "s-profile-28", "s-profile-29"},
+		Frames: []string{"s-profile-5", "s-profile-6", "s-profile-20", "s-profile-21", "s-profile-28", "s-profile-29", "s-profile-38"},
 		Draw: func(model any) Root {
 			p := model.(*view.CollectionNewSheet)
 			return over(p.Under, collection.New(p))
