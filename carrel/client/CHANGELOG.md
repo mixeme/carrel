@@ -10,9 +10,10 @@ Server `v0.4.0`; Typecase `2c98ede` (note 215: tasks 270 and 271). The
 mockup's frames now say what the set holds and what Carrel shows: whole
 collections counted in the calendar rail in the server's order, the address
 from the street, the group card named by its first record, both of Анна's
-addresses and «Дела» by link, the first line as the excerpt. The new
-collection's sheet is held against `s-profile-38` again (the address held
-by the server's trash bin), without a width of its own.
+addresses and «Дела» by link, the first line as the excerpt.
+`s-profile-38` now has the sheet's own width, but leaves out the hint «baikal
+is not answering» that `s-profile-5` draws on the same sheet: its fixture
+waits for Typecase's task 273.
 
 ## v0.11.42 — 2026-11-20
 
