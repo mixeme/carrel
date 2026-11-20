@@ -26,6 +26,14 @@ restarts the container; the volume stays. apache2 is not touched.
 ## First start
 
 Done on 20.11.2026 (v0.4.0): the administrator, the certificate, the vhost.
+Admin → Installation the same day: 11 checks, 10 fine, 1 not measured —
+the proxy's ceiling for a long request, which cannot be measured from
+outside (apache's ProxyPass timeout is 300 s, above the 30 s a poll may
+take). Certificate YE2 until 2027-02-18, chain complete; X-Forwarded-Proto
+https; the client's address is the client's, not the proxy's; the event
+stream's first byte after 2 ms; a 21 MB body passes the proxy; cookie
+Secure, HttpOnly, SameSite=Lax; the clock 1.2 s from the proxy's; /data
+writable, 25 GB free.
 
 An empty instance gives the administrator to whoever opens it first
 (S-10.1: no default password). So the order is:
