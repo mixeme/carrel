@@ -217,6 +217,12 @@ func body(p *view.PublishedPage) []w.MainPart {
 		for _, r := range d.Rows {
 			t := w.TimeRow{Mark: w.Mark{Colour: string(r.Colour)}, Time: string(r.Time), Title: []w.Inline{w.Text(r.Summary)},
 				Detail: string(r.Location), Single: true, Href: r.Href}
+			if p.Places {
+				// The link shows places: a row without one says so, as a
+				// list does (s-publish-6); hidden, the column is empty
+				// (s-publish-24).
+				t.Detail = or(r.Location)
+			}
 			for _, b := range r.Badges {
 				t.Badges = append(t.Badges, bind.Badge(b))
 			}

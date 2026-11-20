@@ -3911,6 +3911,7 @@ type PublishedPage struct { // записка Typecase 122: строка спи�
     Range    *Range         // весь календарь — ← Today → неделями (s-publish-24); у ссылки на диапазон и со словом — nil
     Contacts []ContactGroup // по букве, как книга в приложении (s-publish-7)
     Days     []AgendaDay    // со словом — строки показанной недели (дней ссылки), в которых оно есть; ← Today → несут слово (s-publish-39; записка Typecase 185)
+    Places   bool           // ссылка показывает, где события (отметка «Location» или ссылка до отметок): строка без места — «—», как в списках (s-publish-6); без неё столбец пуст (s-publish-24, -39)
     Tasks    []TaskGroup    // «Open», «Done» со счётом (s-publish-28)
     Notes    []NoteGroup    // по месяцам, от новых к старым (s-publish-29)
     Avatar   *Avatar        // контакт: инициалы в шапке (s-publish-26)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -42,6 +43,11 @@ func TestStand(t *testing.T) {
 	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
 		srv := davtest.New(t)
 		srv.Login, srv.Password = "alice", "secret"
+		// The person's own address, as the principal names it: the frames'
+		// person organises «Синк-ап по релизу» (s-agenda-3: «A name or an
+		// address…», not «You are invited by…»), as the fixtures' servers
+		// say it.
+		srv.UserAddresses = []string{"mailto:mix@example.org", davtest.Principal}
 		servers[label] = srv
 	}
 	for _, col := range standSet {
@@ -93,6 +99,13 @@ func TestStand(t *testing.T) {
 	b := startPlainOn(t, port, "127.0.0.1")
 
 	standSignIn(b)
+	// A relay, and letters from people allowed, as the administrator sets
+	// them (s-admin-3): the frames offer Send on a card (s-agenda-2,
+	// s-contacts-6) and «Letter» under New's arrow (s-notes-7). The relay is
+	// the fixtures' and is never reached: nothing is sent from the stand.
+	b.open("/admin/settings")
+	b.press("Save", url.Values{"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"}, "username": {"relay"},
+		"password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"}, "sender": {"login"}, "people": {"on"}}, nil)
 	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
 		b.open("/app/settings/connections")
 		b.follow("Connect account")
@@ -109,9 +122,61 @@ func TestStand(t *testing.T) {
 	// fitting (README, step 6).
 	servers["baikal"].Refuse("REPORT", 401, "")
 
+	standDuplicates(t, b)
+
 	mock := standMockup(t, port, root)
 	t.Logf("the stand: %s (login %s); the mockup: %s/mockups/carrel-ui-mockups.html; holding %s", b.origin, standLogin, mock, wait)
 	standWait(t, wait)
+}
+
+// standDuplicates decides the duplicates of the set on their screen, as the
+// frames draw them decided (s-dup-1): Алексей Смирнов taken out of the group
+// of Анна Ковалёва, whose work phone he shares (s-dup-9, -10; Typecase's
+// note 209) — they stand «not duplicates» —, her three copies linked, Артём
+// Белов's two, and the two notes copied into «Дневник». The lists are read
+// first: the screen groups what the session has read.
+func standDuplicates(t *testing.T, b *plainBrowser) {
+	t.Helper()
+	for _, list := range []string{"/app/contacts", "/app/notes"} {
+		standSettle(t, b, list)
+	}
+	b.open("/app/duplicates")
+	b.pressIn("Алексей Смирнов", "Алексей Смирнов · Контакты", nil)
+	for _, group := range []string{"Анна Ковалёва", "Артём Белов", "Заметка со встречи 10.08", "Что почитать про CRDT"} {
+		b.open("/app/duplicates")
+		b.pressIn(group, "Link them", nil)
+	}
+}
+
+// standSettle opens a list and follows its poll to the end, as the
+// library's live layer does (data-tc-poll, C-7.4): what the poll brings is
+// the session's then.
+func standSettle(t *testing.T, b *plainBrowser, list string) {
+	t.Helper()
+	page := b.open(list)
+	n := page.find(func(n *html.Node) bool { return attr(n, "data-tc-poll") != "" })
+	if n == nil {
+		return
+	}
+	poll := attr(n, "data-tc-poll")
+	for range 60 {
+		req, err := http.NewRequest(http.MethodGet, b.origin+poll, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Carrel-View", "fragment")
+		resp, err := b.send(req)
+		if err != nil {
+			t.Fatalf("%s: %v", poll, err)
+		}
+		raw, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if !strings.Contains(string(raw), "Polling ·") {
+			return
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	t.Fatalf("%s: the poll did not end in 30 s", list)
 }
 
 // standHold is how long a stand holds, from its variable (2h); a stand not

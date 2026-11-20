@@ -132,8 +132,12 @@ type PublishedPage struct {
 	Range    *Range         `json:"range"`    // у всего календаря — ← Today → (s-publish-24); у ссылки на диапазон — nil
 	Contacts []ContactGroup `json:"contacts"` // по букве, как в приложении (s-publish-7)
 	Days     []AgendaDay    `json:"days"`
-	Tasks    []TaskGroup    `json:"tasks"` // «Open», «Done» со счётом (s-publish-28)
-	Notes    []NoteGroup    `json:"notes"` // по месяцам, от новых к старым (s-publish-29)
+	// Places — ссылка показывает, где события (отметка «Location» или
+	// ссылка до отметок): строка без места — «—», как в списках
+	// (s-publish-6); без неё столбец пуст (s-publish-24, -39)
+	Places bool        `json:"places,omitempty"`
+	Tasks  []TaskGroup `json:"tasks"` // «Open», «Done» со счётом (s-publish-28)
+	Notes  []NoteGroup `json:"notes"` // по месяцам, от новых к старым (s-publish-29)
 	// Avatar — шапка контакта: инициалы (s-publish-26); nil у других
 	Avatar *Avatar `json:"avatar"`
 	Fields []Field `json:"fields"` // одна запись: отмеченные поля; когда и где — в Lede, не здесь

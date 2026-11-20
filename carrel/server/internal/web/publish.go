@@ -1180,6 +1180,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			page.Lede = line(tf.window(from, to) + " · " + strconv.Itoa(eventsIn(page.Days)) + " of " + plural(all, "event"))
 		}
 		guestDays(page, link, open)
+		page.Places = showsPlaces(link.Target)
 		filter(shown)
 		if fixed == nil {
 			// The whole calendar steps by weeks, as the owner's (s-publish-24):

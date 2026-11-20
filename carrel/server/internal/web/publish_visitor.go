@@ -55,6 +55,12 @@ func picksCalendarFields(t user.PublishTarget) bool {
 	return slices.Contains(t.Shows, calendarSeesTime)
 }
 
+// showsPlaces says whether a link lets the guest see where events are:
+// «Location» ticked, or a link made before the ticks, which shows all.
+func showsPlaces(t user.PublishTarget) bool {
+	return !picksCalendarFields(t) || slices.Contains(t.Shows, "location")
+}
+
 // isCalendarKind says whether a kind's links are asked what the guest sees
 // by the calendar's ticks: events and tasks.
 func isCalendarKind(k view.Kind) bool {
