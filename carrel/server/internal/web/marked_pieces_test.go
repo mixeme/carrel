@@ -28,8 +28,15 @@ func framePieces(s string) string {
 	s = pieceMono.ReplaceAllString(s, "⟨mono:$1⟩")
 	s = pieceStrong.ReplaceAllString(s, "⟨strong:$1⟩")
 	s = pieceDanger.ReplaceAllString(s, "⟨danger:$1⟩")
-	return authText(s)
+	// A no-break space is a letter of the text, not a space to fold
+	// (Typecase's note 211: s-davloom-1 «server&nbsp;·» keeps the word and
+	// the dot on one line).
+	s = strings.NewReplacer("&nbsp;", nbspKept, "&#160;", nbspKept, "\u00a0", nbspKept).Replace(s)
+	return strings.ReplaceAll(authText(s), nbspKept, "\u00a0")
 }
+
+// nbspKept stands for a no-break space while the text is folded.
+const nbspKept = "\ue000"
 
 // frameMsgs are the messages of a frame, marked, its caption left out.
 func frameMsgs(t *testing.T, id string) []string {

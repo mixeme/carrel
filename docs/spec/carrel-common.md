@@ -3385,7 +3385,7 @@ type DeviceRow struct {
 
 type DavloomPage struct {
     Shell                       // Title «davloom» (s-davloom-1)
-    Subtitle    Runs            // «One address for every device instead of an account for every server»; у локального адреса — и « · ‹danger›a phone on mobile data will not reach a local address» (s-davloom-1)
+    Subtitle    Runs            // «One address for every device instead of an account for every server»; у локального адреса — и « · ‹danger›a phone on mobile data will not reach a local address» (s-davloom-1), пробел перед точкой неразрывный — U+00A0 (записка Typecase 211)
     Enabled     bool
     Address     Text
     AddressHint Text            // как адрес вводят в DAVx5 и чей пароль (s-davloom-1)

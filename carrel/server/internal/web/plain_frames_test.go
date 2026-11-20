@@ -129,9 +129,18 @@ func saidRuns(r view.Runs) string {
 	return said(view.Text(b.String()))
 }
 
+// htmlSpaces are the spaces HTML folds: space, tab, line feed, carriage
+// return, form feed.
+const htmlSpaces = " \t\n\r\f"
+
 // said is a text of the server written the way frameText writes one:
-// paragraphs and spaces as single spaces.
-func said(t view.Text) string { return strings.Join(strings.Fields(string(t)), " ") }
+// paragraphs and spaces as single spaces — the spaces HTML folds; a
+// no-break space is a letter of the text (Typecase's note 211).
+func said(t view.Text) string {
+	return strings.Join(strings.FieldsFunc(string(t), func(r rune) bool {
+		return strings.ContainsRune(htmlSpaces, r)
+	}), " ")
+}
 
 // shownFields are the fields of a form written the way authFrame writes
 // them.

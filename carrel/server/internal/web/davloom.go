@@ -181,9 +181,11 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 		Sees: view.Action{ID: "davloom.tree", Label: "What the client sees", Href: s.route("/app/settings/davloom/tree"), Method: "GET", Enabled: true, Target: render.TargetSheet},
 	}
 	// A local address does not reach a phone away from home, and the line
-	// under the title says so where the address is given (s-davloom-1).
+	// under the title says so where the address is given (s-davloom-1);
+	// «server» and the dot stay on one line (a no-break space, Typecase's
+	// note 211), or a phone breaks the line a word early.
 	if page.Enabled && localAddress(s.davloomAddress()) {
-		page.Subtitle = join(page.Subtitle, " · ", view.Run{Text: "a phone on mobile data will not reach a local address", Mark: view.RunDanger})
+		page.Subtitle = join(page.Subtitle, "\u00a0· ", view.Run{Text: "a phone on mobile data will not reach a local address", Mark: view.RunDanger})
 	}
 	// Add device in the head (s-davloom-1, Нс47): the dialog is a state of
 	// the page of its own, not a form on every answer.

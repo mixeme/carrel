@@ -534,7 +534,9 @@ type DavloomPage struct {
 	Shell
 	// Subtitle — строка под заголовком (s-davloom-1): «One address for every
 	// device instead of an account for every server», у локального адреса —
-	// и « · ‹danger›a phone on mobile data will not reach a local address»
+	// и « · ‹danger›a phone on mobile data will not reach a local
+	// address», пробел перед точкой неразрывный (U+00A0): «server» и точка
+	// на одной строке (записка Typecase 211)
 	Subtitle Runs `json:"subtitle"`
 	Enabled  bool `json:"enabled"`
 	// Address — адрес для клиента, AddressHint — подсказка под ним: как его

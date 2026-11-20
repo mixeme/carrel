@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.10 — 2026-11-20
+
+Client `v0.11.39`; Typecase `844da2f` (notes 211, 212).
+
+### For consumers
+
+- davloom on a local address (s-davloom-1): the space before « · a phone on
+  mobile data will not reach a local address» is a no-break one (U+00A0),
+  as the frame writes it — «server» and the dot stay on one line on a
+  phone (Typecase's note 211). The frame comparisons of the server's tests
+  now keep a no-break space as a letter of the text.
+
 ## v0.3.9 — 2026-11-20
 
 Client `v0.11.38`; Typecase `18f93a0`. Typecase's notes 208–210 (tasks
