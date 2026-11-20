@@ -333,6 +333,7 @@ spec/fixtures/<screen>/<state>.json
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
+| `/` | GET | — | редирект | — ; голый адрес экземпляра ведёт на `/app/`: без входа — на вход, у пустого тома — на `/setup`, со входом — в контакты |
 | `/login` | GET, POST | — | страница | `LoginPage` |
 | `/offline` | GET | — | страница | `OfflinePage` — страница без сети установленного приложения (U-11, offline-1): знак, «No connection.» с хостом экземпляра (`CARREL_PUBLIC_URL`) и Try again на `/app/` (вход или раздел); одна на всех, без данных; её держит обработчик Typecase (`page.App.Offline`, `render.OfflinePath`) |
 | `/logout` | POST | вход | редирект | — |

@@ -14,6 +14,13 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
+// getRoot is the bare address of the instance: into the application, as
+// /app/ leads — the sign-in, the setup of an empty instance, or the
+// contacts (C-5).
+func (s *Server) getRoot(w http.ResponseWriter, r *http.Request) {
+	s.redirect(w, r, "/app/")
+}
+
 func (s *Server) getAppRoot(w http.ResponseWriter, r *http.Request) {
 	if _, ok := s.requireLogin(w, r); !ok {
 		return

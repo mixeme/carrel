@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.12 — 2026-11-20
+
+Client `v0.11.41`. The first deploy, on carrel.mixfed.ru (v0.4.0 under way).
+
+### For consumers
+
+- **The bare address leads in** (C-5 `/`): it answered 404 in plain text;
+  now it goes to `/app/` — the sign-in, the setup of an empty instance, or
+  the contacts.
+- **Deploying:** `scripts/deploy.sh` packs what is committed, builds the
+  image on carrel.mixfed.ru and starts it on the loopback (pages on
+  8090, davloom on 8091); `deploy/carrel.mixfed.ru` holds the compose file,
+  the apache2 vhost and the order of the first start: the administrator
+  is made through an SSH tunnel before the vhost opens the instance.
+
 ## v0.3.11 — 2026-11-20
 
 Client `v0.11.40`. The client's acceptance (U-15.1), round 6, on the stand

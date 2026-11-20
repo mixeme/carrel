@@ -39,6 +39,7 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /api/backup/download", (*Server).getBackupDownloadLegacy)
 
 	// C-5.3
+	s.handle("GET /{$}", (*Server).getRoot)
 	s.handle("GET /app/", (*Server).getAppRoot)
 	s.handle("GET /app/search", (*Server).getSearch)
 	s.handle("GET /app/search/suggest", (*Server).getSearchSuggest)
