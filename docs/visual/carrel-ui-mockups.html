@@ -201,6 +201,12 @@ body:has(#w390:checked) .tc-root{width:100%}
 .tc-root--pad18-20.tc-root--pad18-20{padding:18px 20px}
 /* Тело страницы библиотеки (package page): без полей, фон и текст — токены. */
 body[data-tc-root]{margin:0;background:var(--tc-bg);color:var(--tc-ink);font-family:var(--tc-font-sans)}
+/* Оболочка на странице — не ниже окна: полоса и тело во всю высоту, рейл тянется, подвал рейла внизу окна,
+   пока содержимое не опустит его со страницей (задача Carrel 272). Кадр — не страница: его коробку задаёт он сам. */
+body[data-tc-root]>.tc-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+body[data-tc-root]>.tc-shell>.tc-shell__body,body[data-tc-root]>.tc-shell>.tc-overlay{flex:1 0 auto}
+body[data-tc-root]>.tc-shell>.tc-overlay{display:flex;flex-direction:column}
+body[data-tc-root]>.tc-shell>.tc-overlay>.tc-shell__body{flex:1 0 auto}
 .tc-root *{box-sizing:border-box}
 .tc-root p,.tc-root h1,.tc-root h2,.tc-root h3,.tc-root h4,.tc-root ul,.tc-root ol,.tc-root dl,.tc-root dd,.tc-root dt,.tc-root figure{margin:0;padding:0}
 .tc-root ul{list-style:none}

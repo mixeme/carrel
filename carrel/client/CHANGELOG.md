@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.44 — 2026-11-20
+
+Server `v0.4.1`; Typecase `3c8a068` (note 216, task 272). On a page the
+shell is at least as high as the window: the top bar, under it the body in
+all the height left; the rail's foot stands at the bottom of the window
+until content taller than the window takes it down with the page. The rule
+is the library's (`css/typecase.css`); nothing in the client changes.
+
 ## v0.11.43 — 2026-11-20
 
 Server `v0.4.0`; Typecase `2c98ede` (note 215: tasks 270 and 271). The

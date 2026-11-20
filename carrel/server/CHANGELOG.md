@@ -17,6 +17,13 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.1 — 2026-11-20
+
+Client `v0.11.44`; Typecase `3c8a068`. The owner's remark on the first
+deploy («the footer is not at the bottom of the page»): a page's shell now
+fills the window, the rail's foot at its bottom (Typecase's task 272). No
+server code changes; deployed on carrel.mixfed.ru.
+
 ## v0.4.0 — 2026-11-20
 
 **Tagged:** `server-v0.4.0`. Client `v0.11.41`. The milestone **first working
