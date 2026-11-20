@@ -25,6 +25,8 @@ restarts the container; the volume stays. apache2 is not touched.
 
 ## First start
 
+Done on 20.11.2026 (v0.4.0): the administrator, the certificate, the vhost.
+
 An empty instance gives the administrator to whoever opens it first
 (S-10.1: no default password). So the order is:
 

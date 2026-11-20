@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.0 — 2026-11-20
+
+**Tagged:** `server-v0.4.0`. Client `v0.11.41`. The milestone **first working
+version** (docs/development.md): the server with its client, every screen
+built, the image deployed on carrel.mixfed.ru behind apache2, and the owner
+starts test use. The code is v0.3.12's, gated on Windows and Linux on
+`580f8fc9`.
+
+### For consumers
+
+- **https://carrel.mixfed.ru** is open: the administrator was made through an
+  SSH tunnel before the vhost opened the instance; the certificate is
+  certbot's (apache authenticator, renewed by its timer).
+- Checked from outside: http goes to https, HSTS; cookies `Secure` (the
+  proxy is believed: `CARREL_TRUSTED_PROXIES` is the docker network's
+  gateway); the library's files served; an address with `%2F` reaches
+  Carrel whole (`AllowEncodedSlashes NoDecode`, `nocanon`); davloom at
+  `/dav/` asks for a device's password (401).
+- Known: on a page the shell is as tall as its content, so the rail's foot
+  is not at the bottom of the window — Typecase's task 272.
+
 ## v0.3.12 — 2026-11-20
 
 Client `v0.11.41`. The first deploy, on carrel.mixfed.ru (v0.4.0 under way).
