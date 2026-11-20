@@ -1,0 +1,47 @@
+# Carrel on carrel.mixfed.ru (docs/development.md, v0.4.0): one container on
+# the loopback, behind the host's apache2 (carrel.conf beside this file).
+# SelfPost holds 127.0.0.1:8080 and Wynd 127.0.0.1:7676 on the same host;
+# Carrel takes 8090 for its pages and 8091 for davloom.
+#
+# /opt/carrel/src holds this repository as carrel/ and Typecase as typecase/
+# beside it — what carrel/server/scripts/deploy.sh unpacks there.
+services:
+  carrel:
+    build:
+      context: ./src
+      dockerfile: carrel/carrel/server/Dockerfile
+      args:
+        VERSION: ${CARREL_VERSION:-dev}
+        COMMIT: ${CARREL_COMMIT:-unknown}
+    image: carrel:deploy
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    volumes:
+      - carrel-data:/data
+    ports:
+      - "127.0.0.1:8090:8080"
+      - "127.0.0.1:8091:8081"
+    environment:
+      CARREL_PUBLIC_URL: https://carrel.mixfed.ru
+      # apache reaches the container through docker-proxy: the request
+      # comes from the network's gateway, and only it is believed about
+      # the client's address and https.
+      CARREL_TRUSTED_PROXIES: 172.31.77.1
+      CARREL_DAVLOOM_PORT: "8081"
+      CARREL_TIMEZONE: Europe/Moscow
+    networks: [carrel]
+
+networks:
+  carrel:
+    ipam:
+      config:
+        # 172.17/16, 172.18/16 and 172.30.76/24 are taken on the host.
+        - subnet: 172.31.77.0/24
+          gateway: 172.31.77.1
+
+volumes:
+  carrel-data:
