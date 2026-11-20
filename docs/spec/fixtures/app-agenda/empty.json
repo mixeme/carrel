@@ -685,13 +685,13 @@
         "on": true
       },
       {
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026tag=release",
-        "label": "release",
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
+        "label": "работа",
         "on": false
       },
       {
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026tag=team",
-        "label": "team",
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+        "label": "релиз",
         "on": false
       }
     ],

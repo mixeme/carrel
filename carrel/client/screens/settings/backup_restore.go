@@ -87,12 +87,53 @@ func reportDialog(rep *view.RestoreReport) w.Dialog {
 	return w.Dialog{Variant: w.DialogWide, Items: []w.DialogPart{w.Steps{Items: []string{stepArchive, stepMatch, stepReport}, On: 3}, h, t}}
 }
 
+// The drop sheet of an archive from this computer (s-io-23): its words, and
+// the ID of the first step's dialog it names.
+const (
+	restoreSourceID = "restore-source"
+	dropArchive     = "Drop the archive"
+	dropOne         = "One "
+	dropZip         = ".zip"
+	dropOfBackup    = " of a Carrel backup"
+)
+
+// archiveField says whether the first step of the restore picks the
+// archive on this computer (s-backup-15): a file field in its form.
+func archiveField(r view.RestoreBlock) bool {
+	if !r.Open || r.Match != nil || r.Report != nil {
+		return false
+	}
+	for _, set := range r.Source.Sets {
+		for _, row := range set.Rows {
+			if row.Kind == view.InputFile {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// RestoreDrop is the drop sheet of the restore's first step where the
+// archive is picked on this computer (s-io-23): the dropped file stands in
+// the archive's field, as one picked there; none elsewhere.
+func RestoreDrop(p *view.BackupPage) (w.Scrim, bool) {
+	if !archiveField(p.Restore) {
+		return w.Scrim{}, false
+	}
+	return bind.DropSheet(restoreSourceID, "restore", dropArchive, []w.Inline{w.Text(dropOne), w.Mono{Text: dropZip}, w.Text(dropOfBackup)}, nil), true
+}
+
 // sourceDialog is the first step (s-backup-7): where the archive is — one
 // of three, a link each —, what that one asks — a job's copies a row each,
 // a server's storage and path —, the archive's password, Open the manifest
 // and Cancel.
 func sourceDialog(r view.RestoreBlock) w.Dialog {
 	d := w.Dialog{Variant: w.DialogStep760, Action: r.Source.Action, Method: r.Source.Method, Fields: bind.Hidden(r.Source)}
+	if archiveField(r) {
+		// A file dropped on the window stands in the archive's field
+		// (s-io-23, Typecase's note 209): the drop sheet names the dialog.
+		d.ID = restoreSourceID
+	}
 	d.Items = append(d.Items, w.Steps{Items: []string{stepArchive, stepMatch, stepReport}, On: 1},
 		w.Head{Title: &w.HeadTitle{Text: string(r.Title)}, Subs: bind.Sub(r.Subtitle)})
 	from := w.Seg{Variant: w.SegStart}

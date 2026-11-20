@@ -291,23 +291,29 @@ func TestRunbar(t *testing.T) {
 	done := &view.PollBar{Percent: 100, Sources: []view.SourceProgress{{State: view.SourceDone}, {State: view.SourceEmpty}}}
 	same(t, "a poll finished clean", bind.Runbar(done), (*w.Runbar)(nil))
 	same(t, "no poll", bind.Runbar(nil), (*w.Runbar)(nil))
-	failed := &view.PollBar{Percent: 83, Summary: view.Runs{{Text: "Polled 5 of 6 · matched by "}, {Text: "a@b", Mark: view.RunMono}, {Text: " · "}, {Text: "baikal unavailable", Mark: view.RunDanger}},
+	failed := &view.PollBar{Percent: 83, Summary: view.Runs{{Text: "Polled · 5 of 6 answered · 7 events"}}, Short: "5 of 6 · 7 events",
 		Sources: []view.SourceProgress{{State: view.SourceDone}, {State: view.SourceError}}}
-	// The bar is red only when the poll ended with a refusal; while it runs
-	// it is green, whatever has refused so far (Р-40 of Typecase, 80d1319:
-	// Meter.Alert).
-	same(t, "a source did not answer", bind.Runbar(failed), &w.Runbar{Meter: w.Meter{Percent: 83, Alert: true}, Parts: []w.RunbarPart{
-		w.Text("Polled 5 of 6 · matched by "), w.Mono{Text: "a@b"}, w.Text(" · "), w.Span{Face: w.FaceDanger, Text: "baikal unavailable"},
+	// Once the poll is over its line begins with a dot of how it ended, red
+	// when a source did not answer (Typecase's note 208); while it runs the
+	// meter, never red.
+	same(t, "a source did not answer", bind.Runbar(failed), &w.Runbar{Result: w.RunFailed, Parts: []w.RunbarPart{
+		w.Say{Full: "Polled · 5 of 6 answered · 7 events", Short: "5 of 6 · 7 events"},
 	}})
 	still := *failed
 	still.Running = true
-	same(t, "a source did not answer, the poll still runs", bind.Runbar(&still).Meter, w.Meter{Percent: 83})
+	same(t, "a source did not answer, the poll still runs", *bind.Runbar(&still), w.Runbar{Meter: w.Meter{Percent: 83}, Parts: []w.RunbarPart{
+		w.Say{Full: "Polled · 5 of 6 answered · 7 events", Short: "5 of 6 · 7 events"},
+	}})
+	stopped := *failed
+	stopped.Sources = []view.SourceProgress{{State: view.SourceDone}, {State: view.SourceCancelled}}
+	same(t, "stopped before every source answered", bind.Runbar(&stopped).Result, w.RunStopped)
+	same(t, "every source answered", bind.RunResult(&view.PollBar{Sources: []view.SourceProgress{{State: view.SourceEmpty}}}), w.RunAnswered)
 	same(t, "running", bind.Running(&view.PollBar{Running: true}), true)
 	// What the bar says on its right (Aside, s-agenda-1: «from cache · 2 min
 	// ago», states-13: how long the poll runs), monospaced and pushed to the
 	// end.
 	failed.Aside = "from cache · 2 min ago"
-	same(t, "its right", bind.Runbar(failed).Parts[4:], []w.RunbarPart{w.Mono{Text: "from cache · 2 min ago", Place: w.Pushed}})
+	same(t, "its right", bind.Runbar(failed).Parts[1:], []w.RunbarPart{w.Mono{Text: "from cache · 2 min ago", Place: w.Pushed}})
 
 	// What did not answer is the red «N failed» with its menu of refusals
 	// (states-16): each source's mark, name, what was asked and answered, its
@@ -315,13 +321,13 @@ func TestRunbar(t *testing.T) {
 	retry := func(src string) *view.Action {
 		return &view.Action{ID: "source.retry", Label: "Retry", Href: "/retry?source=" + src, Method: "POST", Enabled: true}
 	}
-	two := &view.PollBar{Percent: 66, Summary: view.Runs{{Text: "Polled 4 of 6 sources · 9 events"}}, Failed: "2 failed",
+	two := &view.PollBar{Percent: 66, Summary: view.Runs{{Text: "Polled · 4 of 6 answered · 9 events"}}, Short: "4 of 6 · 9 events", Failed: "2 failed",
 		RetryAll: &view.Action{ID: "poll.retry", Label: "Retry all", Href: "/retry", Method: "POST", Enabled: true},
 		Sources: []view.SourceProgress{{State: view.SourceDone},
 			{Stamp: "baikal · Общий", Colour: "#9a9280", State: view.SourceError, Answer: "PROPFIND /c/ → 401 Unauthorized", Retry: retry("b")},
 			{Stamp: "radicale · vps · Проекты", Colour: "#6b4e7a", State: view.SourceError, Answer: "REPORT /p/ → 503 Service Unavailable", Retry: retry("r")}}}
-	same(t, "two refused", bind.Runbar(two), &w.Runbar{Meter: w.Meter{Percent: 66, Alert: true}, Parts: []w.RunbarPart{
-		w.Text("Polled 4 of 6 sources · 9 events"), w.Text(" · "),
+	same(t, "two refused", bind.Runbar(two), &w.Runbar{Result: w.RunFailed, Parts: []w.RunbarPart{
+		w.Say{Full: "Polled · 4 of 6 answered · 9 events ·", Short: "4 of 6 · 9 events ·"},
 		w.Drop{
 			Trigger: w.Button{Label: "2 failed", Menu: true, Kind: w.ButtonDanger, Small: true},
 			Menu: w.Menu{Width: w.MenuWidth420, Pop: w.MenuUnderEnd, Items: []w.MenuPart{

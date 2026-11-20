@@ -174,24 +174,22 @@ func noQuery(p *view.SearchPage) []w.MainPart {
 // the page's and the zone poll's.
 func Bar(p *view.SearchPage) (w.Runbar, bool) { return runbar(&p.Poll) }
 
-// runbar is the bar of the pass, one rule in every state (Typecase's note
-// 118): what it says in two lengths — whole, and on a narrow bar «13 of
-// 14», «9 of 14 · 5 records» (Short) —; after them the red «N failed» with
-// its menu when a source refused; how long the pass took, pushed; while it
-// runs, Stop pushed instead. No bar before a pass (no query, nothing
-// ticked, too many).
+// runbar is the bar of the pass, one rule in every state (Typecase's notes
+// 118 and 208): while it runs the meter, once it is over the dot of how it
+// ended (bind.RunResult); what it says in two lengths (bind.RunSay); after
+// them the red «N failed» with its menu when a source refused; while it
+// runs Stop pushed, once it is over how long ago it answered. No bar
+// before a pass (no query, nothing ticked, too many).
 func runbar(p *view.PollBar) (w.Runbar, bool) {
 	if p.TaskID == "" {
 		return w.Runbar{}, false
 	}
-	said := ""
-	for _, r := range p.Summary {
-		said += string(r.Text)
+	bar := w.Runbar{Result: bind.RunResult(p), Parts: []w.RunbarPart{bind.RunSay(p)}}
+	if bar.Result == w.RunGoing {
+		bar.Meter = w.Meter{Percent: p.Percent}
 	}
-	bar := w.Runbar{Meter: w.Meter{Percent: p.Percent}, Parts: []w.RunbarPart{w.Say{Full: said, Short: string(p.Short)}}}
-	if p.Failed != "" && !p.Running {
-		bar.Meter.Alert = true
-		bar.Parts = append(bar.Parts, w.Text(sep), bind.Refusals(p))
+	if p.Failed != "" {
+		bar.Parts = append(bar.Parts, bind.Refusals(p))
 	}
 	switch {
 	case p.Running:

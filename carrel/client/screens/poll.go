@@ -14,12 +14,12 @@ import (
 )
 
 // PollBar is a poll's bar drawn alone, as the page it stands on draws it
-// (the stream of a run and its fallback bring it, C-7.4): a search's pass —
-// it says itself short too (PollBar.Short) — as the search draws it, the
+// (the stream of a run and its fallback bring it, C-7.4): a search's pass
+// (PollBar.Pass) as the search draws it, the
 // others as the lists do; closed when none stands, the place the next
 // answer goes (Typecase's note 124).
 func PollBar(p *view.PollBar) widget.Runbar {
-	if p != nil && p.Short != "" {
+	if p != nil && p.Pass {
 		if bar, ok := search.PollBar(p); ok {
 			return bar
 		}

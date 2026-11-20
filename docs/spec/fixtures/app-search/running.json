@@ -90,6 +90,7 @@
     "aside": "",
     "every": 700,
     "note": "",
+    "pass": true,
     "percent": 78,
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,

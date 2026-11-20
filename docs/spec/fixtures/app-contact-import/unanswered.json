@@ -224,6 +224,7 @@
   },
   "report": null,
   "source": {
+    "drop": null,
     "folder": null,
     "folderHint": [],
     "hint": [

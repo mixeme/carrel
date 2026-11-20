@@ -178,6 +178,74 @@
   },
   "report": null,
   "source": {
+    "drop": {
+      "accept": [
+        ".ics"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/calendar/a-nc-home/lichnyj/import?into=lichnyj\u0026to=a-nc-home",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "Contacts take this one"
+            }
+          ]
+        },
+        {
+          "ext": ".md",
+          "says": [
+            {
+              "text": "A notebook takes this one"
+            }
+          ]
+        },
+        {
+          "ext": ".zip",
+          "says": [
+            {
+              "text": "A notebook takes this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "text": "One "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " file"
+        }
+      ],
+      "many": false,
+      "note": "The preview opens first: nothing is written until it has been read",
+      "oneOnly": "One file at a time: only notes take several",
+      "refused": [
+        {
+          "text": "Only "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " files are imported here"
+        }
+      ]
+    },
     "folder": null,
     "folderHint": [],
     "hint": [

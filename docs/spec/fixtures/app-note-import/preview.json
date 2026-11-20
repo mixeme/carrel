@@ -259,6 +259,7 @@
   },
   "report": null,
   "source": {
+    "drop": null,
     "folder": {
       "chosen": "",
       "field": "",

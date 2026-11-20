@@ -342,6 +342,32 @@ func (st dupState) groups() []dupGroup {
 	return out
 }
 
+// pulledTo are the pairs of out with each member of g it matches at the
+// threshold — what pulled it into the group (s-dup-10: Алексей Смирнов to
+// Анна Ковалёва in Контакты by the phone they share); a member it was only
+// joined to through others is no pair of it. Records not loaded in this
+// session are not scored: then out goes apart from every other member.
+func (st dupState) pulledTo(g dupGroup, out sealed.RecordRef) [][]sealed.RecordRef {
+	var pairs, every [][]sealed.RecordRef
+	o, loaded := st.records[out]
+	for _, ref := range g.refs {
+		if ref == out {
+			continue
+		}
+		pair := []sealed.RecordRef{out, ref}
+		every = append(every, pair)
+		if l, ok := st.records[ref]; ok && loaded {
+			if n, _ := dupes.Score(o.rec, l.rec, st.weights); n >= st.threshold && n > 0 {
+				pairs = append(pairs, pair)
+			}
+		}
+	}
+	if len(pairs) == 0 {
+		return every
+	}
+	return pairs
+}
+
 // inCatalogOrder is the members of a group in the order of the rail
 // (railOrder).
 func (st dupState) inCatalogOrder(refs []sealed.RecordRef) []sealed.RecordRef {
@@ -622,6 +648,20 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup, only 
 		link := decideAction("duplicates.link", "Link them", "link")
 		link.Primary = true
 		out.Actions = []view.Action{link, decideAction("duplicates.ignore", "Not duplicates", "ignore"), merge}
+		if len(g.refs) > 2 {
+			// One record out of a group of three and more (s-dup-9;
+			// Typecase's note 209, task 267): a pair is Not duplicates.
+			out.Out = &view.DuplicateOut{Label: "Take one out"}
+			for i, ref := range g.refs {
+				col, ok := st.blob.Collection(ref.AccountID, ref.Col)
+				if !ok {
+					col = sealed.Collection{AccountID: ref.AccountID, Path: ref.Col}
+				}
+				it := decideAction("duplicates.out", string(out.Rows[i].Title)+" · "+collectionLabel(col), strconv.Itoa(i+1))
+				it.Name = "out"
+				out.Out.Items = append(out.Out.Items, view.MenuItem{Action: it, Colour: out.Rows[i].Colour})
+			}
+		}
 	}
 	// Every card is a form (U-8; from-typecase note 117 p. 8): its group
 	// and token hidden, its questions in it, every decision a button of it.
@@ -1036,6 +1076,23 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	case do == "ignore" && g.decision == view.DecisionNone:
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.ignore", string(g.kind), func(d *sealed.Duplicates) error {
 			d.Ignored = append(d.Unignored(g.id), sealed.IgnoredGroup{ID: g.id, Kind: g.kind, Members: g.refs, Title: st.titleOf(g)})
+			return nil
+		})
+	case r.FormValue("out") != "" && g.decision == view.DecisionNone && len(g.refs) > 2:
+		// One record out of the group (s-dup-9, -10): it is not a duplicate
+		// of those it was pulled to — a «not duplicates» pair with each —,
+		// and the group is found again without it.
+		place, perr := strconv.Atoi(r.FormValue("out"))
+		if perr != nil || place < 1 || place > len(g.refs) {
+			http.Error(w, "no such record in the group", http.StatusBadRequest)
+			return
+		}
+		pairs := st.pulledTo(g, g.refs[place-1])
+		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.out", string(g.kind), func(d *sealed.Duplicates) error {
+			for _, pair := range pairs {
+				id := dupes.Signature(g.kind, pair)
+				d.Ignored = append(d.Unignored(id), sealed.IgnoredGroup{ID: id, Kind: g.kind, Members: pair, Title: st.titleOf(dupGroup{refs: pair})})
+			}
 			return nil
 		})
 	case do == "again" && g.decision == view.DecisionIgnored:

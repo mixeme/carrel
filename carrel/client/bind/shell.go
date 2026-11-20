@@ -484,8 +484,8 @@ func RetryID(a *view.Action) string {
 	return a.ID + a.Href
 }
 
-// runSep is what the pieces of a poll bar are joined by, as the server joins
-// its Summary: «Polled 5 of 6 sources · 14 events · ‹1 failed›» (s-agenda-1).
+// runSep is what the pieces of a line are joined by, as the server joins
+// them: «Polled · 5 of 6 answered · 14 events» (s-agenda-1).
 const runSep = " · "
 
 // refused are the sources of a poll that did not answer, as its menu of
@@ -596,53 +596,73 @@ func Running(p *view.PollBar) bool {
 	return false
 }
 
-// Runbar is a poll (PollBar) as its bar: how far, and what it says in its
-// pieces (Summary: addresses monospaced) — red only when the poll ended with
-// a refusal, green while it runs (Р-40 of Typecase, Meter.Alert) —, the red
-// «N failed» with its menu
-// of refusals after the separator the summary's pieces are joined by
-// (runSep; Refusals), then
-// on its right what it says there (Aside: when the shown answer was
-// gathered, how long the poll runs), monospaced and pushed to the end; nil
-// when the bar does not stand (Running).
+// Runbar is a poll (PollBar) as its bar (Typecase's note 208, the owner's
+// decisions of 17 and 18.11.2026): while it runs, the meter; once it is
+// over, a dot of how it ended (RunResult). Then what it says in two
+// lengths (RunSay), the red «N failed» with its menu of refusals
+// (Refusals), and on its right what it says there (Aside: how long ago the
+// shown answer was gathered, how long the poll runs), monospaced and
+// pushed to the end; nil when the bar does not stand (Running).
 func Runbar(p *view.PollBar) *w.Runbar {
 	if !Running(p) {
 		return nil
 	}
-	var parts []w.RunbarPart
-	for _, r := range p.Summary {
-		switch r.Mark {
-		case view.RunMono:
-			parts = append(parts, w.Mono{Text: string(r.Text)})
-		case view.RunDanger:
-			parts = append(parts, w.Span{Face: w.FaceDanger, Text: string(r.Text)})
-		default:
-			parts = append(parts, w.Text(r.Text))
-		}
+	bar := &w.Runbar{Result: RunResult(p), Parts: []w.RunbarPart{RunSay(p)}}
+	if bar.Result == w.RunGoing {
+		bar.Meter = w.Meter{Percent: p.Percent}
 	}
 	if p.Failed != "" {
-		parts = append(parts, w.Text(runSep), Refusals(p))
+		bar.Parts = append(bar.Parts, Refusals(p))
 	}
 	if p.Aside != "" {
-		parts = append(parts, w.Mono{Text: string(p.Aside), Place: w.Pushed})
+		bar.Parts = append(bar.Parts, w.Mono{Text: string(p.Aside), Place: w.Pushed})
 	}
-	return &w.Runbar{Meter: w.Meter{Percent: p.Percent, Alert: refusedAtEnd(p)}, Parts: parts}
+	return bar
 }
 
-// refusedAtEnd tells whether a poll ended with a refusal: it runs no more,
-// and a source of it answered with one, was not in time or does not answer
-// at all.
-func refusedAtEnd(p *view.PollBar) bool {
-	if p.Running {
-		return false
+// RunSay is what a run line says (Р-84 of Typecase): whole, «Polled · 5 of
+// 6 answered · 7 events», and on a narrow bar «5 of 6 · 7 events» (Short;
+// the whole where the server gives none) — each ended by the separator
+// when the red «N failed» follows (s-agenda-1).
+func RunSay(p *view.PollBar) w.Say {
+	var full string
+	for _, r := range p.Summary {
+		full += string(r.Text)
 	}
+	short := string(p.Short)
+	if short == "" {
+		short = full
+	}
+	if p.Failed != "" {
+		full, short = full+runEnd, short+runEnd
+	}
+	return w.Say{Full: full, Short: short}
+}
+
+// runEnd ends the words of a run line before its «N failed».
+const runEnd = " ·"
+
+// RunResult is how a run ended, the dot its line begins with: none while
+// it runs (the meter); red when a source refused, was not in time or does
+// not answer at all; grey when it was stopped before every source
+// answered (s-find-10); green when every one answered (s-find-5).
+func RunResult(p *view.PollBar) w.RunResult {
+	if p.Running {
+		return w.RunGoing
+	}
+	stopped := false
 	for _, s := range p.Sources {
 		switch s.State {
 		case view.SourceError, view.SourceTimeout, view.SourceUnavailable:
-			return true
+			return w.RunFailed
+		case view.SourceCancelled:
+			stopped = true
 		}
 	}
-	return false
+	if stopped {
+		return w.RunStopped
+	}
+	return w.RunAnswered
 }
 
 // Badge is a badge of the model (C-6.2 Badge) in the tone of its role.

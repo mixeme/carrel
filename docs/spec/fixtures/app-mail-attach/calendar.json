@@ -1302,6 +1302,7 @@
         "poll": "/app/search/progress/t-task/poll",
         "retryAll": null,
         "running": false,
+        "short": "3 of 3 · 7 cards",
         "sources": [
           {
             "colour": "#4a6b52",
@@ -1334,7 +1335,7 @@
         "stream": "/app/search/progress/t-task",
         "summary": [
           {
-            "text": "Polled 3 of 3 sources · 7 cards"
+            "text": "Polled · 3 of 3 answered · 7 cards"
           }
         ],
         "taskID": "t-task"

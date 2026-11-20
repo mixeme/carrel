@@ -610,6 +610,7 @@
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": true,
+    "short": "1 of 2 · 3 notes",
     "sources": [
       {
         "colour": "#4a6b52",

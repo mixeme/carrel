@@ -165,6 +165,95 @@
   },
   "report": null,
   "source": {
+    "drop": {
+      "accept": [
+        ".vcf"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".ics",
+          "says": [
+            {
+              "text": "Contacts take "
+            },
+            {
+              "mark": "mono",
+              "text": ".vcf"
+            },
+            {
+              "text": " — the calendar and the list of tasks take this one"
+            }
+          ]
+        },
+        {
+          "ext": ".md",
+          "says": [
+            {
+              "text": "Contacts take "
+            },
+            {
+              "mark": "mono",
+              "text": ".vcf"
+            },
+            {
+              "text": " — a notebook takes this one"
+            }
+          ]
+        },
+        {
+          "ext": ".zip",
+          "says": [
+            {
+              "text": "Contacts take "
+            },
+            {
+              "mark": "mono",
+              "text": ".vcf"
+            },
+            {
+              "text": " — a notebook takes this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "text": "One "
+        },
+        {
+          "mark": "mono",
+          "text": ".vcf"
+        },
+        {
+          "text": " file"
+        }
+      ],
+      "many": false,
+      "note": "The preview opens first: nothing is written until it has been read",
+      "oneOnly": "One file at a time: only notes take several",
+      "refused": [
+        {
+          "text": "Only "
+        },
+        {
+          "mark": "mono",
+          "text": ".vcf"
+        },
+        {
+          "text": " files are imported here"
+        }
+      ]
+    },
     "folder": null,
     "folderHint": [],
     "hint": [

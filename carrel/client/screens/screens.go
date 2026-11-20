@@ -652,7 +652,10 @@ var All = []Screen{
 		Frames: []string{"s-backup-1", "s-backup-2", "s-backup-6", "s-backup-7", "s-backup-8", "s-backup-15", "s-backup-16", "s-backup-17", "s-backup-18", "s-backup-19", "s-backup-20"},
 		Draw:   func(model any) Root { return settings.Backup(model.(*view.BackupPage)) },
 		Title:  func(model any) string { return string(model.(*view.BackupPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return settings.BackupForms(model.(*view.BackupPage)) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(settings.RestoreDrop(model.(*view.BackupPage)))
+		},
+		Forms: func(model any) []widget.PostForm { return settings.BackupForms(model.(*view.BackupPage)) },
 	},
 	{
 		Model:  func() any { return new(view.BackupTriggerSheet) },
@@ -828,6 +831,9 @@ var All = []Screen{
 			return folder.Screen(model.(*view.FilesPage))
 		},
 		Title: func(model any) string { return string(model.(*view.FilesPage).Title) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(folder.Drop(model.(*view.FilesPage)))
+		},
 		Forms: func(model any) []widget.PostForm {
 			if p := model.(*view.FilesPage); !p.Print.Paper {
 				return folder.Forms(p)
@@ -860,8 +866,11 @@ var All = []Screen{
 		Model: func() any { return new(view.ImportPage) },
 		Frames: []string{"s-io-3", "s-io-4", "s-io-5", "s-io-6", "s-io-7", "s-io-8", "s-io-9",
 			"s-io-14", "s-io-15", "s-io-16", "s-io-17", "s-io-18", "s-io-19"},
-		Draw:    func(model any) Root { return importer.Screen(model.(*view.ImportPage)) },
-		Title:   func(model any) string { return string(model.(*view.ImportPage).Title) },
+		Draw:  func(model any) Root { return importer.Screen(model.(*view.ImportPage)) },
+		Title: func(model any) string { return string(model.(*view.ImportPage).Title) },
+		Drop: func(model any) (widget.Scrim, *widget.PostForm, bool) {
+			return ownForm(importer.Drop(model.(*view.ImportPage), importIcon))
+		},
 		Forms:   func(model any) []widget.PostForm { return importer.Forms(model.(*view.ImportPage)) },
 		Notices: widget.MsgFlushSides,
 	},

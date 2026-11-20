@@ -147,6 +147,84 @@
   },
   "report": null,
   "source": {
+    "drop": {
+      "accept": [
+        ".md",
+        ".zip",
+        ".ics"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/a-nc-home/zapisi/import?into=zapisi\u0026to=a-nc-home",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "Contacts take this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "mark": "mono",
+          "text": ".md"
+        },
+        {
+          "text": " files, a "
+        },
+        {
+          "mark": "mono",
+          "text": ".zip"
+        },
+        {
+          "text": " or an "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " file"
+        }
+      ],
+      "many": true,
+      "note": "The preview opens first: nothing is written until it has been read",
+      "refused": [
+        {
+          "text": "Only "
+        },
+        {
+          "mark": "mono",
+          "text": ".md"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "mark": "mono",
+          "text": ".zip"
+        },
+        {
+          "text": " or "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " files are imported here"
+        }
+      ]
+    },
     "folder": {
       "chosen": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026in=notes\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
       "field": "",

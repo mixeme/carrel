@@ -249,7 +249,7 @@ sinkap = [
     u'SUMMARY:Синк-ап по релизу',
     u'LOCATION:Переговорная 2',
     u'STATUS:CONFIRMED',
-    u'CATEGORIES:release,team',
+    u'CATEGORIES:релиз,работа',
     u'DESCRIPTION:%s' % esc(u'Обсудить оставшиеся блокеры, дату заморозки '
                             u'и кто пишет письмо пользователям.'),
     u'ORGANIZER;CN=Михаил Енученко:mailto:mix@example.org',
