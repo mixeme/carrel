@@ -7,8 +7,8 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// The bar over a list says it the way the frames say it: «Polled 5 of 6
-// sources · 14 events», and the noun is the kind's — a contact is a card,
+// The bar over a list says it the way the frames say it: «Polled · 5 of 6
+// answered · 14 events» (Typecase's note 208), and the noun is the kind's — a contact is a card,
 // not a «record». The server writes the sentence (C-3.1), so the words are
 // the product's and not a client's guess.
 func TestThePollOverAListSpeaksTheWordsOfTheFrame(t *testing.T) {
@@ -18,14 +18,14 @@ func TestThePollOverAListSpeaksTheWordsOfTheFrame(t *testing.T) {
 	tickRail(t, f.h, f.sess, "contacts", f.path("contacts"))
 
 	page := combined(t, f.h, f.sess, "/app/contacts", contactsPoll)
-	if got := saidRuns(page.Poll.Summary); got != "Polled 1 of 1 source · 2 cards" {
+	if got := saidRuns(page.Poll.Summary); got != "Polled · 1 of 1 answered · 2 cards" {
 		t.Errorf("the list bar says %q", got)
 	}
 }
 
 // Typecase Р-55 (the owner's decision of 11.10.2026): a poll still running
-// says so in the present. Before anybody has answered it names how many it
-// asks (states-3); with some answered — how many of them and what has come
+// says so in the present. Before anybody has answered — how many it asks,
+// none answered, nothing counted (states-3, note 208); with some answered — how many of them and what has come
 // (states-8: the fixture app-contacts/partial holds that line).
 func TestARunningPollSpeaksInThePresent(t *testing.T) {
 	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
@@ -37,7 +37,7 @@ func TestARunningPollSpeaksInThePresent(t *testing.T) {
 	if page.Poll == nil {
 		t.Fatal("the combined book has no poll")
 	}
-	if got := saidRuns(page.Poll.Summary); got != "Polling 1 source…" {
+	if got := saidRuns(page.Poll.Summary); got != "Polling · 0 of 1 answered" {
 		t.Errorf("a poll nobody has answered says %q", got)
 	}
 }

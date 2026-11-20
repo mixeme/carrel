@@ -154,7 +154,7 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 			t.Errorf("%s = %+v", name, sp)
 		}
 	}
-	if bar.Percent != 100 || bar.AnsweredAt == "" || saidRuns(bar.Summary) != "Done · 3 of 3 sources answered" || bar.Failed != "" || bar.Aside == "" {
+	if bar.Percent != 100 || bar.AnsweredAt == "" || saidRuns(bar.Summary) != "Searched · 3 of 3 answered · 7 records" || bar.Short != "3 of 3 · 7 records" || !bar.Pass || bar.Failed != "" || bar.Aside == "" {
 		t.Errorf("bar = %+v", bar)
 	}
 	if action(bar, "poll.stop").Enabled || !action(bar, "poll.again").Enabled {
@@ -375,7 +375,7 @@ func TestSearchRefusalRetriesOneSource(t *testing.T) {
 	}
 	// s-find-1 (Пк7): what did not answer is the red «1 failed» with its
 	// menu, not words of the bar.
-	if saidRuns(bar.Summary) != "Done · 1 of 2 sources answered" || bar.Failed != "1 failed" {
+	if saidRuns(bar.Summary) != "Searched · 1 of 2 answered · 1 record" || bar.Failed != "1 failed" {
 		t.Errorf("summary = %q, failed %q", bar.Summary, bar.Failed)
 	}
 	if h := search(t, f.h, f.sess, "q=Ada"); len(h.Results) != 1 || h.Top.Search.History[0].Outcome != "1 found" {

@@ -172,7 +172,7 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 	if page.Bar.Total == nil || *page.Bar.Total != 3 || len(page.Poll.Sources) != 2 || page.Poll.Running {
 		t.Errorf("bar %+v, poll %+v", page.Bar, page.Poll)
 	}
-	if !strings.Contains(saidRuns(page.Poll.Summary), "Polled 2 of 2 sources · 3 cards") {
+	if !strings.Contains(saidRuns(page.Poll.Summary), "Polled · 2 of 2 answered · 3 cards") {
 		t.Errorf("summary = %q", page.Poll.Summary)
 	}
 	if r := page.Top.Refresh; !r.Action.Enabled || r.Action.Href != "/app/contacts?again=1" || r.Answered == "" || r.Running {
