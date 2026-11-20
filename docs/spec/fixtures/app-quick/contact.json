@@ -923,13 +923,13 @@
               "summary": "Синк-ап по релизу",
               "tags": [
                 {
-                  "href": "/app/calendar?from=2026-08-10\u0026tag=release\u0026task=t-task",
-                  "label": "release",
+                  "href": "/app/calendar?from=2026-08-10\u0026tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7\u0026task=t-task",
+                  "label": "релиз",
                   "on": false
                 },
                 {
-                  "href": "/app/calendar?from=2026-08-10\u0026tag=team\u0026task=t-task",
-                  "label": "team",
+                  "href": "/app/calendar?from=2026-08-10\u0026tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0\u0026task=t-task",
+                  "label": "работа",
                   "on": false
                 }
               ],
@@ -1523,6 +1523,7 @@
         "poll": "/app/search/progress/t-task/poll?from=2026-08-10",
         "retryAll": null,
         "running": false,
+        "short": "5 of 6 · 7 events",
         "sources": [
           {
             "colour": "#4a6b52",
@@ -1591,7 +1592,7 @@
         "stream": "/app/search/progress/t-task?from=2026-08-10",
         "summary": [
           {
-            "text": "Polled 5 of 6 sources · 7 events"
+            "text": "Polled · 5 of 6 answered · 7 events"
           }
         ],
         "taskID": "t-task"
@@ -1854,13 +1855,13 @@
             "on": true
           },
           {
-            "href": "/app/calendar?from=2026-08-10\u0026tag=release\u0026task=t-task",
-            "label": "release",
+            "href": "/app/calendar?from=2026-08-10\u0026tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0\u0026task=t-task",
+            "label": "работа",
             "on": false
           },
           {
-            "href": "/app/calendar?from=2026-08-10\u0026tag=team\u0026task=t-task",
-            "label": "team",
+            "href": "/app/calendar?from=2026-08-10\u0026tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7\u0026task=t-task",
+            "label": "релиз",
             "on": false
           }
         ],

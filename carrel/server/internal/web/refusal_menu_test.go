@@ -53,8 +53,14 @@ func TestRefusalsAreTheMenuOfTheBar(t *testing.T) {
 	if bar == nil || bar[2] != "1 failed" || len(one) != 1 || oneAll {
 		t.Fatalf("s-agenda-1 draws no «1 failed» with one refusal and no Retry all: read the frame again")
 	}
-	said := strings.TrimSuffix(strings.TrimSpace(frameText(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(bar[1], ""))), " ·")
-	pollLine := regexp.MustCompile(`^Polled \d+ of \d+ sources · \d+ events$`)
+	// The words before the button in their whole length (Typecase's note
+	// 208: a Say, whole and short), the separator before «1 failed» off.
+	full := regexp.MustCompile(`tc-say__full">([^<]*)<`).FindStringSubmatch(bar[1])
+	if full == nil {
+		t.Fatalf("s-agenda-1 says nothing in its whole length before «1 failed»: read the frame again")
+	}
+	said := strings.TrimSuffix(strings.TrimSpace(frameText(full[1])), " ·")
+	pollLine := regexp.MustCompile(`^Polled · \d+ of \d+ answered · \d+ events$`)
 	if !pollLine.MatchString(said) {
 		t.Fatalf("s-agenda-1 says %q before «1 failed»: read the frame again", said)
 	}

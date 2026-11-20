@@ -465,10 +465,6 @@ type pollOwner struct {
 	// the sources brought: the rows a list shows of them, a linked record
 	// one (the owner's decision of 09.10.2026). nil — the records brought.
 	seen *int
-	// uncounted: the bar says what was polled and nothing of what was found
-	// — a person's timeline, whose months count it (s-contacts-7; Typecase's
-	// note 154, Р-77: what the records were matched by is not said either).
-	uncounted bool
 	// timed: while the poll runs, the right of the bar says how long it
 	// has run — «0.8 s» (states-3, states-13).
 	timed bool
@@ -520,7 +516,7 @@ func (o pollOwner) count(snap fanout.Snapshot) int {
 // answer, and a summary that says whether the poll is over.
 func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, owner pollOwner) view.PollBar {
 	now := s.now()
-	bar := view.PollBar{TaskID: snap.ID, Running: snap.Running}
+	bar := view.PollBar{TaskID: snap.ID, Running: snap.Running, Pass: !owner.polled}
 	base := "/app/search/progress/" + snap.ID
 	// Where to follow it (C-7.4): the stream, unless the instance polls
 	// instead, the poll and its interval — with the page's query.
@@ -584,82 +580,64 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	if total > 0 {
 		bar.Percent = (answered + refused + timedOut + unreachable + stopped) * 100 / total
 	}
+	// One template for every run line (Typecase's note 208, Р-84; the
+	// owner's decisions of 17 and 18.11.2026): the verb — «Polling»,
+	// «Searching» while it runs, «Polled», «Searched» once it is over —, how
+	// many of those asked answered, the records counted and named as the
+	// rows are (s-find-5: «0 records»), «5 stopped» after them; on a narrow
+	// bar (Short) the same without the verb and «answered». What did not
+	// answer is never counted in words: the red «N failed» opens the menu
+	// of refusals (the owner's decision of 02.10.2026, states-16), while the
+	// run goes on too (states-13).
+	verb := "Searched"
 	switch {
+	case owner.polled && snap.Running:
+		verb = "Polling"
 	case owner.polled:
-		// One sentence, running or not: the meter and the Stop button
-		// already say whether it is still going, and a bar that rewords
-		// itself under the same numbers reads as two different answers.
-		// What did not answer is not counted in words: the bar's red
-		// «N failed» opens the menu of refusals (the owner's decision of
-		// 02.10.2026, states-16); a source stopped by hand is still said.
-		parts := []string{
-			fmt.Sprintf("Polled %d of %s", answered, plural(total, "source")),
-			owner.found(owner.count(snap)),
-		}
-		if snap.Running {
-			// A poll still running says so in the present (Typecase Р-55,
-			// the owner's decision of 11.10.2026; states-8, -13, -19, -26):
-			// how many of those asked have answered and what has come so
-			// far. The one that ended speaks in the past, as before.
-			parts[0] = fmt.Sprintf("Polling · %d of %d answered", answered, total)
-		}
-		if owner.uncounted {
-			parts = parts[:1]
-		}
-		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
-		if snap.Running && answered+failed+stopped == 0 {
-			// Nobody has answered yet (states-3).
-			bar.Summary = line(fmt.Sprintf("Polling %s…", plural(total, "source")))
-		}
-		if failed > 0 {
-			bar.Failed = text(fmt.Sprintf("%d failed", failed))
-		}
-		if failed > 1 {
-			bar.RetryAll = &view.Action{ID: "poll.retry", Label: "Retry all", Method: "POST", Enabled: true, Href: s.route(base + "/retry")}
-		}
-		if !snap.Running {
-			bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
-			// The right of the bar (s-agenda-1): when the answer was
-			// gathered, and that it came from what the session held.
-			bar.Aside = view.Text(tf.formatWhen(snap.Finished, true, now))
-			if cached > 0 {
-				bar.Aside = "from cache · " + bar.Aside
-			}
-			if down := refused + timedOut + unreachable + stopped; down > 0 && owner.missing != nil {
-				bar.Note = text(owner.missing(down))
-			}
-		} else if owner.timed && !snap.Started.IsZero() {
+		verb = "Polled"
+	case snap.Running:
+		verb = "Searching"
+	}
+	said := []string{fmt.Sprintf("%d of %d", answered, total)}
+	if !(owner.polled && snap.Running && answered+failed+stopped == 0) {
+		// A poll nobody has answered yet has nothing to count (states-3).
+		said = append(said, owner.found(owner.count(snap)))
+	}
+	said = append(said, pollTroubles(0, 0, 0, stopped)...)
+	bar.Summary = line(verb + " · " + said[0] + " answered" + strings.TrimPrefix(strings.Join(said, " · "), said[0]))
+	bar.Short = text(strings.Join(said, " · "))
+	if failed > 0 {
+		bar.Failed = text(fmt.Sprintf("%d failed", failed))
+	}
+	if failed > 1 {
+		bar.RetryAll = &view.Action{ID: "poll.retry", Label: "Retry all", Method: "POST", Enabled: true, Href: s.route(base + "/retry")}
+	}
+	switch {
+	case snap.Running:
+		// The right while it runs: how long it has run (states-3, -13); a
+		// search puts Stop there instead (s-find-4).
+		if owner.timed && !snap.Started.IsZero() {
 			bar.Aside = text(runningFor(now.Sub(snap.Started)))
 		}
-	case snap.Running:
-		// A search still running (s-find-4): «Searching · 9 of 14 answered
-		// · 5 records».
-		bar.Summary = line(fmt.Sprintf("Searching · %d of %d answered · %s", answered, total, owner.found(owner.count(snap))))
-		bar.Short = text(fmt.Sprintf("%d of %d · %s", answered, total, owner.found(owner.count(snap))))
+	case owner.polled:
+		bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
+		// The right once it is over (s-agenda-1): how long ago the answer
+		// was gathered, and that it came from what the session held.
+		bar.Aside = view.Text(tf.formatWhen(snap.Finished, true, now))
+		if cached > 0 {
+			bar.Aside = "from cache · " + bar.Aside
+		}
+		if down := refused + timedOut + unreachable + stopped; down > 0 && owner.missing != nil {
+			bar.Note = text(owner.missing(down))
+		}
 	default:
-		// The search done (s-find-1): «Done · 13 of 14 sources answered»;
-		// what did not answer is the red «N failed», whose menu names each
-		// with its answer and Retry, and Retry all when there are more
-		// (Пк7); a source stopped by hand is still said. The right: how long
-		// the pass took (Пк9), and when it answered — today the clock alone
-		// (Пк10).
-		parts := []string{fmt.Sprintf("Done · %d of %s answered", answered, plural(total, "source"))}
-		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
-		// The narrow bar (note 118): «13 of 14», «9 of 14 · 5 stopped».
-		bar.Short = text(strings.Join(append([]string{fmt.Sprintf("%d of %d", answered, total)}, pollTroubles(0, 0, 0, stopped)...), " · "))
-		if failed > 0 {
-			bar.Failed = text(fmt.Sprintf("%d failed", failed))
-		}
-		if failed > 1 {
-			bar.RetryAll = &view.Action{ID: "poll.retry", Label: "Retry all", Method: "POST", Enabled: true, Href: s.route(base + "/retry")}
-		}
+		// A search over: when it answered — today the clock alone (Пк10) —,
+		// and on the right how long ago, «just now» (s-find-5).
 		bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
 		if tf.dayKey(snap.Finished) == tf.dayKey(now) {
 			bar.AnsweredAt = view.When(tf.clock(snap.Finished))
 		}
-		if !snap.Started.IsZero() && !snap.Finished.IsZero() {
-			bar.Aside = text(runningFor(snap.Finished.Sub(snap.Started)))
-		}
+		bar.Aside = view.Text(tf.formatWhen(snap.Finished, true, now))
 	}
 	stop := view.Action{ID: "poll.stop", Label: "Stop", Href: s.route(base + "/cancel"), Method: "POST", Enabled: snap.Running}
 	again := view.Action{ID: "poll.again", Label: owner.againLabel, Href: s.route(owner.again), Method: "GET", Enabled: !snap.Running}

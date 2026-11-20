@@ -95,6 +95,10 @@ const (
 	links        = "Links"
 	linksNote    = "Notes or events may hold it as an attachment: Carrel does not look through the records."
 	upload       = "Upload"
+	dropLead     = "Drop to upload"
+	dropInto     = "into "
+	dropTaken    = "A name already taken is refused, not overwritten"
+	dropIcon     = "upload"
 	sizeField    = "size"
 	takenOp      = "?op=taken"
 	folderIcon   = "file"
@@ -207,6 +211,19 @@ func Screen(p *view.FilesPage) w.Shell {
 	}
 	t := bind.Top(p.Top, top)
 	return w.Shell{Top: &t, Body: body}
+}
+
+// Drop is the folder's drop sheet (s-io-25; s-files-1, states-32;
+// Typecase's note 209): files dropped on the window go into the upload's one
+// form, as picked there, into the folder open — by its name in bold; a name
+// already taken is refused. None where nothing may be uploaded.
+func Drop(p *view.FilesPage) (w.Scrim, bool) {
+	up, ok := action(p.Bar.Actions, uploadID)
+	if !ok || !up.Enabled || up.Method != "POST" || p.Print.Paper {
+		return w.Scrim{}, false
+	}
+	return bind.DropSheet(uploadID, dropIcon, dropLead, []w.Inline{w.Text(dropInto), w.Strong(p.Title)},
+		[]w.Inline{w.Text(dropTaken)}), true
 }
 
 // Forms are the page's forms: the rail's, which its ticks submit, the foot's

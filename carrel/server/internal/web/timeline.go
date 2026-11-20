@@ -114,7 +114,6 @@ func timelineOwner(tt *timelineTask) pollOwner {
 		what:       "timeline",
 		polled:     true,
 		found:      func(n int) string { return plural(n, "record") },
-		uncounted:  true,
 	}
 }
 

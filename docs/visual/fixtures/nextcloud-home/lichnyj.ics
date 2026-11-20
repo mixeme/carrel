@@ -33,7 +33,7 @@ RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z
 SUMMARY:Синк-ап по релизу
 LOCATION:Переговорная 2
 STATUS:CONFIRMED
-CATEGORIES:release,team
+CATEGORIES:релиз,работа
 DESCRIPTION:Обсудить оставшиеся блокеры\, дату
   заморозки и кто пишет письмо пользоват
  елям.

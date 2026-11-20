@@ -125,10 +125,15 @@ type PollBar struct {
 	Poll    string `json:"poll"`
 	Every   int    `json:"every"`
 	Summary Runs   `json:"summary"` // «Polled 5 of 7 · 12 records · 1 refused» кусками (s-contacts-7)
-	// Short — Summary на узкой полосе выдачи поиска (записка Typecase 118):
-	// «13 of 14», «9 of 14 · 5 records» (идёт), «0 of 14», «9 of 14 · 5
-	// stopped»; у прочих полос пусто
-	Short      Text `json:"short,omitempty"`
+	// Short — Summary на узкой полосе (записки Typecase 118, 208): без
+	// глагола и «answered» — «5 of 6 · 7 events», «9 of 14 · 5 records»,
+	// «9 of 14 · 2 records · 5 stopped»; у каждой полосы опроса
+	Short Text `json:"short,omitempty"`
+	// Pass — полоса прохода поиска и упоминаний (s-find-1…10): стоит во
+	// всех состояниях прохода, пока идёт — со Stop справа; false — опрос
+	// списка или хронологии, его полоса стоит, пока идёт или кто-то не
+	// ответил (C-6.4)
+	Pass       bool `json:"pass,omitempty"`
 	AnsweredAt When `json:"answeredAt"` // когда собрана показанная выдача
 	// Aside — справа на полосе моноширинно: когда собрана выдача, «2 min ago»,
 	// и «from cache · » перед этим, когда источник ответил тем, что сеанс
@@ -216,6 +221,21 @@ type DuplicateGroup struct {
 	// /app/duplicates/decide, скрытые _csrf и group; вопросы стоят в ней, а
 	// решения (Actions) — её кнопки do=… (Action.Name, Value)
 	Form *Form `json:"form"`
+	// Out — «Take one out» у группы-кандидата из трёх записей и больше
+	// (записка Typecase 209, задача 267; s-dup-9): меню — по пункту на
+	// запись в порядке строк, метка её коллекции и «‹имя› · ‹коллекция›»;
+	// пункт — кнопка формы группы (Submits, Name «out», Value — место
+	// записи с 1). nil — у пары (её разводит Not duplicates) и у решённых
+	Out *DuplicateOut `json:"out"`
+}
+
+// DuplicateOut — меню «Take one out» (s-dup-9): Label — кнопка, Items —
+// записи группы. Вынутая запись получает решение «not duplicates» с каждой
+// записью группы, к которой её притянуло (s-dup-10), — по паре на каждую;
+// группа считается заново без неё
+type DuplicateOut struct {
+	Label Text       `json:"label"`
+	Items []MenuItem `json:"items"`
 }
 
 // DecidedCard — решение, чьих записей сессия не читала (s-dup-6): что
@@ -816,6 +836,11 @@ type ImportSource struct {
 	// Many — поле берёт несколько файлов разом (multiple): у заметок
 	// (записка Typecase 111 п. 3)
 	Many bool `json:"many,omitempty"`
+	// Drop — бросок файла на окно первого шага (записка Typecase 209,
+	// задача 265): файл встаёт в поле файла, как выбранный там; слова листа
+	// и отказы — как у броска на список (s-io-1), без коллекции: её выбирают
+	// в Into. nil — на прочих шагах
+	Drop *ImportDrop `json:"drop"`
 	// Note — сообщение шага (tc-msg): на первом — что ничего не пишется до
 	// предпросмотра (s-io-3), у заметок — front matter и ‹X-›свойства
 	// (s-io-4); на предпросмотре — что импорт делает с записями этого рода

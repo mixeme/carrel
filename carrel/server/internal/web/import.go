@@ -555,6 +555,10 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 			}
 		}
 		page.Actions = []view.Action{choose}
+		// A file dropped on the window stands in the step's file field, as
+		// one picked there (Typecase's note 209, task 265): the drop sheet's
+		// words, what the field takes and what it refuses, as a list's.
+		page.Source.Drop = dropOf(c.spec.kind, choose.Href, "", "")
 	}
 	return page
 }

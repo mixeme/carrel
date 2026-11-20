@@ -4,6 +4,32 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.38 — 2026-11-20
+
+Server `v0.3.9`; Typecase `18f93a0` (notes 208–210).
+
+- A run line that is over begins with a dot of how it ended
+  (`Runbar.Result`, `bind.RunResult`): red when a source refused, was late
+  or does not answer, grey when it was stopped, green when every one
+  answered; the meter only while it runs, never red (`Meter.Alert` is
+  gone). Its words are one `Say` in two lengths (`bind.RunSay`), ended by
+  « ·» before the «N failed» drop. Lists, the search and the checks of the
+  installation (s-admin-4) draw it so.
+- Drop sheets refuse what their form does not take (s-io-24): the list's
+  hidden import form says what its field takes (`PostForm.Accept`,
+  `Many`), and the sheet carries the server's refusals (`Empty.Refusals`:
+  each `Elsewhere`, `Refused`, `OneOnly`; `bind.ImportSheet`).
+- New drop sheets: the import's first step («Drop to import», into the
+  dialog's file field by `Dialog.ID`), the restore from this computer
+  («Drop the archive», s-io-23), a folder that takes an upload («Drop to
+  upload», «into ‹folder›», s-io-25). `TestDropSheets` holds them against
+  their frames.
+- «Take one out ▾» after «Not duplicates» on a group of three and more
+  (s-dup-9): a menu of its records, each a button of the group's form.
+- Not taken: `s-profile-38` (the address held by the server's trash bin)
+  draws the sheet 520 wide where `s-profile-5` and `-6` draw the same one
+  without a width — Typecase's task 270; its fixture waits for the answer.
+
 ## v0.11.37 — 2026-11-17
 
 Server `v0.3.3`; Typecase `e416059`. The first round of acceptance U-15.1

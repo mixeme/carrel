@@ -17,6 +17,37 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.3.9 — 2026-11-20
+
+Client `v0.11.38`; Typecase `18f93a0`. Typecase's notes 208–210 (tasks
+265–269 closed).
+
+### For consumers
+
+- **Every run line says it one way** (Typecase's note 208, Р-84; the
+  owner's decisions of 17 and 18.11.2026). `PollBar.Summary`: «Polling ·
+  4 of 6 answered · 6 events» while it runs, «Polled · 5 of 6 answered · 7
+  events» once over; a search «Searching …», «Searched · 13 of 14 answered
+  · 7 records»; the records always counted («0 records»), named as the
+  rows; «· 5 stopped» after them; a poll nobody has answered yet — «Polling
+  · 0 of 6 answered». `PollBar.Short` is now given on every bar: the same
+  without the verb and «answered», «5 of 6 · 7 events». A search over says
+  on its right how long ago it answered, «just now», instead of how long it
+  ran; a refusal is the «N failed» drop while a search runs too. A
+  person's timeline counts its records («5 records»).
+  `PollBar.Pass` (new) marks a search's or mentions' pass, whose bar stands
+  in every state: `Short` no longer tells it from a list's.
+- **The import's first step names its drop** (`ImportSource.Drop`,
+  Typecase's note 209): the drop sheet's words and refusals, as a list's,
+  without the collection — it is chosen in Into.
+- **«Take one out» of a group of duplicates** (`DuplicateGroup.Out`,
+  `duplicates.out`; s-dup-9, -10): a candidate group of three and more
+  names each record with its collection; the form sent with `out=N` sets
+  that record apart from each member it matched at the threshold, one
+  «not duplicates» pair each, and the group is found again without it.
+- The mockup set's «Синк-ап по релизу» is tagged «релиз, работа», as every
+  frame draws it (`docs/visual/fixtures`).
+
 ## v0.3.8 — 2026-11-18
 
 Client `v0.11.37`. The client's acceptance (U-15.1) on the public services'

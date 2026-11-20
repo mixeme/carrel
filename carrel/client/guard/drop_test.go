@@ -75,15 +75,30 @@ func TestDropSheets(t *testing.T) {
 			if d := importDropOf(model); d != nil && !named(d.Line) {
 				continue
 			}
+			if m, ok := model.(*view.ImportPage); ok && !named(m.Source.Drop.Line) {
+				continue
+			}
 			took[frame]++
 			parts := scrimOf(l.mock, frame)
 			if fragment(l.mock, frame) {
 				parts = sheetParts(l.mock, frame)
 			}
-			none(t, at+": the drop sheet against "+frame, partFindings(l, frame, at, parts, parseHTML(open)))
+			screen := parseHTML(open)
+			if d := importDropOf(model); frame == "s-io-1" && (d == nil || len(d.Accept) != 1 || d.Accept[0] != ".vcf") {
+				// s-io-1 draws the contacts' refusals (Typecase's note 209):
+				// another kind refuses other files, as many as its own. Each
+				// still names its case.
+				for _, r := range findAll(screen, func(n *html.Node) bool { return hasClass(n, "tc-empty__refusal") }) {
+					if attrOf(r, "data-tc-refusal") == "" {
+						t.Errorf("%s: a refusal of the drop sheet names no case", at)
+					}
+				}
+				screen, parts = withoutRefusals(screen), withoutRefusals(parts)
+			}
+			none(t, at+": the drop sheet against "+frame, partFindings(l, frame, at, parts, screen))
 		}
 	}
-	for _, f := range []string{"s-io-1", "s-io-20", "s-io-21", "s-io-22"} {
+	for _, f := range []string{"s-io-1", "s-io-20", "s-io-21", "s-io-22", "s-io-23", "s-io-25"} {
 		if took[f] == 0 {
 			t.Errorf("no page's drop sheet is held against %s: the samples moved", f)
 		}
@@ -96,7 +111,8 @@ func TestDropSheets(t *testing.T) {
 // dropFrame is the frame of the drop sheet a page of this model draws, and
 // whether one is wanted: a list's import (s-io-1); the page of an event, a
 // task or a note that names its drop (s-io-20); an edit of one that picks a
-// file (s-io-21); a card's photo (s-io-22).
+// file (s-io-21); a card's photo (s-io-22); the restore's archive (s-io-23);
+// a folder's upload (s-io-25).
 func dropFrame(model any, page []*html.Node) (string, bool) {
 	if d := importDropOf(model); d != nil {
 		return "s-io-1", true
@@ -116,8 +132,34 @@ func dropFrame(model any, page []*html.Node) (string, bool) {
 		return "s-io-20", m.Drop != nil
 	case *view.ContactEditPage:
 		return "s-io-22", picks
+	case *view.ImportPage:
+		// The wizard's first step (Typecase's note 209): the sheet of a
+		// list's import, its file into the dialog's field.
+		return "s-io-1", m.Source.Drop != nil && m.Step != view.ImportStepPreview && m.Step != view.ImportStepReport && picks
+	case *view.BackupPage:
+		// The restore's first step, an archive from this computer.
+		return "s-io-23", m.Restore.Open && m.Restore.Match == nil && m.Restore.Report == nil && picks
+	case *view.FilesPage:
+		// A folder that takes an upload, empty or not.
+		for _, a := range m.Bar.Actions {
+			if a.ID == "file.upload" && a.Enabled && a.Method == "POST" {
+				return "s-io-25", !m.Print.Paper
+			}
+		}
 	}
 	return "", false
+}
+
+// withoutRefusals are nodes with the drop sheet's refusals taken out.
+func withoutRefusals(nodes []*html.Node) []*html.Node {
+	for _, n := range nodes {
+		for _, r := range findAll([]*html.Node{n}, func(n *html.Node) bool { return hasClass(n, "tc-empty__refusal") }) {
+			if r.Parent != nil {
+				r.Parent.RemoveChild(r)
+			}
+		}
+	}
+	return nodes
 }
 
 // takesFile says whether the page has a form of the ID with a file field,

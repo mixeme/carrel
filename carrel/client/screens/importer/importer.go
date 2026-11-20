@@ -226,6 +226,25 @@ func intoField(p *view.ImportPage, step int, width w.FieldWidth) w.Field {
 // ro marks a collection that cannot be written to (s-io-3).
 var ro = w.Badge{Label: "ro", Place: w.Pushed}
 
+// FormID is the ID of the first step's dialog, the form a drop sheet names
+// (Drop).
+const FormID = "import-source"
+
+// Drop is the drop sheet of the first step (ImportSource.Drop): the
+// server's words and refusals, the dropped file into the dialog's file
+// field; none on the other steps, or while nothing sends the file.
+func Drop(p *view.ImportPage, icon w.Icon) (w.Scrim, bool) {
+	if p.Source.Drop == nil || p.Step == view.ImportStepPreview || p.Step == view.ImportStepReport {
+		return w.Scrim{}, false
+	}
+	for _, a := range p.Actions {
+		if a.ID == "import.choose" {
+			return bind.ImportSheet(*p.Source.Drop, FormID, icon), true
+		}
+	}
+	return w.Scrim{}, false
+}
+
 // source is the first step: «Into», the file, the folders of notes, the
 // step's message; the dialog sends the file.
 func source(p *view.ImportPage, d w.Dialog) w.Dialog {
@@ -264,6 +283,11 @@ func source(p *view.ImportPage, d w.Dialog) w.Dialog {
 		// (C-11) — without a script nothing else sends it.
 		d.Action, d.Method = choose.Href, choose.Method
 		d.Fields = bind.ActionForm(*choose, "").Fields
+		if p.Source.Drop != nil {
+			// A file dropped on the window stands in this field (Typecase's
+			// note 209): the drop sheet names the dialog's form (Drop).
+			d.ID = FormID
+		}
 		if !choose.Enabled {
 			preview.State, preview.Reason = w.ButtonDisabled, string(choose.Reason)
 		}

@@ -79,7 +79,13 @@ func tally(rows []view.InstallRow, took view.Text) w.Runbar {
 	if took != "" {
 		parts = append(parts, w.Mono{Text: string(took), Place: w.Pushed})
 	}
-	return w.Runbar{Meter: w.Meter{Percent: 100}, Parts: parts}
+	// The checks are over: the dot of how they ended (Typecase's note 208) —
+	// red when something is broken, else green; the words are their own.
+	result := w.RunAnswered
+	if bad > 0 {
+		result = w.RunFailed
+	}
+	return w.Runbar{Result: result, Parts: parts}
 }
 
 // checksTable is a row a check: a passed one ticked; a broken one marked

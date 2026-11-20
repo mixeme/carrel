@@ -197,6 +197,7 @@
     ]
   },
   "source": {
+    "drop": null,
     "folder": null,
     "folderHint": [],
     "hint": [

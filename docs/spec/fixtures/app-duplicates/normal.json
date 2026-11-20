@@ -204,6 +204,7 @@
       },
       "id": "group",
       "kind": "contact",
+      "out": null,
       "points": "80 points · same phone, same name",
       "reasons": [
         "same phone",
@@ -333,6 +334,7 @@
       "hint": "The same event in two calendars, different UIDs: Agenda shows it twice.",
       "id": "group",
       "kind": "event",
+      "out": null,
       "points": "70 points · same title, same start",
       "reasons": [
         "same title, same start"
@@ -545,6 +547,7 @@
       },
       "id": "g-anna",
       "kind": "contact",
+      "out": null,
       "points": "220 points · same UID, same phone, same email, same name",
       "reasons": [
         "same UID",
@@ -724,6 +727,7 @@
       },
       "id": "g-artem",
       "kind": "contact",
+      "out": null,
       "points": "140 points · same phone, same email, same name",
       "reasons": [
         "same phone",
@@ -883,6 +887,7 @@
       },
       "id": "g-sinkap",
       "kind": "event",
+      "out": null,
       "points": "70 points · same title, same start",
       "reasons": [
         "same title, same start"
@@ -1046,6 +1051,7 @@
       },
       "id": "g-chemodan",
       "kind": "task",
+      "out": null,
       "points": "70 points · same title, same due date",
       "reasons": [
         "same title, same due date"
@@ -1193,6 +1199,7 @@
       },
       "id": "g-vstrecha",
       "kind": "note",
+      "out": null,
       "points": "70 points · same title, same date",
       "reasons": [
         "same title, same date"
@@ -1301,6 +1308,7 @@
       "hint": "Same title and the same date: a note copied into a second notebook.",
       "id": "g-crdt",
       "kind": "note",
+      "out": null,
       "points": "70 points · same title, same date",
       "reasons": [
         "same title, same date"
@@ -1397,6 +1405,7 @@
       },
       "id": "group",
       "kind": "contact",
+      "out": null,
       "points": "60 points · same phone",
       "reasons": [
         "same phone"

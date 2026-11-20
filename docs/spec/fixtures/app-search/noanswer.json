@@ -88,10 +88,11 @@
       }
     ],
     "answeredAt": "17:06",
-    "aside": "0.0 s",
+    "aside": "just now",
     "every": 700,
     "failed": "14 failed",
     "note": "",
+    "pass": true,
     "percent": 100,
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": {
@@ -104,7 +105,7 @@
       "target": "poll"
     },
     "running": false,
-    "short": "0 of 14",
+    "short": "0 of 14 · 0 records",
     "sources": [
       {
         "answer": "REPORT /alice/contacts/kontakty/ → 503 Service Unavailable",
@@ -362,7 +363,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Done · 0 of 14 sources answered"
+        "text": "Searched · 0 of 14 answered · 0 records"
       }
     ],
     "taskID": "t-task"

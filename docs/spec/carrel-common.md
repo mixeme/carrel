@@ -1814,7 +1814,7 @@ type SearchPage struct {
     // ответил, s-find-9); об источниках — полоса и рейл
     Subtitle Text
     Bar      ListBar // сегменты All / Contacts / Events / Tasks / Notes / Files
-    Poll     PollBar // поиск идёт — «Searching · 9 of 14 answered · 5 records» и Stop (s-find-4); кончился — «Done · 13 of 14 sources answered» и длительность (Aside); заново — кнопка шапки (Top.Refresh), своей «Search again» у полосы нет
+    Poll     PollBar // поиск идёт — «Searching · 9 of 14 answered · 5 records» и Stop (s-find-4); кончился — «Searched · 13 of 14 answered · 7 records» и как давно, «just now» (Aside; записка Typecase 208); заново — кнопка шапки (Top.Refresh), своей «Search again» у полосы нет
     Results  []FindRow // строка — находка с её Kind; группы рода со счётом («Contacts 2») собирает экран: число — строк этого рода
     Empty    Text    // слова пустой выдачи: «Nothing found for «дача» in 14 collections.» (s-find-5), «No collections are ticked, …» (s-find-7), «No source answered, so nothing was searched.» (s-find-9); пусто — выдача есть, поиск идёт или не начат
     Note     Runs    // «Files are found by their names; what is inside them is not searched.» (s-find-1, -5); пусто, когда файлы не спрошены
@@ -1885,8 +1885,9 @@ type PollBar struct {
     Stream      string
     Poll        string
     Every       int
-    Summary     Runs // кусками: над списком и хронологией — «Polled 5 of 6 sources · 14 events», у хронологии адреса моноширинно (s-agenda-1, s-contacts-7); не ответивших не называет — это Failed, остановленные — «1 stopped»; у поиска законченного — «Done · 13 of 14 sources answered» (s-find-1), отказы — Failed
-    Short       Text // Summary на узкой полосе выдачи поиска: «13 of 14», «9 of 14 · 5 records», «9 of 14 · 5 stopped» (записка 118); у прочих пусто
+    Summary     Runs // по одному шаблону (записка Typecase 208, Р-84): «Polling · 4 of 6 answered · 6 events», «Polled · 5 of 6 answered · 7 events», у поиска «Searching …», «Searched · 13 of 14 answered · 7 records»; записи считаются всегда и названы, как строки; «· 5 stopped» после них; никто ещё не ответил — «Polling · 0 of 6 answered»; не ответивших не называет — это Failed
+    Short       Text // Summary на узкой полосе, без глагола и «answered»: «5 of 6 · 7 events», «9 of 14 · 5 records», «9 of 14 · 2 records · 5 stopped» (записки 118, 208); у каждой полосы
+    Pass        bool // полоса прохода поиска и упоминаний (s-find-1…10): стоит во всех состояниях, пока идёт — со Stop; false — опрос списка или хронологии (C-6.4)
     AnsweredAt  When // когда собрана показанная выдача; у поиска сегодня — одни часы, «11:42» (s-find-1)
     Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пока опрос идёт — сколько он длится, «0.8 s», за минутой «1 min 20 s», у всех разделов (решение владельца 07.10.2026; states-3, -8, -13, -19, -26); у законченного поиска — сколько шёл обход, «1.8 s» (s-find-1)
     Note        Text // под строками, когда опрос кончен и источник не ответил: «What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.» (states-6; у контактов — «Cards … book», states-9); пусто — ответили все
@@ -1953,6 +1954,19 @@ type DuplicateGroup struct {
     // /app/duplicates/decide, скрытые _csrf и group; вопросы стоят в ней,
     // решения (Actions) — её кнопки do=… (Action.Name, Value)
     Form *Form
+    // «Take one out» у группы-кандидата из трёх записей и больше (записка
+    // Typecase 209, задача 267; s-dup-9): меню — по пункту на запись в
+    // порядке строк, метка её коллекции и «‹имя› · ‹коллекция›»; пункт —
+    // кнопка формы группы duplicates.out (Name «out», Value — место записи
+    // с 1). Вынутая получает «not duplicates» парой с каждой записью, к
+    // которой её притянуло по порогу (s-dup-10), группа считается без неё.
+    // nil — у пары (её разводит Not duplicates) и у решённых
+    Out *DuplicateOut
+}
+
+type DuplicateOut struct {
+    Label Text       // «Take one out»
+    Items []MenuItem // записи группы
 }
 
 type DuplicateMember struct {
@@ -2419,6 +2433,7 @@ type ImportSource struct {
     FolderHint Runs          // строка под деревом: «Every ‹.md› directly in that folder …» (s-io-4)
     Taken      Runs          // файл, уже взятый броском на сведённый список (Им4, s-io-17): имя моноширинно — значение поля файла; пусто — файла нет
     Many       bool          // поле берёт несколько файлов разом (multiple): у заметок (записка 111 п. 3)
+    Drop       *ImportDrop   // бросок на окно первого шага (записка Typecase 209, задача 265): файл встаёт в поле файла, как выбранный; слова и отказы — как у броска на список, без коллекции; nil — на прочих шагах
     Note       Runs          // сообщение шага: на первом — «Nothing is written until the preview has been read …» (s-io-3), у заметок — front matter и ‹X-›свойства (s-io-4); на предпросмотре — что импорт делает с записями рода (s-io-5…8)
 }
 // Что сделать с записями файла, которые уже есть в коллекции (записка 52,
@@ -4142,7 +4157,7 @@ Replace, `transfer.skip` Skip — в этом порядке (s-files-2). Опу
 this combination» — кнопка формы расхождения (`ConflictPage.Form`),
 `conflict.mine`, `conflict.theirs`, `conflict.cancel` — каждая своей формой;
 решения группы дубликатов `duplicates.link`, `duplicates.ignore`,
-`duplicates.choose`, `duplicates.unlink` — кнопки её формы
+`duplicates.choose`, `duplicates.unlink`, `duplicates.out` — кнопки её формы
 (`DuplicateGroup.Form`), когда выбирать есть что, `duplicates.merge` — ссылка;
 меню Weights — `duplicates.weights.save` и `duplicates.weights.defaults`;
 `import.choose` Preview file — с полем файла `Action.File`;

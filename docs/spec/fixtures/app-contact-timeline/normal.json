@@ -492,6 +492,7 @@
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": false,
+    "short": "13 of 14 · 5 records",
     "sources": [
       {
         "colour": "#4a6b52",
@@ -632,7 +633,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 13 of 14 sources"
+        "text": "Polled · 13 of 14 answered · 5 records"
       }
     ],
     "taskID": "t-task"

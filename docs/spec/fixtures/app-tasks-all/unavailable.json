@@ -694,6 +694,7 @@
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": false,
+    "short": "1 of 2 · 4 tasks",
     "sources": [
       {
         "colour": "#4a6b52",
@@ -726,7 +727,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 1 of 2 sources · 4 tasks"
+        "text": "Polled · 1 of 2 answered · 4 tasks"
       }
     ],
     "taskID": "t-task"

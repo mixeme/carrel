@@ -280,7 +280,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "release, team"
+            "value": "релиз, работа"
           },
           {
             "add": null,

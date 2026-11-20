@@ -91,14 +91,15 @@
       }
     ],
     "answeredAt": "17:06",
-    "aside": "0.0 s",
+    "aside": "just now",
     "every": 700,
     "note": "",
+    "pass": true,
     "percent": 100,
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": false,
-    "short": "11 of 14 · 3 stopped",
+    "short": "11 of 14 · 7 records · 3 stopped",
     "sources": [
       {
         "colour": "#4a6b52",
@@ -254,7 +255,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Done · 11 of 14 sources answered · 3 stopped"
+        "text": "Searched · 11 of 14 answered · 7 records · 3 stopped"
       }
     ],
     "taskID": "t-task"

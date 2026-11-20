@@ -180,6 +180,9 @@ func card(g view.DuplicateGroup) w.Card {
 			b.Kind, b.Place, b.Reason, why = w.ButtonDanger, w.Pushed, "", string(a.Reason)
 		}
 		acts.Items = append(acts.Items, b)
+		if a.ID == "duplicates.ignore" && g.Out != nil && g.Form != nil {
+			acts.Items = append(acts.Items, takeOut(*g.Out, g.Form.Action))
+		}
 	}
 	c.Items = append(c.Items, acts)
 	if why != "" {
@@ -189,6 +192,18 @@ func card(g view.DuplicateGroup) w.Card {
 		c.Action, c.Fields = g.Form.Action, bind.Hidden(*g.Form)
 	}
 	return c
+}
+
+// takeOut is «Take one out» of a group of three and more, after Not
+// duplicates (s-dup-9; Typecase's note 209): its records by their
+// collection's mark, each a button of the group's form (to) sending which
+// one goes out.
+func takeOut(o view.DuplicateOut, to string) w.Drop {
+	menu := w.Menu{}
+	for _, it := range o.Items {
+		menu.Items = append(menu.Items, w.MenuItem{Mark: &w.Mark{Colour: string(it.Colour)}, Label: string(it.Label), To: to, Name: it.Name, Value: it.Value})
+	}
+	return w.Drop{Trigger: w.Button{Label: string(o.Label), Menu: true}, Menu: menu}
 }
 
 // question is a question of a group: radios of a value held once, ticks of
