@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.45 — 2026-11-21
+
+Server `v0.4.2`; Typecase `3c8a068`. New's arrow in the top bar opens its
+sheets over the page: every item names the zone sheet, and the menu asks it
+for them (`Menu.Target`, `bind.menuTarget`). They were plain links: a quick
+sheet or «Upload files» loaded a page of its own, and its cross left the
+page under it inert (the owner, from a tablet, 21.11.2026). The rest of his
+remarks are the library's — Typecase's tasks 274–276.
+
 ## v0.11.44 — 2026-11-20
 
 Server `v0.4.1`; Typecase `3c8a068` (note 216, task 272). On a page the

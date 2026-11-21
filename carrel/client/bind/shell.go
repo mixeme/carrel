@@ -76,7 +76,7 @@ func Top(t view.TopBar, words TopWords) w.Top {
 		// None where nothing is to be made yet: the change of a temporary
 		// password (account-17).
 	case newBtn.Menu:
-		actions = append(actions, w.TopDrop{Trigger: newBtn, Menu: w.Menu{Items: MenuItems(t.New.Arrow, ""), Pop: w.MenuUnder}})
+		actions = append(actions, w.TopDrop{Trigger: newBtn, Menu: w.Menu{Items: MenuItems(t.New.Arrow, ""), Pop: w.MenuUnder, Target: menuTarget(t.New.Arrow)}})
 	default:
 		actions = append(actions, newBtn)
 	}
@@ -556,6 +556,23 @@ func RailForm(r view.Rail, id string) *w.PostForm {
 	f := PostForm(*r.Ticks, id)
 	f.Target = r.Ticks.Target
 	return &f
+}
+
+// menuTarget is the zone a menu's links ask their address for (Menu.Target):
+// the one every item names (Action.Target) — New's arrow is all sheets, each
+// opening over the page —; none when they differ or none names one, and the
+// items load their pages.
+func menuTarget(items []view.MenuItem) string {
+	target := ""
+	for i, it := range items {
+		if i == 0 {
+			target = it.Target
+		}
+		if it.Target != target {
+			return ""
+		}
+	}
+	return target
 }
 
 // Foot is the rail's foot: its actions as buttons of an icon (New address

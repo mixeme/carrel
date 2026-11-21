@@ -40,6 +40,21 @@ func TestTop(t *testing.T) {
 	bar.Refresh = view.Refresh{Action: view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: "/app/contacts?again=1", Method: "GET", Reason: "Nothing is ticked to ask."}}
 	same(t, "a refresh switched off", bind.Top(bar, bind.TopWords{Brand: brand}).Actions[1],
 		w.TopAction(w.Button{Label: "Refresh", Icon: "refresh", State: w.ButtonDisabled, Reason: "Nothing is ticked to ask."}))
+	// Every item of New's arrow is a sheet (the quick sheets, Upload file,
+	// Letter): the menu asks them for the zone sheet, and they open over the
+	// page instead of loading a page of their own (the owner, 21.11.2026:
+	// «Upload file» opened as a page, and a quick sheet's cross left the page
+	// under it dead).
+	sheets := bar
+	sheets.New.Arrow = []view.MenuItem{{Action: view.Action{Label: "Note", Href: "/n", Method: "GET", Enabled: true, Target: "sheet"}},
+		{Action: view.Action{Label: "Upload file", Href: "/u", Method: "GET", Enabled: true, Target: "sheet"}}}
+	if drop, ok := bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0].(w.TopDrop); !ok || drop.Menu.Target != "sheet" {
+		t.Errorf("New's arrow of sheets: %+v", bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0])
+	}
+	sheets.New.Arrow[1].Target = ""
+	if drop := bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0].(w.TopDrop); drop.Menu.Target != "" {
+		t.Errorf("an arrow of a sheet and a page asks for no zone: %q", drop.Menu.Target)
+	}
 	bar.New.Arrow, bar.Refresh = nil, view.Refresh{}
 	got := bind.Top(bar, bind.TopWords{Brand: brand})
 	same(t, "no arrow, no refresh", got.Actions, []w.TopAction{

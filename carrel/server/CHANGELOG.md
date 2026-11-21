@@ -17,6 +17,11 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.2 — 2026-11-21
+
+Client `v0.11.45`. New's arrow opens its sheets over the page (the client's
+fix); deployed on carrel.mixfed.ru. No server code changes.
+
 ## v0.4.1 — 2026-11-20
 
 Client `v0.11.44`; Typecase `3c8a068`. The owner's remark on the first
