@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.46 — 2026-11-21
+
+Server `v0.4.2`; Typecase `16467bc` (notes 217, 218: task 273). The mockup
+copied; nothing in the client changes. `s-profile-38` still leaves out two
+hints `s-profile-5` draws on the same sheet: its fixture waits for
+Typecase's task 277.
+
 ## v0.11.45 — 2026-11-21
 
 Server `v0.4.2`; Typecase `3c8a068`. New's arrow in the top bar opens its
