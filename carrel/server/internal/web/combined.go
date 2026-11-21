@@ -30,6 +30,53 @@ import (
 // survive a restart; nothing ticked is an empty screen, not "all". Its cost is
 // a fanout of the session (S-15).
 
+// The words of an instance with nothing connected (states-1): under the
+// section's name, and what the list says instead of its rows — the one place
+// where how Carrel works is explained.
+const (
+	unconnectedSub   = "No server connected yet"
+	unconnectedBody  = "Carrel stores nothing of its own: calendars, contacts and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password."
+	unconnectedRail  = "Nothing connected yet"
+	unconnectedRubic = "Sources"
+)
+
+// nothingConnected says whether the person has neither a connection nor a
+// subscription: no list has anything to tick, and every one says so
+// (states-1).
+func nothingConnected(blob sealed.Blob) bool {
+	return len(blob.Connections) == 0 && len(blob.Subscriptions) == 0
+}
+
+// unconnectedPage is a combined list on an instance with nothing connected
+// (states-1; the owner, 21.11.2026: the contacts said «No books are ticked»
+// and ticked nothing): the section's name, «No server connected yet», no
+// actions in the head and no bar, the explanation with Connect account, and
+// the rail's «Nothing connected yet» under «Sources». Every kind alike.
+func (s *Server) unconnectedPage(shell view.Shell, spec kindSpec) any {
+	shell.Title = text(sectionTitles[spec.kind])
+	// Nothing to poll: the top bar has no refresh, and the sections no
+	// counts — there is nothing to count (states-1).
+	shell.Top.Refresh = view.Refresh{}
+	for i := range shell.Rail.Nav {
+		shell.Rail.Nav[i].Count = nil
+	}
+	shell.Rail.Sections = []view.RailSection{{Account: unconnectedRubic, State: view.CollectionOK, Note: unconnectedRail}}
+	shell.Rail.Note = ""
+	connect := s.connectAction()
+	connect.Primary = true
+	empty := &view.Notice{Role: view.NoticeInfo, Body: unconnectedBody, Actions: []view.Action{connect}}
+	switch spec.kind {
+	case view.KindContact:
+		return view.ContactsListPage{Shell: shell, Subtitle: unconnectedSub, Empty: empty}
+	case view.KindEvent:
+		return view.AgendaPage{Shell: shell, Subtitle: line(unconnectedSub), Empty: empty}
+	case view.KindTask:
+		return view.TasksPage{Shell: shell, Subtitle: unconnectedSub, Empty: empty}
+	default:
+		return view.NotesPage{Shell: shell, Subtitle: unconnectedSub, Empty: empty}
+	}
+}
+
 var combinedTitles = map[view.Kind]string{
 	view.KindContact: "Combined address book",
 	view.KindEvent:   "Combined calendar",
@@ -330,6 +377,9 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	st, err := s.readCombined(r, sess, blob, spec)
 	if err != nil {
 		return nil, err
+	}
+	if nothingConnected(blob) {
+		return s.unconnectedPage(st.shell, spec), nil
 	}
 	if sorted != nil {
 		st.shell.Notices = append(st.shell.Notices, *sorted)

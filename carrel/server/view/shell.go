@@ -154,6 +154,10 @@ type RailSection struct {
 	// рубрики бейдж «external» (s-agenda-1, s-contacts-7)
 	Feeds bool        `json:"feeds,omitempty"`
 	Rows  []SourceRow `json:"rows"`
+	// Note — что говорит секция, в которой ничего нет: «Nothing connected
+	// yet» под «Sources» у экземпляра без подключений (states-1); у прочих
+	// пусто и в ответе нет
+	Note Text `json:"note,omitempty"`
 }
 
 type SourceRow struct {

@@ -236,7 +236,13 @@ func head(p *view.AgendaPage) w.Head {
 		b.Menu = true
 		acts = append(acts, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(a.Arrow, rail.ReadOnly), Pop: w.MenuUnder}})
 	}
-	return w.Head{Title: title, Subs: bind.Sub(p.Subtitle), Acts: &w.Acts{Items: acts}}
+	h := w.Head{Title: title, Subs: bind.Sub(p.Subtitle)}
+	if len(acts) > 0 {
+		// Nothing to make or carry on an instance with nothing connected:
+		// the head has no actions (states-1).
+		h.Acts = &w.Acts{Items: acts}
+	}
+	return h
 }
 
 // bar is the bar over the agenda.

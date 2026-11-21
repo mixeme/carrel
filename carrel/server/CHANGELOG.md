@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.3 — 2026-11-21
+
+Client `v0.11.47`. The owner's remark from a tablet: on an instance with
+nothing connected the contacts said «No books are ticked» and offered «Tick
+every book», which ticks nothing, and the rail's Connect account was hidden
+on a narrow screen.
+
+### For consumers
+
+- **An instance with nothing connected says so** (states-1): every combined
+  list — contacts, calendar, tasks, notes — has the section's name for its
+  title, «No server connected yet» under it, no actions in the head, no
+  refresh and no counts; instead of rows, «Carrel stores nothing of its own:
+  … Connect the first one — you will need an address, a user name and a
+  password.» with Connect account; the rail says «Nothing connected yet»
+  under «Sources». Nothing connected means no connection and no
+  subscription.
+- **`RailSection.Note`** (new): what a section says when it has nothing.
+
 ## v0.4.2 — 2026-11-21
 
 Client `v0.11.45`. New's arrow opens its sheets over the page (the client's

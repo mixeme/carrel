@@ -562,6 +562,8 @@ STATE_FRAME = {
     "app-collections-rename/folder": "s-profile-18",
     "app-collections-delete/folder": "s-profile-19",
     "app-collections-new/refused": "s-profile-6",
+    # Ничего не подключено (states-1; замечание владельца 21.11.2026).
+    "app-agenda-all/nothing": "states-1",
     # Записка Typecase 112: листы коллекций из Connections (Р-75), их отказы
     # и итоги на странице Connections.
     "app-collections-new/account": "s-profile-29",
@@ -930,6 +932,8 @@ def walk(x, acts, rows):
         for k, v in x.items():
             if k == "under":
                 continue              # экран под листом держат его фикстуры (C-6 Under)
+            if k == "foot":
+                continue              # подвал рейла — кнопки-значки без подписи (Rail.Foot): «Connect account» в нём не двойник основной кнопки пустого экрана (states-1)
             walk(v, acts, rows)
     elif isinstance(x, list):
         for v in x:

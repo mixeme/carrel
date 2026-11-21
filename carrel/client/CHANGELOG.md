@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.47 — 2026-11-21
+
+Server `v0.4.3`; Typecase `16467bc`. An instance with nothing connected is
+drawn as `states-1`, held against it on the new fixture
+`app-agenda-all/nothing`: a rail section says its note (`RailSection.Note` →
+`RailSec.Note`), and the agenda's head has no actions when there are none.
+
 ## v0.11.46 — 2026-11-21
 
 Server `v0.4.2`; Typecase `16467bc` (notes 217, 218: task 273). The mockup

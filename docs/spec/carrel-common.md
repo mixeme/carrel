@@ -913,6 +913,7 @@ type RailSection struct {
     State     CollectionState // недоступен — помечается здесь, C-8
     Feeds     bool            // секция подписок «Subscriptions»: ленты, прочитанные снаружи; у рубрики — бейдж «external», слово экрана (s-agenda-1, s-contacts-7); в ответе только true
     Rows      []SourceRow
+    Note      Text            // что говорит секция, в которой ничего нет: «Nothing connected yet» под «Sources» у экземпляра без подключений (states-1); у прочих пусто
 }
 
 type SourceRow struct {

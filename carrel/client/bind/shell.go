@@ -451,7 +451,9 @@ func Sources(r view.Rail, words RailWords) []w.RailPart {
 		for _, row := range sec.Rows {
 			items = append(items, TickRow(row, rf))
 		}
-		out = append(out, w.RailSec{Items: items})
+		// A section with nothing in it says why (RailSection.Note): «Nothing
+		// connected yet» under «Sources» (states-1).
+		out = append(out, w.RailSec{Items: items, Note: string(sec.Note)})
 	}
 	if len(r.Tags) > 0 {
 		out = append(out, w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: words.Tags}}, Tags: Tags(r.Tags)})
