@@ -794,9 +794,10 @@ type Look struct {
 
 type TopBar struct {
     Search   SearchBox
-    // «New note» — основная кнопка со значком i-quill — и её стрелка (s-notes-7):
-    // Note (повторяет кнопку), за чертой Contact, Event, Task, за чертой
-    // Upload file, за чертой Letter — когда письмо можно отправить
+    // «New note» — основная кнопка со значком i-quill — и её стрелка (s-notes-7),
+    // половинами (записка Typecase 220): кнопка делает заметку, стрелка —
+    // Contact, Event, Task, за чертой Upload file, за чертой Letter — когда
+    // письмо можно отправить; заметки в стрелке нет, её делает кнопка
     New      Action
     Signed   SignedIn   // кто вошёл и куда — первой строкой меню учётной записи
     User     []MenuItem // меню учётной записи

@@ -19,6 +19,7 @@ var top = bind.TopWords{
 	NewKey: "n", SearchKey: "/",
 	Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
 	Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?", Sheet: "keys"},
+	More:  w.Button{Icon: "chev", Title: "More to create"},
 }
 
 // The screen's words (U-1.3): the rubric of the rail, the emblem of

@@ -629,21 +629,11 @@
           "arrow": [
             {
               "enabled": true,
-              "href": "/app/notes/quick",
-              "icon": "i-quill",
-              "id": "new.notes",
-              "label": "Note",
-              "method": "GET",
-              "target": "sheet"
-            },
-            {
-              "enabled": true,
               "href": "/app/contacts/quick",
               "icon": "i-con",
               "id": "new.contacts",
               "label": "Contact",
               "method": "GET",
-              "separator": true,
               "target": "sheet"
             },
             {

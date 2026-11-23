@@ -32,6 +32,7 @@ var (
 		NewKey: "n", SearchKey: "/",
 		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
 		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?", Sheet: "keys"},
+		More:  w.Button{Icon: "chev", Title: "More to create"},
 	}
 	rail = bind.RailWords{Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
 )

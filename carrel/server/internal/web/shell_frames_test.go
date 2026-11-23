@@ -18,7 +18,7 @@ import (
 // themselves. Everything is read from the frames.
 
 var (
-	frameShellNew       = regexp.MustCompile(`(?s)<span class="tc-drop__anchor">\s*<button class="tc-btn is-primary[^"]*" type="button">(.*?)</button>\s*<span class="tc-drop__panel">(.*?)</span>\s*</span>`)
+	frameShellNew       = regexp.MustCompile(`(?s)<span class="tc-split"><button class="tc-btn is-primary[^"]*" type="button">(.*?)</button><span class="tc-drop__anchor">\s*<button [^>]*title="More to create"[^>]*>.*?</button>\s*<span class="tc-drop__panel[^"]*">(.*?)</span>\s*</span></span>`)
 	frameShellMenuPart  = regexp.MustCompile(`(?s)<span class="tc-menu__sep"></span>|<button class="[^"]*tc-menu__item[^"]*"[^>]*role="menuitem">(.*?)</button>`)
 	frameShellKbd       = regexp.MustCompile(`(?s)<kbd[^>]*>.*?</kbd>`)
 	frameShellRefresh   = regexp.MustCompile(`<button class="tc-btn" type="button"><svg[^>]*><use href="#(i-[\w-]+)"/></svg>\d+ min ago</button>`)
@@ -72,7 +72,7 @@ func TestTopBarIsTheFrames(t *testing.T) {
 	top := page.Top
 
 	button, items := frameNewMenu(t)
-	// The button's first icon is its own; the chevron after it is the arrow's.
+	// New in halves (Typecase's note 220): the main half's icon and words.
 	if got := string(top.New.Label) + " [" + top.New.Icon + "]"; got != button {
 		t.Errorf("New = %q, the frame %q", got, button)
 	}
@@ -82,8 +82,11 @@ func TestTopBarIsTheFrames(t *testing.T) {
 	if got := serverMenu(top.New.Arrow); strings.Join(got, " | ") != strings.Join(items, " | ") {
 		t.Errorf("New's arrow = %q,\nthe frame s-notes-7 %q", got, items)
 	}
-	if len(top.New.Arrow) == 0 || top.New.Arrow[0].ID != top.New.ID || top.New.Arrow[0].Href != top.New.Href {
-		t.Errorf("the arrow's first item repeats the button (C-6.2): %+v", top.New.Arrow)
+	// The note is the main half's: the arrow does not repeat it.
+	for _, it := range top.New.Arrow {
+		if it.Href == top.New.Href {
+			t.Errorf("the arrow repeats the button (Typecase's note 220): %+v", it)
+		}
 	}
 
 	m := frameShellRefresh.FindStringSubmatch(mockupFrame(t, "s-contacts-1"))

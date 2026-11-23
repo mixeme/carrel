@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.5 — 2026-11-24
+
+Client `v0.11.50`; Typecase `9fdc59e` (notes 220, 221).
+
+### For consumers
+
+- **New in halves.** The top bar's «New note» makes a note, and its arrow
+  opens the rest: `TopBar.New.Arrow` no longer starts with «Note» — Contact,
+  Event, Task, then Upload file, then Letter (s-notes-7). A list head's New
+  is drawn the same way; its arrow is unchanged.
+
 ## v0.4.4 — 2026-11-23
 
 Client `v0.11.47`.

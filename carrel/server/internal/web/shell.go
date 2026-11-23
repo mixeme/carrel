@@ -213,7 +213,8 @@ func (s *Server) anonPlainForm(w http.ResponseWriter, r *http.Request, action, m
 // newAction is «New note» of the top bar and its arrow (s-notes-7): the
 // button makes a note — the most frequent thing and the reason to come back —
 // and the arrow is everything else that can be made, in the order of the
-// sections in the rail, the note that the button already makes first. Each
+// sections in the rail; not the note, which the button makes (New in halves,
+// Typecase's note 220). Each
 // opens the quick sheet from the shell (U-6.16). The sheet itself decides
 // where the record goes — the collection the last one was created in, or a
 // question when there is none — so the menu does not need to know about
@@ -228,8 +229,7 @@ func (s *Server) newAction(sess *session.Session) view.Action {
 	}
 	button := item("notes", "New note", "i-quill")
 	button.Primary = true
-	note := item("notes", "Note", "i-quill")
-	out := []view.MenuItem{{Action: note}, {Separator: true, Action: item("contacts", "Contact", "i-con")},
+	out := []view.MenuItem{{Action: item("contacts", "Contact", "i-con")},
 		{Action: item("calendar", "Event", "i-cal")}, {Action: item("tasks", "Task", "i-task")}}
 	// A file and a letter create nothing in a collection of records, so they
 	// stand last, past the line (U-6.4). The upload asks where on its sheet;

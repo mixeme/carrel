@@ -25,6 +25,10 @@ type TopWords struct {
 	// that presses New, «n», and the one that puts the focus into the
 	// search, «/». The library has none of its own.
 	NewKey, SearchKey string
+	// More is New's arrow, which opens the menu of what else can be made
+	// (Split, Typecase's note 220): its icon and its title, «More to
+	// create»; its kind is New's.
+	More w.Button
 	// Theme is the switch of the theme in the account's menu, before Sign
 	// out (account-5): a setting of this browser, not of the server (U-12).
 	// Its label empty — no switch.
@@ -68,15 +72,14 @@ type KeysWords struct {
 // page (UserHref).
 func Top(t view.TopBar, words TopWords) w.Top {
 	newBtn := Button(t.New, "")
-	newBtn.Menu = len(t.New.Arrow) > 0
 	newBtn.Key = words.NewKey
 	var actions []w.TopAction
 	switch {
 	case t.New.Label == "":
 		// None where nothing is to be made yet: the change of a temporary
 		// password (account-17).
-	case newBtn.Menu:
-		actions = append(actions, w.TopDrop{Trigger: newBtn, Menu: w.Menu{Items: MenuItems(t.New.Arrow, ""), Pop: w.MenuUnder, Target: menuTarget(t.New.Arrow)}})
+	case len(t.New.Arrow) > 0:
+		actions = append(actions, NewSplit(newBtn, t.New.Arrow, "", words.More))
 	default:
 		actions = append(actions, newBtn)
 	}
@@ -104,7 +107,6 @@ func Top(t view.TopBar, words TopWords) w.Top {
 		actions = append(actions, w.TopDrop{
 			Trigger: user,
 			Menu:    w.Menu{Items: append(items, withTheme(MenuItems(t.User, ""), words.Theme, words.Keys)...), Width: w.MenuWidth290},
-			End:     true,
 		})
 	}
 	top := w.Top{Brand: words.Brand, Actions: actions}
@@ -118,6 +120,20 @@ func Top(t view.TopBar, words TopWords) w.Top {
 		}
 	}
 	return top
+}
+
+// NewSplit is «New …» in halves (Split, Typecase's note 220; the owner's
+// wish of 21.11.2026): the main half makes what it says, the arrow — the
+// screen's (more), of the main's kind — opens the menu of the rest (the top
+// bar's: a contact, an event, a task, a file, a letter; a combined list's:
+// the collection to make it in), ro the word of a collection read only.
+func NewSplit(main w.Button, arrow []view.MenuItem, ro string, more w.Button) w.Split {
+	main.Menu = false
+	more.Kind = main.Kind
+	return w.Split{Main: main, More: w.SplitDrop{
+		Arrow: more,
+		Menu:  w.Menu{Items: MenuItems(arrow, ro), Pop: w.MenuUnder, Target: menuTarget(arrow)},
+	}}
 }
 
 // withTheme are the items of the account's menu with the theme's switch and

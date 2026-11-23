@@ -35,6 +35,7 @@ var (
 		NewKey: "n", SearchKey: "/",
 		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
 		Keys:  bind.KeysWords{Label: "Keyboard shortcuts", Icon: "search", Key: "?", Sheet: "keys"},
+		More:  w.Button{Icon: "chev", Title: "More to create"},
 	}
 	rail    = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
 	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
@@ -251,8 +252,9 @@ func head(p *view.TasksPage) w.Head {
 			acts = append(acts, b)
 			continue
 		}
-		b.Menu = true
-		acts = append(acts, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(a.Arrow, rail.ReadOnly), Pop: w.MenuUnder}})
+		// New in halves (Typecase's note 220): the main half makes it in the
+		// collection the server names, the arrow picks another.
+		acts = append(acts, bind.NewSplit(b, a.Arrow, rail.ReadOnly, top.More))
 	}
 	h := w.Head{Title: title, Acts: &w.Acts{Items: acts}}
 	if p.Subtitle != "" {

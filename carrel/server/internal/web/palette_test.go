@@ -29,9 +29,22 @@ func mockupFrame(t *testing.T, id string) string {
 	}
 	end := strings.Index(mock[at+1:], `<div class="frame"`)
 	if end < 0 {
-		return columnless.Replace(mock[at:])
+		return splitless(columnless.Replace(mock[at:]))
 	}
-	return columnless.Replace(mock[at : at+1+end])
+	return splitless(columnless.Replace(mock[at : at+1+end]))
+}
+
+// frameSplit is a closed «New …» in halves (Typecase's note 220): the main
+// half, then the arrow «More to create» that opens the rest; a frame draws
+// it on one line, and the pattern keeps to it.
+var frameSplit = regexp.MustCompile(`<span class="tc-split">(<button class="tc-btn is-primary[^"]*" type="button">)(.*?)</button><button [^>]*title="More to create"[^>]*>(.*?)</button></span>`)
+
+// splitless folds a closed split of a frame into the one button with its
+// arrow the frames drew before note 220 — what the server's view is, an
+// Action with its Arrow; the halves are the client's drawing, held against
+// the frames by its guards. The open one (s-notes-7) is read as it stands.
+func splitless(frame string) string {
+	return frameSplit.ReplaceAllString(frame, "$1$2$3</button>")
 }
 
 // columnless takes out of a frame the classes that keep a settings page in

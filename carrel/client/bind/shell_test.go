@@ -22,13 +22,18 @@ func TestTop(t *testing.T) {
 		UserHref: "/app/settings/account",
 		Refresh:  view.Refresh{Action: view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: "/app/contacts?again=1", Method: "GET", Enabled: true}, Answered: "2 min ago"},
 	}
-	same(t, "the top bar", bind.Top(bar, bind.TopWords{Brand: brand, Search: "Search everything…"}), w.Top{
+	same(t, "the top bar", bind.Top(bar, bind.TopWords{Brand: brand, Search: "Search everything…", More: w.Button{Icon: "chev", Title: "More to create"}}), w.Top{
 		Brand:  brand,
 		Search: &w.Search{Query: w.Query{Value: "anna", Placeholder: "Search everything…", Label: "Search everything…", Name: "q"}, Action: "/app/search", Clear: true},
 		Actions: []w.TopAction{
-			w.TopDrop{
-				Trigger: w.Button{Label: "New note", Icon: "quill", Kind: w.ButtonPrimary, Href: "/app/notes/quick", Menu: true},
-				Menu:    w.Menu{Items: []w.MenuPart{w.MenuItem{Icon: "quill", Label: "Note", Href: "/n"}, w.MenuSep{}, w.MenuItem{Label: "Contact", Href: "/c"}}, Pop: w.MenuUnder},
+			// New in halves (Typecase's note 220): the button makes a note,
+			// the arrow opens the rest.
+			w.Split{
+				Main: w.Button{Label: "New note", Icon: "quill", Kind: w.ButtonPrimary, Href: "/app/notes/quick"},
+				More: w.SplitDrop{
+					Arrow: w.Button{Icon: "chev", Kind: w.ButtonPrimary, Title: "More to create"},
+					Menu:  w.Menu{Items: []w.MenuPart{w.MenuItem{Icon: "quill", Label: "Note", Href: "/n"}, w.MenuSep{}, w.MenuItem{Label: "Contact", Href: "/c"}}, Pop: w.MenuUnder},
+				},
 			},
 			w.Button{Label: "2 min ago", Icon: "refresh", Href: "/app/contacts?again=1"},
 			w.UserMenu{Name: "mix", Href: "/app/settings/account"},
@@ -48,11 +53,11 @@ func TestTop(t *testing.T) {
 	sheets := bar
 	sheets.New.Arrow = []view.MenuItem{{Action: view.Action{Label: "Note", Href: "/n", Method: "GET", Enabled: true, Target: "sheet"}},
 		{Action: view.Action{Label: "Upload file", Href: "/u", Method: "GET", Enabled: true, Target: "sheet"}}}
-	if drop, ok := bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0].(w.TopDrop); !ok || drop.Menu.Target != "sheet" {
+	if split, ok := bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0].(w.Split); !ok || split.More.(w.SplitDrop).Menu.Target != "sheet" {
 		t.Errorf("New's arrow of sheets: %+v", bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0])
 	}
 	sheets.New.Arrow[1].Target = ""
-	if drop := bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0].(w.TopDrop); drop.Menu.Target != "" {
+	if drop := bind.Top(sheets, bind.TopWords{Brand: brand}).Actions[0].(w.Split).More.(w.SplitDrop); drop.Menu.Target != "" {
 		t.Errorf("an arrow of a sheet and a page asks for no zone: %q", drop.Menu.Target)
 	}
 	bar.New.Arrow, bar.Refresh = nil, view.Refresh{}
@@ -78,7 +83,6 @@ func TestTop(t *testing.T) {
 			w.MenuSep{},
 			w.MenuItem{Label: "Sign out", Form: "user.logout"},
 		}, Width: w.MenuWidth290},
-		End: true,
 	}))
 	same(t, "the forms of the top bar", bind.TopForms(bar), []w.PostForm{{ID: "user.logout", Action: "/logout", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
 	// The screen's keys and the theme's switch (U-7, account-5): «n» on New,

@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.50 — 2026-11-24
+
+Server `v0.4.5`; Typecase `9fdc59e` (notes 220, 221: task 276 pp. 5–6).
+The mockup copied. «New …» is a split (`bind.NewSplit`): the main half
+makes what it says, the arrow — «More to create», a word of each screen
+(`TopWords.More`) — opens the menu of the rest; so in the top bar and in
+the heads of the combined lists, whose arrow picks the collection. The
+account's menu loses `TopDrop.End` (every top bar menu stands from its
+button's right end now). The fonts pin their line metrics with the
+library's `css/fonts.css`; nothing in the client for that.
+
 ## v0.11.49 — 2026-11-24
 
 Server `v0.4.4`; Typecase `85044ef`. A picture pasted into the text of an

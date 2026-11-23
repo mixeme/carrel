@@ -560,13 +560,13 @@ func opensForm(c control) bool {
 }
 
 // closedMenu says whether the widget is a closed button with its menu (Drop,
-// TopDrop not Open) whose menu has items: its trigger opens the menu, without
+// TopDrop, a split's arrow SplitDrop — not Open) whose menu has items: its trigger opens the menu, without
 // a script too — the library prints a closed one as a details whose summary
 // is the button (Typecase's task 60). A trigger that is a link (Href) stays
 // a link: it is judged as one.
 func closedMenu(c control) bool {
 	switch c.v.Type().Name() {
-	case "Drop", "TopDrop":
+	case "Drop", "TopDrop", "SplitDrop":
 	default:
 		return false
 	}
@@ -644,7 +644,7 @@ func Meaning(v any, forms ...string) []string {
 			}
 			fv := c.v.Field(i)
 			at := c.path + "." + f.Name
-			opens := closed && f.Name == "Trigger"
+			opens := closed && (f.Name == "Trigger" || f.Name == "Arrow")
 			scripted := scripted || (c.scripted && name == "QueueItem") || liveQueuePart(c, name, f.Name)
 			dialog := c.dialog || (name == "Shell" && f.Name == "Dialogs")
 			switch f.Type.Kind() {
