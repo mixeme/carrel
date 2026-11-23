@@ -196,10 +196,17 @@ func edit(p *view.NotePage) []w.MainPart {
 	// document and go with its Save (Doc.Multipart, Typecase's note 152).
 	doc.Multipart = attach != nil || columnAttach(p) != nil
 	var title, body w.Area
+	// A picture pasted into the title or the text joins the attachments, as
+	// one dropped on the page (s-io-21; Typecase's task 88).
+	paste := ""
+	if _, drops := Drop(p); drops {
+		paste = formEdit
+	}
 	if f := p.Doc.Form; f != nil {
 		for _, r := range bind.Rows(*f) {
 			a := bind.Area(r)
 			a.Label = text
+			a.Attach = paste
 			switch r.Name {
 			case titleName:
 				a.Variant = w.AreaTitle

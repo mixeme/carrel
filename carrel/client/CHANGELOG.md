@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.49 — 2026-11-24
+
+Server `v0.4.4`; Typecase `85044ef`. A picture pasted into the text of an
+event's, a task's or a note's edit joins its attachments, as a file dropped
+on the page (s-io-21): each text area of the form the drop sheet sends
+names that form (`Area.Attach` through `bind.PasteInto`; Typecase's task
+88). The keys' sheet promised it — «Ctrl+V: Paste an image as an
+attachment» — and nothing took it: the library takes a picture from a text
+only where the area names a form. Words pasted stay words; a card's text
+takes no picture (it would become the photo). `TestDropSheets` holds it.
+
 ## v0.11.48 — 2026-11-23
 
 Server `v0.4.4`; Typecase `85044ef` (note 219: tasks 277 and 276 pp. 1–4).

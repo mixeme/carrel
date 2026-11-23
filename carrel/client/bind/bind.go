@@ -318,6 +318,41 @@ func Area(r view.FormRow) w.Area {
 	return w.Area{Name: r.Name, Text: string(r.Value), Label: string(r.Label), Mono: r.Mono, Focus: r.Focus}
 }
 
+// PasteInto are a form's items with each text area taking a picture pasted
+// into it into the file field of the form (Area.Attach; Typecase's task 88),
+// as a file dropped on the page goes there: the edit of a record with
+// attachments (s-io-21). Words pasted stay words.
+func PasteInto(items []w.FormPart, form string) []w.FormPart {
+	field := func(f w.Field) w.Field {
+		parts := append([]w.FieldPart(nil), f.Parts...)
+		for i, p := range parts {
+			if a, ok := p.(w.Area); ok {
+				a.Attach = form
+				parts[i] = a
+			}
+		}
+		f.Parts = parts
+		return f
+	}
+	out := append([]w.FormPart(nil), items...)
+	for i, it := range out {
+		switch it := it.(type) {
+		case w.Field:
+			out[i] = field(it)
+		case w.FieldSet:
+			set := append([]w.FieldSetPart(nil), it.Items...)
+			for j, p := range set {
+				if f, ok := p.(w.Field); ok {
+					set[j] = field(f)
+				}
+			}
+			it.Items = set
+			out[i] = it
+		}
+	}
+	return out
+}
+
 // Control is the control of a row by its kind: a pick for a choice from a
 // list, an area for several lines, else a field of one line (Input). A tick,
 // a set of radios and the buttons Add and Remove of a repeating field are not

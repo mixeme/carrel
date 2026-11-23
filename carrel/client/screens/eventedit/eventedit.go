@@ -214,6 +214,11 @@ func Screen(p *view.EventEditPage) w.Shell {
 		// server's kinds-parity list).
 		form.Items = append(form.Items, sourceSet(p.Source))
 	}
+	if _, drops := Drop(p); drops {
+		// A picture pasted into the description joins the attachments, as
+		// one dropped on the page (s-io-21).
+		form.Items = bind.PasteInto(form.Items, id)
+	}
 	main = append(main, form)
 	if p.Delete != nil {
 		main = append(main, w.Danger{Button: bind.Button(*p.Delete, formDelete), Note: string(p.DeleteNote)})

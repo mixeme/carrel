@@ -233,6 +233,11 @@ func Screen(p *view.TaskEditPage) w.Shell {
 	if p.UID != "" {
 		form.Items = append(form.Items, sourceSet(p.Source))
 	}
+	if _, drops := Drop(p); drops {
+		// A picture pasted into the description joins the attachments, as
+		// one dropped on the page (s-io-21).
+		form.Items = bind.PasteInto(form.Items, formID)
+	}
 	main = append(main, form)
 	if p.Delete != nil {
 		main = append(main, w.Danger{Button: bind.Button(*p.Delete, formDelete)})

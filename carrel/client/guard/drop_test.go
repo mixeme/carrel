@@ -46,6 +46,29 @@ func TestDropSheets(t *testing.T) {
 				// A page outside the shell — the printed one — has no sheets.
 				want = false
 			}
+			// A picture pasted into the text of an edit (s-io-21) becomes
+			// one of its attachments, as a file dropped there (Typecase's
+			// task 88, Area.Attach; the keys' sheet says «Paste an image as
+			// an attachment»): each text area of the form the drop sheet
+			// sends names that form. Nowhere else does a pasted picture land
+			// from a text — a card's would become its photo. The page under
+			// a sheet (inert) takes nothing.
+			paste := ""
+			if want && frame == "s-io-21" && len(sheets) == 1 {
+				paste = attrOf(sheets[0], "data-tc-drop")
+			}
+			for _, a := range findAll(page, func(n *html.Node) bool { return n.Data == "textarea" }) {
+				if inert(a) {
+					continue
+				}
+				got := attrOf(a, "data-tc-paste")
+				switch {
+				case paste != "" && inForm(a, paste) && got != paste:
+					t.Errorf("%s: the text area %q takes no pasted picture into %q, the form a dropped file goes to", at, attrOf(a, "name"), paste)
+				case got != "" && (paste == "" || got != paste):
+					t.Errorf("%s: the text area %q sends a pasted picture to %q, and no drop of an attachment goes there", at, attrOf(a, "name"), got)
+				}
+			}
 			switch {
 			case want && len(sheets) != 1:
 				t.Errorf("%s: a file may be dropped here, and the page has %d drop sheets", at, len(sheets))
@@ -172,6 +195,31 @@ func takesFile(page []*html.Node, id string) bool {
 	file := func(n *html.Node) bool { return n.Data == "input" && attrOf(n, "type") == "file" }
 	return find([]*html.Node{form}, file) != nil ||
 		find(page, func(n *html.Node) bool { return file(n) && attrOf(n, "form") == id }) != nil
+}
+
+// inForm says whether a field belongs to the form of the ID: inside it, or
+// naming it (form=).
+func inForm(field *html.Node, id string) bool {
+	if attrOf(field, "form") != "" {
+		return attrOf(field, "form") == id
+	}
+	for n := field.Parent; n != nil; n = n.Parent {
+		if n.Type == html.ElementNode && n.Data == "form" {
+			return attrOf(n, "id") == id
+		}
+	}
+	return false
+}
+
+// inert says whether a node stands in a part of the page a sheet holds
+// still (inert): the page under it.
+func inert(n *html.Node) bool {
+	for ; n != nil; n = n.Parent {
+		if n.Type == html.ElementNode && hasAttr(n, "inert") {
+			return true
+		}
+	}
+	return false
 }
 
 // importDropOf is the import a list's bar names (ListBar.Drop), wherever the
