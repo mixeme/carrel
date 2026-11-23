@@ -584,8 +584,12 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Subtitle = text(notebookSubtitle(combinedNotebooks(page.Rail, spec, st.counted())))
 		if st.task == nil && len(page.Notices) == 0 {
-			// Nothing ticked: no poll, and the notebook says why (U-6.0).
+			// Nothing ticked: no poll, and the notebook says why (U-6.0);
+			// the line under the title is every kind's — how many of the
+			// notebooks and on how many accounts —, not how notes lie on a
+			// server: nothing is shown to lie anywhere (states-25).
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
+			page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.counted()))
 		}
 		page.Print = header(counted(page.Bar.Loaded, "note"))
 		// On paper (print-8; Typecase's note 159): the view as it is — its

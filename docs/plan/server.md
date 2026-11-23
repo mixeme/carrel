@@ -414,6 +414,7 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
 
 | Что | Версии |
 |---|---|
+| Сводная тетрадь без отметок: подзаголовок «0 of 3 notebooks · 0 accounts», как у прочих родов и в `states-25` (было «· VJOURNAL») | `v0.4.4` |
 | Пустой экземпляр по кадру `states-1` (замечание владельца с планшета): без подключений и подписок сводные списки всех родов говорят «No server connected yet», объясняют и дают Connect account; рейл — «Nothing connected yet» (`RailSection.Note`) | `v0.4.3` |
 | **Веха «первая рабочая версия»:** https://carrel.mixfed.ru открыт — администратор заведён через туннель, сертификат certbot, vhost apache2 `carrel.conf`; снаружи проверены https, HSTS, `Secure`, статика, `%2F`, davloom; подвал рейла не внизу окна — задача Typecase 272; Admin → Installation: 11 проверок, 10 в порядке, 1 не измерима снаружи (предел прокси для долгого запроса; у apache 300 с) | `v0.4.0` |
 | Первое развёртывание на carrel.mixfed.ru: `deploy/carrel.mixfed.ru` (compose на петле 8090/8091, vhost apache2, порядок первого запуска), `scripts/deploy.sh`; голый адрес `/` ведёт на `/app/` (был 404) | `v0.3.12` |

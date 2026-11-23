@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.4 — 2026-11-23
+
+Client `v0.11.47`.
+
+### For consumers
+
+- **The combined notebook with nothing ticked** says what every kind says
+  under its title, «0 of 3 notebooks · 0 accounts» (states-25), not «0 of 3
+  notebooks · VJOURNAL»: with nothing shown there is nothing whose way of
+  lying on a server to tell.
+
 ## v0.4.3 — 2026-11-21
 
 Client `v0.11.47`. The owner's remark from a tablet: on an instance with
