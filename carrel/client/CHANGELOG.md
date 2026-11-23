@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.48 — 2026-11-23
+
+Server `v0.4.4`; Typecase `85044ef` (note 219: tasks 277 and 276 pp. 1–4).
+The mockup copied. `s-profile-38` now draws every hint `s-profile-5` draws,
+so the new collection's sheet is held against it again on
+`app-collections-new/trash` (the address held by the server's trash bin).
+The library closes a sheet's own page in place and frees what lay under it,
+prints an overlay that is the whole page with `tc-root` (the client prints
+pages through `page.Document`, so it comes by itself), keeps the menu of
+refusals whole and an open menu over its neighbours. Nothing in the client's
+code changes; its checks read a sheet's own page as the page prints it
+(`widget.PageRoot`), and hold the overlay against its frame without
+`tc-root`, as the frames draw it in a shell.
+
 ## v0.11.47 — 2026-11-21
 
 Server `v0.4.3`; Typecase `16467bc`. An instance with nothing connected is

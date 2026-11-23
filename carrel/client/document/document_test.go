@@ -54,8 +54,10 @@ func check(t *testing.T, at string, scr screens.Screen, model any, base string) 
 		`<link rel="stylesheet" href="` + base + `/static/tc/` + document.Version() + `/css/typecase.css">`,
 		// The library's script, then its live layer (the client's stage 4).
 		`<script src="` + base + `/static/tc/` + document.Version() + `/js/tc.js"></script><script src="` + base + `/static/tc/` + document.Version() + `/js/tc-live.js"></script></body></html>`,
-		// The root with the zones of C-7.2 named.
-		document.Root(scr, model).Render(),
+		// The root with the zones of C-7.2 named, as the page holds it: a
+		// sheet's own page (an overlay alone) with tc-root (Typecase's note
+		// 219, task 276 p. 2).
+		w.PageRoot(document.Root(scr, model)),
 	} {
 		if !strings.Contains(html, want) {
 			t.Errorf("%s: the page has no %s", at, want)

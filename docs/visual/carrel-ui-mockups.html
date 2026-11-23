@@ -207,6 +207,9 @@ body[data-tc-root]>.tc-shell{display:flex;flex-direction:column;min-height:100vh
 body[data-tc-root]>.tc-shell>.tc-shell__body,body[data-tc-root]>.tc-shell>.tc-overlay{flex:1 0 auto}
 body[data-tc-root]>.tc-shell>.tc-overlay{display:flex;flex-direction:column}
 body[data-tc-root]>.tc-shell>.tc-overlay>.tc-shell__body{flex:1 0 auto}
+/* Страница листа бывает наложением без оболочки вокруг (Overlay корнем страницы): то же — не ниже окна (задача Carrel 276). */
+body[data-tc-root]>.tc-overlay{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+body[data-tc-root]>.tc-overlay>.tc-shell__body{flex:1 0 auto}
 .tc-root *{box-sizing:border-box}
 .tc-root p,.tc-root h1,.tc-root h2,.tc-root h3,.tc-root h4,.tc-root ul,.tc-root ol,.tc-root dl,.tc-root dd,.tc-root dt,.tc-root figure{margin:0;padding:0}
 .tc-root ul{list-style:none}
@@ -1863,6 +1866,10 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-menu--full.tc-menu--full{width:100%}
 .tc-menu--w290.tc-menu--w290{width:290px}
 .tc-menu--w420.tc-menu--w420{width:420px;max-width:100%}
+/* Всплывающее меню шириной 420 меряет край по окну, а не по своей кнопке: 100% — ширина кнопки, и «N failed»
+   сжималось до 72 px, ответ сервера ломался по букве (задача Carrel 276); куда встать, решает сценарий (fitMenu).
+   Не по колонке (cqw): ближайший контейнер бывает уже кнопки — «How to mount» в s-publish-32 сжалось бы так же. */
+.tc-menu--w420.tc-menu--w420.is-pop{max-width:calc(100vw - 24px)}
 /* меню из строк с полями: длинная подпись на узком переносится, строка растёт */
 .tc-menu--fields .tc-menu__item{height:auto;min-height:28px}
 .tc-menu__item--danger.tc-menu__item--danger{color:var(--tc-danger)}
@@ -2012,6 +2019,11 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-dim--t11-5.tc-dim--t11-5{font-size:11.5px}
 .tc-dim--struck.tc-dim--struck{background:linear-gradient(currentColor,currentColor) no-repeat 0 calc(50% + 1px)/100% 1px}
 .tc-drop__anchor.tc-drop__anchor{position:relative}
+/* Открытая выпадашка — над закрытыми: на телефоне у каждой .tc-drop свой слой (z-index 6), и меню New шапки уходило
+   под «Columns» полосы ниже, меню верхней полосы — под выпадашки списка (задача Carrel 276). Только слой: где
+   выпадашка стоит static (полоса страницы на телефоне), меню меряет себя по строке, а не по кнопке. */
+details.tc-drop[open],details.tc-drop__anchor[open],span.tc-drop:has(> .tc-menu.is-pop:not([hidden])),
+span.tc-drop__anchor:has(> :is(.tc-drop__panel,.tc-drop__panel--right):not([hidden])){z-index:7}
 .tc-drop__panel.tc-drop__panel{position:absolute;top:calc(100% + 5px);left:0;z-index:2}
 
 .tc-top__search.tc-top__search{position:relative;min-width:0;flex:0 1 560px}
@@ -17236,16 +17248,18 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                   <label data-tc-colour="#A05A2C" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#A05A2C" aria-label="#A05A2C"></label>
                   <label data-tc-colour="#8C6239" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#8C6239" aria-label="#8C6239"></label>
                   <label data-tc-colour="#9A9280" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#9A9280" aria-label="#9A9280"></label>
-                </span></div>
+                </span>
+                <span class="tc-field__hint tc-field__hint--t11-dusty">Written to the server: DAVx5 and Thunderbird show the same one.</span></div>
           <div class="tc-field tc-field--w100"><label>What goes in it</label>
             <div class="tc-line tc-line--wide tc-card__top2">
               <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VEVENT" checked><span class="tc-tickrow__tick"></span>Events</label>
               <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VTODO" checked><span class="tc-tickrow__tick"></span>Tasks</label>
               <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VJOURNAL"><span class="tc-tickrow__tick is-off"></span>Notes</label>
-            </div></div>
+            </div>
+            <span class="tc-field__hint tc-field__hint--t11-dusty">Most servers will not change this later. A collection holding only tasks appears in <b>Tasks</b>, not here.</span></div>
           <div class="tc-field tc-field--w100"><label>Address</label>
             <input class="tc-in is-mono is-ph" type="text" name="address" placeholder="poezdki" aria-label="Address" data-tc-from="name">
-            <span class="tc-field__hint tc-field__hint--t11-dusty"><span class="tc-mono">…/remote.php/dav/calendars/mix/</span><span class="tc-mono" data-tc-slug-of="address">poezdki</span><span class="tc-mono">/</span> — taken from the name, yours to change.</span></div>
+            <span class="tc-field__hint tc-field__hint--t11-dusty"><span class="tc-mono">…/remote.php/dav/calendars/mix/</span><span class="tc-mono" data-tc-slug-of="address">poezdki</span><span class="tc-mono">/</span> — taken from the name, yours to change. Other clients and restores go by the address, not the name.</span></div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Create</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--normal"><a class="tc-btn" href="/app/calendar">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>

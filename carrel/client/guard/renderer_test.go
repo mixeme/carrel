@@ -95,6 +95,11 @@ func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
 	assets := document.Assets(base)
 	tail := pageFormsOf(scr, model) + `<script src="` + assets.JS + `"></script><script src="` + assets.Live + `"></script></body></html>`
 	root, ok := strings.CutSuffix(rest, tail)
+	// A sheet's own page prints its overlay with tc-root (widget.PageRoot;
+	// Typecase's note 219, task 276 p. 2); the frames draw the overlay in a
+	// shell, where it carries none.
+	drawn := document.Root(scr, model)
+	root = strings.Replace(root, widget.PageRoot(drawn), drawn.Render(), 1)
 	// The closed drop sheet (document.withDrop) the frames draw alone
 	// (s-io-1, -20…-22), as the keys' one.
 	if scr.Drop != nil {
