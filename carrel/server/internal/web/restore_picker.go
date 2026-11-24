@@ -17,7 +17,7 @@ import (
 // browseRestore keeps what was typed in the step and opens the tree at the
 // folder of the path typed, or at the collection chosen.
 func (s *Server) browseRestore(w http.ResponseWriter, r *http.Request, sess *session.Session) {
-	_ = r.ParseForm()
+	_ = readForm(r)
 	q := url.Values{"for": {"restore"}}
 	blob := s.catalogOf(sess)
 	acc, col, _ := strings.Cut(r.PostFormValue("store"), "|")

@@ -132,7 +132,11 @@ func NewSplit(main w.Button, arrow []view.MenuItem, ro string, more w.Button) w.
 	more.Kind = main.Kind
 	return w.Split{Main: main, More: w.SplitDrop{
 		Arrow: more,
-		Menu:  w.Menu{Items: MenuItems(arrow, ro), Pop: w.MenuUnder, Target: menuTarget(arrow)},
+		// The menu stands in the arrow's panel, which stands under the
+		// split's right end (s-notes-7): a popping menu of its own was
+		// placed from the panel's edge, to the right of the split (the
+		// owner, 24.11.2026).
+		Menu: w.Menu{Items: MenuItems(arrow, ro), Target: menuTarget(arrow)},
 	}}
 }
 

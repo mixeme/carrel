@@ -54,7 +54,7 @@ func (s *Server) postDavloomScope(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	_ = r.ParseForm()
+	_ = readForm(r)
 	blob := s.catalogOf(sess)
 	sc := user.DeviceScope{ReadOnly: d.ReadOnly}
 	kinds := map[view.Kind]bool{}

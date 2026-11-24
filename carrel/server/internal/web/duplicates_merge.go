@@ -161,7 +161,7 @@ func (s *Server) mergeHref(group string, into int, extra url.Values) string {
 // property's member by its place in the group (pick.<PROP>=; Дб9).
 func picksOf(r *http.Request, mr mergeRead) map[string]sealed.RecordRef {
 	out := map[string]sealed.RecordRef{}
-	_ = r.ParseForm()
+	_ = readForm(r)
 	for k, v := range r.Form {
 		prop, ok := strings.CutPrefix(k, "pick.")
 		if !ok || len(v) == 0 {
@@ -176,7 +176,7 @@ func picksOf(r *http.Request, mr mergeRead) map[string]sealed.RecordRef {
 
 func choicesOf(r *http.Request) map[string]int {
 	out := map[string]int{}
-	_ = r.ParseForm()
+	_ = readForm(r)
 	for k, v := range r.Form {
 		prop, ok := strings.CutPrefix(k, "choice.")
 		if !ok || len(v) == 0 {
@@ -193,7 +193,7 @@ func choicesOf(r *http.Request) map[string]int {
 // carried into the merged record.
 func dropsOf(r *http.Request) map[string][]string {
 	out := map[string][]string{}
-	_ = r.ParseForm()
+	_ = readForm(r)
 	for k, v := range r.Form {
 		if prop, ok := strings.CutPrefix(k, "drop."); ok {
 			out[strings.ToUpper(prop)] = v

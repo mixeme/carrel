@@ -41,10 +41,10 @@ func TestTheAppWorksWithoutScripts(t *testing.T) {
 	b.press("Connect", url.Values{"label": {"home"}, "server": {stand.URL}, "login": {"alice"}, "password": {"secret"}}, nil)
 	b.follow("Back to app")
 
-	// A contact: the rail ticked by its form, the new card by the arrow of
-	// New (its main button opens the quick sheet), edited, deleted.
+	// A contact: the book ticked by Connect (the owner, 24.11.2026), the new
+	// card by the arrow of New (its main button opens the quick sheet),
+	// edited, deleted.
 	b.follow("Contacts")
-	b.press("Tick every book", nil, nil)
 	b.follow("People")
 	b.press("Save", url.Values{"fn": {"Ada Lovelace"}, "tel.0": {"+1 555 0100"}}, nil)
 	b.says("Ada Lovelace")
@@ -61,7 +61,6 @@ func TestTheAppWorksWithoutScripts(t *testing.T) {
 		{"Notes", "Reading list", "Reading list, short"},
 	} {
 		b.follow(k.section)
-		b.press("Tick every", nil, nil)
 		b.follow("Work")
 		b.press("Save", url.Values{"summary": {k.title}}, nil)
 		b.says(k.title)
@@ -104,7 +103,6 @@ func TestTheAppWorksWithoutScripts(t *testing.T) {
 	b.press("Connect", url.Values{"label": {"store"}, "server": {stand.URL + davtest.FileRoot}, "login": {"alice"}, "password": {"secret"}}, nil)
 	b.follow("Back to app")
 	b.follow("Files")
-	b.press("Tick every storage", nil, nil)
 	b.follow("files")
 	b.press("Send", nil, map[string][2]string{"file": {"hello.txt", "hello without scripts"}})
 	b.says("hello.txt")

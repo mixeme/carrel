@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.9 — 2026-11-24
+
+Client `v0.11.55`; Typecase `a802ebb`. The owner's tour of the site.
+
+### For consumers
+
+- **A form the live layer sends is read.** It sends the browser's FormData
+  (multipart) with the token in `X-CSRF-Token`; handlers read their form
+  with `ParseForm`, which skips a multipart body — a rail tick was an empty
+  selection and unticked every collection of the kind (seen on a phone's
+  rail panel). Handlers read their form whatever its encoding now.
+- **A new connection is ticked** (the owner's decision of 24.11.2026,
+  S-14): its collections in the sections of their kinds. Feeds are not.
+- **Connect and Test only with no password** (and no «The server asks no
+  password») are said at the password's field — «Type the password, or
+  tick «The server asks no password».» — and no server is asked. After
+  Test only the field has the caret and «Type it again to connect: Carrel
+  does not send a password back.»
+
 ## v0.4.8 — 2026-11-24
 
 Client `v0.11.54`; Typecase `a802ebb` (notes 223, 224).

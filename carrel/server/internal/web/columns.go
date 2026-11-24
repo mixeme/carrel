@@ -279,7 +279,7 @@ func (s *Server) columnsMenu(r *http.Request, csrf view.FormRow, segment, action
 // the column the list is sorted by puts the list in its default order and
 // tells it so (unsorted=<the order>); the caller has checked who asks.
 func (s *Server) saveColumns(w http.ResponseWriter, r *http.Request, segment, back string, single bool) {
-	if err := r.ParseForm(); err != nil {
+	if err := readForm(r); err != nil {
 		http.Error(w, "bad form", http.StatusBadRequest)
 		return
 	}

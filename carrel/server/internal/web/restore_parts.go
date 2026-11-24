@@ -250,7 +250,7 @@ func restoreFields(r *http.Request) url.Values {
 		}
 		return url.Values{}
 	}
-	_ = r.ParseForm()
+	_ = readForm(r)
 	return r.PostForm
 }
 

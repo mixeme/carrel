@@ -64,15 +64,23 @@ func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Requ
 	if !ok {
 		return
 	}
-	_, trace := s.traceOf(r)
-	page := s.connectionsPage(sess, connectionForm{
+	f := connectionForm{
 		Label:           connectionLabel(r.FormValue("label")),
 		Server:          strings.TrimSpace(r.FormValue("server")),
 		Login:           strings.TrimSpace(r.FormValue("login")),
 		CertFingerprint: strings.TrimSpace(r.FormValue("certFingerprint")),
 		NoPassword:      noPasswordMark(r),
 		Open:            true,
-	}, nil)
+	}
+	// No password and no mark: said at the field, no server asked.
+	if !f.NoPassword && r.FormValue("password") == "" && f.Login != "" {
+		f.PasswordErr = missingPassword
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		return
+	}
+	_, trace := s.traceOf(r)
+	f.Tested = true
+	page := s.connectionsPage(sess, f, nil)
 	page.Trace = trace
 	s.writePage(w, r, http.StatusOK, page)
 }

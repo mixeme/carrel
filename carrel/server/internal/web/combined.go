@@ -1253,7 +1253,7 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		spec, known = filesSpec, true // the ticks of the files root (S-17.2)
 	}
 	key, live := sess.DataKey()
-	if !known || !live || r.ParseForm() != nil {
+	if !known || !live || readForm(r) != nil {
 		s.notFound(w, r)
 		return
 	}

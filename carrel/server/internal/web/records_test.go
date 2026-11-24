@@ -16,6 +16,7 @@ import (
 	"github.com/emersion/go-webdav/carddav"
 
 	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
 )
@@ -48,6 +49,10 @@ func connectFixture(t *testing.T, srv *davtest.Server, col string, configure fun
 		t.Fatalf("connect: %d %s", rec.Code, rec.Body.String())
 	}
 	key, _ := sess.DataKey()
+	// Connect ticks what it brings (the owner, 24.11.2026; held by
+	// TestANewConnectionIsTicked); a fixture starts from no tick, and its
+	// test ticks what it means to.
+	editBlob(t, h, sess, func(b *sealed.Blob) { b.Selected = nil })
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
 	return davFixture{srv: srv, h: h, sess: sess, id: blob.Connections[0].ID, col: col}
 }

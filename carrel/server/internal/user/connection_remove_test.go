@@ -112,8 +112,16 @@ func TestRemoveConnectionTakesEverythingOfIt(t *testing.T) {
 	if n := len(blob.CollectionsOf(kept.ID)); n != 2 {
 		t.Errorf("the neighbour has %d collections, want 2", n)
 	}
-	if len(blob.Selected) != 1 || blob.Selected[0].AccountID != kept.ID {
-		t.Errorf("selected = %+v, want the neighbour's tick only", blob.Selected)
+	// The neighbour's ticks stay — a connection's collections are ticked
+	// when it is added (the owner, 24.11.2026) —, none of the gone one's.
+	if len(blob.Selected) == 0 {
+		t.Error("the neighbour's ticks went too")
+	}
+	for _, sel := range blob.Selected {
+		if sel.AccountID != kept.ID {
+			t.Errorf("selected = %+v, want the neighbour's ticks only", blob.Selected)
+			break
+		}
 	}
 	if len(blob.LastUsed) != 1 || blob.LastUsed[0].AccountID != kept.ID {
 		t.Errorf("last used = %+v, want the neighbour's only", blob.LastUsed)
