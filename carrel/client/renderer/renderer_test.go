@@ -187,3 +187,20 @@ func TestTheEndOfAPollIsItsPage(t *testing.T) {
 		t.Errorf("the end of a poll with its top bar = %.1500s", got)
 	}
 }
+
+// A list's row asks its panel and gets the list with it, its row lit
+// (server v0.4.12): the panel and, out of band, the list — HTML both.
+func TestThePanelComesWithItsList(t *testing.T) {
+	rd := renderer.New("")
+	list := view.ContactsListPage{Shell: view.Shell{Title: "Combined address book", Details: &view.Details{Title: "Ada Lovelace", Close: "/app/contacts"}},
+		Groups: []view.ContactGroup{{Rubric: "A", Count: 1, Rows: []view.ContactRow{{Name: "Ada Lovelace", Href: "/app/contacts?open=x", On: true, Target: "details"}}}}}
+	req := httptest.NewRequest(http.MethodGet, "/app/contacts?open=x", nil)
+	rec := httptest.NewRecorder()
+	if err := rd.Fragment(rec, req, http.StatusOK, render.TargetDetails, list, []render.OOB{{Target: render.TargetMain, Body: list}}); err != nil {
+		t.Fatal(err)
+	}
+	got := rec.Body.String()
+	if !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/html") || !strings.Contains(got, `<template data-tc-zone="main">`) || !strings.Contains(got, "Ada Lovelace") {
+		t.Errorf("the panel with its list = %s %.600s", rec.Header().Get("Content-Type"), got)
+	}
+}

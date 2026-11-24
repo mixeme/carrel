@@ -163,6 +163,15 @@ func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int
 		return r.json.Fragment(w, req, status, target, body, extra)
 	}
 	scr, model, ok := r.screenOf(body)
+	if ok && len(extra) > 0 && target == render.TargetDetails && zone.KindOf(model) == zone.ShellPage {
+		// A list's panel asked by its row, the list out of band with its
+		// row lit (server v0.4.12).
+		if panel, drawn := ShellZone(scr, model, target); drawn {
+			if more, ok := r.outOfBand(extra); ok {
+				return writeHTML(w, status, page.Fragment{Body: []page.Part{page.Printed(panel)}, Extra: more}.Render())
+			}
+		}
+	}
 	if ok && len(extra) == 0 {
 		kind := zone.KindOf(model)
 		out, drawn := "", false

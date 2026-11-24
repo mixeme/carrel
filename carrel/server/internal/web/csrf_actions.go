@@ -30,10 +30,16 @@ func (sr stampingRenderer) Page(w http.ResponseWriter, r *http.Request, status i
 
 func (sr stampingRenderer) Fragment(w http.ResponseWriter, r *http.Request, status int, target string, body any, extra []render.OOB) error {
 	token := sr.token(r)
-	for i := range extra {
-		extra[i].Body = stampLook(stampView(extra[i].Body, token, sr.base), lookOf(r))
-	}
 	look := lookOf(r)
+	for i := range extra {
+		extra[i].Body = stampLook(stampView(extra[i].Body, token, sr.base), look)
+		// The list that comes with its panel (writePage) is asked at its own
+		// address: its rows keep opening in the panel, as the page's do.
+		// Other answers' lists are stamped where they are made.
+		if extra[i].Target == render.TargetMain && target == render.TargetDetails && r.Method == http.MethodGet {
+			extra[i].Body = stampPanel(r, extra[i].Body, look)
+		}
+	}
 	return sr.Renderer.Fragment(w, r, status, target, stampPanel(r, stampLook(stampView(body, token, sr.base), look), look), extra)
 }
 

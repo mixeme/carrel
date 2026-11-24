@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.12 — 2026-11-25
+
+Client `v0.11.57`; Typecase `a802ebb`.
+
+### For consumers
+
+- **A list's panel comes with its list.** Asked by a row (`?open=`, target
+  `details`), the panel's answer brings the list out of band (`main`), its
+  open row `On`, its rows still opening in the panel: the row lit no
+  longer stays the one opened before.
+- **The settings' Refresh says when the servers last answered**
+  (`Top.Refresh.Answered`, the session's newest reading — «2 min ago» in
+  every settings frame); nothing read yet, no time. Found by the text of
+  the settings against their frames (acceptance round 7).
+
 ## v0.4.11 — 2026-11-24
 
 Client `v0.11.56`; Typecase `a802ebb`.

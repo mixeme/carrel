@@ -96,6 +96,9 @@ func TestStand(t *testing.T) {
 	feeds, leaguePassword := standFeeds(t, root)
 
 	t.Setenv("CARREL_TIMEZONE", "Europe/Moscow")
+	// davloom on, as the frames draw it running (account-1, s-davloom-1):
+	// two ports above the stand's (the mockup takes the one above).
+	t.Setenv("CARREL_DAVLOOM_PORT", strconv.Itoa(port+2))
 	b := startPlainOn(t, port, "127.0.0.1")
 
 	standSignIn(b)
@@ -123,6 +126,7 @@ func TestStand(t *testing.T) {
 	servers["baikal"].Refuse("REPORT", 401, "")
 
 	standDuplicates(t, b)
+	standSettings(t, b)
 
 	mock := standMockup(t, port, root)
 	t.Logf("the stand: %s (login %s); the mockup: %s/mockups/carrel-ui-mockups.html; holding %s", b.origin, standLogin, mock, wait)
@@ -401,6 +405,85 @@ func untick(t *testing.T, b *plainBrowser, name string) {
 
 // untickWhere presses the first tick of the rail match picks; what is the
 // tick of which source is said as what.
+// standSettings gives the instance the states the settings' frames draw
+// (acceptance round 7): the users of s-admin-2 — olga an administrator —
+// and backup jobs as s-backup-1 names them, each made by its own form. Not
+// made: davloom's devices (the unlock sheet), the jobs' runs and history.
+func standSettings(t *testing.T, b *plainBrowser) {
+	t.Helper()
+	for _, u := range []struct{ login, role string }{
+		{"anna", "user"}, {"viktor", "user"}, {"olga", "admin"}, {"petr", "user"}, {"ivan", "user"},
+	} {
+		b.open("/admin/invites")
+		standPost(t, b, "/admin/invites", func(n *html.Node) bool {
+			return n.Data == "input" && attr(n, "name") == "action" && attr(n, "value") == "user"
+		},
+			url.Values{"login": {u.login}, "role": {u.role}, "email": {""}, "password": {"temporary-pass-" + u.login}}, nil)
+	}
+	src := func(paths ...string) []string {
+		var out []string
+		for _, n := range b.page.all(func(n *html.Node) bool { return n.Data == "input" && attr(n, "name") == "src" }) {
+			for _, p := range paths {
+				if strings.HasSuffix(attr(n, "value"), p) {
+					out = append(out, attr(n, "value"))
+				}
+			}
+		}
+		return out
+	}
+	for _, job := range []struct {
+		name, mode, folder, keep string
+		src                      []string
+		signin                   bool
+	}{
+		{"Рабочее, ежедневно", "webdav", "/backup/work", "14", []string{"/calendars/rabota/", "/calendars/dela/", "/calendars/proekty/"}, false},
+		{"Личное на домашний диск", "webdav", "/carrel-backup", "8", []string{"/calendars/lichnyj/", "/calendars/dnevnik/", "/contacts/kontakty/", "/contacts/arhiv/", "/files/Documents"}, true},
+		{"Contacts archive, by hand", "download", "", "", []string{"/contacts/kontakty/"}, false},
+	} {
+		b.open("/app/settings/backup/new")
+		set := url.Values{"name": {job.name}, "mode": {job.mode}, "src": src(job.src...)}
+		if job.folder != "" {
+			set.Set("folder", job.folder)
+			set.Set("keep", job.keep)
+		}
+		drop := []string{"encrypted", "password"}
+		if !job.signin {
+			drop = append(drop, "signin.on")
+		}
+		standPost(t, b, "/app/settings/backup?op=create", func(n *html.Node) bool { return n.Data == "form" && attr(n, "id") == "backup-job" }, set, drop)
+	}
+}
+
+// standPost sends a form of the page open — the one holding an element
+// match finds, or that element itself — with set over its own fields and
+// drop taken off, to action.
+func standPost(t *testing.T, b *plainBrowser, action string, match func(*html.Node) bool, set url.Values, drop []string) {
+	t.Helper()
+	n := b.page.find(match)
+	if n == nil {
+		t.Errorf("%s: no form for %s", b.page.url.Path, action)
+		return
+	}
+	form := n
+	if n.Data != "form" {
+		form = b.page.formOf(n)
+	}
+	fields := b.page.fieldsOf(form)
+	for k, v := range set {
+		fields[k] = v
+	}
+	for _, k := range drop {
+		fields.Del(k)
+	}
+	u, _ := b.page.url.Parse(action)
+	req, _ := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(fields.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp := b.do(req)
+	if resp != nil && resp.status >= 400 {
+		t.Errorf("%s: %d", action, resp.status)
+	}
+}
+
 // tickEvery presses the combined row of a section's rail while it is not on:
 // every collection and feed of the kind ticked.
 func tickEvery(t *testing.T, b *plainBrowser, section string) {

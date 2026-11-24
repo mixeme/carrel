@@ -3,6 +3,7 @@ package web
 import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
+	"time"
 )
 
 // The third kind of rail (C-6.3): the settings and the administration. Its
@@ -116,6 +117,18 @@ func countSome(n int) *int {
 func (s *Server) settingsShell(sess *session.Session, title, open, here string) view.Shell {
 	sh := s.withRail(s.buildShell(sess, title), s.settingsRail(sess, open))
 	sh.Top.Refresh = view.Refresh{Action: view.Action{ID: "settings.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route(here), Method: "GET", Enabled: true}}
+	// What it says is when the session last heard a server — its newest
+	// reading of a collection, as the files' root says it —: «2 min ago»
+	// in every settings frame (acceptance round 7, 24.11.2026).
+	var last time.Time
+	for _, col := range s.catalogOf(sess).Collections {
+		if r, ok := sess.ReadingOf(col.AccountID, col.Path); ok && r.At.After(last) {
+			last = r.At
+		}
+	}
+	if !last.IsZero() {
+		sh.Top.Refresh.Answered = s.timeFor(sess).formatWhen(last, true, s.now())
+	}
 	return sh
 }
 

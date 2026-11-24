@@ -145,7 +145,16 @@ func (s *Server) writePage(w http.ResponseWriter, r *http.Request, status int, b
 		return // asked only for its page: the screen under a sheet (under.go)
 	}
 	if render.WantsFragment(r) {
-		_ = s.render.Fragment(w, r, status, render.FragmentTarget(r), body, nil)
+		var extra []render.OOB
+		// A list's row asks its panel (?open=, the live layer): the list
+		// comes with it, its open row lit — the row lit stayed the one
+		// opened before (24.11.2026).
+		if render.FragmentTarget(r) == render.TargetDetails && panelLists[reflect.TypeOf(body)] {
+			if open, _ := r.Context().Value(openKey{}).(string); open != "" {
+				extra = []render.OOB{{Target: render.TargetMain, Body: body}}
+			}
+		}
+		_ = s.render.Fragment(w, r, status, render.FragmentTarget(r), body, extra)
 		return
 	}
 	_ = s.render.Page(w, r, status, onPaper(r, body))

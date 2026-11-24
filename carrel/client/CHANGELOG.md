@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.57 — 2026-11-25
+
+Server `v0.4.12`; Typecase `a802ebb`.
+- **A panel's answer with its list** (target `details`, the list out of
+  band) is drawn as HTML: the panel and the list with its row lit.
+- **Menus stand as the frames draw them** — `TestMenusStandAsTheFramesDraw`
+  (Typecase's task 283, Carrel's part): every menu of every screen, on
+  every fixture, is placed in its container (tag and first class) as the
+  frames place a menu there (`is-pop`, `is-right`). It tells the arrow
+  menu of 24.11 (a popping menu in a drop panel); the closed-menu rule of
+  the frame comparison let it pass.
+
 ## v0.11.56 — 2026-11-24
 
 Server `v0.4.11`; Typecase `a802ebb`. The `topbar` zone of a page in the
