@@ -173,4 +173,17 @@ func TestTheEndOfAPollIsItsPage(t *testing.T) {
 	if rails < 0 || main < rails || !strings.Contains(got[main:], "Ada Lovelace") {
 		t.Errorf("the end of a poll = %.1200s", got)
 	}
+	// The top bar with it, drawn as the page draws it: Refresh on (the owner,
+	// 24.11.2026: it stayed off until the page was loaded again).
+	list.Top = view.TopBar{Refresh: view.Refresh{Action: view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: "/app/contacts?again=1", Method: "GET", Enabled: true}, Answered: "just now"}}
+	buf.Reset()
+	if err := rd.Event(&buf, render.EventPollFinished, render.TargetPoll, view.PollBar{TaskID: "t1"},
+		[]render.OOB{{Target: render.TargetRail, Body: rail}, {Target: render.TargetMain, Body: list}, {Target: render.TargetTopbar, Body: list}}); err != nil {
+		t.Fatal(err)
+	}
+	got = buf.String()
+	top := strings.Index(got, `<template data-tc-zone="topbar">`)
+	if strings.Contains(got, `"target"`) || top < 0 || !strings.Contains(got[top:], "just now") {
+		t.Errorf("the end of a poll with its top bar = %.1500s", got)
+	}
 }

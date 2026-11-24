@@ -299,7 +299,8 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 			},
 		}
 		// A page outside the shell has no rail; a page in the shell has a
-		// queue and a top bar no screen draws alone. A sheet that is a page
+		// queue no screen draws alone (its top bar the page's screen draws:
+		// the end of a poll brings it). A sheet that is a page
 		// has no sheet of its own to answer: the sheet is the screen
 		// (TestRendererDrawsBuiltScreens).
 		if zone.KindOf(model) != zone.Sheet {
@@ -309,7 +310,13 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 		}
 		others := []string{render.TargetRail}
 		if zone.KindOf(model) == zone.ShellPage {
-			others = []string{render.TargetQueue, render.TargetTopbar}
+			others = []string{render.TargetQueue}
+			// The top bar is drawn by the page's screen, in its zone.
+			if c, typ, b := answer(t, rd, func(rd render.Renderer, w http.ResponseWriter) error {
+				return rd.Fragment(w, req, http.StatusOK, render.TargetTopbar, byValue(model), nil)
+			}); c != http.StatusOK || !strings.HasPrefix(typ, "text/html") || !strings.Contains(b, `data-tc-zone="topbar"`) {
+				t.Errorf("%s, topbar: %d %q %.200s", at, c, typ, b)
+			}
 		}
 		for _, target := range others {
 			cases[target] = func(rd render.Renderer, w http.ResponseWriter) error {
