@@ -66,7 +66,7 @@ func TestBaikalBigBook(t *testing.T) {
 
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{
-		"server": {endpoint}, "login": {user}, "password": {pass},
+		"server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)},
 	}))
 	key, _ := app.sess.DataKey()
 	blob, _ := app.users.Catalog(app.sess.AccountID(), key)

@@ -95,7 +95,7 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{
-		"server": {endpoint}, "login": {user}, "password": {pass},
+		"server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)},
 	}))
 	// Only the two collections of this run are ticked: the account may hold
 	// others whose records would match too.

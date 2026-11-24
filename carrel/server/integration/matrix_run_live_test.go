@@ -35,7 +35,7 @@ func hasProp(doc, prop string) bool {
 func liveMatrix(ctx context.Context, t *testing.T, client *dav.Client, endpoint, user, pass string, cols map[view.Kind]string, suffix string) {
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{
-		"label": {"matrix " + suffix}, "server": {endpoint}, "login": {user}, "password": {pass},
+		"label": {"matrix " + suffix}, "server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)},
 	}))
 	key, _ := app.sess.DataKey()
 	blob, _ := app.users.Catalog(app.sess.AccountID(), key)

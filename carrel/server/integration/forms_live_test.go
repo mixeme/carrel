@@ -97,7 +97,7 @@ func runForms(t *testing.T, endpoint, user, pass string) {
 
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{
-		"label": {"live " + suffix}, "server": {endpoint}, "login": {user}, "password": {pass},
+		"label": {"live " + suffix}, "server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)},
 	}))
 	key, _ := app.sess.DataKey()
 	blob, _ := app.users.Catalog(app.sess.AccountID(), key)
@@ -163,7 +163,7 @@ func liveDisconnect(t *testing.T, app *liveApp, connID, endpoint, user, pass, ca
 	// anew as a new connection (the owner, 24.11.2026), none of the old
 	// connection's ticks back.
 	redirected(t, "connect again", app.post("/app/settings/connections", url.Values{
-		"server": {endpoint}, "login": {user}, "password": {pass},
+		"server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)},
 	}))
 	blob, _ = app.users.Catalog(app.sess.AccountID(), key)
 	if len(blob.Connections) != 1 || blob.Connections[0].ID == connID {
@@ -653,7 +653,7 @@ func liveConnectionEditRight(t *testing.T, app *liveApp, connID, endpoint, user,
 	key, _ := app.sess.DataKey()
 	test := "/app/settings/connections?" + url.Values{"op": {"test"}, "account": {connID}}.Encode()
 	edit := "/app/settings/connections?" + url.Values{"op": {"edit"}, "account": {connID}}.Encode()
-	form := url.Values{"label": {label}, "server": {endpoint}, "login": {user}, "password": {pass}}
+	form := url.Values{"label": {label}, "server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)}}
 	if pass == "" {
 		// An empty field means «leave it as it is» — otherwise editing a label
 		// would wipe the password. A server that asks none (Xandikos) is said
@@ -719,4 +719,14 @@ func runContactFieldsInTheOnlyBook(t *testing.T, endpoint, user, pass, who strin
 	t.Run("matrix", func(t *testing.T) {
 		liveMatrix(ctx, t, client, endpoint, user, pass, map[view.Kind]string{view.KindContact: book.Path}, suffix)
 	})
+}
+
+// askedNone is the mark «The server asks no password» as a person ticks it
+// for a server that asks none (Xandikos): an empty password without it is
+// said at its field and no server is asked (the owner, 24.11.2026).
+func askedNone(pass string) string {
+	if pass == "" {
+		return "true"
+	}
+	return ""
 }
