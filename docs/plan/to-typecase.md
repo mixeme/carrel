@@ -12,7 +12,9 @@
 
 ## Приоритет открытых задач (24.11.2026)
 
-Открыты четыре. **279** (владелец с телефона, 24.11.2026): кадр «Files»
+Открыты пять. **280** (владелец, 24.11.2026): роды в словах кадров — в
+порядке разделов (подпись входа, `states-1`, `s-notes-6`, `s-backup-2`);
+первая — слова на первом экране. **279** (владелец с телефона, 24.11.2026): кадр «Files»
 на пустом экземпляре — `states-1` с выключенной «New folder» в подвале
 рейла; фикстура `app-files/nothing` ждёт его; четвёртая, мелкая.
 **278** (сверка U-8, 24.11.2026): пустая папка
@@ -2039,6 +2041,29 @@ rows» каждого раздела. Нужно от библиотеки:
    установки (`s-admin-4`). Просьба: в `s-admin-29` последняя строка —
    пропущенная, своим видом. Набор сервера рисует отказ контакта (403) как
    кадр.
+
+## 280. Роды в словах — в порядке разделов (24.11.2026)
+
+Замечание владельца 24.11.2026: вторая строка подписи входа перечисляет
+коллекции не в том порядке, как принято. Принято — порядок разделов
+навигации: Contacts, Calendar, Tasks, Notes, Files (адресные книги,
+календари, задачи, заметки, файлы). Кадры перечисляют иначе:
+
+1. **`s-auth-1`, `s-auth-13`, `rest-3`:** «Calendars, contacts, tasks,
+   notes and files — one place.» → «Contacts, calendars, tasks, notes and
+   files — one place.»
+2. **`states-1`:** «Carrel stores nothing of its own: calendars, contacts
+   and notes come from your DAV servers.» → «…: contacts, calendars, tasks
+   and notes come from your DAV servers.» (задачи там тоже с серверов DAV).
+3. **`s-notes-6`, `components-44`:** «Connect an account to see calendars,
+   address books and notebooks.» → «…to see address books, calendars and
+   notebooks.»
+4. **`s-backup-2`, `s-backup-19`:** «Files go as files; calendars, tasks and
+   notes as .ics, address books as .vcf.» → «Address books go as .vcf;
+   calendars, tasks and notes as .ics; files as files.»
+
+Слова — ваши, порядок — правило; Carrel возьмёт их запиской (сервер пишет
+эти фразы теми же словами, проверки слов сверяют их с кадрами).
 
 ## 279. Пустой экземпляр в разделе «Files» (24.11.2026)
 

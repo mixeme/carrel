@@ -38,6 +38,18 @@ func TestARefusedConnectionSaysSo(t *testing.T) {
 	if c.Actions[0].ID != "connection.test" || c.Actions[0].Label != "Test again" {
 		t.Errorf("the first action = %+v, the frame draws Test again", c.Actions[0])
 	}
+	// Nothing to discover on a server that refuses the password: the
+	// refused card draws Test again, Edit, Disconnect and no Update
+	// collection list (s-profile-1, -27; acceptance round 7, 24.11.2026 —
+	// the frame comparison let a longer row of buttons pass).
+	for _, a := range c.Actions {
+		if a.ID == "connection.rediscover" {
+			t.Errorf("the refused card offers %s", a.Label)
+		}
+	}
+	if !strings.Contains(card[:strings.Index(card, m[0])], "Test again") || strings.Contains(card[:strings.Index(card, m[0])], "Update collection list") {
+		t.Error("s-profile-1's refused card: read the frame again")
+	}
 
 	f.srv.Accept("REPORT")
 	combined(t, f.h, f.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })

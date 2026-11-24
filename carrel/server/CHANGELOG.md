@@ -32,6 +32,10 @@ Client `v0.11.52`; Typecase `9fdc59e`.
   the rail's «Sources» with «Nothing connected yet», no refresh and no
   shortcuts. With an account connected and no storage the page is as
   before. Every section's empty page drops the rail's shortcuts.
+- **A refused connection's card has no Update collection list** (s-profile-1,
+  -27: Test again, Edit, Disconnect): discovery asks the same password the
+  server refused. Found by the text of the settings against their frames
+  (acceptance round 7); the frame comparison let the longer row pass.
 
 ## v0.4.5 — 2026-11-24
 
