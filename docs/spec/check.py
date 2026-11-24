@@ -134,7 +134,7 @@ states = {"source","trash","folder-cut","book-empty","panel-one","whole","whole-
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
           "calendar","event","link-never","gone","note-files-kept","contact","unanswered","account","none","storage","delete-refused","move-kept",
-          "running","stopped","nothing","noquery","noanswer","toomany","unticked","print","typed","files-gone","photo-gone"}
+          "running","stopped","nothing","noquery","noanswer","toomany","unticked","print","typed","files-gone","photo-gone","sole-admin","self"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -512,6 +512,10 @@ STATE_FRAME = {
     "app-settings-account/escrow-deposited": "account-7",
     "app-settings-account/escrow-off": "account-13",
     "app-settings-escrow/no-copy": "account-12",
+    # Записка Typecase 224 (задача 281): единственный администратор, свой логин в Recover.
+    "app-settings-account/sole-admin": "account-18",
+    "app-settings-escrow/sole-admin": "account-19",
+    "admin-escrow/self": "s-admin-35",
     "app-settings-escrow/escrow-off": "account-14",
     "app-settings-escrow-deposit/normal": "account-2",
     # Вынужденная смена пароля — свой кадр (записка Typecase 101).
@@ -568,6 +572,7 @@ STATE_FRAME = {
     "app-contacts/nothing": "states-1",
     "app-tasks-all/nothing": "states-1",
     "app-notes-all/nothing": "states-1",
+    "app-files/nothing": "states-37",  # записка Typecase 223 (задача 279)
     # Записки Typecase 210, 215: адрес держит корзина сервера (SV-30).
     "app-collections-new/trash": "s-profile-38",
     # Записка Typecase 112: листы коллекций из Connections (Р-75), их отказы

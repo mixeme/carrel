@@ -150,6 +150,7 @@
     "theme": "auto",
     "wide": false
   },
+  "noScript": "Without scripts the frame and zoom stay as shown; rotating works.",
   "note": "Drag to choose the frame.",
   "notices": [],
   "print": {

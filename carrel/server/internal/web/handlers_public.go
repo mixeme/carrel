@@ -72,7 +72,7 @@ func passwordError(pair []view.FormRow, err error) {
 // nothing else does (s-auth-1, rest-3).
 const (
 	taglineLead = "One desk. Every server."
-	taglineText = "Calendars, contacts, tasks, notes and files — one place."
+	taglineText = "Contacts, calendars, tasks, notes and files — one place."
 )
 
 // passwordWarning stands over the fields of every form that sets a password

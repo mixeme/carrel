@@ -799,6 +799,9 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		page.Empty = &view.Notice{Role: view.NoticeInfo, Title: "This folder is empty."}
 		if !c.col.ReadOnly {
 			page.Empty.Body = "Upload files into it, or drop them onto the window."
+			// Without a script there is no drop (states-32; Typecase's
+			// note 223).
+			page.Empty.BodyNoScript = "Upload files into it. Without scripts there is no drop."
 			page.Empty.Actions = s.folderActions(c, segs, nil, false)
 			// Upload of an empty folder is the file field alone, without
 			// the arrow (states-32, note 83 of Typecase): folders come by

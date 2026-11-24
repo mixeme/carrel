@@ -730,6 +730,7 @@ type Notice struct {
     Role    NoticeRole // C-8
     Title   Text
     Body    Text
+    BodyNoScript Text   // Body на странице без сценария, когда Body обещает сделанное сценарием: «Upload files into it. Without scripts there is no drop.» у пустой папки (states-32, записка Typecase 223); пусто — Body один на оба случая; нет — поля нет в JSON
     Runs    Runs        // Body кусками, когда кадр выделяет часть: адреса моноширинно в сообщении Email (account-9, -10); Body тогда пуст; нет — поля нет в JSON
     Details *Diagnostic // технический блок; nil — его нет, C-9
     Actions []Action    // кнопки уведомления: «New calendar» у календаря, в который сервер взял не всё (s-agenda-11, SV-52)
@@ -1499,6 +1500,7 @@ type PhotoPreviewPage struct {
     Subtitle  Text   // чья фотография: «Анна Ковалёва · metadata will be stripped» (s-contacts-5); у новой формы — набранное имя, иначе «New contact»
     Href      string // предпросмотр текущего кадра
     Note      Text   // «Drag to choose the frame.»
+    NoScript  Text   // Note без сценария: «Without scripts the frame and zoom stay as shown; rotating works.» (s-contacts-5, записка Typecase 223)
     Form      Form   // страница — форма (записка Typecase 119): POST ?op=crop — Save photo; скрытые etag, zoom, x, y — кадр, как его нарисовал сервер (их двигает сценарий; числовых полей нет и не будет), радио rotate (0, 90, 180, 270)
     Saved     Text   // что запишет Save photo: «512 × 512 · JPEG · about 90 KB» (s-contacts-5)
     SavedHint Text   // «Kept inside the card, so it is made small.»

@@ -113,6 +113,11 @@ type Notice struct {
 	Role  NoticeRole `json:"role"`
 	Title Text       `json:"title"`
 	Body  Text       `json:"body"`
+	// BodyNoScript — Body на странице без сценария, когда Body обещает то,
+	// что делает сценарий: «Upload files into it. Without scripts there is
+	// no drop.» у пустой папки (states-32, записка Typecase 223); пусто —
+	// Body один на оба случая
+	BodyNoScript Text `json:"bodyNoScript,omitempty"`
 	// Runs — Body кусками, когда кадр выделяет часть: адреса моноширинно в
 	// сообщении Email (account-9, -10; Нс10); Body тогда пуст
 	Runs    Runs        `json:"runs,omitempty"`

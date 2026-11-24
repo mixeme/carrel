@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.8 — 2026-11-24
+
+Client `v0.11.54`; Typecase `a802ebb` (notes 223, 224).
+
+### For consumers
+
+- **Kinds in words go in the sections' order** (Typecase's task 280): the
+  sign-in tagline «Contacts, calendars, tasks, notes and files — one
+  place.»; the empty instance «…: contacts, calendars, tasks and notes come
+  from your DAV servers.»; a backup job's hint «Address books go as .vcf;
+  calendars, tasks and notes as .ics; files as files.»; the backup page
+  «Carrel copies raw .vcf, .ics and files…».
+- **`Notice.BodyNoScript`** (new, omitted when empty): the body on a page
+  without a script. An empty folder: «Upload files into it. Without scripts
+  there is no drop.» (states-32).
+- **`PhotoPreviewPage.NoScript`** (new): «Without scripts the frame and zoom
+  stay as shown; rotating works.» (s-contacts-5).
+- **Recover with one's own login** says its refusal under Account, the
+  login kept and focused (s-admin-35), not under the last field.
+
 ## v0.4.7 — 2026-11-24
 
 Client `v0.11.53`; Typecase `90e3823` (note 222). The mockup copied; no

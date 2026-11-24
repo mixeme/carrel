@@ -225,21 +225,21 @@
           {
             "hintRuns": [
               {
-                "text": "Files go as files; calendars, tasks and notes as "
-              },
-              {
-                "mark": "mono",
-                "text": ".ics"
-              },
-              {
-                "text": ", address books as "
+                "text": "Address books go as "
               },
               {
                 "mark": "mono",
                 "text": ".vcf"
               },
               {
-                "text": "."
+                "text": "; calendars, tasks and notes as "
+              },
+              {
+                "mark": "mono",
+                "text": ".ics"
+              },
+              {
+                "text": "; files as files."
               }
             ],
             "legend": "What to copy",

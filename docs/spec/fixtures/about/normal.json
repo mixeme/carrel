@@ -12,6 +12,7 @@
       "text": "One desk. Every server."
     }
   ],
+  "licence": "AGPL-3.0-or-later: if you run a modified version for others, you must make the source available to them.",
   "notices": [],
   "source": {
     "enabled": true,
@@ -20,6 +21,7 @@
     "label": "Source code",
     "method": "GET"
   },
+  "tagline": "Contacts, calendars, tasks, notes and files — one place.",
   "third": {
     "enabled": true,
     "href": "/about",
@@ -28,7 +30,5 @@
     "method": "GET"
   },
   "title": "Carrel",
-  "version": "0.0.1",
-  "licence": "AGPL-3.0-or-later: if you run a modified version for others, you must make the source available to them.",
-  "tagline": "Calendars, contacts, tasks, notes and files — one place."
+  "version": "0.0.1"
 }

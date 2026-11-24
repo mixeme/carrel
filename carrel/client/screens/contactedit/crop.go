@@ -39,7 +39,7 @@ func Crop(p *view.PhotoPreviewPage) w.Shell {
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
-	crop := w.PhotoCrop{Colour: pictureSpot, Src: p.Href, Note: string(p.Note)}
+	crop := w.PhotoCrop{Colour: pictureSpot, Src: p.Href, Note: string(p.Note), NoScript: string(p.NoScript)}
 	crop.Fields = append(crop.Fields, w.Field{Label: zoomLabel, Parts: []w.FieldPart{w.Zoom{Value: times(p.Form)}}, Width: w.FieldW100})
 	for _, r := range bind.Rows(p.Form) {
 		if r.Kind != view.InputRadio {

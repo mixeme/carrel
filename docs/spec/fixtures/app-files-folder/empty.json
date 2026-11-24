@@ -267,6 +267,7 @@
       }
     ],
     "body": "Upload files into it, or drop them onto the window.",
+    "bodyNoScript": "Upload files into it. Without scripts there is no drop.",
     "details": null,
     "role": "info",
     "title": "This folder is empty."

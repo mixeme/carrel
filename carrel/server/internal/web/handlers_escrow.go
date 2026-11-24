@@ -18,7 +18,10 @@ type adminEscrowFlash struct {
 	formErr    string
 	masterErr  string
 	recoverErr string
-	result     *view.IssuedPassword
+	// recoverSelf: the refusal is the login's, said under Account
+	// (s-admin-35), not under the last field.
+	recoverSelf bool
+	result      *view.IssuedPassword
 }
 
 func (s *Server) getSettingsEscrow(w http.ResponseWriter, r *http.Request) {
@@ -313,6 +316,7 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 			// Nobody recovers themselves (the owner, 24.11.2026): signed in,
 			// one changes one's password.
 			flash.recoverErr = "You are signed in as " + sess.Login() + ": change your password on Account."
+			flash.recoverSelf = true
 		} else if err != nil {
 			flash.recoverErr = string(formError(err))
 		} else {
@@ -414,7 +418,18 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		page.Recover.Actions[0].Danger = true
 		legend(&page.Recover, "Recover an account")
 		if flash.recoverErr != "" {
-			page.Recover.Sets[0].Rows[len(page.Recover.Sets[0].Rows)-1].Error = text(flash.recoverErr)
+			at := len(page.Recover.Sets[0].Rows) - 1
+			if flash.recoverSelf {
+				for i, row := range page.Recover.Sets[0].Rows {
+					if row.Name == "login" {
+						at = i
+						// The login stays typed, as the frame draws it.
+						page.Recover.Sets[0].Rows[i].Value = text(sess.Login())
+						page.Recover.Sets[0].Rows[i].Focus = true
+					}
+				}
+			}
+			page.Recover.Sets[0].Rows[at].Error = text(flash.recoverErr)
 		}
 	} else {
 		page.Form = withSubmit(s.plainForm("/admin/escrow", "POST",

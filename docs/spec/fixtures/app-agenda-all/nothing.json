@@ -26,7 +26,7 @@
         "primary": true
       }
     ],
-    "body": "Carrel stores nothing of its own: calendars, contacts and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password.",
+    "body": "Carrel stores nothing of its own: contacts, calendars, tasks and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password.",
     "details": null,
     "role": "info",
     "title": ""

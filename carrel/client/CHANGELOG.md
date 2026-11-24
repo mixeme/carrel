@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.54 — 2026-11-24
+
+Server `v0.4.8`; Typecase `a802ebb` (notes 223, 224: tasks 278–281). The
+mockup copied. Words that need a script have their pair without one
+(`w.ScriptPair`): an empty folder's sentence (`bind.EmptyParts` pairs
+`Notice.Body` with `BodyNoScript`), the upload sheet's «Drop files here,
+or» / «Without scripts there is no drop:», the photo's line over the fields
+(`PhotoCrop.NoScript`). The files' root on an empty instance is held
+against its frame `states-37`. The only administrator's frames are named:
+`account-18` (Account), `account-19` (Key escrow), `s-admin-35` (Recover
+with one's own login). The comparison of a fragment's drawings skips a
+hidden field, as shape does: `s-admin-35` is a whole form with its `csrf`
+and `action`.
+
 ## v0.11.53 — 2026-11-24
 
 Server `v0.4.7`; Typecase `90e3823` (note 222: tasks 274, 275). The mockup

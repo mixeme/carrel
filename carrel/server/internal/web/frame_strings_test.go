@@ -155,7 +155,10 @@ func TestPhotoPreviewSaysWhatIsSaved(t *testing.T) {
 	for _, o := range regexp.MustCompile(`name="rotate" value="(\d+)"`).FindAllStringSubmatch(frame, -1) {
 		turns = append(turns, o[1])
 	}
-	note := frameOne(t, regexp.MustCompile(`<span class="tc-dim--muted tc-dim--t12-5">(.*?)</span>`), frame, "line over the fields")[1]
+	// The line over the fields in a pair: with a script and without one
+	// (Typecase's note 223).
+	note := frameOne(t, regexp.MustCompile(`<span class="tc-dim--muted tc-dim--t12-5 tc-js">(.*?)</span>`), frame, "line over the fields")[1]
+	noScript := frameOne(t, regexp.MustCompile(`<span class="tc-dim--muted tc-dim--t12-5 tc-nojs">(.*?)</span>`), frame, "line over the fields without a script")[1]
 	hint := frameOne(t, regexp.MustCompile(`(?s)<label>Saved as</label>.*?<span class="tc-field__hint">(.*?)</span>`), frame, "hint of «Saved as»")[1]
 	if !strings.Contains(frame, `photo-preview?op=crop" method="post"`) || !strings.Contains(frame, `formaction="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/photo-preview?op=remove"`) {
 		t.Fatal("s-contacts-5 posts elsewhere: read it again")
@@ -174,8 +177,8 @@ func TestPhotoPreviewSaysWhatIsSaved(t *testing.T) {
 	if strings.Join(gotHidden, " ") != strings.Join(hidden, " ") || strings.Join(gotTurns, " ") != strings.Join(turns, " ") {
 		t.Errorf("fields %q, turns %q; the frame %q, %q", gotHidden, gotTurns, hidden, turns)
 	}
-	if !strings.HasSuffix(page.Form.Action, "/photo-preview?op=crop") || string(page.Note) != note || string(page.SavedHint) != hint {
-		t.Errorf("form %q, note %q, hint %q; the frame ?op=crop, %q, %q", page.Form.Action, page.Note, page.SavedHint, note, hint)
+	if !strings.HasSuffix(page.Form.Action, "/photo-preview?op=crop") || string(page.Note) != note || string(page.NoScript) != noScript || string(page.SavedHint) != hint {
+		t.Errorf("form %q, note %q / %q, hint %q; the frame ?op=crop, %q / %q, %q", page.Form.Action, page.Note, page.NoScript, page.SavedHint, note, noScript, hint)
 	}
 	save, cancel := actionByID(page.Actions, "photo.save"), actionByID(page.Actions, "photo.cancel")
 	if save == nil || !save.Submits || save.Label != "Save photo" || cancel == nil || cancel.Method != "GET" || cancel.Href != rec+"/edit" {

@@ -620,7 +620,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.AccountPage) },
-		Frames: []string{"account-1", "account-7", "account-8", "account-9", "account-10", "account-13", "s-mail-9"},
+		Frames: []string{"account-1", "account-7", "account-8", "account-9", "account-10", "account-13", "s-mail-9", "account-18"},
 		Draw:   func(model any) Root { return settings.Account(model.(*view.AccountPage)) },
 		Title:  func(model any) string { return string(model.(*view.AccountPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return settings.AccountForms(model.(*view.AccountPage)) },
@@ -699,7 +699,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.EscrowPage) },
-		Frames: []string{"account-4", "account-12", "account-14", "account-16"},
+		Frames: []string{"account-4", "account-12", "account-14", "account-16", "account-19"},
 		Draw:   func(model any) Root { return settings.Escrow(model.(*view.EscrowPage)) },
 		Title:  func(model any) string { return string(model.(*view.EscrowPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return settings.EscrowForms(model.(*view.EscrowPage)) },
@@ -775,7 +775,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.AdminEscrowPage) },
-		Frames: []string{"s-admin-6", "s-admin-30", "s-admin-31"},
+		Frames: []string{"s-admin-6", "s-admin-30", "s-admin-31", "s-admin-35"},
 		Draw:   func(model any) Root { return admin.Escrow(model.(*view.AdminEscrowPage)) },
 		Title:  func(model any) string { return string(model.(*view.AdminEscrowPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return admin.EscrowForms(model.(*view.AdminEscrowPage)) },
@@ -816,7 +816,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.FilesRootPage) },
-		Frames: []string{"s-files-6", "states-35"},
+		Frames: []string{"s-files-6", "states-35", "states-37"},
 		Draw:   func(model any) Root { return files.Screen(model.(*view.FilesRootPage)) },
 		Title:  func(model any) string { return string(model.(*view.FilesRootPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return files.Forms(model.(*view.FilesRootPage)) },

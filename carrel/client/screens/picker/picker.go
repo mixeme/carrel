@@ -27,7 +27,8 @@ const (
 	server    = "Server"
 	enter     = "Enter"
 	esc       = "Esc"
-	dropHere  = "Drop files here, or "
+	dropHere  = "Drop files here, or"
+	noDrop    = "Without scripts there is no drop:"
 	choose    = "choose on the computer"
 	taken     = "A name already taken is refused, not overwritten"
 	remove    = "Remove"
@@ -157,7 +158,9 @@ func drop(up view.Action) w.Empty {
 	// for it (s-notes-11): it names no form.
 	pick := w.FilePick{Label: choose, File: w.FileField{Name: up.File, Label: files, List: listID, Size: sizeField, Many: true}, Row: row}
 	return w.Empty{Variant: w.EmptyDashed, Parts: []w.EmptyPart{
-		w.Text(dropHere), pick, w.Text(" "),
+		// A drop needs a script; without one the sheet says so before the
+		// pick (s-notes-11; Typecase's note 223).
+		w.ScriptPair{With: []w.Inline{w.Text(dropHere)}, Without: []w.Inline{w.Text(noDrop)}}, w.Text(" "), pick, w.Text(" "),
 		w.Aside{Face: w.FaceSmall, Parts: []w.Inline{w.Text(taken)}}, w.Text(" "),
 		w.Line{Gap: w.LineGapNormal, Block: true, ID: listID, Place: w.Grown},
 	}}

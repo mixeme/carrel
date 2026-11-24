@@ -540,6 +540,9 @@ func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, no
 		Subtitle: text(who + " · metadata will be stripped"),
 		Href:     s.route(c.origin().photoPath(uid) + "?preview=" + strconv.Itoa(d.Step)),
 		Note:     "Drag to choose the frame.",
+		// Without a script the frame is not dragged and the zoom not
+		// moved: what is shown is saved (s-contacts-5; Typecase's note 223).
+		NoScript: "Without scripts the frame and zoom stay as shown; rotating works.",
 	}
 	// What Save photo writes into the card, said before it is pressed
 	// (s-contacts-5): the frame as it would be saved, measured.

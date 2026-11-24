@@ -965,7 +965,18 @@ func EmptyParts(n view.Notice) []w.EmptyPart {
 	if n.Title != "" {
 		parts = append(parts, w.Strong(n.Title))
 	}
-	if n.Body != "" {
+	switch {
+	case n.Body != "" && n.BodyNoScript != "":
+		// Words a script makes true, paired with the page's without one
+		// (states-32; Typecase's note 223).
+		if len(parts) > 0 {
+			parts = append(parts, w.Text(" "))
+		}
+		parts = append(parts, w.ScriptPair{With: []w.Inline{w.Text(n.Body)}, Without: []w.Inline{w.Text(n.BodyNoScript)}})
+		if len(n.Actions) > 0 {
+			parts = append(parts, w.Text(" "))
+		}
+	case n.Body != "":
 		body := string(n.Body)
 		if len(parts) > 0 {
 			body = " " + body

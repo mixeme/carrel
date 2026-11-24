@@ -111,6 +111,10 @@ type PhotoPreviewPage struct {
 	Href     string `json:"href"` // предпросмотр текущего кадра
 	// Note — строка над полями: «Drag to choose the frame.» (s-contacts-5)
 	Note Text `json:"note"`
+	// NoScript — Note на странице без сценария: кадр не тянется и масштаб
+	// не двигается, «Without scripts the frame and zoom stay as shown;
+	// rotating works.» (s-contacts-5, записка Typecase 223)
+	NoScript Text `json:"noScript"`
 	// Form — страница-форма (записка Typecase 119): кадр, как его нарисовал
 	// сервер, — скрытые zoom, x, y (их двигает сценарий; числовых полей нет),
 	// etag, поворот — радио rotate (0, 90, 180, 270); POST ?op=crop —

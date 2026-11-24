@@ -3165,7 +3165,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
     </div>
     <div class="tc-shell__body tc-shell__body--no-rail tc-shell__body--minh340">
       <div class="tc-main">
-        <div class="tc-empty">Connect an account to see calendars, address books and notebooks.</div>
+        <div class="tc-empty">Connect an account to see address books, calendars and notebooks.</div>
       </div>
     </div>
   </div>
@@ -4459,7 +4459,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
           <div class="tc-dialog__photo-rule-v"></div>
         </div>
         <div class="tc-stack tc-stack--wide tc-dialog__side">
-          <span class="tc-dim--muted tc-dim--t12-5">Drag to choose the frame.</span>
+          <span class="tc-dim--muted tc-dim--t12-5 tc-js">Drag to choose the frame.</span><span class="tc-dim--muted tc-dim--t12-5 tc-nojs">Without scripts the frame and zoom stay as shown; rotating works.</span>
           <div class="tc-field tc-field--w100"><label>Zoom</label>
             <span class="tc-line tc-line--normal tc-field__zoom">
               <span class="tc-field__rail">
@@ -9658,7 +9658,7 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="tc-main">
-          <div class="tc-empty">Connect an account to see calendars, address books and notebooks.</div>
+          <div class="tc-empty">Connect an account to see address books, calendars and notebooks.</div>
         </div>
       </div>
       <div class="tc-scrim">
@@ -10693,7 +10693,7 @@ Read  2 min ago</div>
             </div>
             <div class="tc-sheet__body">
               <div class="tc-empty tc-empty--dashed">
-                Drop files here, or <label class="tc-empty__pick"><b class="tc-dim--accent">choose on the computer</b><input class="tc-file" type="file" name="file" aria-label="Files" data-tc-list="upload-files" data-tc-size="size" multiple><template data-tc-row><span class="tc-grow tc-line tc-line--normal"><span class="tc-dim--t12-5">{name} <span class="tc-dim">{size}</span></span><button class="tc-btn is-sm is-danger tc-push" type="button" data-tc-remove>Remove</button></span></template></label>
+                <span class="tc-js">Drop files here, or</span><span class="tc-nojs">Without scripts there is no drop:</span> <label class="tc-empty__pick"><b class="tc-dim--accent">choose on the computer</b><input class="tc-file" type="file" name="file" aria-label="Files" data-tc-list="upload-files" data-tc-size="size" multiple><template data-tc-row><span class="tc-grow tc-line tc-line--normal"><span class="tc-dim--t12-5">{name} <span class="tc-dim">{size}</span></span><button class="tc-btn is-sm is-danger tc-push" type="button" data-tc-remove>Remove</button></span></template></label>
                 <span class="tc-dim--t12">A name already taken is refused, not overwritten</span>
                 <div class="tc-grow tc-line tc-line--normal" id="upload-files"></div>
               </div>
@@ -15433,6 +15433,43 @@ dav: HTTP 503: the server is busy</div>
     </div>
   </div>
   <figcaption>Страница депонирования без копии: что даёт депозит и чем за него платят — до кнопки, а не после. С копией страница — кадр выше.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 330px">
+  <div class="frame" data-frame="account-18">
+    <div class="frame-label"><span>Учётная запись · Key escrow единственного администратора</span><span class="frag">фрагмент</span><i>рубрика Key escrow, страница целиком — выше</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-form">
+        <div class="tc-fset">
+          <div class="tc-rubric">Key escrow</div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">No copy of your data key is deposited: if you lose your password, nobody can recover the account.</span></div>
+          <div class="tc-field"><button class="tc-btn" title="No other administrator could recover it: you are the only one." type="button" disabled>Deposit my key</button></div>
+        </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Та же рубрика у единственного администратора: кнопка выключена с причиной в подсказке.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 330px">
+  <div class="frame" data-frame="account-19">
+    <div class="frame-label"><span>Key escrow · единственный администратор</span><span class="frag">фрагмент</span><i>страница /app/settings/escrow</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Key escrow</div><div class="tc-head__sub">No copy of your data key is deposited</div></div></div>
+        <div class="tc-form">
+          <div class="tc-fset tc-fset--lead">
+            <div class="tc-rubric">What a deposit does</div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">With a copy, an administrator with the escrow master password can recover this account if you lose your password, and read the DAV credentials you save here. You can withdraw it at any time.</span></div>
+            <div class="tc-field"><button class="tc-btn" title="No other administrator could recover it: you are the only one." type="button" disabled>Deposit my key</button></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Единственный администратор ключ не депонирует: восстановить его некому. «Deposit my key» выключена, причина — в её подсказке; второй администратор её включает.</figcaption>
   </figure>
 
 <figure style="flex:1 1 330px">
@@ -20513,7 +20550,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <div class="tc-tickrow tc-tickrow--inset"><input class="tc-tickrow__tick is-off" type="checkbox" name="src" value="sftpgo|public" aria-label="Public"><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Public</span><span class="tc-tickrow__meta">files · ro</span></div>
             </div>
           </div>
-          <div class="tc-msg tc-grow tc-msg--flush-above-tight tc-msg--max580">Files go as files; calendars, tasks and notes as <span class="tc-mono">.ics</span>, address books as <span class="tc-mono">.vcf</span>.</div>
+          <div class="tc-msg tc-grow tc-msg--flush-above-tight tc-msg--max580">Address books go as <span class="tc-mono">.vcf</span>; calendars, tasks and notes as <span class="tc-mono">.ics</span>; files as files.</div>
         </div>
 
         <div class="tc-fset">
@@ -20624,7 +20661,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               <div class="tc-tickrow tc-tickrow--inset"><input class="tc-tickrow__tick is-off" type="checkbox" name="src" value="sftpgo|public" aria-label="Public"><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Public</span><span class="tc-tickrow__meta">files · ro</span></div>
             </div>
           </div>
-          <div class="tc-msg tc-grow tc-msg--flush-above-tight tc-msg--max580">Files go as files; calendars, tasks and notes as <span class="tc-mono">.ics</span>, address books as <span class="tc-mono">.vcf</span>.</div>
+          <div class="tc-msg tc-grow tc-msg--flush-above-tight tc-msg--max580">Address books go as <span class="tc-mono">.vcf</span>; calendars, tasks and notes as <span class="tc-mono">.ics</span>; files as files.</div>
         </div>
 
         <div class="tc-fset">
@@ -21214,7 +21251,7 @@ jobs:
         <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-restore"/></svg>Restore</button></div>
       </div>
       <div class="tc-empty">
-        Carrel copies raw <span class="tc-mono">.ics</span>, <span class="tc-mono">.vcf</span> and files to storage of your own, with a manifest and a read-back check. Nothing is kept here.
+        Carrel copies raw <span class="tc-mono">.vcf</span>, <span class="tc-mono">.ics</span> and files to storage of your own, with a manifest and a read-back check. Nothing is kept here.
         <span class="tc-dim--t12-5">Already have an archive from another instance? <b>Restore</b> takes it from a file — a job is not needed for that.</span>
       </div>
     </div></div>
@@ -26656,6 +26693,27 @@ password  4c1-tide-oven</div>
 <figcaption>Самый опасный экран во всей администраторской части, и первое, что на нём стоит, — объяснение, чем депонирование <b>не</b> является. Текст взят из продукта; после решения владельца 16.10 о ссылке на историю пароля восстановление не «mailed», а «shown to them». Покрытие новых учёток — один флажок в Policy со своей кнопкой Save, не кнопка в шапке и флажок сразу: это одно и то же. Ниже — мастер-пароль, восстановление и таблица, отвечающая на вопрос, который администратор задаёт в первую очередь: <b>кого именно</b> этот мастер-пароль открывает. Строка «mix» с прочерками показывает, что администратор может не быть покрыт собственным механизмом, — это нормально и должно быть видно.</figcaption>
 </figure>
 
+<figure style="flex:1 1 330px">
+  <div class="frame" data-frame="s-admin-35">
+    <div class="frame-label"><span>Key escrow · Recover своего логина</span><span class="frag">фрагмент</span><i>рубрика Recover an account после Recover, страница целиком — выше</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-form">
+          <form class="tc-fset" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="recover">
+            <div class="tc-rubric">Recover an account</div>
+            <div class="tc-field tc-field--md"><label>Account</label><input class="tc-in is-error is-focus" type="text" name="login" value="mix" aria-label="Account" required><span class="tc-field__hint tc-dim--danger">You are signed in as mix: change your password on Account.</span></div>
+            <div class="tc-field tc-field--lg"><label>Master password</label><input class="tc-in" type="password" name="master" aria-label="Master password" required></div>
+            <div class="tc-field tc-field--md"><label>Temporary password for the user</label><input class="tc-in is-mono" type="text" name="temp" value="9f2-brick-lamp" aria-label="Temporary password for the user" required></div>
+            <div class="tc-field"><button class="tc-btn is-danger" type="submit">Recover</button></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint tc-field__hint--max580">Connections survive a recovery. The user sees it in their password history, and gets a letter when mail can reach them.</span></div>
+          </form>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Свой логин Recover не берёт: свой пароль меняют на Account. Поле — текст, его не выключить, поэтому отказ стоит под ним.</figcaption>
+  </figure>
+
 <figure>
 <div class="frame" data-frame="s-admin-30" data-screen="/admin/escrow" data-part="recovered">
   <div class="frame-label"><span>Депонирование · учётная запись восстановлена</span><i>дополнительный кадр: recovered · /admin/escrow</i></div>
@@ -26913,7 +26971,7 @@ password  9f2-brick-lamp</div>
           </div>
           <div class="tc-auth__tagline tc-auth__tagline--mid">
             <strong class="tc-auth__tagline-lead">One desk. Every server.</strong>
-            Calendars, contacts, tasks, notes and files — one place.
+            Contacts, calendars, tasks, notes and files — one place.
           </div>
           <div class="tc-auth__stack">
           <div class="tc-form tc-form--col tc-form--pad0">
@@ -26944,7 +27002,7 @@ password  9f2-brick-lamp</div>
           </div>
           <div class="tc-auth__tagline tc-auth__tagline--mid">
             <strong class="tc-auth__tagline-lead">One desk. Every server.</strong>
-            Calendars, contacts, tasks, notes and files — one place.
+            Contacts, calendars, tasks, notes and files — one place.
           </div>
           <div class="tc-auth__stack">
           <div class="tc-form tc-form--col tc-form--pad0">
@@ -27301,7 +27359,7 @@ The account itself stays: same login, role and confirmed address, the same first
           <div class="tc-head__sub tc-head__sub--below-wide"><span class="tc-mono">0.0.1 · 786949a</span></div>
           <div class="tc-auth__tagline tc-auth__tagline--below-wide">
             <strong class="tc-auth__tagline-lead">One desk. Every server.</strong>
-            Calendars, contacts, tasks, notes and files — one place.
+            Contacts, calendars, tasks, notes and files — one place.
           </div>
           <div class="tc-prose tc-prose--muted">AGPL-3.0-or-later: if you run a modified version for others, you must make the source available to them.</div>
           <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-sm" type="button">Source code</button><button class="tc-btn is-sm" type="button">Third-party licences</button><span class="tc-push"><button class="tc-btn" type="button">Back to sign in</button></span></div>
@@ -29766,7 +29824,7 @@ SMTP  mail.home.example:465  TLS
         <div class="tc-main">
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Calendar</div><div class="tc-head__sub">No server connected yet</div></div></div>
           <div class="tc-empty">
-            Carrel stores nothing of its own: calendars, contacts and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password.
+            Carrel stores nothing of its own: contacts, calendars, tasks and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password.
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button>
           </div>
         </div>
@@ -29774,6 +29832,53 @@ SMTP  mail.home.example:465  TLS
     </div>
   </div>
   <figcaption>Пустой экран объясняет устройство продукта — это единственное место, где такое объяснение уместно.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="states-37">
+    <div class="frame-label"><span>Файлы · ничего не подключено</span><i>первый вход</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-top">
+        <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+        <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+        <div class="tc-top__actions">
+          <span class="tc-split"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note</button><button class="tc-btn is-primary" type="button" title="More to create" aria-label="More to create"><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></span>
+          <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="tc-shell__body">
+        <div class="tc-shell__rail">
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes</a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates</a>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">Sources</div>
+            <div class="tc-railsec__note">Nothing connected yet</div>
+          </div>
+          <div class="tc-railfoot">
+            <button class="tc-btn" title="Open a folder to make one in it." type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>
+            <button class="tc-btn" title="Connect account" type="button"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg></button>
+            <button class="tc-btn" title="Subscribe to a feed" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+            <svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
+        </div>
+        <div class="tc-main">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Files</div><div class="tc-head__sub">No server connected yet</div></div></div>
+          <div class="tc-empty">
+            Carrel stores nothing of its own: contacts, calendars, tasks and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password.
+            <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Первый вход в разделе файлов — как в календаре. Первая кнопка подвала — «New folder»; на корне она выключена: папку делают внутри открытой папки.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -32444,7 +32549,7 @@ Read  2 min ago</div>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           </div>
         </div>
-        <div class="tc-empty"><b>This folder is empty.</b> Upload files into it, or drop them onto the window. <label class="tc-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<input class="tc-file" type="file" name="file" form="post-upload" aria-label="Files" data-tc-size="size" data-tc-taken="/app/files/sftpgo/documents/upload/carrel/attachments/2026-07/черновики?op=taken" multiple></label> <button class="tc-btn tc-nojs" type="submit" form="post-upload">Send</button> <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
+        <div class="tc-empty"><b>This folder is empty.</b> <span class="tc-js">Upload files into it, or drop them onto the window.</span><span class="tc-nojs">Upload files into it. Without scripts there is no drop.</span> <label class="tc-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<input class="tc-file" type="file" name="file" form="post-upload" aria-label="Files" data-tc-size="size" data-tc-taken="/app/files/sftpgo/documents/upload/carrel/attachments/2026-07/черновики?op=taken" multiple></label> <button class="tc-btn tc-nojs" type="submit" form="post-upload">Send</button> <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
         <form class="tc-post" id="post-upload" action="/app/files/sftpgo/documents/upload/carrel/attachments/2026-07/черновики" method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="7f3a91de"></form>
         <div class="tc-queue" data-tc-progress="post-upload" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%" hidden><div class="tc-queue__head"><b>Uploading {done} of {count}</b><span class="tc-mono tc-push tc-mono--dusty">{sent}</span><button class="tc-btn is-sm" type="button">Hide</button></div><template data-tc-row><li><div class="tc-queue__row"><span class="tc-queue__name">{name}</span><span class="tc-queue__meta">{size} · {percent}%</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="0%"></i></span></li></template><template data-tc-taken><li><div class="tc-queue__row"><span class="tc-dim--danger">{name}</span><span class="tc-dim--danger">name taken</span></div><div class="tc-line tc-line--normal tc-queue__acts"><button class="tc-btn is-sm" type="button" name="answer" value="keep">Keep both</button><button class="tc-btn is-sm" type="button" name="answer" value="replace">Replace</button><button class="tc-btn is-sm" type="button" name="answer" value="skip">Skip</button></div></li></template><ul class="tc-queue__list"></ul></div>
       </div>

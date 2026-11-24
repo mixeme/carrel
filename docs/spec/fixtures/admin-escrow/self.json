@@ -1,0 +1,538 @@
+{
+  "covered": [
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "never",
+      "login": "anna",
+      "recovered": false
+    },
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "2026-08-10 17:04",
+      "login": "viktor",
+      "recovered": true
+    },
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "never",
+      "login": "olga",
+      "recovered": false
+    },
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "never",
+      "login": "petr",
+      "recovered": false
+    },
+    {
+      "covered": false,
+      "deposited": "no",
+      "lastRecovery": "—",
+      "login": "mix",
+      "recovered": false
+    },
+    {
+      "covered": false,
+      "deposited": "no",
+      "lastRecovery": "—",
+      "login": "ivan",
+      "recovered": false
+    }
+  ],
+  "details": null,
+  "enabled": true,
+  "form": {
+    "action": "/admin/escrow",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/admin/escrow",
+        "id": "escrow.policy.save",
+        "label": "Save",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Policy",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "action",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "policy"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Copies already taken stay: only their owners delete them.",
+            "kind": "check",
+            "label": "New accounts are covered",
+            "name": "coverNew",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "true"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "master": {
+    "action": "/admin/escrow",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/admin/escrow",
+        "id": "escrow.master.change",
+        "label": "Change",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Master password",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "action",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "master"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Current",
+            "name": "current",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "New",
+            "name": "master",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "The deposited copies stay as they are: nobody has to opt in again.",
+            "kind": "password",
+            "label": "Repeat",
+            "name": "master2",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "notices": [],
+  "opens": 4,
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "admin.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/admin/invites",
+        "icon": "i-plus",
+        "id": "admin.invites",
+        "label": "Add users",
+        "method": "GET"
+      },
+      {
+        "count": 6,
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-con",
+        "id": "admin.users",
+        "label": "Users",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/settings",
+        "icon": "i-adm",
+        "id": "admin.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/install",
+        "icon": "i-shield",
+        "id": "admin.install",
+        "label": "Installation",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/dav",
+        "icon": "i-search",
+        "id": "admin.dav",
+        "label": "DAV validator",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "icon": "i-dup",
+        "id": "admin.escrow",
+        "label": "Key escrow",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/audit",
+        "icon": "i-clock",
+        "id": "admin.audit",
+        "label": "Audit log",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last sent "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
+          }
+        ],
+        "title": "Mail is going out",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
+          }
+        ],
+        "title": "Checks passed",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "recover": {
+    "action": "/admin/escrow",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "id": "escrow.recover",
+        "label": "Recover",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Recover an account",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "action",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "recover"
+          },
+          {
+            "add": null,
+            "error": "You are signed in as mix: change your password on Account.",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "text",
+            "label": "Account",
+            "name": "login",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "mix"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Master password",
+            "name": "master",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Connections survive a recovery. The user sees it in their password history, and gets a letter when mail can reach them.",
+            "kind": "text",
+            "label": "Temporary password for the user",
+            "mono": true,
+            "name": "temp",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "temp-password"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "result": null,
+  "subtitle": "4 of 6 accounts open with the master password",
+  "title": "Key escrow",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "warning": {
+    "actions": [],
+    "body": "Key escrow is a way in, not a backup: with the master password an administrator can decrypt a covered user’s DAV credentials, and through them their records. Covered users are told so, and every recovery is shown to them.",
+    "details": null,
+    "role": "alert",
+    "title": ""
+  }
+}

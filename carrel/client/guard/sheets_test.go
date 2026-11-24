@@ -206,6 +206,11 @@ func elements(n *html.Node) []*html.Node {
 func partFindings(l lib, frame, at string, parts, screen []*html.Node) []string {
 	var out []string
 	for i, p := range parts {
+		// A hidden field draws nothing (shape drops it): a fragment that is
+		// a whole form carries its own (s-admin-35: csrf, action).
+		if p.Data == "input" && attrOf(p, "type") == "hidden" {
+			continue
+		}
 		cs := classes(p)
 		if len(cs) == 0 {
 			out = append(out, fmt.Sprintf("%s: a drawing of %s without a class", at, frame))

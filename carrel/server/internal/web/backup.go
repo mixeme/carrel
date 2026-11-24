@@ -510,7 +510,7 @@ func backupHead(page *view.BackupPage, jobs int) {
 	switch jobs {
 	case 0:
 		page.Subtitle = line("No jobs yet")
-		page.Empty = join("Carrel copies raw ", monoRun(".ics"), ", ", monoRun(".vcf"), " and files to storage of your own, with a manifest and a read-back check. Nothing is kept here.")
+		page.Empty = join("Carrel copies raw ", monoRun(".vcf"), ", ", monoRun(".ics"), " and files to storage of your own, with a manifest and a read-back check. Nothing is kept here.")
 		page.EmptyNote = join("Already have an archive from another instance? ", strongRun("Restore"), " takes it from a file — a job is not needed for that.")
 	case 1:
 		page.Subtitle = line("One job · its own sources, destination and trigger")
@@ -613,7 +613,7 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 				Options: []view.Option{{Value: "1", Label: "Job is on", Selected: !job.Off}}},
 		}},
 		{Legend: "What to copy", LegendAside: s.chosenAside(sess.AccountID(), blob, job),
-			HintRuns: join("Files go as files; calendars, tasks and notes as ", monoRun(".ics"), ", address books as ", monoRun(".vcf"), "."),
+			HintRuns: join("Address books go as ", monoRun(".vcf"), "; calendars, tasks and notes as ", monoRun(".ics"), "; files as files."),
 			Rows:     []view.FormRow{{Name: "src", Label: "What to copy", Kind: view.InputCheck, Options: srcOpts, Error: errs["src"]}}},
 		{Legend: "Where to", Rows: []view.FormRow{
 			{Name: "mode", Label: "Where to", Kind: view.InputRadio, Options: modes,

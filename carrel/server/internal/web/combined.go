@@ -35,7 +35,7 @@ import (
 // where how Carrel works is explained.
 const (
 	unconnectedSub   = "No server connected yet"
-	unconnectedBody  = "Carrel stores nothing of its own: calendars, contacts and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password."
+	unconnectedBody  = "Carrel stores nothing of its own: contacts, calendars, tasks and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password."
 	unconnectedRail  = "Nothing connected yet"
 	unconnectedRubic = "Sources"
 )

@@ -2099,6 +2099,11 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		app.compare(t, "admin-escrow/recovered.json", app.h.do(postForm("/admin/escrow", app.sess, url.Values{
 			"action": {"recover"}, "login": {"viktor"}, "master": {"sixteen-char-pass!"}, "temp": {"temp-pass-4821"},
 		})))
+		// s-admin-35 (Typecase's note 224): Recover with one's own login,
+		// refused under Account.
+		app.compare(t, "admin-escrow/self.json", app.h.do(postForm("/admin/escrow", app.sess, url.Values{
+			"action": {"recover"}, "login": {"mix"}, "master": {"sixteen-char-pass!"}, "temp": {"9f2-brick-lamp"},
+		})))
 		escrow := func(on bool) {
 			if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 				st.Settings.EscrowEnabled = on
@@ -2393,6 +2398,18 @@ func TestFixtureAccountStates(t *testing.T) {
 		defer mutate(t, func(st *store.State, _ *store.User) { st.Settings.EscrowEnabled = true })
 		account(t, "escrow-off")
 		app.compare(t, "app-settings-escrow/escrow-off.json", app.h.do(get("/app/settings/escrow", app.sess)))
+	})
+	// account-18 and account-19 (Typecase's note 224): the only
+	// administrator — olga a user for the while — has «Deposit my key» off
+	// with its reason, on Account and on the escrow page.
+	t.Run("sole-admin", func(t *testing.T) {
+		role := func(r store.Role) {
+			mutate(t, func(st *store.State, _ *store.User) { st.UserByLogin("olga").Role = r })
+		}
+		role(store.RoleUser)
+		defer role(store.RoleAdmin)
+		account(t, "sole-admin")
+		app.compare(t, "app-settings-escrow/sole-admin.json", app.h.do(get("/app/settings/escrow", app.sess)))
 	})
 	// account-12: the page without a copy, and account-2: the deposit
 	// sheet over Account.

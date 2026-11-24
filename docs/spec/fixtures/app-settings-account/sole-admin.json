@@ -1,0 +1,458 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/password",
+      "id": "account.password",
+      "label": "Change password",
+      "method": "GET"
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/settings/account?op=end-others",
+      "id": "account.session.others",
+      "label": "End every other session",
+      "method": "POST"
+    }
+  ],
+  "danger": [
+    {
+      "danger": true,
+      "enabled": true,
+      "href": "/app/settings/unlock?back=%2Fapp%2Fsettings%2Faccount\u0026for=delete",
+      "id": "account.delete",
+      "label": "Delete account",
+      "method": "GET",
+      "target": "sheet"
+    }
+  ],
+  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays.",
+  "details": null,
+  "email": {
+    "aside": "new@example.org",
+    "badge": {
+      "label": "pending",
+      "role": "neutral"
+    },
+    "confirmedAt": "14 February",
+    "pending": "new@example.org",
+    "send": null,
+    "sentAt": "11:42",
+    "sentTo": "new@example.org",
+    "state": "pending"
+  },
+  "escrow": {
+    "actionNote": "",
+    "actions": [
+      {
+        "enabled": false,
+        "href": "/app/settings/escrow/deposit",
+        "id": "escrow.deposit",
+        "label": "Deposit my key",
+        "method": "GET",
+        "reason": "No other administrator could recover it: you are the only one.",
+        "target": "sheet"
+      }
+    ],
+    "active": true,
+    "badge": null,
+    "by": "",
+    "covered": false,
+    "deposited": "",
+    "lastRecovery": "",
+    "note": "No copy of your data key is deposited: if you lose your password, nobody can recover the account."
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "passwordNote": "Your saved connections stay readable after the change.",
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "profile": {
+    "action": "/app/settings/account",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Name",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/account?op=name",
+              "id": "account.name.save",
+              "label": "Save",
+              "method": "POST"
+            },
+            "hint": "Shown as the sender and used as the signature in letters you send. Blank means your login.",
+            "kind": "text",
+            "label": "Display name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Михаил Енученко"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "badges": [
+          {
+            "label": "pending",
+            "role": "neutral"
+          }
+        ],
+        "legend": "Email",
+        "legendAside": "new@example.org",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/account?op=email",
+              "id": "account.email.change",
+              "label": "Change",
+              "method": "POST"
+            },
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "Used for service notices, and as "
+              },
+              {
+                "mark": "mono",
+                "text": "Reply-To"
+              },
+              {
+                "text": " on letters you send."
+              }
+            ],
+            "kind": "email",
+            "label": "Address",
+            "name": "email",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "mix@example.org"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 3 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": 4,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
+          }
+        ],
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "sessions": [
+    {
+      "address": "203.0.113.7",
+      "agent": "Firefox · Windows",
+      "current": true,
+      "end": {
+        "csrf": "csrf",
+        "enabled": false,
+        "id": "account.session.end",
+        "label": "End",
+        "method": "POST",
+        "reason": "This is the session you are using: sign out instead."
+      },
+      "lastSeen": "just now",
+      "started": "2026-08-10 17:04"
+    },
+    {
+      "address": "203.0.113.8",
+      "agent": "Edge · Windows",
+      "current": false,
+      "end": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/account?op=end\u0026s=session",
+        "id": "account.session.end",
+        "label": "End",
+        "method": "POST"
+      },
+      "lastSeen": "just now",
+      "started": "2026-08-10 17:04"
+    }
+  ],
+  "subtitle": "mix · created 11 February 2026",
+  "title": "Account",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

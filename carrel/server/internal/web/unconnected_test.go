@@ -51,7 +51,7 @@ func TestAnInstanceWithNothingConnectedSaysSo(t *testing.T) {
 			t.Errorf("%s: head %q / %s", path, p.Title, sub)
 		}
 		if p.Empty == nil || p.Empty.Title != "" ||
-			p.Empty.Body != "Carrel stores nothing of its own: calendars, contacts and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password." ||
+			p.Empty.Body != "Carrel stores nothing of its own: contacts, calendars, tasks and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password." ||
 			len(p.Empty.Actions) != 1 || p.Empty.Actions[0].Label != "Connect account" {
 			t.Errorf("%s: empty %+v", path, p.Empty)
 		}

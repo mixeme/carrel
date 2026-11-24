@@ -71,14 +71,16 @@ func TestFolderHeadCountsTheFolder(t *testing.T) {
 // Upload files into it, or drop them onto the window.» with Upload and New
 // folder (states-32); a read-only one has nothing to offer.
 func TestEmptyFolderIsTheFrame(t *testing.T) {
-	m := frameOne(t, regexp.MustCompile(`(?s)<div class="tc-empty"><b>(.*?)</b>(.*?)<(?:button|label)`), mockupFrame(t, "states-32"), "empty folder")
-	title, body := frameText(m[1]), frameText(m[2])
+	// The sentence in a pair, with a script and without one (Typecase's
+	// note 223).
+	m := frameOne(t, regexp.MustCompile(`(?s)<div class="tc-empty"><b>(.*?)</b> <span class="tc-js">(.*?)</span><span class="tc-nojs">(.*?)</span>`), mockupFrame(t, "states-32"), "empty folder")
+	title, body, noScript := frameText(m[1]), frameText(m[2]), frameText(m[3])
 
 	f := filesFixture(t, true)
 	f.srv.SeedFolder(filesDocs + "sub/")
 	page := decode[view.FilesPage](t, f.h.do(get(f.at("", "sub", ""), f.sess)))
-	if page.Empty == nil || string(page.Empty.Title) != title || string(page.Empty.Body) != body {
-		t.Fatalf("empty = %+v, want %q %q", page.Empty, title, body)
+	if page.Empty == nil || string(page.Empty.Title) != title || string(page.Empty.Body) != body || string(page.Empty.BodyNoScript) != noScript {
+		t.Fatalf("empty = %+v, want %q %q / %q", page.Empty, title, body, noScript)
 	}
 	up, nf := actionByID(page.Empty.Actions, "file.upload"), actionByID(page.Empty.Actions, "folder.new")
 	if up == nil || nf == nil || !up.Primary || len(up.Arrow) != 0 || up.File == "" || !up.Enabled || !nf.Enabled || len(page.Empty.Actions) != 2 {
