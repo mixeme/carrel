@@ -586,6 +586,14 @@
         "id": "nav.neighbour",
         "label": "Что почитать про CRDT",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517",
+        "icon": "i-note",
+        "id": "nav.neighbour",
+        "label": "Про сроки по сборнику",
+        "method": "GET"
       }
     ],
     "note": "",

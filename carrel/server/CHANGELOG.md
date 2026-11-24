@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.10 — 2026-11-24
+
+Client `v0.11.55`; Typecase `a802ebb`.
+
+### For consumers
+
+- **`Rail.Neighbours` holds the whole notebook** (the owner's decision of
+  24.11.2026: one note on each side of the open one showed «то 3 заметки,
+  то 2»): in the list's order, the open one `On`; a window of twenty on each
+  side only for a very large notebook. The frames still draw one on a side
+  (Typecase's task 289).
+
 ## v0.4.9 — 2026-11-24
 
 Client `v0.11.55`; Typecase `a802ebb`. The owner's tour of the site.
