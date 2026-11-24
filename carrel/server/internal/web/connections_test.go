@@ -64,8 +64,16 @@ func TestAddConnectionWritesCatalog(t *testing.T) {
 	if p, ok := blob.Collection(conn.ID, people); !ok || !p.ReadOnly || !p.Has(view.KindContact) {
 		t.Errorf("people = %+v (found %v)", p, ok)
 	}
-	if len(blob.Selected) != 0 {
-		t.Errorf("selected = %+v; a new tick is not set by itself", blob.Selected)
+	// What the connection brings is ticked in its sections (the owner,
+	// 24.11.2026): the calendar for its kinds, the book for contacts.
+	ticked := map[string]bool{}
+	for _, sel := range blob.Selected {
+		ticked[string(sel.Kind)+" "+sel.Path] = true
+	}
+	for _, want := range []string{"event " + work, "contact " + people} {
+		if !ticked[want] {
+			t.Errorf("selected = %+v; %s is not ticked", blob.Selected, want)
+		}
 	}
 
 	snap := h.st.Snapshot()

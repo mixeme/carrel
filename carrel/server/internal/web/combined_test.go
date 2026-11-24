@@ -128,6 +128,7 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 	key, _ := f.sess.DataKey()
 	blob, _ := f.h.users.Catalog(f.sess.AccountID(), key)
 	second := blob.Connections[1].ID
+	untickAccount(t, f, second)
 	teamPath := "/app/contacts/" + second + "/" + url.PathEscape(teamBook)
 
 	asked := len(srv.Requests()) + len(other.Requests())

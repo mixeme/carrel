@@ -106,7 +106,7 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 			// The person's own password first (S-10.7): the password's
 			// sheet over the form, what was typed held (s-davloom-5,
 			// Typecase's note 86); the sheet creates the password.
-			_ = r.ParseForm()
+			_ = readForm(r)
 			holdDevice(sess, r.PostForm)
 			http.Redirect(w, r, s.unlockHref(unlockDavloom, "/app/settings/davloom?add=1&held=1"), http.StatusSeeOther)
 			return
@@ -141,7 +141,7 @@ const accountDeleteNote = "Deletes the account and the saved connections. Data o
 // scopeFromForm reads the ticked kinds (kind.{kind}) and collections
 // (col.{account}|{path}).
 func scopeFromForm(r *http.Request) user.DeviceScope {
-	_ = r.ParseForm()
+	_ = readForm(r)
 	return deviceScopeOf(r.PostForm)
 }
 

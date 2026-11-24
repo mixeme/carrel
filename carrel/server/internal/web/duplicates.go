@@ -953,7 +953,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	if do == "weights" {
 		var refused []string
 		sentN := 0
-		if r.ParseForm() == nil {
+		if readForm(r) == nil {
 			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.weights", "", func(d *sealed.Duplicates) error {
 				for _, sig := range dupes.Signals {
 					vals, sent := r.Form[weightField(sig)]

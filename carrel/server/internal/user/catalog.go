@@ -59,6 +59,12 @@ func (s *Service) AddConnection(viewerID string, dataKey [crypt.KeyLen]byte, con
 		for _, c := range cols {
 			c.AccountID = id
 			blob.Collections = append(blob.Collections, c)
+			// What a connection brings is ticked in its sections (the
+			// owner's decision of 24.11.2026): Connect no longer leaves
+			// every rail empty. A selection the person empties stays empty.
+			for _, k := range c.Kinds {
+				blob.Selected = append(blob.Selected, sealed.Selection{Kind: k, AccountID: id, Path: c.Path})
+			}
 		}
 		sealedBlob, err := sealed.Seal(dataKey, blob, u.Login)
 		if err != nil {

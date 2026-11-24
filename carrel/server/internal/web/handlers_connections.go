@@ -25,6 +25,12 @@ type connectionForm struct {
 	Label, Server, Login, CertFingerprint string
 	ServerErr, LabelErr                   view.Text
 	NoPassword                            bool
+	// PasswordErr: Connect or Test only with no password and no mark «The
+	// server asks no password» — said at the field, no server asked (the
+	// owner, 24.11.2026). Tested: the dialog back after Test only, whose
+	// password is not given back (S-10.7) — typed again before Connect.
+	PasswordErr view.Text
+	Tested      bool
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
 	// Refused is the dialog back after discovery failed: the refusal over
@@ -97,7 +103,7 @@ func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request)
 	case "pick":
 		// «account|path» of a collection, «subscription|section» of a
 		// feed's row of Lands in.
-		_ = r.ParseForm()
+		_ = readForm(r)
 		account, rest, _ := strings.Cut(r.PostFormValue("pick"), "|")
 		r.Form.Set("account", account)
 		r.Form.Set("path", rest)
@@ -184,6 +190,10 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	if f.NoPassword {
 		password = ""
+	} else if password == "" {
+		f.PasswordErr = missingPassword
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		return
 	}
 	pin := dav.NormalizeFingerprint(f.CertFingerprint)
 
@@ -622,7 +632,10 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 // (s-profile-14): an empty active field means «unchanged», so «no password»
 // cannot be said by emptiness.
 func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Form {
-	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, ReadOnly: f.NoPassword, Invalid: f.PasswordRefused}
+	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, ReadOnly: f.NoPassword, Invalid: f.PasswordRefused, Error: f.PasswordErr}
+	if f.Tested && !f.NoPassword && f.PasswordErr == "" {
+		password.Hint = "Type it again to connect: Carrel does not send a password back."
+	}
 	action, id, label := "/app/settings/connections/new", "connection.add", "Connect"
 	if f.Editing != "" {
 		// Beside a field the mark turned off there is nothing kept to keep
@@ -661,7 +674,11 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 	}
 	// The caret is in Server URL: Label is optional (s-profile-2). The edit
 	// puts it nowhere (s-profile-16).
-	if f.Editing == "" && !f.Refused {
+	switch {
+	case f.Editing == "" && (f.PasswordErr != "" || f.Tested && !f.NoPassword):
+		// The password is what is missing (the owner, 24.11.2026).
+		form = focused(form, "password")
+	case f.Editing == "" && !f.Refused:
 		form = focused(form, "server")
 	}
 	if f.Editing != "" {
@@ -1084,6 +1101,11 @@ func withValues(r *http.Request, vs url.Values) *http.Request {
 	}
 	return r2
 }
+
+// missingPassword is the password's field when Connect or Test only came
+// without one (the owner, 24.11.2026): Carrel asks no server with an empty
+// password it was not told to send.
+const missingPassword = "Type the password, or tick «The server asks no password»."
 
 func (s *Server) connectAction() view.Action {
 	return view.Action{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.connectHref(), Method: "GET", Enabled: true}

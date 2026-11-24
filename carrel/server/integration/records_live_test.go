@@ -308,7 +308,7 @@ func runRecords(t *testing.T, endpoint, user, pass string) {
 
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{
-		"server": {endpoint}, "login": {user}, "password": {pass},
+		"server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)},
 	}))
 	key, _ := app.sess.DataKey()
 	blob, ok := app.users.Catalog(app.sess.AccountID(), key)

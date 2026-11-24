@@ -452,7 +452,7 @@ func sameKeys(a, b []recValue) bool {
 func answersOf(r *http.Request, qs []question) (map[string]sealed.RecordRef, map[string][]string) {
 	prefs := map[string]sealed.RecordRef{}
 	dropped := map[string][]string{}
-	_ = r.ParseForm()
+	_ = readForm(r)
 	for _, q := range qs {
 		sent := r.Form["choice."+q.prop()]
 		if q.many() {

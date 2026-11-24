@@ -37,7 +37,7 @@ type typedSettings struct {
 // sender and the ceilings of people's letters while they are off, which the
 // page does not show (Typecase's note 88) — stays as it is stored.
 func (s *Server) settingsTyped(r *http.Request) typedSettings {
-	_ = r.ParseForm()
+	_ = readForm(r)
 	stored := s.users.Settings()
 	kept := map[string]int{"attach": stored.MailMaxAttachMB, "letter": stored.MailMaxMessageMB,
 		"recipients": stored.MailMaxRecipients, "perDay": stored.MailMaxPerDay}

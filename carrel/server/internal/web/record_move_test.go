@@ -76,7 +76,24 @@ func addAccount(t *testing.T, f davFixture, srv *davtest.Server) string {
 	if len(blob.Connections) != 2 {
 		t.Fatalf("connections = %d, want 2", len(blob.Connections))
 	}
-	return blob.Connections[1].ID
+	id := blob.Connections[1].ID
+	untickAccount(t, f, id)
+	return id
+}
+
+// untickAccount takes off the ticks Connect set on an account's collections
+// (the owner, 24.11.2026): a test of moves and ticks starts from its own.
+func untickAccount(t *testing.T, f davFixture, id string) {
+	t.Helper()
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		var kept []sealed.Selection
+		for _, s := range b.Selected {
+			if s.AccountID != id {
+				kept = append(kept, s)
+			}
+		}
+		b.Selected = kept
+	})
 }
 
 func (f moveFixture) record(account, book, uid string) string {

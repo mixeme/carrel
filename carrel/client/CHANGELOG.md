@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.55 — 2026-11-24
+
+Server `v0.4.9`; Typecase `a802ebb`. The owner's tour of the site.
+- **A row opens the panel alone.** Rows that open in the details panel
+  (their `Target`, «Keep the details panel open» on) put their list's
+  `Target` to that zone: the live layer asks the panel, the page kept —
+  going from note to note reloaded the whole page. The page under a sheet
+  asks none. `TestRowsThatOpenInThePanelAskThePanel` holds it.
+- **New's arrow menu** stands in its panel, as s-notes-7 draws it: a popping
+  menu of its own stood to the right of a list head's split.
+
 ## v0.11.54 — 2026-11-24
 
 Server `v0.4.8`; Typecase `a802ebb` (notes 223, 224: tasks 278–281). The

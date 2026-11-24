@@ -271,15 +271,11 @@ func standRails(t *testing.T, b *plainBrowser, feeds string, keep func(value, na
 
 	// Every rail ticked, then the ones the frames draw off taken off: the
 	// holidays stand in the calendar only, the league nowhere.
-	for _, section := range []string{"contacts", "calendar", "tasks", "notes"} {
+	// Connect ticks a connection's collections (the owner, 24.11.2026), not
+	// the feeds: the combined row ticks every one while not all are.
+	for _, section := range []string{"contacts", "calendar", "tasks", "notes", "files"} {
 		b.open("/app/" + section)
-		if b.page.find(isButton("Tick every")) != nil {
-			b.press("Tick every", nil, nil)
-		}
-	}
-	b.open("/app/files")
-	if b.page.find(isButton("Tick every")) != nil {
-		b.press("Tick every", nil, nil)
+		tickEvery(t, b, section)
 	}
 	for _, off := range []struct{ section, name string }{
 		{"contacts", "Рассылки"}, {"calendar", "Дни рождения"}, {"calendar", "Расписание лиги"},
@@ -405,6 +401,26 @@ func untick(t *testing.T, b *plainBrowser, name string) {
 
 // untickWhere presses the first tick of the rail match picks; what is the
 // tick of which source is said as what.
+// tickEvery presses the combined row of a section's rail while it is not on:
+// every collection and feed of the kind ticked.
+func tickEvery(t *testing.T, b *plainBrowser, section string) {
+	t.Helper()
+	all := func(n *html.Node) bool {
+		return (n.Data == "button" || n.Data == "input") && attr(n, "name") == "toggle" && strings.HasSuffix(attr(n, "value"), "/app/"+section)
+	}
+	btn := b.page.find(all)
+	if btn == nil || attr(btn, "aria-pressed") == "true" {
+		return
+	}
+	form := b.page.formOf(btn)
+	fields := b.page.fieldsOf(form)
+	fields.Set("toggle", attr(btn, "value"))
+	u, _ := b.page.url.Parse(attr(form, "action"))
+	req, _ := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(fields.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	b.do(req)
+}
+
 func untickWhere(t *testing.T, b *plainBrowser, what string, match func(*html.Node) bool) {
 	t.Helper()
 	btn := b.page.find(func(n *html.Node) bool {

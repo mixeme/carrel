@@ -123,7 +123,17 @@ func Screen(p *view.NotesPage) w.Shell {
 		if g.Rubric != "" {
 			main = append(main, w.ListGroup{Title: w.Rubric{Text: string(g.Rubric), Form: w.RubricInline}, Count: &w.Num{Value: g.Count}})
 		}
-		main = append(main, w.List{Rows: rows})
+		list := w.List{Rows: rows}
+		// A row that opens in the details panel asks the panel alone with the
+		// live layer (C-7.2), the page kept — not the whole page (the owner,
+		// 24.11.2026: going from note to note reloaded the page). The zone is
+		// the rows' own Target; without a kept panel a row leads to its page.
+		for _, r := range g.Rows {
+			if p.Look.Panel && r.Target != "" {
+				list.Target = r.Target
+			}
+		}
+		main = append(main, list)
 	}
 	if p.Empty != nil {
 		main = append(main, w.Empty{Parts: bind.EmptyParts(*p.Empty)})

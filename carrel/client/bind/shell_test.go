@@ -1,6 +1,7 @@
 package bind_test
 
 import (
+	"strings"
 	"testing"
 
 	"carrel.dev/carrel/client/bind"
@@ -32,13 +33,19 @@ func TestTop(t *testing.T) {
 				Main: w.Button{Label: "New note", Icon: "quill", Kind: w.ButtonPrimary, Href: "/app/notes/quick"},
 				More: w.SplitDrop{
 					Arrow: w.Button{Icon: "chev", Kind: w.ButtonPrimary, Title: "More to create"},
-					Menu:  w.Menu{Items: []w.MenuPart{w.MenuItem{Icon: "quill", Label: "Note", Href: "/n"}, w.MenuSep{}, w.MenuItem{Label: "Contact", Href: "/c"}}, Pop: w.MenuUnder},
+					// In place in the arrow's panel, as s-notes-7 draws it: a
+					// popping menu stood to the right of the split (the owner,
+					// 24.11.2026).
+					Menu: w.Menu{Items: []w.MenuPart{w.MenuItem{Icon: "quill", Label: "Note", Href: "/n"}, w.MenuSep{}, w.MenuItem{Label: "Contact", Href: "/c"}}},
 				},
 			},
 			w.Button{Label: "2 min ago", Icon: "refresh", Href: "/app/contacts?again=1"},
 			w.UserMenu{Name: "mix", Href: "/app/settings/account"},
 		},
 	})
+	if printed := bind.Top(bar, bind.TopWords{Brand: brand}).Actions[0].(w.Split).Render(); !strings.Contains(printed, `tc-drop__panel--right"><div class="tc-menu"`) {
+		t.Errorf("New's arrow prints its menu otherwise than s-notes-7: %s", printed)
+	}
 	// Nothing to ask, or a poll that still runs (Р-39 of Typecase, states-7,
 	// -8, -13, -14, -18, -25): the refresh is switched off, says why, and its
 	// words are its own — there is no answer to say the time of.

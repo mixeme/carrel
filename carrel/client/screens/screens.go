@@ -936,19 +936,31 @@ func over(u *view.Under, sheet widget.Sheet) Root {
 	case u == nil:
 		return bind.Alone(sheet)
 	case u.Contacts != nil:
-		shell = contacts.Screen(u.Contacts)
+		// The page under a sheet is inert: its rows ask no panel.
+		page := *u.Contacts
+		page.Look.Panel = false
+		shell = contacts.Screen(&page)
 	case u.Contact != nil:
 		shell = contact.Screen(u.Contact)
 	case u.Agenda != nil:
-		shell = agenda.Screen(u.Agenda)
+		// The page under a sheet is inert: its rows ask no panel.
+		page := *u.Agenda
+		page.Look.Panel = false
+		shell = agenda.Screen(&page)
 	case u.Event != nil:
 		shell = event.Screen(u.Event)
 	case u.Tasks != nil:
-		shell = tasks.Screen(u.Tasks)
+		// The page under a sheet is inert: its rows ask no panel.
+		page := *u.Tasks
+		page.Look.Panel = false
+		shell = tasks.Screen(&page)
 	case u.Task != nil:
 		shell = task.Screen(u.Task)
 	case u.Notes != nil:
-		shell = notes.Screen(u.Notes)
+		// The page under a sheet is inert: its rows ask no panel.
+		page := *u.Notes
+		page.Look.Panel = false
+		shell = notes.Screen(&page)
 	case u.Note != nil:
 		shell = note.Screen(u.Note)
 	case u.EventEdit != nil:

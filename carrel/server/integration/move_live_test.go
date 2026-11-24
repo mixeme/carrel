@@ -393,7 +393,7 @@ func makeMoveCollections(ctx context.Context, t *testing.T, endpoint, user, pass
 func connectLive(t *testing.T, app *liveApp, endpoint, user, pass string) string {
 	t.Helper()
 	redirected(t, "connect "+endpoint, app.post("/app/settings/connections", url.Values{
-		"server": {endpoint}, "login": {user}, "password": {pass},
+		"server": {endpoint}, "login": {user}, "password": {pass}, "noPassword": {askedNone(pass)},
 	}))
 	blob := liveCatalog(t, app)
 	return blob.Connections[len(blob.Connections)-1].ID
