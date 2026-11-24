@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.52 — 2026-11-24
+
+Server `v0.4.6`; Typecase `9fdc59e`. The owner from a phone: on an
+instance with nothing connected the explanation stood lower in Contacts,
+Tasks and Notes than in Calendar. Their heads printed an empty actions
+block (`tc-acts`), which takes a line of its own on a narrow screen; the
+calendar's had been fixed alone on 21.11 because only it had the fixture.
+A head without actions has no `Acts` now in every list, and states-1 is a
+frame of Contacts, Tasks and Notes on their fixtures `nothing` (red first:
+«the screen has <.tc-acts> the frame does not draw»). The files' root with
+nothing connected has the section's head (no snug pad, the plain title):
+the server answers it as every section's empty page; its fixture waits for
+Typecase's task 279 (New folder off in the rail's foot).
+
 ## v0.11.51 — 2026-11-24
 
 Server `v0.4.5`; Typecase `9fdc59e`. No screen changed. A new bite,

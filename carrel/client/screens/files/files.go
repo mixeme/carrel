@@ -59,6 +59,12 @@ const (
 //   - Nothing to show (Empty): what, why, and the button that helps.
 func Screen(p *view.FilesRootPage) w.Shell {
 	h := w.Head{Title: &w.HeadTitle{Text: rootName(p.Rail), Size: w.HeadTitle18}, Pad: w.HeadSnug}
+	if rootName(p.Rail) == "" {
+		// Nothing connected (states-1): no root in the rail, and the head
+		// is the section's, as every list's on an empty instance (the owner
+		// from a phone, 24.11.2026).
+		h = w.Head{Title: &w.HeadTitle{Text: string(p.Title)}}
+	}
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}

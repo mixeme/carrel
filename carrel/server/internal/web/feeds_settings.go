@@ -200,7 +200,7 @@ func (s *Server) postFolder(w http.ResponseWriter, r *http.Request, sess *sessio
 	s.redirect(w, r, "/app/settings/connections")
 }
 
-var sectionTitles = map[view.Kind]string{view.KindContact: "Contacts", view.KindEvent: "Calendar", view.KindTask: "Tasks", view.KindNote: "Notes"}
+var sectionTitles = map[view.Kind]string{view.KindContact: "Contacts", view.KindEvent: "Calendar", view.KindTask: "Tasks", view.KindNote: "Notes", view.KindFile: "Files"}
 
 // feedTrace is what a read found, step by step.
 // feedCheckTrace is a feed's Check as the steps of its card's trace: the

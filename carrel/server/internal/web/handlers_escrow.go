@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -8,6 +9,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
@@ -95,7 +97,7 @@ func (s *Server) getEscrowDeposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	snap := s.store.Snapshot()
-	if u := snap.UserByID(sess.AccountID()); u == nil || !store.EscrowActive(&snap) || store.UserDeposited(u) {
+	if u := snap.UserByID(sess.AccountID()); u == nil || !store.EscrowActive(&snap) || store.UserDeposited(u) || store.SoleAdmin(&snap, u) {
 		s.notFound(w, r)
 		return
 	}
@@ -221,6 +223,11 @@ func (s *Server) escrowStatus(sess *session.Session, u *store.User, onAccount bo
 		ID: "escrow.deposit", Label: "Deposit my key",
 		Href: s.route("/app/settings/escrow/deposit"), Method: "GET", Enabled: true,
 	}}
+	// The only administrator: nobody could recover the copy, so there is
+	// none to make — off with its reason (the owner, 24.11.2026).
+	if store.SoleAdmin(&snap, u) {
+		status.Actions[0].Enabled, status.Actions[0].Reason = false, formError(user.ErrSoleAdminDeposit)
+	}
 	return status
 }
 
@@ -302,7 +309,11 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		temp, err := s.users.RecoverEscrow(ctx, sess.AccountID(), login, r.FormValue("master"), r.FormValue("temp"))
-		if err != nil {
+		if errors.Is(err, user.ErrRecoverSelf) {
+			// Nobody recovers themselves (the owner, 24.11.2026): signed in,
+			// one changes one's password.
+			flash.recoverErr = "You are signed in as " + sess.Login() + ": change your password on Account."
+		} else if err != nil {
 			flash.recoverErr = string(formError(err))
 		} else {
 			mailed := s.sendEscrowRecoveryMail(r, login, sess.Login())

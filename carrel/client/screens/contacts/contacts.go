@@ -184,11 +184,13 @@ func head(p *view.ContactsListPage) w.Head {
 		// collection the server names, the arrow picks another.
 		acts = append(acts, bind.NewSplit(b, a.Arrow, rail.ReadOnly, top.More))
 	}
-	return w.Head{
-		Title: title,
-		Subs:  []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}},
-		Acts:  &w.Acts{Items: acts},
+	h := w.Head{Title: title, Subs: []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}}
+	if len(acts) > 0 {
+		// Nothing to make or carry on an instance with nothing connected:
+		// the head has no actions (states-1), as the calendar's.
+		h.Acts = &w.Acts{Items: acts}
 	}
+	return h
 }
 
 // bar is the bar over the list.

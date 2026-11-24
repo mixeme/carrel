@@ -1379,14 +1379,6 @@
               "label": "Disconnect",
               "method": "GET",
               "target": "sheet"
-            },
-            {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/settings/connections?account=a-baikal\u0026op=rediscover",
-              "id": "connection.rediscover",
-              "label": "Update collection list",
-              "method": "POST"
             }
           ],
           "answered": "",

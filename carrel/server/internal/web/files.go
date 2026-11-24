@@ -343,6 +343,10 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 	page := view.FilesRootPage{Shell: s.buildShell(sess, "Files")}
 	page.Rail = s.filesRail(sess, blob, nil)
 	page.Print = view.Print{Title: page.Title}
+	if nothingConnected(blob) {
+		s.writePage(w, r, http.StatusOK, s.unconnectedPage(page.Shell, filesSpec))
+		return
+	}
 	// The root asks no server: its refresh reads it again, and says when a
 	// folder of a ticked storage was read last (s-files-6).
 	page.Top.Refresh = view.Refresh{Action: view.Action{ID: "files.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route("/app/files"), Method: "GET", Enabled: true}}

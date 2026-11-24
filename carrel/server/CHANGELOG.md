@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.6 — 2026-11-24
+
+Client `v0.11.52`; Typecase `9fdc59e`.
+
+### For consumers
+
+- **Files on an instance with nothing connected is every section's empty
+  page** (states-1; the owner from a phone, 24.11.2026: Files was another
+  page, «Selected collections · 0 of 0 storages», «No file storage is
+  connected», Connect account not the main button). `/app/files` answers
+  `FilesRootPage` with `title` «Files», `subtitle` «No server connected
+  yet», `empty` the instance's explanation with Connect account primary,
+  the rail's «Sources» with «Nothing connected yet», no refresh and no
+  shortcuts. With an account connected and no storage the page is as
+  before. Every section's empty page drops the rail's shortcuts.
+- **The only administrator deposits no key** (the owner's decision of
+  24.11.2026, S-10.5): nobody else could recover it. `EscrowStatus`'s
+  «Deposit my key» comes `enabled: false` with `reason` «No other
+  administrator could recover it: you are the only one.» on Account and
+  Key escrow; `/app/settings/escrow/deposit` answers 404 and a deposit
+  posted anyway is refused with the same words. A second administrator
+  turns it on. Recover refuses the signed-in administrator's own login:
+  «You are signed in as ‹login›: change your password on Account.»
+- **A refused connection's card has no Update collection list** (s-profile-1,
+  -27: Test again, Edit, Disconnect): discovery asks the same password the
+  server refused. Found by the text of the settings against their frames
+  (acceptance round 7); the frame comparison let the longer row pass.
+
 ## v0.4.5 — 2026-11-24
 
 Client `v0.11.50`; Typecase `9fdc59e` (notes 220, 221).

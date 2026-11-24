@@ -816,11 +816,12 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		card.Refused, card.Answered, card.Note = true, "", text(note)
 		card.State = view.CollectionUnavailable
 		card.Actions[0].Label = "Test again"
-		// Nothing is made on a server that refuses: the card has no New
-		// collection or New folder (s-profile-1, baikal).
+		// Nothing is made on a server that refuses, and nothing is found
+		// there: the card has no New collection or New folder, and no
+		// Update collection list (s-profile-1, -27, baikal).
 		var kept []view.Action
 		for _, a := range card.Actions {
-			if a.ID != "collection.new" && a.ID != "folder.new" {
+			if a.ID != "collection.new" && a.ID != "folder.new" && a.ID != "connection.rediscover" {
 				kept = append(kept, a)
 			}
 		}

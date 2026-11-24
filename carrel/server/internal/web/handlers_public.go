@@ -24,7 +24,7 @@ func formError(err error) view.Text {
 		user.ErrPasswordShort, user.ErrPasswordMismatch, user.ErrLoginTaken, user.ErrLastAdmin, user.ErrLoginConfirm,
 		user.ErrLoginEmpty, user.ErrSelfRegNeedsMail, user.ErrBadAddress,
 		user.ErrMasterPasswordShort, user.ErrMasterPasswordMismatch,
-		user.ErrEscrowNotConfigured, user.ErrEscrowConfigured, user.ErrNotDeposited, user.ErrEscrowDisabled,
+		user.ErrEscrowNotConfigured, user.ErrEscrowConfigured, user.ErrNotDeposited, user.ErrEscrowDisabled, user.ErrSoleAdminDeposit,
 	} {
 		if errors.Is(err, known) {
 			return text(refusal(known.Error()))

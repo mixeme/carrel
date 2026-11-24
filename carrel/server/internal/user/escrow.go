@@ -21,6 +21,12 @@ var (
 	ErrEscrowConfigured       = errors.New("key escrow is already configured")
 	ErrNotDeposited           = errors.New("no deposited key for this account")
 	ErrEscrowDisabled         = errors.New("key escrow is disabled on this instance")
+	// The only administrator's copy is of no use: recovery is done by an
+	// administrator signed in with the master password (the owner,
+	// 24.11.2026).
+	ErrSoleAdminDeposit = errors.New("no other administrator could recover it: you are the only one")
+	// A signed-in administrator changes their own password on Account.
+	ErrRecoverSelf = errors.New("an administrator does not recover their own account")
 )
 
 func validateMasterPassword(pw string) error {
@@ -141,6 +147,9 @@ func (s *Service) DepositEscrow(accountID string, dataKey [crypt.KeyLen]byte) er
 		if u == nil || u.Disabled {
 			return nil, ErrNotFound
 		}
+		if store.SoleAdmin(st, u) {
+			return nil, ErrSoleAdminDeposit
+		}
 		u.EscrowOptIn = true
 		if err := store.TryDepositEscrow(st, u, dataKey, now); err != nil {
 			return nil, err
@@ -187,6 +196,9 @@ func (s *Service) RecoverEscrow(ctx context.Context, actorID, login, masterPassw
 		return "", ErrEscrowNotConfigured
 	}
 	u := snap.UserByLogin(login)
+	if u != nil && u.ID == actorID {
+		return "", ErrRecoverSelf
+	}
 	if u == nil || !store.UserDeposited(u) {
 		return "", ErrNotDeposited
 	}
