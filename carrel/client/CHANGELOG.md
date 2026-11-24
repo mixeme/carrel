@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.56 — 2026-11-24
+
+Server `v0.4.11`; Typecase `a802ebb`. The `topbar` zone of a page in the
+shell is drawn by the page's screen (`renderer.ShellZone`), out of band
+too: the end of a poll puts the top bar back with its Refresh on. A
+`topbar` that is a `TopBar` without its page (the password sheet's live
+answer) stays JSON.
+
 ## v0.11.55 — 2026-11-24
 
 Server `v0.4.9`; Typecase `a802ebb`. The owner's tour of the site.

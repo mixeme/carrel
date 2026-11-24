@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.11 — 2026-11-24
+
+Client `v0.11.56`; Typecase `a802ebb`.
+
+### For consumers
+
+- **The end of a poll brings the page's top bar** (`topbar` out of band,
+  the same page as `main`) in the stream's `poll-finished` and the
+  fallback's last answer. A list is drawn while its poll runs, its Refresh
+  off with «The poll is still running.»; it stayed off until the page was
+  loaded again, which starts another poll (the owner, 24.11.2026: «Refresh
+  не активен стал почему-то»).
+
 ## v0.4.10 — 2026-11-24
 
 Client `v0.11.55`; Typecase `a802ebb`.

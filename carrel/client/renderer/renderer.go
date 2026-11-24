@@ -26,8 +26,8 @@
 //     answer) the zone queue as the folder draws it. Out of band (C-7.3)
 //     go a rail — drawn by the screen of the page it is of
 //     (screens.RailOf) — and a page's main, each in its template
-//     (page.Fragment). The rest — topbar, which no screen built draws
-//     alone — is JSON.
+//     (page.Fragment), and at the end of a poll the page's top bar (its
+//     Refresh on), drawn by the page's screen. The rest is JSON.
 //   - Event: the events of C-7.4 as a poll's bar answered alone, the rail
 //     out of band, their lines the data lines; JSON is JSON.
 package renderer
@@ -264,6 +264,13 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 		return "", false
 	}
 	switch target {
+	case render.TargetTopbar:
+		// The top bar as the page draws it: the end of a poll turns its
+		// Refresh on (the owner, 24.11.2026).
+		if shell.Top == nil {
+			return "", false
+		}
+		return shell.Top.Render(), true
 	case render.TargetMain:
 		// The page named as its zone, the forms its buttons submit inside
 		// it: the answer takes the zone's place whole, the forms with it.
@@ -401,16 +408,16 @@ func (r *Renderer) outOfBand(extra []render.OOB) ([]page.ZonePart, bool) {
 				return nil, false
 			}
 			z.Body, z.Forms = []page.Part{document.PollZone(screens.PollBar(p), p)}, bind.PollForms(p)
-		case render.TargetMain:
+		case render.TargetMain, render.TargetTopbar:
 			scr, model, ok := r.screenOf(x.Body)
 			if !ok || zone.KindOf(model) != zone.ShellPage {
 				return nil, false
 			}
-			main, ok := ShellZone(scr, model, render.TargetMain)
+			drawn, ok := ShellZone(scr, model, x.Target)
 			if !ok {
 				return nil, false
 			}
-			z.Body = []page.Part{page.Printed(main)}
+			z.Body = []page.Part{page.Printed(drawn)}
 		default:
 			return nil, false
 		}

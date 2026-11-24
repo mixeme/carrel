@@ -1385,7 +1385,11 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 				extra = []render.OOB{{Target: render.TargetRail, Body: stampView(*rail, token, s.basePath)}}
 			}
 			if page, ok := s.pageAtTheEnd(r, t, r.URL.Query()); ok {
-				extra = append(extra, render.OOB{Target: render.TargetMain, Body: stampView(page, token, s.basePath)})
+				stamped := stampView(page, token, s.basePath)
+				// The top bar with it: drawn while the poll ran, its Refresh
+				// was off (the owner, 24.11.2026: «Refresh не активен»).
+				extra = append(extra, render.OOB{Target: render.TargetMain, Body: stamped},
+					render.OOB{Target: render.TargetTopbar, Body: stamped})
 			}
 			_ = s.render.Event(w, render.EventPollFinished, render.TargetPoll, bar, extra)
 			_ = rc.Flush()
@@ -1428,7 +1432,8 @@ func (s *Server) getSearchProgressPoll(w http.ResponseWriter, r *http.Request) {
 			extra = append(extra, render.OOB{Target: render.TargetRail, Body: *rail})
 		}
 		if page, ok := s.pageAtTheEnd(r, t, r.URL.Query()); ok {
-			extra = append(extra, render.OOB{Target: render.TargetMain, Body: page})
+			extra = append(extra, render.OOB{Target: render.TargetMain, Body: page},
+				render.OOB{Target: render.TargetTopbar, Body: page})
 		}
 	}
 	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), snap, owner), extra)
