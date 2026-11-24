@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.6 — 2026-11-24
+
+Client `v0.11.52`; Typecase `9fdc59e`.
+
+### For consumers
+
+- **Files on an instance with nothing connected is every section's empty
+  page** (states-1; the owner from a phone, 24.11.2026: Files was another
+  page, «Selected collections · 0 of 0 storages», «No file storage is
+  connected», Connect account not the main button). `/app/files` answers
+  `FilesRootPage` with `title` «Files», `subtitle` «No server connected
+  yet», `empty` the instance's explanation with Connect account primary,
+  the rail's «Sources» with «Nothing connected yet», no refresh and no
+  shortcuts. With an account connected and no storage the page is as
+  before. Every section's empty page drops the rail's shortcuts.
+
 ## v0.4.5 — 2026-11-24
 
 Client `v0.11.50`; Typecase `9fdc59e` (notes 220, 221).

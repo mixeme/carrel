@@ -564,6 +564,10 @@ STATE_FRAME = {
     "app-collections-new/refused": "s-profile-6",
     # Ничего не подключено (states-1; замечание владельца 21.11.2026).
     "app-agenda-all/nothing": "states-1",
+    # Каждый раздел так же (роды равны; владелец с телефона 24.11.2026).
+    "app-contacts/nothing": "states-1",
+    "app-tasks-all/nothing": "states-1",
+    "app-notes-all/nothing": "states-1",
     # Записки Typecase 210, 215: адрес держит корзина сервера (SV-30).
     "app-collections-new/trash": "s-profile-38",
     # Записка Typecase 112: листы коллекций из Connections (Р-75), их отказы

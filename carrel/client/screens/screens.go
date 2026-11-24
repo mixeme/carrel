@@ -419,7 +419,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.ContactsListPage) },
-		Frames: []string{"s-contacts-1", "states-4", "states-7", "states-8", "states-9", "states-10", "states-11", "print-2"},
+		Frames: []string{"s-contacts-1", "states-4", "states-7", "states-8", "states-9", "states-10", "states-11", "states-1", "print-2"},
 		Draw: func(model any) Root {
 			if p := model.(*view.ContactsListPage); p.Print.Paper {
 				return contacts.Paper(p)
@@ -528,7 +528,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.TasksPage) },
-		Frames: []string{"s-tasks-1", "s-tasks-15", "s-tasks-20", "states-18", "states-19", "states-20", "states-21", "states-22", "states-23", "print-4"},
+		Frames: []string{"s-tasks-1", "s-tasks-15", "s-tasks-20", "states-18", "states-19", "states-20", "states-21", "states-22", "states-23", "states-1", "print-4"},
 		Draw: func(model any) Root {
 			if p := model.(*view.TasksPage); p.Print.Paper {
 				return tasks.Paper(p)
@@ -569,7 +569,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotesPage) },
-		Frames: []string{"s-notes-1", "s-notes-31", "s-notes-33", "states-25", "states-26", "states-27", "states-28", "states-29", "states-30", "print-8"},
+		Frames: []string{"s-notes-1", "s-notes-31", "s-notes-33", "states-25", "states-26", "states-27", "states-28", "states-29", "states-30", "states-1", "print-8"},
 		Draw: func(model any) Root {
 			if p := model.(*view.NotesPage); p.Print.Paper {
 				return notes.Paper(p)

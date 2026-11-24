@@ -17,7 +17,7 @@ func TestAnInstanceWithNothingConnectedSaysSo(t *testing.T) {
 	mix := h.login("mix", "password123")
 	for path, title := range map[string]string{
 		"/app/contacts": "Contacts", "/app/calendar?from=2026-08-10": "Calendar",
-		"/app/tasks": "Tasks", "/app/notes": "Notes",
+		"/app/tasks": "Tasks", "/app/notes": "Notes", "/app/files": "Files",
 	} {
 		rec := h.do(get(path, mix))
 		var p struct {

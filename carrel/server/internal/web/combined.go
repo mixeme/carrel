@@ -51,7 +51,8 @@ func nothingConnected(blob sealed.Blob) bool {
 // (states-1; the owner, 21.11.2026: the contacts said «No books are ticked»
 // and ticked nothing): the section's name, «No server connected yet», no
 // actions in the head and no bar, the explanation with Connect account, and
-// the rail's «Nothing connected yet» under «Sources». Every kind alike.
+// the rail's «Nothing connected yet» under «Sources». Every kind alike, the
+// files' root as well (the owner from a phone, 24.11.2026).
 func (s *Server) unconnectedPage(shell view.Shell, spec kindSpec) any {
 	shell.Title = text(sectionTitles[spec.kind])
 	// Nothing to poll: the top bar has no refresh, and the sections no
@@ -62,6 +63,9 @@ func (s *Server) unconnectedPage(shell view.Shell, spec kindSpec) any {
 	}
 	shell.Rail.Sections = []view.RailSection{{Account: unconnectedRubic, State: view.CollectionOK, Note: unconnectedRail}}
 	shell.Rail.Note = ""
+	// The files' shortcuts (Attachments, Published) lead nowhere without a
+	// storage; states-1 draws none.
+	shell.Rail.Shortcuts = nil
 	connect := s.connectAction()
 	connect.Primary = true
 	empty := &view.Notice{Role: view.NoticeInfo, Body: unconnectedBody, Actions: []view.Action{connect}}
@@ -72,6 +76,8 @@ func (s *Server) unconnectedPage(shell view.Shell, spec kindSpec) any {
 		return view.AgendaPage{Shell: shell, Subtitle: line(unconnectedSub), Empty: empty}
 	case view.KindTask:
 		return view.TasksPage{Shell: shell, Subtitle: unconnectedSub, Empty: empty}
+	case view.KindFile:
+		return view.FilesRootPage{Shell: shell, Subtitle: text(unconnectedSub), Empty: empty}
 	default:
 		return view.NotesPage{Shell: shell, Subtitle: unconnectedSub, Empty: empty}
 	}
