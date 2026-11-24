@@ -45,7 +45,8 @@ func railParts(r view.Rail) []w.RailPart {
 	nav := w.Nav{}
 	for _, n := range r.Nav {
 		if n.ID == back {
-			parts = append(parts, w.Nav{Items: []w.NavItem{bind.NavItem(n)}})
+			// «Sections» beside it on a phone (Typecase's note 222, task 274).
+			parts = append(parts, w.Nav{Items: []w.NavItem{bind.NavItem(n)}, Sections: true})
 			continue
 		}
 		nav.Items = append(nav.Items, bind.NavItem(n))

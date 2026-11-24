@@ -4,6 +4,19 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.53 — 2026-11-24
+
+Server `v0.4.7`; Typecase `90e3823` (note 222: tasks 274, 275). The mockup
+copied. On a narrow width the rail opens as a panel — pressing the current
+section again, in the icons' rail or the phone's bottom bar —, the library's
+script with nothing printed by the client. Settings and administration put
+«Sections» beside «Back to app» (`w.Nav{Sections: true}` in
+`bind.BackRail` and the administration's rail): on a phone the bottom bar
+holds «← App», the current section and «Sections», which opens the rail
+with all of them. Without it the frame comparison of every settings screen
+is red. The fields the library dropped (`Nav.Opens`, `TickRowTouch`, a
+`Scrim` in `Main`, a `RailSec` in `Sheet`) were never printed here.
+
 ## v0.11.52 — 2026-11-24
 
 Server `v0.4.6`; Typecase `9fdc59e`. The owner from a phone: on an

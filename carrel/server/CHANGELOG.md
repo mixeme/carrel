@@ -17,6 +17,11 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.7 — 2026-11-24
+
+Client `v0.11.53`; Typecase `90e3823` (note 222). The mockup copied; no
+change to the contract or the answers.
+
 ## v0.4.6 — 2026-11-24
 
 Client `v0.11.52`; Typecase `9fdc59e`.

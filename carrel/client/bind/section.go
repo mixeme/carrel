@@ -18,7 +18,10 @@ func BackRail(r view.Rail, back, rubric, davloom string) []w.RailPart {
 	for _, n := range r.Nav {
 		it := NavItem(n)
 		if n.ID == back {
-			parts = append(parts, w.Nav{Items: []w.NavItem{it}})
+			// «Sections» beside it: on a phone the bottom bar holds «← App»,
+			// the current section and the button that opens the rail with
+			// all of them (Typecase's note 222, task 274).
+			parts = append(parts, w.Nav{Items: []w.NavItem{it}, Sections: true})
 			continue
 		}
 		if n.Icon == "" {
