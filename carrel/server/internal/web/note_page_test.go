@@ -94,8 +94,7 @@ func neighbourLabels(rail view.Rail) (labels []string, on string) {
 // from-typecase notes 9 and 18, s-notes-2 and s-notes-20: the rail of a
 // note's page, read and edited, lists its neighbours in the order of the
 // notebook's list and marks the open one. The frames open a note inside the
-// list and draw as many before it as after it — one on each side (s-notes-2,
-// s-notes-3, s-notes-20); the newest has nothing before it. The
+// list; the rail holds the whole notebook (the owner, 24.11.2026). The
 // neighbours are all of the open notebook — a note of another one, however
 // close its day, is not among them. They come from the list the session
 // holds: a notebook not loaded has none, and nothing is asked for them.
@@ -113,20 +112,11 @@ func TestNotePageRailHasNeighbours(t *testing.T) {
 
 	_ = f.h.do(get(list, f.sess))
 	_ = f.h.do(get(f.notebook(f.diary), f.sess))
-	span, after := frameNeighbours(t, "s-notes-20")
-	for _, id := range []string{"s-notes-2", "s-notes-3"} {
-		if b, a := frameNeighbours(t, id); b != span || a != after {
-			t.Fatalf("%s and s-notes-20 draw different neighbours: read the frames again", id)
-		}
-	}
-	// Since Typecase's note 44 the frames open the newest note of its
-	// notebook — the neighbours are the notes of that notebook, and «Записи»
-	// of the set has two —, so they draw none before it and one after: the
-	// newest has nothing before it. One on a side is what they show.
-	if span > after || after < 1 {
-		t.Fatalf("s-notes-20 draws %d before and %d after the open note: read the frame again", span, after)
-	}
-	span = after
+	// The owner's decision of 24.11.2026: the rail holds the whole notebook
+	// — «то 3 заметки, то 2» with one on each side —, a window of twenty on
+	// each side only for a very large one. The frames still draw one on a
+	// side (Typecase's task 289): a longer run is no difference to shape.
+	span := 20
 	newest := []string{"Fourth", "Third", "Second", "First"}
 	for _, open := range []struct{ uid, title string }{{"n4", "Fourth"}, {"n3", "Third"}, {"n1", "First"}} {
 		at := slices.Index(newest, open.title)
