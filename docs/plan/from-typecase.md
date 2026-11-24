@@ -6733,6 +6733,37 @@ New верхней полосы и шапок списков — `bind.NewSplit`
      только со сценарием). 86 кадров её несут; на широкой странице она
      скрыта.
 
+Записка 223 от 24.11.2026 (Typecase `26a4047`; задачи 278, 279, 280).
+**Последний коммит Typecase, который она описывает, — `26a4047`** (584
+кадра). **278, 279, 280 закрыты.** Сборку клиента не ломает.
+
+223. **Порядок родов в словах, «Files» пустого экземпляра, слова без
+   сценария.**
+   - **280.** Слова — в порядке разделов: «Contacts, calendars, tasks, notes
+     and files — one place.» (`s-auth-1`, `-13`, `rest-3`); «Carrel stores
+     nothing of its own: contacts, calendars, tasks and notes come from your
+     DAV servers.» (`states-1`); «Connect an account to see address books,
+     calendars and notebooks.» (`s-notes-6`, `components-44`); «Address books
+     go as .vcf; calendars, tasks and notes as .ics; files as files.»
+     (`s-backup-2`, `-19`). Сверх просьбы — `s-backup-6`: «Carrel copies raw
+     .vcf, .ics and files…» (было .ics, .vcf).
+   - **279.** Новый кадр `states-37` — `states-1` в разделе «Files»: первая
+     кнопка подвала рейла — «New folder», выключена с причиной «Open a
+     folder to make one in it.»; остальное как в `states-1` (без ярлыков
+     Attachments и Published). Фикстура `app-files/nothing` ложится на него.
+   - **278.** Новый виджет `ScriptPair{With, Without []Inline}` — слова со
+     сценарием и без, парой (`tc-js` / `tc-nojs`); стоит в `Empty.Parts` и
+     везде, где идёт строка текста. Слова без сценария:
+     - `states-32`: «Upload files into it. Without scripts there is no
+       drop.» — пара стоит в `Empty.Parts` после `Strong("This folder is
+       empty.")`, на месте прежней фразы; `page.Empty.Body` модели нужна
+       вторая фраза для половины `Without`.
+     - `s-notes-11`: «Without scripts there is no drop:» перед «choose on
+       the computer» (половина `With` — «Drop files here, or»).
+     - `s-contacts-5`: `PhotoCrop.NoScript` — «Without scripts the frame and
+       zoom stay as shown; rotating works.»
+     Со сценарием кадры попиксельно те же.
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
