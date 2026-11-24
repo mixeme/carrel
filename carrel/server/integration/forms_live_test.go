@@ -159,7 +159,9 @@ func liveDisconnect(t *testing.T, app *liveApp, connID, endpoint, user, pass, ca
 	if _, ok := app.users.OpenPublished(link); ok {
 		t.Error("a link of the connection still opens")
 	}
-	// The server kept everything, and connecting again finds it — unticked.
+	// The server kept everything, and connecting again finds it — ticked
+	// anew as a new connection (the owner, 24.11.2026), none of the old
+	// connection's ticks back.
 	redirected(t, "connect again", app.post("/app/settings/connections", url.Values{
 		"server": {endpoint}, "login": {user}, "password": {pass},
 	}))
@@ -167,8 +169,11 @@ func liveDisconnect(t *testing.T, app *liveApp, connID, endpoint, user, pass, ca
 	if len(blob.Connections) != 1 || blob.Connections[0].ID == connID {
 		t.Fatalf("connected again: %+v", blob.Connections)
 	}
-	if len(blob.Selected) != 0 {
-		t.Errorf("the ticks came back: %+v", blob.Selected)
+	for _, sel := range blob.Selected {
+		if sel.AccountID != blob.Connections[0].ID {
+			t.Errorf("the old connection's ticks came back: %+v", blob.Selected)
+			break
+		}
 	}
 	if catalogEntry(t, blob, calPath).Path == "" {
 		t.Error("the calendar is gone from the server")
