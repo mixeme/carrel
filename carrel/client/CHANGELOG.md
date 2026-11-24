@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.51 — 2026-11-24
+
+Server `v0.4.5`; Typecase `9fdc59e`. No screen changed. A new bite,
+`oneTwin` in `TestFrameComparisonBite`: the sign-in page keeps one of its
+two links of one shape, and the frame comparison says «the screen has 1
+where the frame draws 2» — the plan's line that neither the comparison nor
+the kinship sees a missing twin was older than Typecase's task 76, and is
+closed. The check of what U-8 names unavailable without scripts found
+three frames that promise a drop or a drag on a page without one
+(`states-32`, `s-contacts-5`, `s-notes-11`): Typecase's task 278.
+
 ## v0.11.50 — 2026-11-24
 
 Server `v0.4.5`; Typecase `9fdc59e` (notes 220, 221: task 276 pp. 5–6).

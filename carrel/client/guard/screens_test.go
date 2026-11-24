@@ -669,6 +669,16 @@ var (
 		auth.Dialog.Items[2] = a
 		p.Items[0] = auth
 	})
+	// One of two twins gone: the frame's two links under the button are of
+	// one shape, the screen keeps only the second. Words are not compared,
+	// so only the run's length tells it (Typecase's task 76).
+	oneTwin = signIn(func(p *w.Page) {
+		auth := p.Items[0].(w.Auth)
+		a := auth.Dialog.Items[2].(w.AuthStack)
+		a.Links = a.Links[1:]
+		auth.Dialog.Items[2] = a
+		p.Items[0] = auth
+	})
 	// The refused state drawn as the empty sign-in: no reason under the
 	// field, which is not marked. On s-auth-1 alone it is green.
 	noReason = signIn(func(p *w.Page) {
@@ -712,7 +722,7 @@ func hints(p *w.Page, change func(*w.Field)) {
 func TestFrameComparisonBite(t *testing.T) {
 	l := load(t)
 	none(t, "the good sample", frameFindings(l, []screens.Screen{signIn(nil)}))
-	for name, s := range map[string]screens.Screen{"wrapped": wrapped, "other variant": otherVariant, "no button": otherWidget} {
+	for name, s := range map[string]screens.Screen{"wrapped": wrapped, "other variant": otherVariant, "no button": otherWidget, "one twin": oneTwin} {
 		if found := frameFindings(l, []screens.Screen{s}); len(found) == 0 {
 			t.Errorf("%s: the frame comparison stayed green", name)
 		} else {
