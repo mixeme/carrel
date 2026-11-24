@@ -1886,6 +1886,7 @@ func TestFixtureNoteEdit(t *testing.T) {
 func TestFixtureSettings(t *testing.T) {
 	app := newMockupApp(t)
 	settingsState(t, app)
+	secondAdmin(t, app)
 	for _, one := range []struct{ dir, route string }{
 		{"app-settings-account", "/app/settings/account"},
 		{"app-settings-appearance", "/app/settings/appearance"},
@@ -1908,6 +1909,20 @@ func TestFixtureSettings(t *testing.T) {
 // sections and folders read, the screen taken two minutes after; davloom's
 // three devices, their last answer the morning of the frames; the backups'
 // jobs and runs (s-publish-1, appearance-1).
+// secondAdmin makes olga an administrator, as the frames' instance has her
+// (s-admin-2: «2 administrators»): mix is not the only one, so his key may
+// be deposited (account-1 «Deposit my key»; the owner's decision of
+// 24.11.2026 turns it off for the only administrator).
+func secondAdmin(t *testing.T, app *mockupApp) {
+	t.Helper()
+	snap := app.h.st.Snapshot()
+	mixID := snap.UserByLogin("mix").ID
+	olga := app.h.invite(mixID, "olga", "olgapass1234")
+	if err := app.h.users.SetUserRole(mixID, olga, store.RoleAdmin); err != nil {
+		t.Fatalf("olga an administrator: %v", err)
+	}
+}
+
 func settingsState(t *testing.T, app *mockupApp) (work, home string) {
 	t.Helper()
 	settingsDevices(t, app)
@@ -2304,6 +2319,7 @@ func TestFixtureConnectionsEmpty(t *testing.T) {
 // instance lets mix nowhere else.
 func TestFixtureAccountStates(t *testing.T) {
 	app := newMockupApp(t)
+	secondAdmin(t, app)
 	// The page whole in s-mail-9: over the instance of the settings' frames.
 	settingsState(t, app)
 	mutate := func(t *testing.T, change func(st *store.State, u *store.User)) {
@@ -2581,6 +2597,7 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		app.compare(t, "app-settings-unlock/davloom.json", app.h.do(get(rec.Header().Get("Location"), app.sess)))
 	})
 	t.Run("app-settings-unlock-delete", func(t *testing.T) {
+		secondAdmin(t, app) // the account page under the sheet, as account-1
 		app.compare(t, "app-settings-unlock/delete.json", app.h.do(get("/app/settings/unlock?for=delete&back=%2Fapp%2Fsettings%2Faccount", app.sess)))
 	})
 	// Move over the combined book it was opened from, as s-contacts-2 draws
