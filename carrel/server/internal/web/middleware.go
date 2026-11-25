@@ -33,7 +33,13 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 		}
 	}
 
-	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+	if r.Method == http.MethodGet || r.Method == http.MethodHead {
+		// A GET of Carrel carries nothing in its body, and its body has no
+		// ceiling: Go's FormValue would read a multipart one of any method,
+		// 32 MiB into memory and the rest to a temporary file (audit №4,
+		// А4-4). A value of a GET comes from its address.
+		r.Body = http.NoBody
+	} else {
 		sess, hasSess := s.sessionFrom(r)
 		// A file upload has no ceiling of Carrel's (C-12): its body is read as it
 		// arrives, and only the fields in front of the files are bounded.
