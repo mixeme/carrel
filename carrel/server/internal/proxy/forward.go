@@ -51,6 +51,9 @@ var requestHeaders = []string{"Content-Type", "Depth", "If-Match", "If-None-Matc
 var responseHeadersDropped = map[string]bool{
 	"Connection": true, "Keep-Alive": true, "Proxy-Authenticate": true, "Transfer-Encoding": true, "Upgrade": true,
 	"Set-Cookie": true, "Www-Authenticate": true, "Content-Length": true, "Location": true, "Content-Location": true,
+	// davloom's own sandbox stands (А4-2): the far server's policy and
+	// framing do not travel.
+	"Content-Security-Policy": true, "Content-Security-Policy-Report-Only": true, "X-Frame-Options": true,
 }
 
 func isXML(contentType string) bool {

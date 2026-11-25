@@ -108,6 +108,10 @@ func (s *Server) hrefBase() string {
 	return ""
 }
 
+// sandboxPolicy is the policy of every davloom answer: nothing in it runs,
+// loads or is framed (А4-2).
+const sandboxPolicy = "sandbox; default-src 'none'; frame-ancestors 'none'"
+
 // Handler is the listener's whole mux: no web routes, no cookies.
 func (s *Server) Handler() http.Handler {
 	return http.HandlerFunc(s.serve)
@@ -119,8 +123,15 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		s.log.Debug("davloom: request", "method", r.Method, "path", r.URL.EscapedPath(), "status", sw.status, "ms", time.Since(start).Milliseconds())
 	}()
-	// Nothing here is a page, and a client must not take it for one.
+	// Nothing here is a page, and a client must not take it for one. davloom
+	// may share the origin of Carrel's pages (/dav/ of the same host), and
+	// it hands on what a far server holds with that server's type: a page
+	// of HTML in a folder would run as Carrel's own. So every answer is
+	// sandboxed, as a download of the web is (audit №4, А4-2); a DAV
+	// client reads none of these headers.
 	sw.Header().Set("X-Content-Type-Options", "nosniff")
+	sw.Header().Set("Content-Security-Policy", sandboxPolicy)
+	sw.Header().Set("X-Frame-Options", "DENY")
 	escaped := r.URL.EscapedPath()
 	if base := s.hrefBase(); base != "" {
 		if rest, ok := strings.CutPrefix(escaped, base); ok && (rest == "" || strings.HasPrefix(rest, "/")) {
