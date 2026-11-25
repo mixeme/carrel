@@ -7028,6 +7028,35 @@ New верхней полосы и шапок списков — `bind.NewSplit`
        Решение — у владельца: только перо или все значки кнопок на 1 px.
    Дальше: 282.
 
+Записка 232 от 26.11.2026 (Typecase `7825f86`; задача 282).
+**Последний коммит Typecase, который она описывает, — `7825f86`** (591
+кадр). **282 закрыта** (s-admin-5 — следом, по просьбе). Сборку клиента не
+ломает.
+
+232. **Итог Test only — своей зоной.**
+   - Под полями формы подключения — `Notices{Zone: "connect-test"}`, пустая
+      и скрытая (`hidden`); «Test only» — `Button{…, To:
+      "/app/settings/connections/new/test", Form: "connect", Target:
+      "connect-test"}`. Живой слой шлёт форму туда (заголовок цели — ваш
+      `data-tc-target-header`), ответ — содержимое зоны: `Msg` итога и под
+      ним `Diag` журнала (`Diag` теперь часть `Notices`). Форма и набранный
+      пароль не трогаются, страница не уходит. Без сценария — страница, как
+      прежде. `TestTestOnlyAnswersInItsZone`.
+   - Кадры: зона — в `s-profile-2`, `-11`, `-14`, `-24` (по пикселям те
+      же); новые `s-profile-39` — прошла: «Test passed: Carrel can sign in
+      and found 8 collections. Nothing is saved until you press Connect. One
+      step had a warning: see well-known below.» (`MsgPlain`), журнал
+      `[well-known] … → 301 → http://…/dav.php/` / «HTTPS → HTTP: not
+      followed, the URL as typed is used» / `[principal]` / `[home]` /
+      `[collections] 8 collection(s)`; `s-profile-40` — не прошла: «Test
+      failed: discovery stopped at the principal: the server refused the
+      login and password. Check them and test again. Nothing was saved.»
+      (`is-alert`), журнал до шага, где встало.
+   - Свёртку журнала на узком экране не делали: он короткий, переносится.
+   **Серверу:** ответ Test only при заголовке цели — фрагмент зоны (итог +
+   журнал); поле итога у `DiagnosticTrace` — ваше.
+   Открыты 289 и 287 — ждут владельца (записка 231).
+
 ## Для сведения — сервер не трогает
 
 - **Перевыпуска ключа данных нет** (решение владельца 04.11.2026): ключ
