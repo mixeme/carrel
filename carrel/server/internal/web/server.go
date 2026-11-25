@@ -355,8 +355,34 @@ func (s *Server) Static(prefix string, h http.Handler) {
 	s.mux.Handle("GET "+strings.TrimSuffix(prefix, "/")+"/", h)
 }
 
+// hostCookies is whether the cookies carry the __Host- prefix: an https
+// public address at the root (audit №4, А4-8; the owner's decision of
+// 25.11.2026). Such a cookie is Secure, Path=/ and without Domain, and no
+// other host — a neighbouring subdomain — can set one; a cookie of the
+// plain name is then no session. Plain http or a base path cannot carry the
+// prefix, and keep the plain names.
+func (s *Server) hostCookies() bool {
+	return strings.HasPrefix(strings.ToLower(s.cfg.PublicURL), "https://") && s.cookiePath() == "/"
+}
+
+// sidCookie is the session cookie's name.
+func (s *Server) sidCookie() string {
+	if s.hostCookies() {
+		return "__Host-" + cookieName
+	}
+	return cookieName
+}
+
+// csrfCookie is the anonymous CSRF cookie's name.
+func (s *Server) csrfCookie() string {
+	if s.hostCookies() {
+		return "__Host-" + anonCSRFCookieName
+	}
+	return anonCSRFCookieName
+}
+
 func (s *Server) sessionFrom(r *http.Request) (*session.Session, bool) {
-	c, err := r.Cookie(cookieName)
+	c, err := r.Cookie(s.sidCookie())
 	if err != nil {
 		return nil, false
 	}
@@ -365,7 +391,7 @@ func (s *Server) sessionFrom(r *http.Request) (*session.Session, bool) {
 
 func (s *Server) setSessionCookie(w http.ResponseWriter, r *http.Request, sid string) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     cookieName,
+		Name:     s.sidCookie(),
 		Value:    sid,
 		Path:     s.cookiePath(),
 		HttpOnly: true,
@@ -376,7 +402,7 @@ func (s *Server) setSessionCookie(w http.ResponseWriter, r *http.Request, sid st
 
 func (s *Server) clearSessionCookie(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     cookieName,
+		Name:     s.sidCookie(),
 		Value:    "",
 		Path:     s.cookiePath(),
 		MaxAge:   -1,

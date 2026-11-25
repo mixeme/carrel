@@ -26,7 +26,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 
 	// /healthz and /about carry no bucket at all (architecture.md): probes
 	// and the licence obligation never see 429, cookie or not.
-	if c, err := r.Cookie(cookieName); err == nil && c.Value != "" && !unmetered(r.URL.Path) {
+	if c, err := r.Cookie(s.sidCookie()); err == nil && c.Value != "" && !unmetered(r.URL.Path) {
 		if !s.limit.allowSession(c.Value, now) {
 			http.Error(w, "too many requests", http.StatusTooManyRequests)
 			return
@@ -92,7 +92,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 			}
 		} else if needsCSRF(r) && !hasSess && needsAnonymousCSRF(r) {
 			if token := r.Header.Get(csrfHeaderName); token != "" {
-				if !checkAnonymousCSRF(r, token) {
+				if !s.checkAnonymousCSRF(r, token) {
 					http.Error(w, "forbidden", http.StatusForbidden)
 					return
 				}
@@ -103,7 +103,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 				}
 				http.Error(w, "bad request", http.StatusBadRequest)
 				return
-			} else if !checkAnonymousCSRF(r, token) {
+			} else if !s.checkAnonymousCSRF(r, token) {
 				http.Error(w, "forbidden", http.StatusForbidden)
 				return
 			}

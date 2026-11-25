@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.16 — 2026-11-25
+
+Client `v0.11.57`; Typecase `a802ebb`.
+
+### For consumers
+
+- **Cookies `__Host-carrel_sid` and `__Host-carrel_csrf`** on an https
+  public address at the root (audit №4, А4-8; the owner's decision of
+  25.11.2026): a neighbouring subdomain cannot set them, and a cookie of the
+  plain name is no session there. Plain http or a base path keeps
+  `carrel_sid` and `carrel_csrf`. Everyone signs in again once.
+
 ## v0.4.15 — 2026-11-25
 
 Client `v0.11.57`; Typecase `a802ebb`.

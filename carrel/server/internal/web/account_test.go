@@ -186,7 +186,7 @@ func TestAccountSessions(t *testing.T) {
 		req.Header.Set("User-Agent", ua)
 		rec := h.do(req)
 		for _, c := range rec.Result().Cookies() {
-			if c.Name == "carrel_sid" {
+			if c.Name == "carrel_sid" || c.Name == "__Host-carrel_sid" {
 				return c
 			}
 		}

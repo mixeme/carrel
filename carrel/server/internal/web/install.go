@@ -76,7 +76,7 @@ func (s *Server) observe(next http.Handler) http.Handler {
 			s.probes.mu.Unlock()
 			if ch != nil {
 				peer, _ := remoteAddr(r)
-				_, cookieErr := r.Cookie(cookieName)
+				_, cookieErr := r.Cookie(s.sidCookie())
 				seen := probeSeen{
 					Host: r.Host, ForwardedHost: r.Header.Get("X-Forwarded-Host"), ForwardedProto: r.Header.Get("X-Forwarded-Proto"),
 					ForwardedFor: r.Header.Get("X-Forwarded-For"), Peer: peer.String(), ClientIP: s.clientIP(r),
@@ -140,7 +140,7 @@ func (s *Server) postAdminInstall(w http.ResponseWriter, r *http.Request) {
 		}
 		s.cfg.PublicURL = origin
 	}
-	cookie, _ := r.Cookie(cookieName)
+	cookie, _ := r.Cookie(s.sidCookie())
 	start := time.Now()
 	rows := s.runInstallCheck(r.Context(), sess, origin, cookie)
 	took := time.Since(start)

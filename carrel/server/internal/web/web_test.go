@@ -139,6 +139,16 @@ func (h *harness) putConnections(login string, key [32]byte, ids ...string) {
 }
 
 func (h *harness) do(req *http.Request) *httptest.ResponseRecorder {
+	// The tests send the cookies by their plain names; on an https public
+	// address the server reads them with __Host- (А4-8): each goes under
+	// both, as a browser holds the one the server set.
+	for _, name := range []string{"carrel_sid", "carrel_csrf"} {
+		if c, err := req.Cookie(name); err == nil {
+			if _, twin := req.Cookie("__Host-" + name); twin != nil {
+				req.AddCookie(&http.Cookie{Name: "__Host-" + name, Value: c.Value})
+			}
+		}
+	}
 	rec := httptest.NewRecorder()
 	h.srv.Handler().ServeHTTP(rec, req)
 	return rec
@@ -186,7 +196,7 @@ func (h *harness) anonPostForm(getPath, postPath string, form url.Values) *http.
 	rec := h.do(get(getPath, nil))
 	var token string
 	for _, c := range rec.Result().Cookies() {
-		if c.Name == "carrel_csrf" {
+		if c.Name == "carrel_csrf" || c.Name == "__Host-carrel_csrf" {
 			token = c.Value
 		}
 	}
