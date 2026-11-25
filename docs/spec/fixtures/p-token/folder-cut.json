@@ -117,7 +117,7 @@
   "range": null,
   "readOnly": true,
   "strip": {
-    "address": "http://example.com/p/link-july-token/dav/",
+    "address": "https://carrel.example/p/link-july-token/dav/",
     "label": "Mount as a drive",
     "mount": [
       {

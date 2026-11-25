@@ -1022,6 +1022,9 @@ func (s *Server) writeLetter(r *http.Request, ls letterSender, to []string, subj
 // relayLetter writes a letter and hands it to the relay whole: one
 // recipient refused, it goes to nobody.
 func (s *Server) relayLetter(r *http.Request, ls letterSender, to []string, subject, typed string, links []string, files []cmail.Attachment) error {
+	if s.cfg.PublicURL == "" {
+		return errNoPublicAddress // А4-6
+	}
 	data, err := s.writeLetter(r, ls, to, subject, typed, links, files)
 	if err != nil {
 		return err

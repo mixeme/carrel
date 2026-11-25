@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.14 — 2026-11-25
+
+Client `v0.11.57`; Typecase `a802ebb`.
+
+### For consumers
+
+- **No letter goes without the public address** (audit №4, А4-6; the
+  owner's decision of 25.11.2026). Every letter carries a link to the
+  instance, and without `CARREL_PUBLIC_URL` it came from the `Host` a
+  request names — a `/forgot` letter could hand the wipe token to the host
+  an attacker named. Without the address the relay sends nothing (system
+  letters, people's letters, the test letter); what would send is off with
+  «No letter goes without the public address: set CARREL_PUBLIC_URL.»
+  (Send invitation, Resend, Let users send letters, the address's confirm
+  link, Letter and Send, which follow «mail configured»); `/forgot` answers
+  as for an account without mail; the rail's mail status says «Mail is
+  off». The Public address row says «…; without it no letter goes.»
+- **One rule for a local address** for the instance and davloom: the
+  reserved suffixes `.example` and `.invalid` (RFC 2606) count as local,
+  as `.test` did; davloom's warning now follows the same list.
+
 ## v0.4.13 — 2026-11-25
 
 Client `v0.11.57`; Typecase `a802ebb`. Audit №4 (docs/security.md,

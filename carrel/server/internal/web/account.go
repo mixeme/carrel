@@ -283,7 +283,7 @@ func (s *Server) confirmAction(label view.Text) view.Action {
 	a := view.Action{ID: "account.confirm", Label: label, Method: "POST", Enabled: s.mailConfigured(),
 		Href: s.postQuery("/app/settings/account", url.Values{"op": {"confirm"}})}
 	if !a.Enabled {
-		a.Reason = "Mail is not configured on this instance."
+		a.Reason = text(s.mailOffReason("Mail is not configured on this instance."))
 	}
 	return a
 }

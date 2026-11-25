@@ -106,7 +106,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Links in letters start with it. Set with CARREL_PUBLIC_URL.",
+            "hint": "Links in letters start with it. Set with CARREL_PUBLIC_URL; without it no letter goes.",
             "kind": "text",
             "label": "Public address",
             "mono": true,
@@ -114,7 +114,7 @@
             "options": [],
             "readOnly": true,
             "required": false,
-            "value": "the address each request comes to"
+            "value": "https://carrel.example"
           }
         ],
         "unfold": null

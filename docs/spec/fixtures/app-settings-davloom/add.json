@@ -37,7 +37,7 @@
       }
     ]
   },
-  "address": "http://127.0.0.1:8081/",
+  "address": "https://carrel.example/dav/",
   "addressHint": "In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.",
   "details": null,
   "devices": [

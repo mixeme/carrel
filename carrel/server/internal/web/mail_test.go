@@ -30,6 +30,11 @@ func (h *harness) relayed() *mailtest.Server {
 	if err != nil {
 		h.t.Fatal(err)
 	}
+	// An instance that sends has its public address (А4-6): the host the
+	// tests' requests come to, so the links in letters read as before.
+	if h.cfg.PublicURL == "" {
+		h.cfg.PublicURL = "http://example.com"
+	}
 	return relay
 }
 
@@ -65,6 +70,7 @@ func letterBody(t *testing.T, l mailtest.Letter) (mail.Header, string) {
 // answer. The relay is a rubric of the one form of the settings (Ад17).
 func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 	h := newHarness(t)
+	h.cfg.PublicURL = "http://example.com" // an instance that sends has its address (А4-6)
 	h.admin("alice", "password123")
 	alice := h.login("alice", "password123")
 	relay := mailtest.New(t)
@@ -261,6 +267,7 @@ func TestEscrowRecoveryIsMailedWithoutThePassword(t *testing.T) {
 // and stores nothing.
 func TestTheTestLetterGoesThroughWhatIsTyped(t *testing.T) {
 	h := newHarness(t)
+	h.cfg.PublicURL = "http://example.com" // an instance that sends has its address (А4-6)
 	h.admin("alice", "password123")
 	alice := h.login("alice", "password123")
 	relay := mailtest.New(t)

@@ -165,7 +165,7 @@
   "range": null,
   "readOnly": true,
   "strip": {
-    "address": "http://example.com/p/link-august-token/dav/",
+    "address": "https://carrel.example/p/link-august-token/dav/",
     "label": "Mount as a drive",
     "mount": [
       {

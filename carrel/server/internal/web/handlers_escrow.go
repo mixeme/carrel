@@ -353,7 +353,7 @@ func (s *Server) escrowRecoveryMailedStatus(login string, sent bool) view.Text {
 	case sent:
 		return text("They are told by letter; hand the password over yourself.")
 	case !s.mailConfigured():
-		return text("No letter went: mail is not configured. Tell them yourself.")
+		return text(s.mailOffReason("No letter went: mail is not configured.") + " Tell them yourself.")
 	case s.users.ConfirmedAddress(login) == "":
 		// By name, beside the password of that name (s-admin-30).
 		return text("No letter went: " + login + " has no confirmed address. Tell them yourself.")

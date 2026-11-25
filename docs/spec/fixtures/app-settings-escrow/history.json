@@ -10,7 +10,7 @@
   },
   "notices": [],
   "passwordLink": {
-    "address": "http://example.com/password-history/history-token",
+    "address": "https://carrel.example/password-history/history-token",
     "copy": {
       "enabled": true,
       "icon": "i-dup",

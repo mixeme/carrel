@@ -2,7 +2,6 @@ package web
 
 import (
 	"net/http"
-	"net/netip"
 	"net/url"
 	"slices"
 	"strconv"
@@ -52,12 +51,7 @@ func localAddress(raw string) bool {
 	if err != nil {
 		return false
 	}
-	host := strings.ToLower(u.Hostname())
-	if ip, err := netip.ParseAddr(host); err == nil {
-		return ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast()
-	}
-	return host == "localhost" || strings.HasSuffix(host, ".local") || strings.HasSuffix(host, ".lan") ||
-		strings.HasSuffix(host, ".home.arpa") || strings.HasSuffix(host, ".localhost")
+	return localHost(u.Hostname())
 }
 
 type issuedDevice struct {

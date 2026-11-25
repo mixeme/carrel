@@ -606,6 +606,9 @@ func newMockupApp(t *testing.T) *mockupApp {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	// The frames' instance has its public address (s-admin-3: «Public
+	// address» https://carrel.example); without it no letter goes (А4-6).
+	h.cfg.PublicURL = "https://" + mockupInstance
 	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
 		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
 			"label": {label}, "server": {servers[label].URL}, "login": {"alice"}, "password": {"secret"},
@@ -2907,8 +2910,11 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 			route := strings.ReplaceAll(one.route, "a-nc-home", app.realAccount(t, one.slug))
 			route = strings.ReplaceAll(route, "c="+one.slug, "c="+url.QueryEscape(app.realPath(t, one.slug)))
 			if !one.local {
-				app.h.cfg.PublicURL = "https://carrel.example"
-				defer func() { app.h.cfg.PublicURL = "" }()
+				// A public address the internet reaches: the frames'
+				// carrel.example is reserved (RFC 2606) and counts as local.
+				was := app.h.cfg.PublicURL
+				app.h.cfg.PublicURL = "https://carrel.example.org"
+				defer func() { app.h.cfg.PublicURL = was }()
 			}
 			app.compare(t, "app-publish/"+one.state+".json", app.h.do(get(route, app.sess)))
 		})

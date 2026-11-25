@@ -37,16 +37,16 @@
   },
   "line": {
     "at": "03:00",
-    "command": "0 3 * * * curl -fsS -m 30 -X POST -H 'Authorization: Bearer cbk_••••' 'http://example.com/api/backup/run?job=j-job'",
+    "command": "0 3 * * * curl -fsS -m 30 -X POST -H 'Authorization: Bearer cbk_••••' 'https://carrel.example/api/backup/run?job=j-job'",
     "cronLine": "",
-    "curl": "curl -fsS -m 30 -X POST -H 'Authorization: Bearer cbk_••••' 'http://example.com/api/backup/run?job=j-job'",
+    "curl": "curl -fsS -m 30 -X POST -H 'Authorization: Bearer cbk_••••' 'https://carrel.example/api/backup/run?job=j-job'",
     "destination": [],
     "endpoints": [
       "POST /api/backup/run?job=j-job",
       "GET /api/backup/status?job=j-job",
       "GET /api/backup/{id}/download"
     ],
-    "gitea": "name: Carrel backup · Рабочее, ежедневно\non:\n  schedule:\n    - cron: '0 3 * * *'\njobs:\n  backup:\n    runs-on: ubuntu-latest\n    steps:\n      - run: curl -fsS -m 30 -X POST -H \"Authorization: Bearer ${{ secrets.CARREL_BACKUP }}\" 'http://example.com/api/backup/run?job=j-job'",
+    "gitea": "name: Carrel backup · Рабочее, ежедневно\non:\n  schedule:\n    - cron: '0 3 * * *'\njobs:\n  backup:\n    runs-on: ubuntu-latest\n    steps:\n      - run: curl -fsS -m 30 -X POST -H \"Authorization: Bearer ${{ secrets.CARREL_BACKUP }}\" 'https://carrel.example/api/backup/run?job=j-job'",
     "giteaFile": ".gitea/workflows/carrel-j-job.yaml",
     "giteaSecret": "CARREL_BACKUP",
     "goSentry": {
@@ -58,7 +58,7 @@
         "POST",
         "-H",
         "Authorization: Bearer cbk_••••",
-        "http://example.com/api/backup/run?job=j-job"
+        "https://carrel.example/api/backup/run?job=j-job"
       ],
       "command": "curl",
       "folder": "Backup",

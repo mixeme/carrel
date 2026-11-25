@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -59,9 +60,29 @@ func (s *Server) mailPolicy() mailPolicy {
 	return p
 }
 
-// mailConfigured reports whether the instance can send at all.
+// mailConfigured reports whether the instance can send at all: a relay,
+// and the public address — every letter carries a link to the instance, and
+// without the address that link would come from the Host a request names,
+// which anybody may name (audit №4, А4-6; the owner's decision of
+// 25.11.2026: without it no letter goes at all).
 func (s *Server) mailConfigured() bool {
-	return s.users.SMTP().Configured()
+	return s.cfg.PublicURL != "" && s.users.SMTP().Configured()
+}
+
+// noPublicAddress is why nothing is sent on an instance without its public
+// address (А4-6).
+const noPublicAddress = "No letter goes without the public address: set CARREL_PUBLIC_URL."
+
+// errNoPublicAddress refuses a letter on such an instance.
+var errNoPublicAddress = errors.New(noPublicAddress)
+
+// mailOffReason is why mail is off: why, the relay's own reason, while there
+// is no relay; with one, the public address missing (А4-6).
+func (s *Server) mailOffReason(why string) string {
+	if s.users.SMTP().Configured() && s.cfg.PublicURL == "" {
+		return noPublicAddress
+	}
+	return why
 }
 
 // sendSystemMail sends one of the instance's own letters (S-26): from the
@@ -74,6 +95,9 @@ func (s *Server) sendSystemMail(ctx context.Context, to, subject, body string) (
 // sendWith sends one of the instance's own letters through relay: the stored
 // one, or the one typed in the settings for the test letter (Ад37).
 func (s *Server) sendWith(ctx context.Context, relay cmail.Relay, to, subject, body string) (string, error) {
+	if s.cfg.PublicURL == "" {
+		return "", errNoPublicAddress
+	}
 	data, err := cmail.Build(relay, cmail.Message{To: []string{to}, Subject: subject, Text: body}, time.Now())
 	if err == nil {
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)

@@ -150,6 +150,8 @@ func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 	var result view.MailTestResult
 	addrs, err := cmail.Addresses([]string{to})
 	switch {
+	case s.cfg.PublicURL == "":
+		result.Reply = text(noPublicAddress) // А4-6
 	case relay.Host == "":
 		result.Reply = text(mailNotConfigured)
 	case len(refused) > 0:
@@ -227,7 +229,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		{Name: "session", Label: "Session life, d", Kind: view.InputNumber, Mono: true, Value: orDefault(set.SessionDays, int(conf.SessionAbsoluteTimeout.Hours()/24))},
 		{Name: "name", Label: "Instance name", Kind: view.InputText, Value: text(set.InstanceName())},
 		{Name: "publicURL", Label: "Public address", Kind: view.InputText, Mono: true, Value: text(origin), ReadOnly: true,
-			Hint: "Links in letters start with it. Set with CARREL_PUBLIC_URL."},
+			Hint: "Links in letters start with it. Set with CARREL_PUBLIC_URL; without it no letter goes."},
 	}}
 
 	port := ""
@@ -276,8 +278,8 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 	// are not shown at all (s-admin-3, -32, -33).
 	tick := view.FormRow{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
 		Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."}
-	if !cur.Configured() {
-		tick.Value, tick.Reason = "", mailNotConfigured
+	if !cur.Configured() || s.cfg.PublicURL == "" {
+		tick.Value, tick.Reason = "", text(s.mailOffReason(mailNotConfigured))
 	}
 	letters := view.FieldSet{Legend: "Letters from users", Rows: []view.FormRow{tick,
 		{Name: "sender", Label: "Sender address", Kind: view.InputRadio, Options: senderOptions(shown),
@@ -288,7 +290,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxPerDay, s.cfg.MailMaxPerDay)},
 	}}
 	switch {
-	case !s.mailPolicy().People || !cur.Configured():
+	case !s.mailPolicy().People || !s.mailConfigured():
 		letters.Rows = letters.Rows[:1]
 		letters.Badges = []view.Badge{{Label: "off", Role: view.BadgeNeutral}}
 	default:
