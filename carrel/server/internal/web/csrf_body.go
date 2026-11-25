@@ -1,6 +1,7 @@
 package web
 
 import (
+	"maps"
 	"net/http"
 	"strings"
 
@@ -29,7 +30,20 @@ func csrfTokenFromBody(r *http.Request) (string, error) {
 // then nothing before the handler has read the body. ParseForm skips a
 // multipart body, so a form so sent was read empty: the rail's tick became
 // an empty selection (24.11.2026). A handler reads its form with this.
+//
+// An upload's body (isFileUpload) has no ceiling, and the middleware has
+// read its fields in front of the first file (readUploadFields): those are
+// the form, and nothing parses the rest — ParseMultipartForm would write
+// the files past a MiB to a temporary file on disk (audit №4, А4-1).
 func readForm(r *http.Request) error {
+	if up, ok := r.Context().Value(uploadKey{}).(*uploadBody); ok {
+		r.PostForm = up.fields
+		r.Form = maps.Clone(up.fields)
+		for k, vs := range r.URL.Query() {
+			r.Form[k] = append(r.Form[k], vs...)
+		}
+		return nil
+	}
 	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
 		if r.MultipartForm != nil {
 			return nil

@@ -43,14 +43,17 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 		}
 
 		if needsCSRF(r) && hasSess {
-			if token := r.Header.Get(csrfHeaderName); token != "" {
-				if !sess.CheckCSRF(token) {
-					http.Error(w, "forbidden", http.StatusForbidden)
-					return
-				}
-			} else if stream {
+			header := r.Header.Get(csrfHeaderName)
+			if header != "" && !sess.CheckCSRF(header) {
+				http.Error(w, "forbidden", http.StatusForbidden)
+				return
+			}
+			if stream {
 				// _csrf comes before the first file: a token after it cannot be
-				// read without buffering the file.
+				// read without buffering the file. With the token in the header
+				// the fields are read here all the same: a body without a
+				// ceiling is never handed on unread, where a ParseMultipartForm
+				// would put its files on disk (audit №4, А4-1).
 				up, err := readUploadFields(r)
 				switch {
 				case err != nil && tooLarge(err):
@@ -59,21 +62,25 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 				case err != nil:
 					http.Error(w, "bad request", http.StatusBadRequest)
 					return
-				case !sess.CheckCSRF(up.fields.Get(csrfFormField)):
+				case header == "" && !sess.CheckCSRF(up.fields.Get(csrfFormField)):
 					http.Error(w, "forbidden", http.StatusForbidden)
 					return
 				}
 				r = r.WithContext(context.WithValue(r.Context(), uploadKey{}, up))
-			} else if token, err := csrfTokenFromBody(r); err != nil {
-				if tooLarge(err) {
-					http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
+			} else if header == "" {
+				// With the token in the header the body is left to the
+				// handler (readForm), within the ceiling set above.
+				if token, err := csrfTokenFromBody(r); err != nil {
+					if tooLarge(err) {
+						http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
+						return
+					}
+					http.Error(w, "bad request", http.StatusBadRequest)
+					return
+				} else if !sess.CheckCSRF(token) {
+					http.Error(w, "forbidden", http.StatusForbidden)
 					return
 				}
-				http.Error(w, "bad request", http.StatusBadRequest)
-				return
-			} else if !sess.CheckCSRF(token) {
-				http.Error(w, "forbidden", http.StatusForbidden)
-				return
 			}
 		} else if needsCSRF(r) && !hasSess && needsAnonymousCSRF(r) {
 			if token := r.Header.Get(csrfHeaderName); token != "" {
