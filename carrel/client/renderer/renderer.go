@@ -163,9 +163,10 @@ func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int
 		return r.json.Fragment(w, req, status, target, body, extra)
 	}
 	scr, model, ok := r.screenOf(body)
-	if ok && len(extra) > 0 && target == render.TargetDetails && zone.KindOf(model) == zone.ShellPage {
+	if ok && len(extra) > 0 && (target == render.TargetDetails || target == render.TargetMain) && zone.KindOf(model) == zone.ShellPage {
 		// A list's panel asked by its row, the list out of band with its
-		// row lit (server v0.4.12).
+		// row lit (server v0.4.12); a page asked into main by a link, its
+		// rail out of band with the row of what opened lit (server v0.4.18).
 		if panel, drawn := ShellZone(scr, model, target); drawn {
 			if more, ok := r.outOfBand(extra); ok {
 				return writeHTML(w, status, page.Fragment{Body: []page.Part{page.Printed(panel)}, Extra: more}.Render())
@@ -398,7 +399,17 @@ func (r *Renderer) outOfBand(extra []render.OOB) ([]page.ZonePart, bool) {
 		case render.TargetRail:
 			rail, ok := x.Body.(view.Rail)
 			if !ok {
-				return nil, false
+				// A page's rail, as the page draws it (server v0.4.18).
+				scr, model, ok := r.screenOf(x.Body)
+				if !ok || zone.KindOf(model) != zone.ShellPage {
+					return nil, false
+				}
+				drawn, ok := ShellZone(scr, model, x.Target)
+				if !ok {
+					return nil, false
+				}
+				z.Body = []page.Part{page.Printed(drawn)}
+				break
 			}
 			parts, form := screens.RailOf(rail)
 			for _, part := range parts {

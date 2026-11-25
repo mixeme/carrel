@@ -169,10 +169,31 @@ func (s *Server) writePage(w http.ResponseWriter, r *http.Request, status int, b
 				extra = []render.OOB{{Target: render.TargetMain, Body: body}}
 			}
 		}
+		// A page asked into main by a link (a collection's name in the
+		// rail, Typecase's task 292): its rail comes with it — the row lit
+		// stayed the one of the page before (25.11.2026).
+		if render.FragmentTarget(r) == render.TargetMain && r.Method == http.MethodGet && shellPage(body) {
+			extra = append(extra, render.OOB{Target: render.TargetRail, Body: body})
+		}
 		_ = s.render.Fragment(w, r, status, render.FragmentTarget(r), body, extra)
 		return
 	}
 	_ = s.render.Page(w, r, status, onPaper(r, body))
+}
+
+// shellPage reports whether body is a page in the shell: the shell embedded,
+// as the client tells a page of the shell from the rest.
+func shellPage(body any) bool {
+	t := reflect.TypeOf(body)
+	if t == nil || t.Kind() != reflect.Struct {
+		return false
+	}
+	for i := 0; i < t.NumField(); i++ {
+		if f := t.Field(i); f.Anonymous && f.Type == shellType {
+			return true
+		}
+	}
+	return false
 }
 
 // onPaper is a page asked on paper (?print=1, U-10) with its print header

@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.59 — 2026-11-25
+
+Server `v0.4.18`; Typecase `f20b328`.
+- **A page opened in main by a link brings its rail** (a collection's
+  name in the rail): main and, out of band, the rail as the page draws it,
+  the opened collection's row lit — HTML both. The lit row stayed the one
+  of the page before.
+
 ## v0.11.58 — 2026-11-25
 
 Server `v0.4.17`; Typecase `f20b328` (note 227: tasks 292, 290, 288).

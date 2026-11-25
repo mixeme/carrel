@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.18 — 2026-11-25
+
+Client `v0.11.59`; Typecase `f20b328`.
+
+### For consumers
+
+- **A page of the shell asked into `main` (GET) comes with its rail out of
+  band** (`extra`, target `rail`, the page itself as body; C-7.3): the row
+  of the collection opened from the rail is on. The tab's title stays the
+  old one until Typecase answers task 294.
+
 ## v0.4.17 — 2026-11-25
 
 Client `v0.11.58`; Typecase `f20b328`.

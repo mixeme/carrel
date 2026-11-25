@@ -188,6 +188,36 @@ func TestTheEndOfAPollIsItsPage(t *testing.T) {
 	}
 }
 
+// A collection's name in the rail opens it in main and gets the page's rail
+// with it, the collection's row lit (server v0.4.18): main and, out of band,
+// the rail as the page draws it — HTML both.
+func TestAMainAnswerComesWithItsRail(t *testing.T) {
+	rd := renderer.New("")
+	rail := view.Rail{
+		Nav: []view.NavRow{{Action: view.Action{ID: "nav.contacts", Label: "Contacts", Href: "/app/contacts", On: true}}},
+		Sections: []view.RailSection{
+			{Rows: []view.SourceRow{{Href: "/app/contacts", Label: "Combined address book", Tick: view.TickOn}}},
+			{Account: "nextcloud", Rows: []view.SourceRow{{Href: "/app/contacts/a/people", Label: "People", Colour: "#4a6b52", Tick: view.TickOn, On: true}}},
+		},
+	}
+	list := view.ContactsListPage{Shell: view.Shell{Title: "People", Rail: rail},
+		Groups: []view.ContactGroup{{Rubric: "A", Count: 1, Rows: []view.ContactRow{{Name: "Ada Lovelace", Href: "/app/contacts/a/people/ada"}}}}}
+	req := httptest.NewRequest(http.MethodGet, "/app/contacts/a/people", nil)
+	rec := httptest.NewRecorder()
+	if err := rd.Fragment(rec, req, http.StatusOK, render.TargetMain, list, []render.OOB{{Target: render.TargetRail, Body: list}}); err != nil {
+		t.Fatal(err)
+	}
+	got := rec.Body.String()
+	at := strings.Index(got, `<template data-tc-zone="rail">`)
+	if !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/html") || at < 0 || !strings.Contains(got[:at], "Ada Lovelace") {
+		t.Fatalf("main with its rail = %s %.800s", rec.Header().Get("Content-Type"), got)
+	}
+	lit := strings.Index(got[at:], `tc-tickrow is-on`)
+	if lit < 0 || strings.Count(got[at:], `tc-tickrow is-on`) != 1 || !strings.Contains(got[at+lit:], "People") || strings.Contains(got[at:], `tc-tickrow is-all is-on`) {
+		t.Errorf("the rail out of band lights not the book alone: %.1500s", got[at:])
+	}
+}
+
 // A list's row asks its panel and gets the list with it, its row lit
 // (server v0.4.12): the panel and, out of band, the list — HTML both.
 func TestThePanelComesWithItsList(t *testing.T) {
