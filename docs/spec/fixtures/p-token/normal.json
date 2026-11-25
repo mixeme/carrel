@@ -303,11 +303,11 @@
   "range": null,
   "readOnly": true,
   "strip": {
-    "address": "webcal://example.com/p/link-lichnyj-shown-token/lichnyi.ics",
+    "address": "webcal://carrel.example/p/link-lichnyj-shown-token/lichnyi.ics",
     "label": "Subscribe in your own client",
     "mount": [],
     "note": "read-only, updates on its own",
-    "open": "webcal://example.com/p/link-lichnyj-shown-token/lichnyi.ics"
+    "open": "webcal://carrel.example/p/link-lichnyj-shown-token/lichnyi.ics"
   },
   "tasks": [],
   "title": "Личный",

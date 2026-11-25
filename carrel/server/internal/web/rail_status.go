@@ -135,6 +135,10 @@ func (s *Server) adminStatus(sess *session.Session) []view.RailStatus {
 	sent, checked, bad := s.marks.sent, s.marks.checked, s.marks.checkBad
 	s.marks.mu.Unlock()
 	mail := view.RailStatus{Tone: view.StatusAlert, Title: "SMTP not configured", Line: line("No mail is going out.")}
+	if s.cfg.PublicURL == "" && s.users.SMTP().Configured() {
+		// A relay and no public address: nothing goes (А4-6).
+		mail = view.RailStatus{Tone: view.StatusAlert, Title: "Mail is off", Line: line(noPublicAddress)}
+	}
 	if s.mailConfigured() {
 		mail = view.RailStatus{Tone: view.StatusOn, Title: "Mail is going out", Line: line("No letter since the start.")}
 		if !sent.IsZero() {

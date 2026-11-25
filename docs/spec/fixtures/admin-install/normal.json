@@ -44,7 +44,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "http://example.com"
+            "value": "https://carrel.example"
           }
         ],
         "unfold": null

@@ -54,7 +54,7 @@
             "options": [],
             "readOnly": true,
             "required": false,
-            "value": "http://example.com/p/link-token"
+            "value": "https://carrel.example/p/link-token"
           }
         ],
         "unfold": null

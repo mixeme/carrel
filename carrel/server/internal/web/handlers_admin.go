@@ -449,7 +449,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 			// The button is off without a relay; the server does not take
 			// it either — an invitation by letter that cannot go is a link.
 			if !s.mailConfigured() {
-				flash.inviteErr = "SMTP is not configured: no letter can go."
+				flash.inviteErr = text(s.mailOffReason("SMTP is not configured: no letter can go."))
 				break
 			}
 			if email = strings.TrimSpace(r.FormValue("email")); email == "" {
@@ -590,7 +590,7 @@ func (s *Server) buildAdminInvitesPage(r *http.Request, sess *session.Session, m
 	send := view.Action{ID: "admin.invite.send", Label: "Send invitation", Method: "POST", Enabled: true,
 		Href: s.postQuery("/admin/invites", url.Values{"action": {"send"}})}
 	if !mail {
-		send.Enabled, send.Reason = false, "SMTP is not configured: no letter can go."
+		send.Enabled, send.Reason = false, text(s.mailOffReason("SMTP is not configured: no letter can go."))
 	}
 	invite := s.plainForm("/admin/invites?action=link", "POST",
 		csrfField(sess),
@@ -706,7 +706,7 @@ func (s *Server) buildAdminInvitesPage(r *http.Request, sess *session.Session, m
 			resend := view.Action{ID: "admin.invite.resend", Label: "Resend", Method: "POST", Enabled: true,
 				Href: s.postQuery("/admin/invites", url.Values{"action": {"resend"}, "invite": {inv.ID}})}
 			if !mail {
-				resend.Enabled, resend.Reason = false, "SMTP is not configured: no letter can go."
+				resend.Enabled, resend.Reason = false, text(s.mailOffReason("SMTP is not configured: no letter can go."))
 			}
 			row.Actions = append(row.Actions, resend)
 		}

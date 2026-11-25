@@ -181,7 +181,7 @@
           "target": "sheet"
         }
       ],
-      "address": "http://example.com/p/link-smeta-token",
+      "address": "https://carrel.example/p/link-smeta-token",
       "created": "2026-08-10",
       "expires": "—",
       "gone": "Deleted, or moved where Carrel could not follow it",

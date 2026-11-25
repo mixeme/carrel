@@ -117,7 +117,7 @@
   "range": null,
   "readOnly": true,
   "strip": {
-    "address": "http://example.com/p/link-komanda-token/komanda.vcf",
+    "address": "https://carrel.example/p/link-komanda-token/komanda.vcf",
     "label": "Address of this book",
     "mount": [],
     "note": "another Carrel can subscribe to it; other clients import it",

@@ -289,7 +289,15 @@ func (s *Server) instanceLocal() bool {
 	if err != nil || u.Hostname() == "" {
 		return true
 	}
-	host := strings.ToLower(strings.TrimSuffix(u.Hostname(), "."))
+	return localHost(u.Hostname())
+}
+
+// localHost is whether a host does not answer from the internet: a private,
+// loopback or link-local address, a name without a dot, or a name of a
+// local or reserved suffix — one rule for the instance's address and
+// davloom's (they told local apart differently).
+func localHost(host string) bool {
+	host = strings.ToLower(strings.TrimSuffix(host, "."))
 	if ip, err := netip.ParseAddr(host); err == nil {
 		ip = ip.Unmap()
 		return ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsUnspecified() || sharedAddressSpace.Contains(ip)
@@ -297,7 +305,9 @@ func (s *Server) instanceLocal() bool {
 	if !strings.Contains(host, ".") {
 		return true
 	}
-	for _, suffix := range []string{".localhost", ".local", ".lan", ".home", ".internal", ".intranet", ".corp", ".home.arpa", ".test"} {
+	// .example and .invalid are reserved (RFC 2606) and never answer from
+	// outside, as .test: the frames' instance, carrel.example, is local.
+	for _, suffix := range []string{".localhost", ".local", ".lan", ".home", ".internal", ".intranet", ".corp", ".home.arpa", ".test", ".example", ".invalid"} {
 		if strings.HasSuffix("."+host, suffix) {
 			return true
 		}

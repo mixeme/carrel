@@ -5,7 +5,7 @@
     "badge": null,
     "copy": {
       "enabled": true,
-      "href": "http://example.com/invite/invite-token",
+      "href": "https://carrel.example/invite/invite-token",
       "id": "admin.invite.copy",
       "label": "Copy",
       "method": "GET"
@@ -95,7 +95,7 @@
     },
     "issued": null,
     "lede": "",
-    "link": "http://example.com/invite/invite-token",
+    "link": "https://carrel.example/invite/invite-token",
     "title": "Invitation",
     "warning": null
   },
@@ -238,7 +238,7 @@
       "actions": [
         {
           "enabled": true,
-          "href": "http://example.com/invite/invite-token",
+          "href": "https://carrel.example/invite/invite-token",
           "id": "admin.invite.copy",
           "label": "Copy link",
           "method": "GET"
@@ -247,7 +247,7 @@
       "address": "by link",
       "delivery": "link",
       "expires": "2026-08-10 17:04",
-      "link": "http://example.com/invite/invite-token",
+      "link": "https://carrel.example/invite/invite-token",
       "menu": [
         {
           "csrf": "csrf",
@@ -284,7 +284,7 @@
         },
         {
           "enabled": true,
-          "href": "http://example.com/invite/invite-token",
+          "href": "https://carrel.example/invite/invite-token",
           "id": "admin.invite.copy",
           "label": "Copy link",
           "method": "GET"
@@ -293,7 +293,7 @@
       "address": "oleg@example.org",
       "delivery": "email",
       "expires": "2026-08-10 17:04",
-      "link": "http://example.com/invite/invite-token",
+      "link": "https://carrel.example/invite/invite-token",
       "menu": [
         {
           "csrf": "csrf",
@@ -327,7 +327,7 @@
     },
     "copy": {
       "enabled": true,
-      "href": "http://example.com/register",
+      "href": "https://carrel.example/register",
       "id": "admin.selfreg.copy",
       "label": "Copy",
       "method": "GET"
@@ -396,7 +396,7 @@
     },
     "issued": null,
     "lede": "A visitor creates an account and confirms the address by email. Cannot be turned on until mail works.",
-    "link": "http://example.com/register",
+    "link": "https://carrel.example/register",
     "title": "Self-registration",
     "warning": null
   },
