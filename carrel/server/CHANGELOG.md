@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.19 — 2026-11-26
+
+Client `v0.11.60`; Typecase `a0f2006`.
+
+### For consumers
+
+- **Nothing in the contract.** The pages carry Typecase `a0f2006`: a top
+  bar's and a split's menu opens under its button in its panel, over a
+  closed split.
+
 ## v0.4.18 — 2026-11-25
 
 Client `v0.11.59`; Typecase `f20b328`.

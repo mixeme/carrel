@@ -447,6 +447,8 @@ a.tc-btn[aria-disabled=true]{opacity:.45;cursor:default}
 /* Меню стрелки висит под всем сплитом, от его правого края, как все меню верхней полосы (владелец, 24.11: у кнопки у
    правого края меню раскрывается внутрь страницы): место ему отсчитывается от сплита. Сплит с меню — слоем выше соседей. */
 .tc-split:has(> .tc-drop__anchor){position:relative;z-index:7}
+/* Открытый — выше закрытых: меню стрелки «New note» полосы не уходит под сплит шапки, у которого тот же слой (задача Carrel 283). */
+.tc-split:has(> details.tc-drop__anchor[open]),.tc-split:has(> span.tc-drop__anchor > .tc-drop__panel--right:not([hidden])){z-index:8}
 .tc-split > .tc-drop__anchor.tc-drop__anchor{position:static}
 .tc-split > .tc-btn.is-primary + .tc-btn.is-primary,.tc-split > .tc-btn.is-primary + .tc-drop__anchor > .tc-btn.is-primary{box-shadow:inset 1px 0 0 rgba(255,253,247,.45)}
 /* Переключатель не сжимается и не переносит подписи: целиком или под «⋯». */
@@ -826,6 +828,8 @@ label.tc-tree__row{cursor:pointer}
 .tc-kbd{font-family:var(--tc-font-mono);font-size:10.5px;border:.5px solid var(--tc-edge);border-radius:3px;
   padding:1px 5px;color:var(--tc-muted);background:var(--tc-bg);white-space:nowrap}
 .tc-menu{width:236px;background:var(--tc-surface);border:.5px solid var(--tc-edge);border-radius:4px;padding:4px}
+/* Меню и лист — свой текст, не места (задача Carrel 283): рубрика, шапка, полоса не передают им прописные, разрядку, кегль и цвет. */
+.tc-menu,.tc-sheet{font-family:var(--tc-font-sans);font-size:13px;line-height:1.45;font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;color:var(--tc-ink)}
 /* Меню на экране всплывает и места в раскладке не занимает.
    Витрины раздела 6 — исключение: там меню и есть предмет. */
 .tc-menu.is-pop{position:absolute;top:100%;left:0;margin-top:4px;z-index:3}
@@ -2074,9 +2078,10 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-drop__anchor.tc-drop__anchor{position:relative}
 /* Открытая выпадашка — над закрытыми: на телефоне у каждой .tc-drop свой слой (z-index 6), и меню New шапки уходило
    под «Columns» полосы ниже, меню верхней полосы — под выпадашки списка (задача Carrel 276). Только слой: где
-   выпадашка стоит static (полоса страницы на телефоне), меню меряет себя по строке, а не по кнопке. */
+   выпадашка стоит static (полоса страницы на телефоне), меню меряет себя по строке, а не по кнопке. Слой 8 — выше
+   и закрытого сплита (7): меню полосы не уходит под сплит шапки (задача Carrel 283). */
 details.tc-drop[open],details.tc-drop__anchor[open],span.tc-drop:has(> .tc-menu.is-pop:not([hidden])),
-span.tc-drop__anchor:has(> .tc-drop__panel--right:not([hidden])){z-index:7}
+span.tc-drop__anchor:has(> .tc-drop__panel--right:not([hidden])){z-index:8}
 
 .tc-top__search.tc-top__search{position:relative;min-width:0;flex:0 1 560px}
 /* Подсказки поиска не уже своих строк (до 360 px): поиск, сжатый до своей подсказки, сжимал бы и их (свободная сборка 10.11). */

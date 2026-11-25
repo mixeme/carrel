@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.60 — 2026-11-26
+
+Server `v0.4.19`; Typecase `a0f2006` (note 228: task 283).
+- **Menus by one rule** (mockup copy, no client code): a top bar's and a
+  split's menu stands in its panel at the button's end whatever its
+  `Pop`; an open menu lies over a closed split (the bar's «New note» no
+  longer goes under the head's split); a menu's words are its own.
+
 ## v0.11.59 — 2026-11-25
 
 Server `v0.4.18`; Typecase `f20b328`.
