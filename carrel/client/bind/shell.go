@@ -403,6 +403,12 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 	if words.Form != "" {
 		row.Send = w.Send{Form: words.Form, Name: words.Toggle, Value: r.Href}
 	}
+	// The name opens the collection alone, the tick staying its choice
+	// (Typecase's note 227, the owner's «не кликабельны», task 292); the
+	// live layer asks the page's main column for it.
+	if r.Href != "" {
+		row.Href, row.Target = r.Href, MainZone
+	}
 	return row
 }
 
@@ -1029,11 +1035,31 @@ func Over(under w.Shell, sheet w.Sheet) w.Shell {
 	var rail []w.OverlayRailPart
 	for _, p := range body.Rail {
 		if o, ok := p.(w.OverlayRailPart); ok {
-			rail = append(rail, o)
+			rail = append(rail, plainRail(o))
 		}
 	}
 	return w.Shell{Top: under.Top, Body: w.Overlay{
 		Body:  w.OverlayBody{Rail: rail, Main: body.Main, Height: w.ShellHeight560},
 		Scrim: w.Scrim{Content: sheet, Pad: w.ScrimPad26},
 	}}
+}
+
+// plainRail is a section of the rail under a sheet: the names still link
+// their collections (s-contacts-2), but no zone of the live layer stands
+// under a sheet, so each goes the plain way.
+func plainRail(p w.OverlayRailPart) w.OverlayRailPart {
+	sec, ok := p.(w.RailSec)
+	if !ok {
+		return p
+	}
+	items := make([]w.RailSecPart, len(sec.Items))
+	for i, it := range sec.Items {
+		if row, ok := it.(w.TickRow); ok {
+			row.Target = ""
+			it = row
+		}
+		items[i] = it
+	}
+	sec.Items = items
+	return sec
 }

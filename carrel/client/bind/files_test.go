@@ -26,11 +26,11 @@ func TestFilesRail(t *testing.T) {
 	}
 	same(t, "the files' rail", bind.Sources(rail, words), []w.RailPart{
 		w.RailSec{Items: []w.RailSecPart{w.TickRow{Ticked: w.TickedPart, Kind: w.TickRowRoot, Icon: "file", Label: "Selected collections", Meta: "2 of 3", Current: true,
-			Send: w.Send{Form: "rail", Name: "toggle", Value: "/app/files"}}}},
+			Send: w.Send{Form: "rail", Name: "toggle", Value: "/app/files"}, Href: "/app/files"}}},
 		w.RailSec{Items: []w.RailSecPart{
 			w.Rubric{Text: "sftpgo · vps"},
-			w.TickRow{Mark: w.Mark{Colour: "#a05a2c"}, Label: "Documents", Meta: "rw", Send: w.Send{Form: "rail", Name: "toggle", Value: "/d"}},
-			w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#a05a2c"}, Label: "Public", Hidden: true, Trail: w.Badge{Label: "ro"}, Send: w.Send{Form: "rail", Name: "toggle", Value: "/p"}},
+			w.TickRow{Mark: w.Mark{Colour: "#a05a2c"}, Label: "Documents", Meta: "rw", Send: w.Send{Form: "rail", Name: "toggle", Value: "/d"}, Href: "/d"},
+			w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#a05a2c"}, Label: "Public", Hidden: true, Trail: w.Badge{Label: "ro"}, Send: w.Send{Form: "rail", Name: "toggle", Value: "/p"}, Href: "/p"},
 		}},
 	})
 

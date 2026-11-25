@@ -138,6 +138,10 @@ func Button(a view.Action, form string) w.Button {
 // a zone the page has.
 var Zones []string
 
+// MainZone is the zone of a page's main column, which a link that opens a
+// list asks for with the live layer (the document names it).
+var MainZone string
+
 // Live is a target as a link or a form names it: the zone's name if the
 // pages carry the zone, else none.
 func Live(target string) string {

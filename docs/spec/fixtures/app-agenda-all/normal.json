@@ -551,6 +551,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
           "sources": [],
           "stamp": "nextcloud · Работа",
           "state": "ok",
@@ -638,6 +639,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
           "sources": [],
           "stamp": "radicale · vps · Дежурства",
           "state": "ok",
@@ -729,6 +731,7 @@
             }
           ],
           "on": true,
+          "page": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "sources": [],
           "stamp": "nextcloud · Личный",
           "state": "ok",
@@ -827,6 +830,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0",
           "sources": [],
           "stamp": "nextcloud · Работа",
           "state": "ok",
@@ -920,6 +924,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-rad-vps/proekty/9c27-0e5d-4412",
           "sources": [],
           "stamp": "radicale · vps · Проекты",
           "state": "ok",
@@ -1002,6 +1007,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27",
           "sources": [],
           "stamp": "nextcloud · Личный",
           "state": "ok",
@@ -1095,6 +1101,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209",
           "sources": [],
           "stamp": "nextcloud · Личный",
           "state": "ok",
@@ -1189,6 +1196,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209",
           "sources": [],
           "stamp": "nextcloud · Личный",
           "state": "ok",
@@ -1283,6 +1291,7 @@
             }
           ],
           "on": false,
+          "page": "/app/calendar/a-nc-home/lichnyj/3e6b-71d4-a209",
           "sources": [],
           "stamp": "nextcloud · Личный",
           "state": "ok",

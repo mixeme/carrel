@@ -265,6 +265,7 @@ func row(r view.ContactRow, single bool) w.FaceRow {
 		Source:   string(r.Stamp),
 		On:       r.On,
 		Href:     r.Href,
+		Page:     r.Page, // where the panel is not drawn (Typecase's note 227)
 	}
 	if len(r.Badges) > 0 {
 		b := bind.Badge(r.Badges[0])

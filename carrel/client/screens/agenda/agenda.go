@@ -360,6 +360,7 @@ func row(r view.AgendaRow, single bool) w.TimeRow {
 		Source: string(r.Stamp),
 		On:     r.On,
 		Href:   r.Href,
+		Page:   r.Page, // where the panel is not drawn (Typecase's note 227)
 	}
 	if t.Detail == "" {
 		t.Detail = none
@@ -406,7 +407,7 @@ func chosen(c *view.Columns, single bool) []string {
 // the event has nothing but for the badges, whose cell is empty then
 // (Typecase's note 63) —, leading to the event.
 func columnRow(r view.AgendaRow, shown []string) w.ColumnRow {
-	c := w.ColumnRow{Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Href: r.Href}
+	c := w.ColumnRow{Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Href: r.Href, Page: r.Page}
 	for _, id := range shown {
 		col, ok := cells[id]
 		if !ok {

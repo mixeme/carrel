@@ -546,6 +546,7 @@
             }
           ],
           "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
           "sources": [
             "nextcloud · Записи",
             "nextcloud · Дневник"
@@ -646,6 +647,7 @@
             }
           ],
           "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
           "sources": [
             "nextcloud · Записи",
             "nextcloud · Дневник"
@@ -736,6 +738,7 @@
             }
           ],
           "on": true,
+          "page": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19",
           "sources": [],
           "stamp": "nextcloud · Дневник",
           "state": "ok",
@@ -829,6 +832,7 @@
             }
           ],
           "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d93-21b4-c517",
           "sources": [],
           "stamp": "nextcloud · Записи",
           "state": "ok",

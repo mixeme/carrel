@@ -324,6 +324,7 @@ func row(r view.TaskRow, single bool) w.DueRow {
 		On:       r.On,
 		Overdue:  r.Overdue,
 		Href:     r.Href,
+		Page:     r.Page, // where the panel is not drawn (Typecase's note 227)
 	}
 	if len(r.Badges) > 0 {
 		b := bind.Badge(r.Badges[0])
@@ -379,7 +380,7 @@ func chosen(c *view.Columns) []string {
 // dash where the task has nothing —, leading to the task.
 func columnRow(r view.TaskRow, shown []string) w.ColumnRow {
 	t := bind.Tick(r.Tick, r.Done, done)
-	c := w.ColumnRow{Tick: &t, Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Overdue: r.Overdue, Href: r.Href}
+	c := w.ColumnRow{Tick: &t, Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Overdue: r.Overdue, Href: r.Href, Page: r.Page}
 	for _, id := range shown {
 		col, ok := cells[id]
 		if !ok {

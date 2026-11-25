@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.17 — 2026-11-25
+
+Client `v0.11.58`; Typecase `f20b328`.
+
+### For consumers
+
+- **`Page` on `ContactRow`, `AgendaRow`, `TaskRow`, `NoteRow`:** when a row's
+  `Href` is rewritten to open the record in the list's panel (`?open=`),
+  `Page` keeps the record's own page — the address where no panel is drawn.
+  Empty otherwise.
+
 ## v0.4.16 — 2026-11-25
 
 Client `v0.11.57`; Typecase `a802ebb`.

@@ -1213,6 +1213,7 @@ type ContactGroup struct { Rubric Text; Count int; Rows []ContactRow } // Count 
 type ContactRow struct {
     Href      string
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    Page      string // страница записи, когда Href ведёт в панель списка (?open=): туда строка ведёт, где панели на этой ширине нет (задача Typecase 290); нет — поля нет в JSON
     UID       string
     Colour    Colour
     Stamp     Stamp
@@ -1261,6 +1262,7 @@ type AgendaRow struct {
     Href      string
     Continues bool // строка не первого из дней события на несколько дней в этом списке («day 2 of 3», записка Typecase 182): рисуется так же, в счёт событий не идёт
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    Page      string // страница записи, когда Href ведёт в панель списка (?open=): туда строка ведёт, где панели на этой ширине нет (задача Typecase 290); нет — поля нет в JSON
     UID       string
     Colour    Colour
     Stamp     Stamp
@@ -1303,6 +1305,7 @@ type TaskGroup struct { Rubric Text; Count int; Overdue bool; Rows []TaskRow }
 type TaskRow struct {
     Href      string
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    Page      string // страница записи, когда Href ведёт в панель списка (?open=): туда строка ведёт, где панели на этой ширине нет (задача Typecase 290); нет — поля нет в JSON
     UID       string
     Colour    Colour
     Stamp     Stamp
@@ -1347,6 +1350,7 @@ type NoteGroup struct { Rubric Text; Count int; Rows []NoteRow }
 type NoteRow struct {
     Href      string
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    Page      string // страница записи, когда Href ведёт в панель списка (?open=): туда строка ведёт, где панели на этой ширине нет (задача Typecase 290); нет — поля нет в JSON
     UID       string
     Colour    Colour
     Stamp     Stamp

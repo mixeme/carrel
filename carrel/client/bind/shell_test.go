@@ -217,23 +217,23 @@ func TestTickRow(t *testing.T) {
 	}{
 		"the combined view, open": {
 			view.SourceRow{Href: "/app/contacts", Label: "Combined address book", Count: ptr(6), Tick: view.TickPart, On: true}, words,
-			w.TickRow{Ticked: w.TickedPart, Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "Combined address book", Meta: "6", Current: true,
+			w.TickRow{Ticked: w.TickedPart, Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "Combined address book", Meta: "6", Current: true, Href: "/app/contacts",
 				Send: w.Send{Form: "rail", Name: "toggle", Value: "/app/contacts"}},
 		},
 		// Nothing ticked (states-14): the row of the combined view is ticked
 		// off, and stays as it is — it is every source, not one hidden.
 		"the combined view, nothing ticked": {
 			view.SourceRow{Href: "/app/calendar", Label: "Combined calendar", Tick: view.TickOff, On: true}, words,
-			w.TickRow{Ticked: w.TickedOff, Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "Combined calendar", Meta: "—", Current: true,
+			w.TickRow{Ticked: w.TickedOff, Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "Combined calendar", Meta: "—", Current: true, Href: "/app/calendar",
 				Send: w.Send{Form: "rail", Name: "toggle", Value: "/app/calendar"}},
 		},
 		"read-only": {
 			view.SourceRow{Href: "/k", Label: "Команда", Colour: "#6b4e7a", Count: ptr(1), Tick: view.TickOn, ReadOnly: true}, words,
-			w.TickRow{Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Команда", Meta: "1", Trail: w.Badge{Label: "ro"}, Send: w.Send{Form: "rail", Name: "toggle", Value: "/k"}},
+			w.TickRow{Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Команда", Meta: "1", Trail: w.Badge{Label: "ro"}, Href: "/k", Send: w.Send{Form: "rail", Name: "toggle", Value: "/k"}},
 		},
 		"ticked off, not counted, on the rail of return": {
 			view.SourceRow{Href: "/r", Label: "Рассылки", Colour: "#6b4e7a", Tick: view.TickOff}, bind.RailWords{None: "—"},
-			w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Рассылки", Meta: "—", Hidden: true},
+			w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Рассылки", Meta: "—", Hidden: true, Href: "/r"},
 		},
 		"a feed": {
 			view.SourceRow{Href: "/f", Label: "Праздники РФ", Colour: "#8c6239", Count: ptr(0), Tick: view.TickOn, Feed: true, ReadOnly: true}, bind.RailWords{None: "—", ReadOnly: "ro"},
@@ -241,21 +241,21 @@ func TestTickRow(t *testing.T) {
 			// draws the mark is-ext in a rail (s-contacts-7, s-agenda-1). Its
 			// count stands where a count stands and «ro» is a badge beside it
 			// (Р-34 of Typecase, 80d1319).
-			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "0", Trail: w.Badge{Label: "ro"}},
+			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "0", Trail: w.Badge{Label: "ro"}, Href: "/f"},
 		},
 		"a feed ticked off": {
 			view.SourceRow{Href: "/l", Label: "Расписание лиги", Colour: "#6b4e7a", Tick: view.TickOff, Feed: true, ReadOnly: true}, bind.RailWords{None: "—", ReadOnly: "ro"},
-			w.TickRow{Ticked: w.TickedOff, Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Расписание лиги", Meta: "—", Hidden: true, Trail: w.Badge{Label: "ro"}},
+			w.TickRow{Ticked: w.TickedOff, Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Расписание лиги", Meta: "—", Hidden: true, Trail: w.Badge{Label: "ro"}, Href: "/l"},
 		},
 		"no answer: a mark, the reason its hint, no retry (states-16)": {
 			view.SourceRow{Href: "/o", Label: "Общий", Colour: "#9a9280", Tick: view.TickOn, State: view.CollectionUnavailable, Detail: "401 Unauthorized"}, bind.RailWords{None: "—"},
-			w.TickRow{Mark: w.Mark{Colour: "#9a9280"}, Label: "Общий", MetaTitle: "401 Unauthorized", Error: true},
+			w.TickRow{Mark: w.Mark{Colour: "#9a9280"}, Label: "Общий", MetaTitle: "401 Unauthorized", Error: true, Href: "/o"},
 		},
 		// A book read only that does not answer has the sign alone: no count
 		// and no «ro» beside it (states-9: «Команда»).
 		"no answer, read-only": {
 			view.SourceRow{Href: "/k", Label: "Команда", Colour: "#6b4e7a", Tick: view.TickOn, ReadOnly: true, State: view.CollectionUnavailable, Detail: "503"}, bind.RailWords{None: "—", ReadOnly: "ro"},
-			w.TickRow{Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Команда", MetaTitle: "503", Error: true},
+			w.TickRow{Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Команда", MetaTitle: "503", Error: true, Href: "/k"},
 		},
 	} {
 		same(t, name, bind.TickRow(c.row, c.words), c.want)
@@ -270,8 +270,8 @@ func TestSources(t *testing.T) {
 		},
 		Tags: []view.Tag{{Label: "all", Href: "/t", On: true}, {Label: "работа", Href: "/t?r"}},
 	}
-	all := w.TickRow{Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "All", Meta: "2"}
-	k := w.TickRow{Mark: w.Mark{Colour: "#4a6b52"}, Label: "Контакты", Meta: "2"}
+	all := w.TickRow{Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "All", Meta: "2", Href: "/all"}
+	k := w.TickRow{Mark: w.Mark{Colour: "#4a6b52"}, Label: "Контакты", Meta: "2", Href: "/k"}
 	tags := w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "Tags"}}, Tags: []w.Tag{{Label: "all", On: true, Href: "/t"}, {Label: "работа", Href: "/t?r"}}}
 	same(t, "a rail that sends nothing", bind.Sources(rail, words), []w.RailPart{
 		w.RailSec{Items: []w.RailSecPart{all}},
@@ -291,10 +291,10 @@ func TestSources(t *testing.T) {
 		{Account: "Subscriptions", Feeds: true, Rows: []view.SourceRow{{Href: "/f", Label: "Праздники РФ", Colour: "#8c6239", Feed: true, ReadOnly: true, Tick: view.TickOn}}},
 	}}
 	same(t, "the feeds' rubric", bind.Sources(feeds, words), []w.RailPart{
-		w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "nextcloud"}, w.TickRow{Mark: w.Mark{Colour: "#4a6b52"}, Label: "Личный", Meta: "7"}}},
+		w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "nextcloud"}, w.TickRow{Mark: w.Mark{Colour: "#4a6b52"}, Label: "Личный", Meta: "7", Href: "/k"}}},
 		w.RailSec{Items: []w.RailSecPart{
 			w.Rubric{Text: "Subscriptions", Items: []w.RubricPart{w.Badge{Label: "external"}}},
-			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "—", Trail: w.Badge{Label: "ro"}},
+			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "—", Trail: w.Badge{Label: "ro"}, Href: "/f"},
 		}},
 	})
 }

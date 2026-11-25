@@ -70,6 +70,11 @@ func panelRows(v reflect.Value, path string, q url.Values) {
 				open[k] = vs
 			}
 			open.Set("open", href.String())
+			// The record's page stays the row's second address: where the
+			// panel is not drawn, the row leads there (Typecase's task 290).
+			if page := v.FieldByName("Page"); page.IsValid() && page.Kind() == reflect.String {
+				page.SetString(href.String())
+			}
 			href.SetString(path + "?" + open.Encode())
 			return
 		}

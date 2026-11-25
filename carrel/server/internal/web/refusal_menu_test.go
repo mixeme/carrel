@@ -24,7 +24,7 @@ var (
 	frameRetryAll  = regexp.MustCompile(`<div class="tc-menu__foot"><button[^>]*>Retry all</button></div>`)
 	frameFailedBar = regexp.MustCompile(`(?s)<div class="tc-runbar">(.*?)<details class="tc-drop"><summary class="tc-btn is-sm is-danger">(\d+ failed)`)
 	frameErrorRow  = regexp.MustCompile(`<div class="tc-tickrow is-error">(.*?)</div>`)
-	frameErrorMark = regexp.MustCompile(`<span class="tc-tickrow__label">([^<]*)</span><span class="tc-tickrow__err" role="img" aria-label="([^"]*)" title="([^"]*)">`)
+	frameErrorMark = regexp.MustCompile(`<(?:span|a) class="tc-tickrow__label"[^>]*>([^<]*)</(?:span|a)><span class="tc-tickrow__err" role="img" aria-label="([^"]*)" title="([^"]*)">`)
 )
 
 type frameRefused struct{ colour, source, answer string }

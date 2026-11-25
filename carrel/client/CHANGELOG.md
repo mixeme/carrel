@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.58 — 2026-11-25
+
+Server `v0.4.17`; Typecase `f20b328` (note 227: tasks 292, 290, 288).
+- **The rail opens a collection:** a collection's name is a link to it,
+  the tick stays its own button (`bind.TickRow`: `Href`, `Target` main).
+  Under a sheet the links go the plain way (`bind.Over`): no zone stands
+  there.
+- **A row that opens in the panel keeps its record's page** (`Page` →
+  `data-tc-page`): where the panel is not drawn at that width (a tablet),
+  `tc.js` goes to the page instead of nowhere.
+- **The empty «To» of a letter spans the field** (mockup copy).
+
 ## v0.11.57 — 2026-11-25
 
 Server `v0.4.12`; Typecase `a802ebb`.

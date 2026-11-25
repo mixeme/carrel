@@ -55,6 +55,21 @@ func TestRowsThatOpenInThePanelAskThePanel(t *testing.T) {
 				}
 			}
 			at := label(scr) + " on " + key(path)
+			// Each row that asks the panel names the record's page too: where
+			// the panel is not drawn, the row leads there (Typecase's task 290).
+			if probe.Look.Panel {
+				for _, n := range found {
+					if attrOf(n, "data-tc-target") != "details" {
+						continue
+					}
+					for _, a := range findAll([]*html.Node{n}, func(x *html.Node) bool { return x.Data == "a" && strings.Contains(attrOf(x, "href"), "open=") }) {
+						if attrOf(a, "data-tc-page") == "" {
+							t.Errorf("%s: a row to the panel without the record's page: %s", at, attrOf(a, "href"))
+							break
+						}
+					}
+				}
+			}
 			switch {
 			case probe.Look.Panel && named == 0:
 				t.Errorf("%s: the panel is kept and no list asks it", at)

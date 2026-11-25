@@ -24,7 +24,7 @@ var (
 	frameShellRefresh   = regexp.MustCompile(`<button class="tc-btn" type="button"><svg[^>]*><use href="#(i-[\w-]+)"/></svg>\d+ min ago</button>`)
 	frameNavIcon        = regexp.MustCompile(`(?s)<a class="[^"]*tc-nav__item[^"]*" href="#"><svg[^>]*><use href="#(i-[\w-]+)"/></svg>([^<]+)`)
 	frameShellTick      = regexp.MustCompile(`(?s)<div class="((?:[^" ]+ )*tc-tickrow(?: [^"]*)?)">(.*?)</div>`)
-	frameShellTickLabel = regexp.MustCompile(`<span class="tc-tickrow__label">([^<]*)</span>`)
+	frameShellTickLabel = regexp.MustCompile(`<(?:span|a) class="tc-tickrow__label"[^>]*>([^<]*)</(?:span|a)>`)
 	frameShellAbout     = regexp.MustCompile(`<a class="tc-railfoot__about" href="#rest">([^<]*)<span class="tc-mono">([^<]*)</span></a>`)
 	frameShellEmblem    = regexp.MustCompile(`<svg class="tc-emblem"[^>]*><title>([^<]*)</title>`)
 )

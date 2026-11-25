@@ -169,6 +169,20 @@ func (b *plainBrowser) follow(text string) *plainPage {
 	return b.go_(attr(a, "href"))
 }
 
+// followNew goes by the link that makes a record in the collection named
+// text — the item of New's arrow, not the collection's name in the rail,
+// which opens the collection (Typecase's task 292).
+func (b *plainBrowser) followNew(text string) *plainPage {
+	b.t.Helper()
+	a := b.page.find(func(n *html.Node) bool {
+		return n.Data == "a" && strings.HasSuffix(attr(n, "href"), "/new") && strings.Contains(words(n), text)
+	})
+	if a == nil {
+		b.t.Fatalf("%s: no link to a new record in %q; links: %s", b.page.url.Path, text, b.page.links())
+	}
+	return b.go_(attr(a, "href"))
+}
+
 // go_ goes to an address the page names.
 func (b *plainBrowser) go_(href string) *plainPage {
 	b.t.Helper()

@@ -293,6 +293,7 @@ func row(r view.NoteRow, single bool) w.ExcerptRow {
 		Source:  string(r.Stamp),
 		On:      r.On,
 		Href:    r.Href,
+		Page:    r.Page, // where the panel is not drawn (Typecase's note 227)
 	}
 	if len(r.Badges) > 0 {
 		b := bind.Badge(r.Badges[0])
@@ -337,7 +338,7 @@ func chosen(c *view.Columns) []string {
 // notebook's mark, a cell for each column in their order — the dash where
 // the note has nothing —, leading to the note.
 func columnRow(r view.NoteRow, shown []string) w.ColumnRow {
-	c := w.ColumnRow{Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Href: r.Href}
+	c := w.ColumnRow{Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Href: r.Href, Page: r.Page}
 	for _, id := range shown {
 		col, ok := cells[id]
 		if !ok {

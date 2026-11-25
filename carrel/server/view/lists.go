@@ -122,6 +122,9 @@ type ContactRow struct {
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
 	Target string `json:"target,omitempty"`
+	// Page — страница записи, когда Href ведёт в панель списка (?open=):
+	// туда строка ведёт, где панели на этой ширине нет (задача Typecase 290)
+	Page   string `json:"page,omitempty"`
 	UID    string `json:"uid"`
 	Colour Colour `json:"colour"`
 	Stamp  Stamp  `json:"stamp"`
@@ -169,7 +172,10 @@ type AgendaRow struct {
 	Continues bool `json:"continues,omitempty"`
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
-	Target   string `json:"target,omitempty"`
+	Target string `json:"target,omitempty"`
+	// Page — страница записи, когда Href ведёт в панель списка (?open=):
+	// туда строка ведёт, где панели на этой ширине нет (задача Typecase 290)
+	Page     string `json:"page,omitempty"`
 	UID      string `json:"uid"`
 	Colour   Colour `json:"colour"`
 	Stamp    Stamp  `json:"stamp"`
@@ -217,7 +223,10 @@ type TaskRow struct {
 	Href string `json:"href"`
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
-	Target  string `json:"target,omitempty"`
+	Target string `json:"target,omitempty"`
+	// Page — страница записи, когда Href ведёт в панель списка (?open=):
+	// туда строка ведёт, где панели на этой ширине нет (задача Typecase 290)
+	Page    string `json:"page,omitempty"`
 	UID     string `json:"uid"`
 	Colour  Colour `json:"colour"`
 	Stamp   Stamp  `json:"stamp"`
@@ -284,7 +293,10 @@ type NoteRow struct {
 	Href string `json:"href"`
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
-	Target  string  `json:"target,omitempty"`
+	Target string `json:"target,omitempty"`
+	// Page — страница записи, когда Href ведёт в панель списка (?open=):
+	// туда строка ведёт, где панели на этой ширине нет (задача Typecase 290)
+	Page    string  `json:"page,omitempty"`
 	UID     string  `json:"uid"`
 	Colour  Colour  `json:"colour"`
 	Stamp   Stamp   `json:"stamp"`

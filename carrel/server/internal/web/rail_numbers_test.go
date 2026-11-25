@@ -23,7 +23,7 @@ import (
 
 var (
 	frameTickRow    = regexp.MustCompile(`(?s)<div class="((?:[^" ]+ )*tc-tickrow(?: [^"]*)?)">(.*?)</div>`)
-	frameTickLabel  = regexp.MustCompile(`<span class="tc-tickrow__label">([^<]*)</span>`)
+	frameTickLabel  = regexp.MustCompile(`<(?:span|a) class="tc-tickrow__label"[^>]*>([^<]*)</(?:span|a)>`)
 	frameTickMeta   = regexp.MustCompile(`<span class="tc-tickrow__meta"[^>]*>([^<]*)</span>`)
 	frameSourcesRub = regexp.MustCompile(`<div class="tc-rubric">Sources <span[^>]*>(\d+) / (\d+)</span>`)
 	frameNavNum     = regexp.MustCompile(`(?s)<span class="tc-num">.*?</span>`)

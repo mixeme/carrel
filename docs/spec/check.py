@@ -762,7 +762,9 @@ def frame_rail(frame):
     # секцию до первого </div> вместе с первой строкой.
     for m in re.finditer(r'<div class="((?:[^" ]+ )*tc-tickrow(?: [^"]*)?)">(.*?)</div>', rail, re.S):
         classes = m.group(1).split()
-        lab = re.search(r'<span class="tc-tickrow__label">([^<]*)</span>', m.group(2))
+        # Название — ссылка на коллекцию, где её страница есть (задача
+        # Typecase 292), и простая надпись, где нет.
+        lab = re.search(r'<(?:span|a) class="tc-tickrow__label"[^>]*>([^<]*)</(?:span|a)>', m.group(2))
         meta = re.search(r'<span class="tc-tickrow__meta">([^<]*)</span>', m.group(2))
         if lab:
             # Число — только цифры. «ro» у ленты и причина у не ответившей

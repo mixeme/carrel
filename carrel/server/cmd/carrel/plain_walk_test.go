@@ -45,7 +45,7 @@ func TestTheAppWorksWithoutScripts(t *testing.T) {
 	// card by the arrow of New (its main button opens the quick sheet),
 	// edited, deleted.
 	b.follow("Contacts")
-	b.follow("People")
+	b.followNew("People")
 	b.press("Save", url.Values{"fn": {"Ada Lovelace"}, "tel.0": {"+1 555 0100"}}, nil)
 	b.says("Ada Lovelace")
 	b.follow("Edit")
@@ -61,7 +61,7 @@ func TestTheAppWorksWithoutScripts(t *testing.T) {
 		{"Notes", "Reading list", "Reading list, short"},
 	} {
 		b.follow(k.section)
-		b.follow("Work")
+		b.followNew("Work")
 		b.press("Save", url.Values{"summary": {k.title}}, nil)
 		b.says(k.title)
 		b.follow("Edit")

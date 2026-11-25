@@ -18,6 +18,7 @@ import (
 // layer puts each in place of the page's form of that ID).
 func init() {
 	bind.Zones = []string{render.TargetMain, render.TargetRail, render.TargetDetails, render.TargetSheet, render.TargetNotices, render.TargetPoll, render.TargetQueue}
+	bind.MainZone = render.TargetMain
 }
 
 // Zoned is a screen's root with the zones of C-7.2 named, as the library's
