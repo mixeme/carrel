@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.13 — 2026-11-25
+
+Client `v0.11.57`; Typecase `a802ebb`. Audit №4 (docs/security.md,
+А4-1…А4-4 fixed here; А4-5…А4-8 wait for the owner).
+
+### For consumers
+
+- **davloom answers are sandboxed** (А4-2): every answer of the davloom
+  listener — a file, a listing, the root, a refusal — carries
+  `Content-Security-Policy: sandbox; default-src 'none'; frame-ancestors
+  'none'` and `X-Frame-Options: DENY`; the far server's own
+  `Content-Security-Policy`, `…-Report-Only` and `X-Frame-Options` are not
+  passed on. DAV clients do not read them; a browser no longer runs a page
+  of HTML from a folder on Carrel's origin.
+- **An upload route reads its fields itself, with the token in the header
+  too** (А4-1): a multipart POST to a route of files (upload, import,
+  attachments, the restore's step) with `X-CSRF-Token` has its fields in
+  front of the first file read before the handler, within a form's 1 MiB —
+  over it is 413, a body that cannot be read as multipart is 400. Nothing
+  of the file goes to a temporary file.
+- **A photo step reads its form in memory** (А4-3): within the route's
+  ceiling (`CARREL_PHOTO_MAX_UPLOAD_BYTES` and a form's 1 MiB), no
+  temporary file. Answers are as they were.
+- **The body of a GET or HEAD is not read** (А4-4): a value comes from the
+  address only.
+
 ## v0.4.12 — 2026-11-25
 
 Client `v0.11.57`; Typecase `a802ebb`.
