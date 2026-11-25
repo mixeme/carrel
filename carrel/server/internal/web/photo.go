@@ -633,7 +633,7 @@ func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
 	typing := func() cardTyping {
 		if r.MultipartForm == nil && strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
 			var over *http.MaxBytesError
-			tooLarge = errors.As(r.ParseMultipartForm(conf.MaxFormBodyBytes), &over)
+			tooLarge = errors.As(parseMultipart(r), &over)
 		}
 		if typed, sent := s.postedNewForm(c, r); sent {
 			return cardTyping{values: typed, at: strings.TrimSpace(r.URL.Query().Get("etag"))}

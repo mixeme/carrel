@@ -39,7 +39,9 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 		// arrives, and only the fields in front of the files are bounded.
 		stream := hasSess && isFileUpload(r)
 		if !stream || strings.HasPrefix(r.URL.Path, "/app/contacts/") {
-			r.Body = http.MaxBytesReader(w, r.Body, s.bodyLimit(r))
+			limit := s.bodyLimit(r)
+			r.Body = http.MaxBytesReader(w, r.Body, limit)
+			r = r.WithContext(context.WithValue(r.Context(), bodyCapKey{}, limit))
 		}
 
 		if needsCSRF(r) && hasSess {

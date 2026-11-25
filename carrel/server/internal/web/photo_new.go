@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/photo"
 	"carrel.dev/carrel/server/view"
@@ -145,7 +144,7 @@ func (s *Server) newPhotoForm(w http.ResponseWriter, r *http.Request, c *collect
 // step of the frame's own forms carries no field of the card.
 func (s *Server) postedNewForm(c *collectionCtx, r *http.Request) (formValues, bool) {
 	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
-		if r.MultipartForm == nil && r.ParseMultipartForm(conf.MaxFormBodyBytes) != nil {
+		if r.MultipartForm == nil && parseMultipart(r) != nil {
 			return nil, false
 		}
 	} else if r.ParseForm() != nil {

@@ -14,7 +14,7 @@ import (
 func csrfTokenFromBody(r *http.Request) (string, error) {
 	ct := r.Header.Get("Content-Type")
 	if strings.HasPrefix(ct, "multipart/form-data") {
-		if err := r.ParseMultipartForm(conf.MaxFormBodyBytes); err != nil {
+		if err := parseMultipart(r); err != nil {
 			return "", err
 		}
 		return r.FormValue(csrfFormField), nil
@@ -48,7 +48,25 @@ func readForm(r *http.Request) error {
 		if r.MultipartForm != nil {
 			return nil
 		}
-		return r.ParseMultipartForm(conf.MaxFormBodyBytes)
+		return parseMultipart(r)
 	}
 	return r.ParseForm()
+}
+
+// bodyCapKey holds the ceiling the middleware put on a request's body.
+type bodyCapKey struct{}
+
+// parseMultipart parses a multipart form whole, in memory: the body has a
+// ceiling (bodyLimit), and the form is read within it. With less memory
+// than the body may hold — a MiB for a photo of up to
+// CARREL_PHOTO_MAX_UPLOAD_BYTES — Go writes the file past it to a temporary
+// file, a copy of a person's photo on Carrel's disk (audit №4, А4-3). A body
+// without a ceiling is never parsed so: its fields are read in front of the
+// files (readUploadFields).
+func parseMultipart(r *http.Request) error {
+	limit, ok := r.Context().Value(bodyCapKey{}).(int64)
+	if !ok {
+		limit = conf.MaxFormBodyBytes
+	}
+	return r.ParseMultipartForm(limit)
 }
