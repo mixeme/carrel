@@ -11,6 +11,7 @@ const (
 	InviteTTL              = 72 * time.Hour
 	EmailConfirmTTL        = 48 * time.Hour
 	ForgotLinkTTL          = 24 * time.Hour
+	ForgotLetterGap        = 5 * time.Minute // one /forgot letter per account in it (А4-7)
 	ConsoleWipeLinkTTL     = 15 * time.Minute
 	DeviceProfileLinkTTL   = 5 * time.Minute
 	PublicLinkDefaultTTL   = 30 * 24 * time.Hour

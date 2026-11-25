@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.15 — 2026-11-25
+
+Client `v0.11.57`; Typecase `a802ebb`.
+
+### For consumers
+
+- **`/forgot` sends one letter per account in five minutes, and keeps one
+  live link** (audit №4, А4-7; the owner's decision of 25.11.2026). A
+  request within five minutes of a letter answers «Check your inbox» as
+  one that went, and sends nothing; a new letter burns the link before it.
+  The bucket by address stays as it was.
+
 ## v0.4.14 — 2026-11-25
 
 Client `v0.11.57`; Typecase `a802ebb`.

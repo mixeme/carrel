@@ -582,6 +582,12 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 	case "wipe":
 		// The wipe token goes to the mail layer (S-26), never into a response.
 		token, err := s.users.ForgotRequest(r.Context(), typed)
+		if errors.Is(err, user.ErrForgotRecent) {
+			// A letter went a moment ago: the same page as when it goes,
+			// nothing sent (А4-7).
+			page.Title, page.Lede, page.Sent, page.HasMail = "Check your inbox", line(forgotSent), true, true
+			break
+		}
 		if err != nil {
 			// The person sees the same page as when nothing could be issued;
 			// the operator sees why. No identifier from the form goes to the

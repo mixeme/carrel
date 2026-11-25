@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -539,6 +540,11 @@ func (s *Service) ForgotLookup(loginOrEmail string) (login string, hasMail, canA
 // ForgotRequest issues the wipe link of /forgot (S-10.4) and returns its
 // token for the mail layer; "" when the account cannot be helped
 // (forgotUser).
+// ErrForgotRecent: a /forgot letter went to the account within
+// conf.ForgotLetterGap — nothing is issued, and the page answers as when a
+// letter went (audit №4, А4-7).
+var ErrForgotRecent = errors.New("a recovery letter went a moment ago")
+
 func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (token string, err error) {
 	if snap := s.st.Snapshot(); forgotUser(&snap, loginOrEmail) == nil {
 		return "", nil
@@ -555,6 +561,14 @@ func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (token
 			return nil, nil
 		}
 		pruneTokens(st, now)
+		// One letter per account in the gap, and one live link: a new one
+		// burns the one before (audit №4, А4-7; the owner, 25.11.2026).
+		for _, t := range st.Tokens {
+			if t.Kind == tokenForgotWipe && t.UserID == u.ID && now.Sub(t.CreatedAt) < conf.ForgotLetterGap {
+				return nil, ErrForgotRecent
+			}
+		}
+		burnTokens(st, u.ID, tokenForgotWipe)
 		st.Tokens = append(st.Tokens, store.SecretToken{
 			Kind: tokenForgotWipe, Hash: hash, UserID: u.ID, Step: string(view.WipeConfirm),
 			CreatedAt: now, ExpiresAt: now.Add(conf.ForgotLinkTTL),
