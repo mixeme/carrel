@@ -44,18 +44,27 @@ func TestNotebookIsTheFrame(t *testing.T) {
 		t.Errorf("subtitle = %q, want the shape of %q", page.Subtitle, frameSubtitle(t, "s-notes-1"))
 	}
 	// The table counts rows, the rail records (the owner's decision of
-	// 09.10.2026): the linked note is one of «4 notes», and one of each of
-	// its notebooks in the rail.
-	if sub := frameSubtitle(t, "s-notes-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 4 notes") {
-		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), sub)
+	// 09.10.2026): the linked note is one row of «17 notes», and one of each
+	// of its notebooks in the rail. «Записи» holds the 16 notes of
+	// Neighbours since Typecase's note 234; the frame still says «4 notes» —
+	// Typecase's task 295. When it says 17, this is red: hold the subtitle
+	// to the frame again.
+	const subtitle = "2 of 3 notebooks · 17 notes · VJOURNAL"
+	if sub := frameSubtitle(t, "s-notes-1"); sub == subtitle {
+		t.Errorf("s-notes-1 says %q now: task 295 is answered, hold the subtitle to the frame", sub)
 	}
-	// «Записи 3», «Дневник 3» (Typecase's notes 123 p. 8, 182): the rail
-	// counts what lies in each, the copies too.
-	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 6 {
-		t.Errorf("the rail's combined row = %+v, want the 6 notes of the ticked notebooks", all.Count)
+	if string(page.Subtitle) != subtitle || !strings.HasSuffix(runsText(page.Poll.Summary), " · 17 notes") {
+		t.Errorf("subtitle = %q, poll %q; want %q", page.Subtitle, runsText(page.Poll.Summary), subtitle)
 	}
+	// «Записи 16», «Дневник 3» (Typecase's notes 123 p. 8, 182, 234): the
+	// rail counts what lies in each, the copies too.
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 19 {
+		t.Errorf("the rail's combined row = %+v, want the 19 notes of the ticked notebooks", all.Count)
+	}
+	// August's three as the frame draws them; July's «Про сроки по
+	// сборнику» and the thirteen notes of Neighbours under it.
 	if len(page.Groups) != 2 || page.Groups[0].Rubric != "August 2026" || page.Groups[0].Count != len(page.Groups[0].Rows) || page.Groups[0].Count != 3 ||
-		page.Groups[1].Rubric != "July 2026" || page.Groups[1].Count != 1 {
+		page.Groups[1].Rubric != "July 2026" || page.Groups[1].Count != 14 {
 		t.Errorf("groups = %+v", page.Groups)
 	}
 	if n := actionByID(page.Bar.Actions, "record.new"); n == nil || len(n.Arrow) != 2 || !slices.ContainsFunc(n.Arrow, func(m view.MenuItem) bool { return m.Label == "Записи" && m.Aside == "last used" }) {
@@ -104,7 +113,11 @@ func TestNotebookIsTheFrame(t *testing.T) {
 
 	// One notebook: where, how many and as what (s-notes-31).
 	one := decode[view.NotesPage](t, app.h.do(get(app.listPath(t, "notes", "zapisi")+"?open="+url.QueryEscape(open), app.sess)))
-	if sub := frameSubtitle(t, "s-notes-31"); string(one.Subtitle) != sub || one.Details == nil || one.Bar.FilterForm == nil {
+	// «16 notes»: the frame says 3 until Typecase's task 295.
+	if sub := frameSubtitle(t, "s-notes-31"); sub == "nextcloud · 16 notes · VJOURNAL" {
+		t.Errorf("s-notes-31 says %q now: task 295 is answered, hold the subtitle to the frame", sub)
+	}
+	if string(one.Subtitle) != "nextcloud · 16 notes · VJOURNAL" || one.Details == nil || one.Bar.FilterForm == nil {
 		t.Errorf("one notebook = %q %+v", one.Subtitle, one.Details)
 	}
 

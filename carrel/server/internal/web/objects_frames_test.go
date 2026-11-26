@@ -45,6 +45,13 @@ func TestObjectsAreWhatTheCollectionsHold(t *testing.T) {
 		}
 	}
 	walk(loadFixture(t, "app-settings-connections/normal.json"))
+	// «Записи» holds the 16 notes of Neighbours since Typecase's note 234;
+	// s-profile-1 still counts 3 — Typecase's task 295. When the frame says
+	// 16, this line is red: hold Записи to the frame again.
+	if want["Записи"] == 16 {
+		t.Errorf("s-profile-1 counts Записи 16 now: task 295 is answered, drop the exception")
+	}
+	want["Записи"] = 16
 	for name, n := range want {
 		if g, ok := got[name]; ok && g != n {
 			t.Errorf("%s: the fixture counts %d, the frame %d", name, g, n)
