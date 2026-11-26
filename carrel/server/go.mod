@@ -24,6 +24,8 @@ require (
 require (
 	carrel.dev/typecase v0.0.0-00010101000000-000000000000 // indirect
 	filippo.io/hpke v0.4.0 // indirect
+	github.com/emersion/go-imap/v2 v2.0.0-beta.9 // indirect
+	github.com/emersion/go-message v0.18.2 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 )
 
