@@ -14,6 +14,15 @@ func TestSub(t *testing.T) {
 	same(t, "nothing", bind.Sub(nil), []w.HeadSub(nil))
 }
 
+// A related record the session has read says its kind and day; one it has
+// not is its UID, and the line says why instead of a «· » before nothing.
+func TestRelatedAbout(t *testing.T) {
+	same(t, "kind and day", bind.RelatedAbout(view.TimelineRow{Kind: "event", When: "10 Aug", Why: "Related to"}, "· "), "· event · 10 Aug")
+	same(t, "kind alone", bind.RelatedAbout(view.TimelineRow{Kind: "task", Why: "Related to"}, "· "), "· task")
+	same(t, "not read: why", bind.RelatedAbout(view.TimelineRow{Title: "8f1c-4a02-b7d3", Why: "Not in the lists loaded for this collection"}, "· "), "· Not in the lists loaded for this collection")
+	same(t, "nothing to say", bind.RelatedAbout(view.TimelineRow{Title: "8f1c-4a02-b7d3"}, "· "), "")
+}
+
 func TestAttendee(t *testing.T) {
 	known := view.AttendeeRow{Name: "Анна Ковалёва", Email: "a.kovaleva@example.org", Status: "accepted", Href: "/app/contacts/a/k/4f2b", Colour: "#4a6b52", Value: "mailto:a.kovaleva@example.org"}
 	stranger := view.AttendeeRow{Name: "Виктор Гончаров", Email: "v@example.org", Status: "no reply", Value: "mailto:v@example.org"}
