@@ -59,7 +59,9 @@ func compactCookie(segment string) string { return "carrel_compact_" + segment }
 // browser's, kept by a cookie of the section — 1 or 0, so that a section
 // keeps comfortable rows where the browser's density is Compact —, and the
 // list comes back without the mark. The form of the bar sends the hidden 0
-// and, ticked, the 1 after it: the last value is the choice. It reports
+// and, ticked, the 1 too — in the order the library prints them, the check
+// first (the owner's phone, 26.11.2026: the last value was the hidden 0, and
+// the rows never went compact): a 1 among them is the choice. It reports
 // whether it answered.
 func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, back string) bool {
 	q := r.URL.Query()
@@ -69,7 +71,7 @@ func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, 
 	}
 	cookie := &http.Cookie{Name: compactCookie(segment), Path: s.cookiePath(), HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, Secure: s.secureCookies(r), Value: "0", MaxAge: int(conf.ColumnsChoiceAge.Seconds())}
-	if len(v) > 0 && v[len(v)-1] == "1" {
+	if slices.Contains(v, "1") {
 		cookie.Value = "1"
 	}
 	http.SetCookie(w, cookie)

@@ -88,8 +88,8 @@ func TestEmptyFieldsUnfold(t *testing.T) {
 }
 
 // «Compact rows» is a check of a GET form on the list (s-contacts-1,
-// components-38): ticked it sends compact=1, unticked the hidden 0 before
-// it; the list's query goes along; the choice is this browser's.
+// components-38): ticked it sends compact=1 beside the hidden 0, unticked
+// the hidden 0 alone; the list's query goes along; the choice is this browser's.
 func TestCompactRowsIsACheck(t *testing.T) {
 	app := newMockupApp(t)
 	list := app.listPath(t, "contacts", "kontakty")
@@ -135,6 +135,19 @@ func TestCompactRowsIsACheck(t *testing.T) {
 	}
 	if cookie == nil || cookie.Value != "1" {
 		t.Fatalf("cookie = %+v", cookie)
+	}
+	// The library prints the check before the hidden rows: the 1 comes
+	// first and the hidden 0 after it, and that is ticked too (the owner's
+	// phone, 26.11.2026: the rows never went compact).
+	first := url.Values{}
+	for k, v := range sent {
+		first[k] = append([]string(nil), v...)
+	}
+	first["compact"] = []string{"1", "0"}
+	for _, k := range app.h.do(get(list+"?"+first.Encode(), app.sess)).Result().Cookies() {
+		if k.Name == "carrel_compact_contacts" && k.Value != "1" {
+			t.Errorf("the check before the hidden 0: cookie %+v, want 1", k)
+		}
 	}
 	req := get(list, app.sess)
 	req.AddCookie(cookie)

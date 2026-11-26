@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.24 — 2026-11-26
+
+Client `v0.11.63`; Typecase `9cd1220`.
+
+### For consumers
+
+- **Compact rows works** (the owner's phone, 26.11.2026): a `1` among the
+  values of `compact` ticks it. The library prints the check before the
+  hidden `0`, so «the last value» was always the `0` and the rows never went
+  compact — on every width.
+
 ## v0.4.23 — 2026-11-26
 
 Client `v0.11.63`; Typecase `9cd1220`.
