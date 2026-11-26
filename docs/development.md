@@ -139,9 +139,12 @@
   CHANGELOG, как у `deploy.sh`. Typecase в обоих — клон рядом с
   репозиторием на коммите «Typecase сборки» плана клиента: репозиторий
   `vars.TYPECASE_REPO` (по умолчанию `<владелец>/typecase`), закрытый —
-  с токеном чтения в `secrets.TYPECASE_TOKEN`. Нужно со стороны владельца:
-  зеркала Carrel и Typecase на GitHub (push mirror в Gitea), секрет, если
-  Typecase закрыт, и после первой публикации — открыть пакет `carrel`.
+  с токеном чтения в `secrets.TYPECASE_TOKEN`. Зеркало — `github.com/mixeme/carrel`:
+  прежнее зеркало carrel_old под этим именем затирается зеркалом Carrel
+  (решение владельца 26.11.2026). Нужно со стороны владельца: зеркала Carrel
+  и Typecase на GitHub (push mirror в Gitea), секрет, если Typecase закрыт,
+  первый запуск «Image» руками и после первой публикации — открыть пакет
+  `carrel`.
 - **Живой набор** — `go test -tags=integration ./integration/`, **вывод в
   файл**, фильтровать уже из него. Нет сервера — набор пропускается с адресом
   и причиной; сервер ответил не так — падает. Наборы общие (`runRecords`,
