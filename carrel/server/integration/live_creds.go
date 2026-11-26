@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -83,6 +84,25 @@ type credSection struct {
 }
 
 func (s credSection) get(names ...string) string {
+	for _, n := range names {
+		if v := s.keys[n]; v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// prefixed is the value of a key that starts with prefix — the first by
+// name, where there are several —, for a key the file names after what the
+// value is for: «app password, Carrel-dev» (26.11.2026).
+func (s credSection) prefixed(prefix string) string {
+	var names []string
+	for k := range s.keys {
+		if strings.HasPrefix(k, prefix) {
+			names = append(names, k)
+		}
+	}
+	sort.Strings(names)
 	for _, n := range names {
 		if v := s.keys[n]; v != "" {
 			return v
@@ -192,7 +212,11 @@ func credEnv(text string) map[string]string {
 	// the login (the prefix alone answers 404).
 	set("CARREL_GOOGLE_CARDDAV_URL", googleAddress(pickAddress(google, "carddav", "carddav/v1"), google.get("login")))
 	set("CARREL_GOOGLE_CARDDAV_USER", google.get("login"))
-	gpass := strings.ReplaceAll(google.get("app password, carreldav", "app password"), " ", "")
+	gpass := google.get("app password, carreldav", "app password")
+	if gpass == "" {
+		gpass = google.prefixed("app password")
+	}
+	gpass = strings.ReplaceAll(gpass, " ", "")
 	set("CARREL_GOOGLE_CARDDAV_PASS", gpass)
 	// Contacts and calendars sit on different hosts, so the file names both and
 	// each is taken by what it contains. The documented

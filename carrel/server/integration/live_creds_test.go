@@ -222,3 +222,16 @@ func TestMissingSectionSetsNothing(t *testing.T) {
 		t.Error("the section that is there was not read")
 	}
 }
+
+// The app password of Google under a name of the file's own: «app password,
+// Carrel-dev» (the owner's new account, 26.11.2026) is the account's app
+// password as much as «app password, CarrelDAV».
+func TestGoogleAppPasswordByAnyName(t *testing.T) {
+	env := credEnv("# Google, CardDAV/CalDAV\nlogin: someone@gmail.com\napp password, Carrel-dev: wxyz abcd efgh ijkl\n" +
+		"CardDAV: https://www.googleapis.com/carddav/v1/principals/\nCalDAV: https://www.google.com/calendar/dav/\n")
+	for _, k := range []string{"CARREL_GOOGLE_CARDDAV_PASS", "CARREL_GOOGLE_CALDAV_PASS"} {
+		if env[k] != "wxyzabcdefghijkl" {
+			t.Errorf("%s = %q, want the app password without its spaces", k, env[k])
+		}
+	}
+}
