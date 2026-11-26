@@ -102,6 +102,11 @@ type Screen struct {
 	// every state of a pass, with Stop while it runs (s-find-1, -4); false —
 	// no bar. The zone poll is drawn so too. nil — bind.Runbar.
 	Poll func(model any) (widget.Runbar, bool)
+	// Zone draws a zone of the screen's own alone (Notices{Zone}, Typecase's
+	// notes 232, 233), for an answer into it by its name: the zone and its
+	// content, as the page carries it. false — the screen has no such zone
+	// in this state. nil — none.
+	Zone func(model any, target string) (string, bool)
 	// Waits are what of the screen waits for the library (U-5.5, the
 	// owner's decision of 01.10.2026): each a row of the list «ждёт
 	// библиотеку», and the row's mark stands at the line here and at the
@@ -639,6 +644,13 @@ var All = []Screen{
 		Title:     func(model any) string { return string(model.(*view.ConnectionsPage).Title) },
 		Forms:     func(model any) []widget.PostForm { return settings.ConnectionsForms(model.(*view.ConnectionsPage)) },
 		NoticesOf: func(model any) widget.MsgSpace { return settings.ConnectionsNotices(model.(*view.ConnectionsPage)) },
+		Zone: func(model any, target string) (string, bool) {
+			p := model.(*view.ConnectionsPage)
+			if target != settings.AnswerZone || p.Add == nil || p.DialogTitle == "" {
+				return "", false
+			}
+			return settings.Answer(p).Render(), true
+		},
 	},
 	{
 		Model:  func() any { return new(view.DevicesPage) },

@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/mail/attach?a=a-nc-home\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+      "href": "/app/mail/attach?a=a-nc-home\u0026c=zapisi\u0026uid=6d97-0d44-c3e4\u0026what=note",
       "id": "mail.attach.add",
       "label": "Attach",
       "method": "POST",
@@ -31,7 +31,7 @@
   },
   "crumbs": [],
   "form": {
-    "action": "/app/mail/attach?a=a-nc-home\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+    "action": "/app/mail/attach?a=a-nc-home\u0026c=zapisi\u0026uid=6d97-0d44-c3e4\u0026what=note",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -106,8 +106,8 @@
         "label": "",
         "method": ""
       },
-      "size": "550 KB",
-      "title": "Заметка со встречи 10.08"
+      "size": "192 B",
+      "title": "Вопросы к бухгалтеру"
     }
   ],
   "rail": {
@@ -177,13 +177,93 @@
     {
       "avatar": null,
       "colour": "#4a6b52",
-      "detail": "Договорились заморозить ветку в среду.",
-      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+      "detail": "Вычет за лечение, сроки декларации.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d97-0d44-c3e4\u0026what=note",
       "kind": "note",
       "on": true,
       "stamp": "nextcloud · Записи",
+      "title": "Вопросы к бухгалтеру",
+      "when": "18 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Договорились заморозить ветку в среду.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
       "title": "Заметка со встречи 10.08",
       "when": "10 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Доклад про синхронизацию календарей — слайды прислать.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d9a-1077-c3e7\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Заметки с конференции",
+      "when": "15 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Шрифт без засечек, тёмно-зелёный фон.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d9c-1299-c3e9\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Идеи для обложки",
+      "when": "13 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Раз в неделю на диск, раз в месяц — вне дома.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d98-0e55-c3e5\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Как устроить резервные копии",
+      "when": "17 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Три романа и одна книга про сады.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d95-0b22-c3e2\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Книги на осень",
+      "when": "20 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Ближе к работе или ближе к парку.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d9e-14bb-c3eb\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Мысли о переезде",
+      "when": "11 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Спросить у отца, где наклейка с роутера.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d9f-15cc-c3ec\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Пароли Wi-Fi у родителей",
+      "when": "10 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Сборник, ремонт, отпуск.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d9b-1188-c3e8\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "План на квартал",
+      "when": "14 Jul"
     },
     {
       "avatar": null,
@@ -194,6 +274,56 @@
       "stamp": "nextcloud · Записи",
       "title": "Про сроки по сборнику",
       "when": "21 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Сократить вступление, перенести пример в конец.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d96-0c33-c3e3\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Разбор третьей главы",
+      "when": "19 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Плитка в ванной, плинтус в коридоре, розетка на кухне.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d94-0a11-c3e1\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Ремонт: что осталось",
+      "when": "25 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Паспорта, зарядки, страховка.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6da0-16dd-c3ed\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Список к отпуску",
+      "when": "9 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Подкормить закваску за ночь до замеса.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d99-0f66-c3e6\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Хлеб на закваске",
+      "when": "16 Jul"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Удлинитель, семена, перчатки.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=zapisi\u0026uid=6d9d-13aa-c3ea\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Что взять на дачу",
+      "when": "12 Jul"
     },
     {
       "avatar": null,

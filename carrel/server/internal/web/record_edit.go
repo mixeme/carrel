@@ -3631,6 +3631,9 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	uid := r.PathValue("uid")
+	if autosaving(r) {
+		w = &autosaveWriter{ResponseWriter: w, done: s.route(c.recordPath(uid))}
+	}
 	upload := &formUpload{}
 	if r.URL.Query().Get("op") == "" {
 		var err error
@@ -3671,7 +3674,13 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.notFound(w, r)
 		return
 	}
-	etag := strings.TrimSpace(r.FormValue("etag"))
+	// The form says the version it was opened at; one this session's
+	// auto-save wrote since stands in for it (Typecase's note 229): the
+	// page did not change while it auto-saved, and its next write — an
+	// auto-save or Save — edits what the last one wrote, not a conflict
+	// with itself. A record an auto-save created has a form with none.
+	formETag := strings.TrimSpace(r.FormValue("etag"))
+	etag := c.sess.AutosavedFrom(c.conn.ID, c.col.Path, uid, formETag)
 	readAt := unixForm(r.FormValue("readat"))
 	want := s.submittedValues(c, r)
 	st := editState{uid: uid, values: want, etag: etag, readAt: readAt, unfold: r.URL.Query().Get("fields") == "all", filesChosen: upload.chosen}
@@ -3681,7 +3690,9 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	moving := false
 	if c.cal != nil {
 		st.notebook = strings.TrimSpace(r.FormValue("notebook"))
-		moving = st.notebook != "" && st.notebook != c.listPath()
+		// An auto-save writes the edit where it is: the form would go on
+		// to the old address. The move is Save's.
+		moving = st.notebook != "" && st.notebook != c.listPath() && !autosaving(r)
 	}
 	if upload.notice != nil {
 		st.obj, _ = c.find(r.Context(), uid)
@@ -3868,6 +3879,19 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	upload.saved = true
+	// What this write made of the version the form was opened at, for the
+	// form's next write (AutosavedFrom): kept for an auto-save, and for the
+	// Save of a form that auto-saved before.
+	if autosaving(r) || etag != formETag {
+		if wrote == "" {
+			if got, err := c.find(r.Context(), uid); err == nil {
+				wrote = got.ETag
+			}
+		}
+		if wrote != "" {
+			c.sess.NoteAutosaved(c.conn.ID, c.col.Path, uid, formETag, wrote)
+		}
+	}
 	back := c.recordPath(uid)
 	if markDone {
 		back = doneBack(c, uid, r.FormValue("from"))
@@ -4687,6 +4711,9 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		s.notFound(w, r)
 		return
 	}
+	if autosaving(r) {
+		w = &autosaveWriter{ResponseWriter: w, created: true}
+	}
 	// A step of a new form's attachments (attach_new.go): its file is read
 	// from the body as it comes, nothing may parse the form before.
 	if op := r.URL.Query().Get("op"); op != "" && c.cal != nil {
@@ -4898,6 +4925,15 @@ func (s *Server) finishCreate(w http.ResponseWriter, r *http.Request, c *collect
 				}
 			}
 		}
+	}
+	// Created by an auto-save (Typecase's note 229): the form goes on to the
+	// record's edit, which takes its next writes as the version written now
+	// (AutosavedFrom: a new record's form names none). What the server did
+	// not keep is said by the Save that follows.
+	if autosaving(r) && wr.err == nil && wr.got != nil {
+		c.sess.NoteAutosaved(c.conn.ID, c.col.Path, wr.uid, "", wr.got.ETag)
+		s.redirect(w, r, c.recordPath(wr.uid)+"/edit")
+		return
 	}
 	s.reportWrite(w, r, c, sent, c.recordPath(wr.uid), wr, nil)
 }

@@ -226,6 +226,13 @@ type renders interface{ Render() string }
 // details and rail are the parts of the screen's shell; notices and poll are
 // the model's zone (zone.Of) translated as the screens translate them.
 func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
+	// A zone of the screen's own, by the name it gives it (Screen.Zone): the
+	// answer of Connect's Test only (Typecase's note 232).
+	if scr.Zone != nil {
+		if out, ok := scr.Zone(model, target); ok {
+			return out, true
+		}
+	}
 	switch target {
 	case render.TargetNotices:
 		ns, err := zone.Of(model, target)

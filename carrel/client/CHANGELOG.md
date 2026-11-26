@@ -4,6 +4,28 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.61 — 2026-11-26
+
+Server `v0.4.20`; Typecase `37401ba` (notes 229–234: tasks 286, 291, 284,
+285, 282, 289).
+- **The edit bar works** (`screens/note`): the markup buttons mark the text
+  (`Marks`), Focus hides the rail and the column (`Focuses`), Auto-save is
+  kept under one name for every notebook (`AutoSave: "notes"`) and sends
+  the edit after a pause in typing, the draft note says «Saved» after it
+  (`Saved`). The meaning guard holds an edit bar's script-only controls to
+  naming what they do.
+- **Connect's dialog answers under its head** (`settings.Answer`, zone
+  `connect-answer` of C-7.2): Test only goes into it with the live layer,
+  the form and the typed password untouched; a refused Connect stands
+  there too, its trace in the lines of Test only. `Screen.Zone` draws a
+  screen's own zone alone; `zone.Of` cuts it (`zone.ConnectAnswer`).
+- **Copy is the publish sheet's primary** where it has no Send by letter
+  (s-publish-22).
+- **Neighbours scrolls in its own block** (`Tree.Scrolls`), the open note
+  in its middle.
+- Mockup copy: the phone's section bar stands at the window's foot (291),
+  Reading width one measure (284).
+
 ## v0.11.60 — 2026-11-26
 
 Server `v0.4.19`; Typecase `a0f2006` (note 228: task 283).

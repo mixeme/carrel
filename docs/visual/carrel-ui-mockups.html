@@ -257,6 +257,7 @@ body[data-tc-root]>.tc-overlay>.tc-shell__body{flex:1 0 auto}
 .tc-shell__body{display:grid;grid-template-columns:var(--tc-rail) minmax(0,1fr);min-height:480px;--tc-shell-mode:full}
 .tc-shell__body.tc-shell__body--side{grid-template-columns:var(--tc-rail) minmax(0,1fr) var(--tc-side)}
 .tc-shell__body.tc-shell__body--no-rail{grid-template-columns:minmax(0,1fr)}
+.tc-shell__body[data-tc-focus] > .tc-shell__rail{display:none}
 .tc-shell__rail{border-right:.5px solid var(--tc-rule);padding:12px 0 0;display:flex;flex-direction:column;gap:16px;min-width:0}
 .tc-main{min-width:0;display:flex;flex-direction:column;background:var(--tc-bg);container:tcbox / inline-size;overflow-x:auto;position:relative}
 .tc-side{border-left:.5px solid var(--tc-rule);background:var(--tc-surface);display:flex;flex-direction:column;min-width:0;position:relative;container:tcbox / inline-size}
@@ -809,6 +810,8 @@ label.tc-tree__row{cursor:pointer}
 .tc-tree__row.is-on:has(> .tc-tree__box:not(:checked)){background:none;font-weight:400}
 .tc-tree__row:has(> .tc-tree__box:focus-visible){outline:1.5px solid var(--tc-accent);outline-offset:1px}
 .tc-tree svg{width:14px;height:14px;stroke:var(--tc-muted);stroke-width:1.3;fill:none}
+.tc-tree--scroll{max-height:283px;overflow-y:auto;overscroll-behavior:contain}
+.tc-tree--scroll > .tc-tree__row{flex:none}
 /* наложение: быстрая заметка поверх любого экрана */
 .tc-overlay{position:relative;container:tcbox / inline-size;min-width:0}
 /* Затемнение — слой над всей страницей, открытые меню (6) и поднятые кнопки ящика (1) тоже под ним. */
@@ -928,6 +931,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
 /* Колонка справа — та же панель подробностей, 400 px; при рабочей области уже 880 — 296. */
 .tc-doc__layout{display:grid;grid-template-columns:minmax(0,1fr) var(--tc-side);min-height:0}
 .tc-doc__layout.is-focus{grid-template-columns:minmax(0,1fr)}
+/* Focus сценарием (задача Carrel 286): страница та же, что в s-notes-4, — рейл и колонка записи стоят, но не видны (data-tc-focus ставит tc.js). */
+.tc-shell__body[data-tc-focus] .tc-doc__layout > .tc-docmeta{display:none}
 /* Полный экран: поля не зажаты. «Reading width» — названный режим. */
 .tc-doc{padding:20px var(--tc-page-gutter) 30px;min-width:0}
 /* В документе поле занимает свою ячейку целиком. Без width сброс
@@ -960,13 +965,17 @@ label.tc-menu__item{position:relative;cursor:pointer}
 @container tcbox (max-width:640px){
   .tc-doc__tablebar{display:flex}
 }
-.tc-doc__layout.is-measure .tc-doc > *{max-width:78ch}
+/* Reading width — одна мера на весь столбец (задача Carrel 284): 78 знаков кегля текста, 14.5, у самого столбца;
+   заголовок, поля и текст кончаются у одного края. Раньше 78ch считались в кегле каждого ребёнка и на широком окне расходились. */
+.tc-doc__layout.is-measure .tc-doc{font-size:14.5px;max-width:calc(78ch + 2 * var(--tc-page-gutter))}
 .tc-doc__title{font-family:var(--tc-font-serif);font-size:27px;line-height:1.15;font-weight:400}
 .tc-docmeta{border-left:.5px solid var(--tc-rule);padding:16px 18px;display:flex;flex-direction:column;gap:15px;background:var(--tc-surface)}
 .tc-docmeta .tc-rubric{margin-bottom:6px}
 .tc-docbar{display:flex;align-items:center;gap:6px;padding:7px var(--tc-page-gutter);border-bottom:.5px solid var(--tc-hair);background:var(--tc-surface)}
 /* Выбор коллекции в панели документа — по ширине своего текста, не шире 210: сначала сжимается он, потом кнопки уходят под «⋯» (владелец, 09.11). */
 .tc-docbar > .tc-field{width:auto;max-width:210px}
+/* Записка черновика: «Draft in this window · 11:42», после автосохранения — «Saved · 11:44» (задача Carrel 286); время сменяется на месте. */
+.tc-docbar__draft{white-space:nowrap}
 /* диалоги и одиночные страницы */
 /* Страницы до входа: карточка в поле пустой страницы. Не примитив набора. */
 .tc-auth{min-height:520px;display:flex;align-items:center;justify-content:center;padding:40px 20px}
@@ -1234,6 +1243,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-bar.tc-bar--sel > .tc-bar__sep{flex-basis:100%;height:0;margin-top:-8px;background:none}
   /* Правая часть (Select all, Clear selection) — к счёту, справа: на строке действий она уезжала на край одна. */
   .tc-bar.tc-bar--sel > .tc-bar__sep,.tc-bar.tc-bar--sel > .tc-bar__sep ~ :not(.tc-bar__right){order:1}
+  /* Правой части тесно у счёта — она переносит своё внутри себя, справа, а не вылезает за край (свободная композиция, 26.11). */
+  .tc-bar.tc-bar--sel > .tc-bar__right{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end;min-width:0}
   .tc-docbar{flex-wrap:wrap}
   .tc-bar > .tc-range{flex-wrap:wrap}
   .tc-table .tc-acts{flex-wrap:wrap;white-space:normal}
@@ -1400,6 +1411,9 @@ label.tc-menu__item{position:relative;cursor:pointer}
     border-right:0;border-top:.5px solid var(--tc-rule);background:var(--tc-surface);
     overflow:visible;align-items:stretch}
   .tc-shell__rail .tc-railsec,.tc-shell__rail .tc-railfoot{display:none}
+  /* На странице полоса разделов — у низа окна при любой длине страницы: страница прокручивается под ней
+     (задача Carrel 291: настройки длиннее экрана уводили её вниз вместе с концом страницы). */
+  body[data-tc-root] > .tc-shell > .tc-shell__body:not([data-tc-rail-open]) > .tc-shell__rail{position:sticky;bottom:0;z-index:5}
   /* Разделы и возврат — пункты одной панели равной ширины: возврат идёт за разделами, как в рейле, за чертой. */
   .tc-shell__rail .tc-nav{display:contents}
   .tc-shell__rail .tc-nav--top2 .tc-nav__item{border-left:.5px solid var(--tc-rule)}
@@ -1718,6 +1732,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-fset__col.tc-fset__col{display:flex;flex-direction:column;gap:2px;min-width:0}
 .tc-card__note.tc-card__note{font-size:11.5px;color:var(--tc-muted);margin-top:9px;line-height:1.55}
 .tc-card__foot.tc-card__foot{border-top:.5px solid var(--tc-hair);margin-top:11px;padding-top:9px}
+/* Под галкой подвала — место нажатия: то, что идёт следом, не встаёт в её 44 px (свободная композиция, 26.11). */
+.tc-card__foot > .tc-check:not(:last-child){margin-bottom:14px}
 .tc-card__above.tc-card__above{font-size:11.5px;color:var(--tc-dusty);margin:-3px 0 8px}
 .tc-card__grid.tc-card__grid{margin-top:11px;align-items:center;display:grid;gap:8px 12px;grid-template-columns:92px minmax(0,1fr) auto}
 .tc-card__rows.tc-card__rows{font-size:11.5px;display:grid;gap:7px 0;grid-template-columns:minmax(0,1fr)}
@@ -3290,7 +3306,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
     <button class="tc-btn is-primary" type="button">Save</button>
     <button class="tc-btn" type="button">Cancel</button>
     <span class="tc-bar__sep"></span>
-    <button class="tc-btn" type="button"><b>B</b></button>
+    <button class="tc-btn" type="button" data-tc-marks="bold"><b>B</b></button>
     <span class="tc-bar__right"><kbd class="tc-kbd">Ctrl+S</kbd></span>
   </div>
   <div class="tc-doc__title">Заметка со встречи 10.08</div>
@@ -8645,15 +8661,29 @@ SEQUENCE  1</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Neighbours</div>
-          <div class="tc-tree tc-tree--padx">
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
             <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
             <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
           </div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -8727,7 +8757,7 @@ Read  2 min ago</div>
   </div>
 </div>
 <figcaption><b>Чтение.</b> Текст занимает всю колонку содержимого: кегль 14.5, интерлиньяж 1.7. Справа — колонка с тем, что не текст: теги, связи, вложения, техническая правда об источнике; кнопка <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-panel"/></svg> убирает и её.<br><br><b>Эта колонка — не панель подробностей, хотя ширина у неё та же, 400&nbsp;px.</b> Панель на других экранах показывает строку, выбранную в списке: крестик закрывает её, и остаётся список, а открывают снова выбором строки. Здесь списка нет — колонка часть страницы самой заметки. Закрой её крестиком, и вернуть было бы нечем, поэтому её убирает и возвращает переключатель в панели над текстом, а крестика нет: он стал бы вторым способом сделать то же самое. И колонка начинается <b>под</b> этой панелью, а не от шапки: Edit, Export <code>.md</code>, Send, Print, Source и ширина текста относятся ко всей заметке вместе с колонкой. Своей шапки у колонки нет — она повторила бы заголовок, который уже стоит в тексте.<br><br>В рейле вместо списка коллекций — соседние заметки, чтобы листать не возвращаясь. Переключатель <b>Full width / Reading width</b> в панели выбирает между двумя ширинами текста: во всю колонку содержимого — или в 78&nbsp;ch, примерно как в книге. Он нужен на мониторе, который шире, чем удобно читать; выбор запоминается. На кнопке написано, что она делает. Умолчание — полная ширина. Как это выглядит в 78&nbsp;ch — кадр следом.
-<br><br><b>Да, Markdown разбирается — в просмотре и только в нём.</b> Заголовок «Что делаем» и список выше показаны так, как их увидит человек. Это решение, а не набросок: без разбора «режим просмотра» отличался бы от правки одним лишь отсутствием рамки у поля, и заводить его было бы незачем. Стоит оно одной зависимости — <code>goldmark</code> в бинарник, без CDN и без JS, с <b>выключенным сырым HTML</b>: чужая заметка приходит с чужого сервера, и превращать её в исполняемую разметку нельзя. Поддерживается то, что пишут в заметках руками и что кладёт jtx Board: заголовки, списки, задачи-флажки, выделение, ссылки, код, цитаты и таблицы. <b>Хранится по-прежнему текст.</b> Carrel ничего не переписывает: правка отдаёт ровно те символы, которые набрали, а синтаксис, которого разборщик не знает, остаётся видимым текстом, а не пропадает. Кнопка <b>«Source»</b> в меню карточки показывает исходник, когда нужно понять, что именно лежит на сервере. <b>Связанные записи</b> — тот же блок, что у контакта: строка говорит, где лежит другая копия и чем отличается, нажатие открывает её.</figcaption>
+<br><br><b>Да, Markdown разбирается — в просмотре и только в нём.</b> Заголовок «Что делаем» и список выше показаны так, как их увидит человек. Это решение, а не набросок: без разбора «режим просмотра» отличался бы от правки одним лишь отсутствием рамки у поля, и заводить его было бы незачем. Стоит оно одной зависимости — <code>goldmark</code> в бинарник, без CDN и без JS, с <b>выключенным сырым HTML</b>: чужая заметка приходит с чужого сервера, и превращать её в исполняемую разметку нельзя. Поддерживается то, что пишут в заметках руками и что кладёт jtx Board: заголовки, списки, задачи-флажки, выделение, ссылки, код, цитаты и таблицы. <b>Хранится по-прежнему текст.</b> Carrel ничего не переписывает: правка отдаёт ровно те символы, которые набрали, а синтаксис, которого разборщик не знает, остаётся видимым текстом, а не пропадает. Кнопка <b>«Source»</b> в меню карточки показывает исходник, когда нужно понять, что именно лежит на сервере. <b>Связанные записи</b> — тот же блок, что у контакта: строка говорит, где лежит другая копия и чем отличается, нажатие открывает её.<br><br><b>Neighbours — вся тетрадь</b> в порядке списка, открытая подсвечена (задача Carrel 289). Длинная прокручивается в своём блоке, остальной рейл идёт со страницей, как прежде; со сценарием блок открывается так, что открытая заметка — посередине.</figcaption>
 </figure>
 <figure>
 <div class="frame" data-frame="s-notes-27" data-screen="/app/notes/{account}/{col}/{uid}" data-part="source">
@@ -8747,15 +8777,29 @@ Read  2 min ago</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Neighbours</div>
-          <div class="tc-tree tc-tree--padx">
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
             <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
             <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
           </div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -8954,15 +8998,29 @@ Read  2 min ago</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Neighbours</div>
-          <div class="tc-tree tc-tree--padx">
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
             <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
             <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
           </div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -9055,15 +9113,29 @@ Read  2 min ago</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Neighbours</div>
-          <div class="tc-tree tc-tree--padx">
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
             <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
             <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
           </div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -9074,20 +9146,20 @@ Read  2 min ago</div>
           <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
           <div class="tc-field tc-field--md"><details class="tc-drop"><summary class="tc-in is-pick" title="Notebook"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" type="button"><b>B</b></button>
-          <button class="tc-btn tc-btn--fontstyle-italic" type="button">I</button>
-          <button class="tc-btn is-3rd" type="button">H2</button>
-          <button class="tc-btn is-3rd" type="button">• list</button>
-          <button class="tc-btn is-3rd" title="Task" type="button"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
-          <button class="tc-btn is-3rd" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+          <button class="tc-btn" type="button" data-tc-marks="bold"><b>B</b></button>
+          <button class="tc-btn tc-btn--fontstyle-italic" type="button" data-tc-marks="italic">I</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="heading">H2</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="list">• list</button>
+          <button class="tc-btn is-3rd" title="Task" type="button" data-tc-marks="tick"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="link"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
           <details class="tc-drop"><summary class="tc-btn" title="Attach"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg><span class="tc-btn__label">Attach</span><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-edit" aria-label="From this computer" data-tc-list="note-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right">
-            <button class="tc-check is-3rd" type="button"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
-            <span class="is-2nd">Draft in this window · <span class="tc-mono">11:42</span></span>
+            <button class="tc-check is-3rd" type="button" data-tc-autosave="notes"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
+            <span class="tc-docbar__draft is-2nd" data-tc-draft data-tc-saved="Saved">Draft in this window · <span class="tc-mono">11:42</span></span>
             <kbd class="tc-kbd is-2nd">Ctrl+S</kbd>
             <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn" title="Focus" type="button"><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
+            <button class="tc-btn" title="Focus" type="button" data-tc-focus-mode><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
           </span>
         </div>
         <div class="tc-runbar" data-tc-progress="note-edit" hidden><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="0%"></i></span>Saving · <span class="tc-mono">0 of 0 MB</span></div>
@@ -9139,6 +9211,123 @@ Read  2 min ago</div>
 </div>
 <figcaption><b>Правка там же, где чтение.</b> Заметка связана с копией в «Дневнике»; какую копию правят, говорит метка и имя в поле Notebook — отдельной строки об этом нет (решение владельца 16.10, задача Carrel 182). Edit — в панели над текстом или в панели заметки у списка — открывает эту страницу в правке: рейл с соседними заметками и колонка справа остаются на месте, меняется только колонка текста — вместо прочитанного поле заголовка, поля «когда» и «куда» и поле текста. <b>Tags и Related из колонки на время правки уходят</b>: они стали полями под заголовком, и два места для одного значения заставили бы гадать, какое из них настоящее. В колонке остаётся то, что правкой не меняется: вложения, источник и удаление. Блока «та же заметка в других тетрадях» в правке нет (решение владельца 13.10, Р-58): копию выбирают в листе до формы, и форма — форма одной копии; блок стоит в чтении. <b>У вложения, которое лежит в папке Files, кнопка другая</b> (задача 155): не тревожная «Remove», а простая «Unlink» (в подсказке — «Remove the link; the file stays in …») — уходит связь, файл остаётся там, где лежит, и значок рядом называет это место; «Remove» цветом тревоги — у вложения, записанного в саму заметку: оно удаляется вместе с ней. Save и Cancel возвращают к чтению. <b>Focus</b> — кнопка справа в панели — убирает рейл и колонку, когда писать долго; этот режим — кадр следом. <b>У Focus свой значок — рамка видоискателя.</b> Стрелки наружу во всём макете значат одно: «открыть крупнее» — страницу заметки из панели, карточку из листа «New …»; одним значком для двух действий было бы не понять, что откроется.</figcaption>
 </figure>
+
+<figure>
+<div class="frame" data-frame="s-notes-36" data-screen="/app/notes/{account}/{col}/{uid}/edit">
+  <div class="frame-label"><span>Заметка · правка с Auto-save</span><i>Auto-save включён и полная ширина (Appearance) — не умолчание · /app/notes/{account}/{col}/{uid}/edit</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <span class="tc-split"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note</button><button class="tc-btn is-primary" type="button" title="More to create" aria-label="More to create"><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></span>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Neighbours</div>
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
+            <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
+          </div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-docbar tc-docbar--edit">
+          <button class="tc-btn is-primary" type="submit" form="note-edit">Save</button>
+          <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
+          <div class="tc-field tc-field--md"><details class="tc-drop"><summary class="tc-in is-pick" title="Notebook"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
+          <span class="tc-bar__sep"></span>
+          <button class="tc-btn" type="button" data-tc-marks="bold"><b>B</b></button>
+          <button class="tc-btn tc-btn--fontstyle-italic" type="button" data-tc-marks="italic">I</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="heading">H2</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="list">• list</button>
+          <button class="tc-btn is-3rd" title="Task" type="button" data-tc-marks="tick"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="link"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+          <details class="tc-drop"><summary class="tc-btn" title="Attach"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg><span class="tc-btn__label">Attach</span><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-edit" aria-label="From this computer" data-tc-list="note-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
+          <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
+          <span class="tc-bar__right">
+            <button class="tc-check is-3rd" type="button" data-tc-autosave="notes"><span class="tc-tickrow__tick"></span>Auto-save</button>
+            <span class="tc-docbar__draft is-2nd" data-tc-draft data-tc-saved="Saved">Saved · <span class="tc-mono">11:44</span></span>
+            <kbd class="tc-kbd is-2nd">Ctrl+S</kbd>
+            <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
+            <button class="tc-btn" title="Focus" type="button" data-tc-focus-mode><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
+          </span>
+        </div>
+        <div class="tc-runbar" data-tc-progress="note-edit" hidden><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="0%"></i></span>Saving · <span class="tc-mono">0 of 0 MB</span></div>
+        <div class="tc-doc__layout">
+          <form class="tc-doc" id="note-edit" action="/app/notes/nextcloud/zapisi/9e31-40b7-c012" method="post" enctype="multipart/form-data">
+            <textarea class="tc-in tc-in--title" name="summary">Заметка со встречи 10.08</textarea>
+            <div class="tc-doc__fields">
+              <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
+              <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
+              <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" name="categories" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Link</label><input class="tc-in is-ph" type="text" name="url" placeholder="optional" aria-label="Link"></div>
+              <div class="tc-field tc-field--flex3-340">
+                <label>Related to</label>
+                <span class="tc-in tc-in--tags">
+                  <span class="tc-tag tc-tag--pill"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>Синк-ап по релизу
+                    <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></span> <span class="tc-tag tc-tag--pill"><span class="tc-mark tc-mark--h11" data-tc-colour="#3F6E8C"></span>Дописать раздел про кэш
+                    <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></span> <input class="tc-in__add" type="text" name="related.add" placeholder="Title or UID" aria-label="Add a link" autocomplete="off"> </span>
+              </div>
+            </div>
+            <textarea class="tc-in is-area is-focus tc-in--body" name="description">Договорились заморозить ветку в среду.
+
+Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.
+
+## Что делаем
+
+- [ ] проверить changelog
+- [x] попросить у Артёма скриншоты
+
+Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.</textarea>
+            <div class="tc-doc__note">Properties Carrel does not know — <span class="tc-mono">X-JTX-COLOR</span> and two more — are kept unchanged and not shown here.</div>
+          </form>
+          <div class="tc-docmeta">
+            <div class="tc-docmeta__sec" id="note-attachments">
+              <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-edit" aria-label="From this computer" data-tc-list="note-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+              <div class="tc-line__text"><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span> <button class="tc-btn is-sm is-danger" type="button">Remove</button></div>
+              <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span> <button class="tc-btn is-sm" type="button" title="Remove the link; the file stays in Documents / carrel">Unlink</button></div>
+            </div>
+            <div class="tc-docmeta__sec">
+              <div class="tc-rubric">Source</div>
+              <div class="tc-diag">UID   9e31-40b7-c012
+Read  2 min ago</div>
+            </div>
+            <div class="tc-danger tc-danger--topauto-flush-padt"><button class="tc-btn is-danger-solid" type="button">Delete note</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Auto-save.</b> Галка держится в этом браузере — на тетрадь или на все сразу, как решит Carrel. Включённая, правка уходит сама после паузы в наборе — тем же Save, не уходя со страницы; выбранные файлы ждут Save. Когда записано, говорит записка второго ранга справа — «Saved · 11:44»; как и «Draft in this window», она стоит, пока полоса шире 1280, уже — уходит первой. Выключенная — набранное держится черновиком в этом окне («Draft in this window · 11:42», s-notes-20): перезагрузка той же правки возвращает его, пока заметку не изменили. Новая заметка (s-notes-30) появляется с первой записью. Кнопки разметки ставят Markdown вокруг выделения (B, I, ссылка) или в начало строк (H2, список, задача); нажатые снова — снимают.</figcaption>
+</figure>
 <figure>
 <div class="frame" data-frame="s-notes-30" data-screen="/app/notes/{account}/{col}/new">
   <div class="frame-label"><span>Заметка · новая</span><i>/app/notes/{account}/{col}/new</i></div>
@@ -9157,7 +9346,7 @@ Read  2 min ago</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
@@ -9169,19 +9358,19 @@ Read  2 min ago</div>
           <a class="tc-btn" href="/app/notes/nextcloud/zapisi">Cancel</a>
           <div class="tc-field tc-field--md"><details class="tc-drop"><summary class="tc-in is-pick" title="Notebook"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" form="note-new" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" form="note-new" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" form="note-new" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" type="button"><b>B</b></button>
-          <button class="tc-btn tc-btn--fontstyle-italic" type="button">I</button>
-          <button class="tc-btn is-3rd" type="button">H2</button>
-          <button class="tc-btn is-3rd" type="button">• list</button>
-          <button class="tc-btn is-3rd" title="Task" type="button"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
-          <button class="tc-btn is-3rd" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+          <button class="tc-btn" type="button" data-tc-marks="bold"><b>B</b></button>
+          <button class="tc-btn tc-btn--fontstyle-italic" type="button" data-tc-marks="italic">I</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="heading">H2</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="list">• list</button>
+          <button class="tc-btn is-3rd" title="Task" type="button" data-tc-marks="tick"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="link"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
           <details class="tc-drop"><summary class="tc-btn" title="Attach"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg><span class="tc-btn__label">Attach</span><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-new" aria-label="From this computer" data-tc-list="note-new-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right">
-            <button class="tc-check is-3rd" type="button"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
+            <button class="tc-check is-3rd" type="button" data-tc-autosave="notes"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
             <kbd class="tc-kbd is-2nd">Ctrl+S</kbd>
             <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn" title="Focus" type="button"><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
+            <button class="tc-btn" title="Focus" type="button" data-tc-focus-mode><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
           </span>
         </div>
         <div class="tc-runbar" data-tc-progress="note-new" hidden><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="0%"></i></span>Saving · <span class="tc-mono">0 of 0 MB</span></div>
@@ -9230,15 +9419,29 @@ Read  2 min ago</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Neighbours</div>
-          <div class="tc-tree tc-tree--padx">
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
             <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
             <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
           </div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -9249,20 +9452,20 @@ Read  2 min ago</div>
           <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
           <div class="tc-field tc-field--md"><details class="tc-drop"><summary class="tc-in is-pick" title="Notebook"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" type="button"><b>B</b></button>
-          <button class="tc-btn tc-btn--fontstyle-italic" type="button">I</button>
-          <button class="tc-btn is-3rd" type="button">H2</button>
-          <button class="tc-btn is-3rd" type="button">• list</button>
-          <button class="tc-btn is-3rd" title="Task" type="button"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
-          <button class="tc-btn is-3rd" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+          <button class="tc-btn" type="button" data-tc-marks="bold"><b>B</b></button>
+          <button class="tc-btn tc-btn--fontstyle-italic" type="button" data-tc-marks="italic">I</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="heading">H2</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="list">• list</button>
+          <button class="tc-btn is-3rd" title="Task" type="button" data-tc-marks="tick"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="link"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
           <details class="tc-drop"><summary class="tc-btn" title="Attach"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg><span class="tc-btn__label">Attach</span><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-edit" aria-label="From this computer" data-tc-list="saving-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right">
-            <button class="tc-check is-3rd" type="button"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
-            <span class="is-2nd">Draft in this window · <span class="tc-mono">11:42</span></span>
+            <button class="tc-check is-3rd" type="button" data-tc-autosave="notes"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
+            <span class="tc-docbar__draft is-2nd" data-tc-draft data-tc-saved="Saved">Draft in this window · <span class="tc-mono">11:42</span></span>
             <kbd class="tc-kbd is-2nd">Ctrl+S</kbd>
             <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn" title="Focus" type="button"><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
+            <button class="tc-btn" title="Focus" type="button" data-tc-focus-mode><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
           </span>
         </div>
         <div class="tc-runbar" data-tc-progress="note-edit"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="22%"></i></span>Saving the note and план-поездки.pdf · <span class="tc-mono">5.3 of 24 MB</span></div>
@@ -9336,20 +9539,20 @@ Read  2 min ago</div>
           <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
           <div class="tc-field tc-field--md"><details class="tc-drop"><summary class="tc-in is-pick" title="Notebook"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" form="note-edit" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" type="button"><b>B</b></button>
-          <button class="tc-btn tc-btn--fontstyle-italic" type="button">I</button>
-          <button class="tc-btn is-3rd" type="button">H2</button>
-          <button class="tc-btn is-3rd" type="button">• list</button>
-          <button class="tc-btn is-3rd" title="Task" type="button"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
-          <button class="tc-btn is-3rd" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+          <button class="tc-btn" type="button" data-tc-marks="bold"><b>B</b></button>
+          <button class="tc-btn tc-btn--fontstyle-italic" type="button" data-tc-marks="italic">I</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="heading">H2</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="list">• list</button>
+          <button class="tc-btn is-3rd" title="Task" type="button" data-tc-marks="tick"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="link"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
           <details class="tc-drop"><summary class="tc-btn" title="Attach"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg><span class="tc-btn__label">Attach</span><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-edit" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right">
-            <button class="tc-check is-3rd" type="button"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
-            <span class="is-2nd">Draft in this window · <span class="tc-mono">11:42</span></span>
+            <button class="tc-check is-3rd" type="button" data-tc-autosave="notes"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
+            <span class="tc-docbar__draft is-2nd" data-tc-draft data-tc-saved="Saved">Draft in this window · <span class="tc-mono">11:42</span></span>
             <kbd class="tc-kbd is-2nd">Ctrl+S</kbd>
             <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn tc-btn--on-card" title="Focus" type="button"><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
+            <button class="tc-btn tc-btn--on-card" title="Focus" type="button" data-tc-focus-mode><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
           </span>
         </div>
         <div class="tc-doc__layout is-focus">
@@ -12443,7 +12646,7 @@ Read  2 min ago</div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Общий</span><span class="tc-tickrow__meta">1</span></div>
           <div class="tc-tickrow is-ext"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Праздники РФ</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Дела</span><span class="tc-tickrow__meta">4</span></div>
-          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -12821,7 +13024,7 @@ Read  2 min ago</div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Общий</span><span class="tc-tickrow__meta">1</span></div>
           <div class="tc-tickrow is-ext"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Праздники РФ</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Дела</span><span class="tc-tickrow__meta">4</span></div>
-          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -12914,7 +13117,7 @@ Read  2 min ago</div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Общий</span><span class="tc-tickrow__meta">1</span></div>
           <div class="tc-tickrow is-ext"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Праздники РФ</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Дела</span><span class="tc-tickrow__meta">4</span></div>
-          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -12991,7 +13194,7 @@ Read  2 min ago</div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Общий</span><span class="tc-tickrow__meta">1</span></div>
           <div class="tc-tickrow is-ext"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Праздники РФ</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Дела</span><span class="tc-tickrow__meta">4</span></div>
-          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -13378,7 +13581,7 @@ Read  just now · written by the merge</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
@@ -13801,7 +14004,7 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
@@ -14639,7 +14842,7 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
@@ -14963,7 +15166,7 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
@@ -16847,6 +17050,7 @@ dav: HTTP 503: the server is busy</div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
+      <div class="tc-notices" data-tc-zone="connect-answer" hidden></div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
         <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono is-focus" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
@@ -16854,11 +17058,121 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" value="xxxxxxxxxx" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
       </form>
-      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" formaction="/app/settings/connections/new/test">Test only</button><a class="tc-btn" href="/app/settings/connections">Cancel</a></div>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" data-tc-target="connect-answer" formaction="/app/settings/connections/new/test">Test only</button><a class="tc-btn" href="/app/settings/connections">Cancel</a></div>
     </div></div></div>
   </div>
 </div>
 <figcaption>«Test only» — та же проверка, что у администратора, без сохранения пароля.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-profile-39">
+  <div class="frame-label"><span>Подключение · Test only прошла</span><i>дополнительный кадр: ответ Test only, шаг с предупреждением · диалог</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <span class="tc-split"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note</button><button class="tc-btn is-primary" type="button" title="More to create" aria-label="More to create"><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></span>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a><button class="tc-nav__item tc-nav__all tc-js" type="button" data-tc-toggle="rail" aria-expanded="false"><svg><use href="#i-menu"/></svg>Sections</button></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Settings</div>
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
+            <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-archive"/></svg>Backup<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-dim__hint">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
+      <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
+      <div class="tc-notices" data-tc-zone="connect-answer"><div class="tc-msg tc-msg--mr0-ml0 tc-msg--max580"><b>Test passed:</b> Carrel can sign in and found 8 collections. Nothing is saved until you press Connect. One step had a warning: see well-known below.</div><div class="tc-diag">[well-known] GET /.well-known/caldav → 301 → http://…/dav.php/
+             HTTPS → HTTP: not followed, the URL as typed is used
+[principal]  PROPFIND /dav.php/ → 207 /dav.php/principals/m.yenuchenko/
+[home]       calendar-home-set, addressbook-home-set → 207
+[collections] 8 collection(s)</div></div>
+      <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono is-focus" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="m.yenuchenko" aria-label="Username"></div>
+        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" value="xxxxxxxxxx" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
+          <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
+      </form>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" data-tc-target="connect-answer" formaction="/app/settings/connections/new/test">Test only</button><a class="tc-btn" href="/app/settings/connections">Cancel</a></div>
+    </div></div></div>
+  </div>
+</div>
+<figcaption><b>Итог проверки — над журналом, в зоне под шапкой, там же, где ответ Connect</b> (задача Carrel 282): «Test only» шлёт форму в неё живым слоем, форма и набранный пароль не трогаются. Прошла — спокойное сообщение: что нашлось и что ничего не сохранено до Connect; шаг с предупреждением — одной фразой со ссылкой на журнал. Без сценария ответ — страница, как прежде.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-profile-40">
+  <div class="frame-label"><span>Подключение · Test only не прошла</span><i>дополнительный кадр: ответ Test only · диалог</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <span class="tc-split"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note</button><button class="tc-btn is-primary" type="button" title="More to create" aria-label="More to create"><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></span>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a><button class="tc-nav__item tc-nav__all tc-js" type="button" data-tc-toggle="rail" aria-expanded="false"><svg><use href="#i-menu"/></svg>Sections</button></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Settings</div>
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
+            <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-archive"/></svg>Backup<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-dim__hint">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
+      <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
+      <div class="tc-notices" data-tc-zone="connect-answer"><div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580"><b>Test failed:</b> discovery stopped at the principal: the server refused the login and password. Check them and test again. Nothing was saved.</div><div class="tc-diag">[well-known] GET /.well-known/caldav → 301 → /dav.php/
+[principal]  PROPFIND /dav.php/ → 401 Unauthorized
+[home]       not asked: the step before did not pass</div></div>
+      <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono is-focus" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
+        <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="login" value="m.yenuchenko" aria-label="Username"></div>
+        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" value="xxxxxxxxxx" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
+          <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
+      </form>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" data-tc-target="connect-answer" formaction="/app/settings/connections/new/test">Test only</button><a class="tc-btn" href="/app/settings/connections">Cancel</a></div>
+    </div></div></div>
+  </div>
+</div>
+<figcaption>Не прошла — сообщение тревоги: на каком шаге остановилось, что делать, что ничего не сохранено; журнал под ним, как в s-profile-39.</figcaption>
 </figure>
 
 <figure>
@@ -16898,10 +17212,9 @@ dav: HTTP 503: the server is busy</div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
-      <div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580"><b>Could not connect.</b> The server refused the login and password. Nothing was saved.</div>
-      <div class="tc-diag">Discovery trace
-well-known · ok · GET /.well-known/caldav → 301 → /dav.php/
-principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
+      <div class="tc-notices" data-tc-zone="connect-answer"><div class="tc-msg is-alert tc-msg--mr0-ml0 tc-msg--max580"><b>Could not connect.</b> The server refused the login and password. Nothing was saved.</div><div class="tc-diag">[well-known] GET /.well-known/caldav → 301 → /dav.php/
+[principal]  PROPFIND /dav.php/ → 401 Unauthorized
+[home]       not asked: the step before did not pass</div></div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
         <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://dav.office.example/dav.php/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
@@ -16909,11 +17222,11 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-error" type="password" name="password" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
       </form>
-      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" formaction="/app/settings/connections/new/test">Test only</button><a class="tc-btn" href="/app/settings/connections">Cancel</a></div>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" data-tc-target="connect-answer" formaction="/app/settings/connections/new/test">Test only</button><a class="tc-btn" href="/app/settings/connections">Cancel</a></div>
     </div></div></div>
   </div>
 </div>
-<figcaption>Сервер отказал в логине и пароле: ничего не сохранено, диалог — с набранным, пароль обратно не печатается. Над полями — что сказал сервер и на каком шаге, след целиком.</figcaption>
+<figcaption>Сервер отказал в логине и пароле: ничего не сохранено, диалог — с набранным, пароль обратно не печатается. Под шапкой — что сказал сервер и на каком шаге, след целиком: та же зона и тот же журнал, что у «Test only», и следующий ответ любой из кнопок заменяет этот.</figcaption>
 </figure>
 
 <figure>
@@ -16953,6 +17266,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
+      <div class="tc-notices" data-tc-zone="connect-answer" hidden></div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-ph" type="text" name="label" placeholder="optional" aria-label="Label"></div>
         <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://xandikos.home.example/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
@@ -16960,7 +17274,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password" disabled><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" checked data-tc-disables="password"><span class="tc-tickrow__tick"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
       </form>
-      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" formaction="/app/settings/connections/new/test">Test only</button><button class="tc-btn" type="button">Cancel</button></div>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" data-tc-target="connect-answer" formaction="/app/settings/connections/new/test">Test only</button><button class="tc-btn" type="button">Cancel</button></div>
     </div></div></div>
   </div>
 </div>
@@ -17535,6 +17849,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
+      <div class="tc-notices" data-tc-zone="connect-answer" hidden></div>
       <form class="tc-form tc-form--padl0-padr0" id="connect" action="/app/settings/connections/new" method="post"><input type="hidden" name="csrf" value="7f3a91de">
         <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-error is-focus" type="text" name="label" value="nextcloud" aria-label="Label"><span class="tc-field__hint tc-dim--danger">There is already a connection called “nextcloud”. Choose another label.</span></div>
         <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" name="server" value="https://cloud.example.org/" aria-label="Server URL"><span class="tc-field__hint tc-field__hint--max580"><code class="tc-mono">.well-known</code> is tried first, then the URL exactly as typed.</span></div>
@@ -17542,7 +17857,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" value="xxxxxxxxxx" aria-label="Password"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="noPassword" value="1" data-tc-disables="password"><span class="tc-tickrow__tick is-off"></span>The server asks no password</label></div>
           <div class="tc-field tc-field--full"><label>Certificate fingerprint <span class="tc-dim">SHA-256 · optional</span></label><input class="tc-in is-mono is-ph" type="text" name="certFingerprint" placeholder="only for a certificate the system does not trust" aria-label="Certificate fingerprint"></div>
       </form>
-      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" formaction="/app/settings/connections/new/test">Test only</button><button class="tc-btn" type="button">Cancel</button></div>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="connect">Connect</button><button class="tc-btn" type="submit" form="connect" data-tc-target="connect-answer" formaction="/app/settings/connections/new/test">Test only</button><button class="tc-btn" type="button">Cancel</button></div>
     </div></div></div>
   </div>
 </div>
@@ -22626,7 +22941,7 @@ jobs:
           <div class="tc-sheet">
             <div class="tc-sheet__head"><b class="tc-sheet__title">Publish a calendar</b><span class="tc-badge is-local" title="Local instance: the link will not open from outside your network">local</span><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Личный</span><a class="tc-btn tc-close" href="/app/calendar" title="Close" aria-label="Close"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></a></div>
             <div class="tc-sheet__body">
-              <div class="tc-field tc-field--w100"><label>Link</label><span class="tc-line tc-line--normal"><input class="tc-in is-mono tc-in--fill" type="text" value="https://carrel.example/p/7Qm2c8XvLk3w" aria-label="Link" readonly><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7Qm2c8XvLk3w" data-tc-copied="Copied"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy</button></span>
+              <div class="tc-field tc-field--w100"><label>Link</label><span class="tc-line tc-line--normal"><input class="tc-in is-mono tc-in--fill" type="text" value="https://carrel.example/p/7Qm2c8XvLk3w" aria-label="Link" readonly><button class="tc-btn is-primary is-sm" type="button" data-tc-copy="https://carrel.example/p/7Qm2c8XvLk3w" data-tc-copied="Copied"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy</button></span>
                 <span class="tc-field__hint">No expiry. Revoke it when it is no longer needed.</span></div>
             </div>
             <div class="tc-sheet__foot"><a class="tc-btn" href="/p/7Qm2c8XvLk3w">Open the link</a><a class="tc-btn" href="/app/files/published">All published links</a></div>
@@ -22635,7 +22950,7 @@ jobs:
       </div>
     </div>
   </div>
-  <figcaption>Ссылка без срока: вместо дня — «No expiry», закрывает её только Revoke. Почты на экземпляре нет — «Send by letter» нет.</figcaption>
+  <figcaption>Ссылка без срока: вместо дня — «No expiry», закрывает её только Revoke. Почты на экземпляре нет — «Send by letter» нет, и главная — Copy: ссылку дальше несут сами (задача Carrel 285).</figcaption>
   </figure>
 <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-publish-19" data-screen="/app/publish">
@@ -22866,15 +23181,29 @@ Read  2 min ago · not changed on server</div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Neighbours</div>
-          <div class="tc-tree tc-tree--padx">
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
             <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
             <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
           </div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -32481,15 +32810,29 @@ dav: HTTP 503: the server is busy</div></div>
         <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
         <div class="tc-railsec">
           <div class="tc-rubric">nextcloud</div>
-          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">3</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">16</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">3</span></div>
           <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Neighbours</div>
-          <div class="tc-tree tc-tree--padx">
+          <div class="tc-tree tc-tree--padx tc-tree--scroll">
             <div class="is-on tc-tree__row"><svg><use href="#i-note"/></svg>Заметка со встречи</div>
             <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что почитать про CRDT</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Ремонт: что осталось</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Про сроки по сборнику</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Книги на осень</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Разбор третьей главы</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Вопросы к бухгалтеру</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Как устроить резервные копии</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Хлеб на закваске</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Заметки с конференции</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>План на квартал</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Идеи для обложки</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Что взять на дачу</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Мысли о переезде</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Пароли Wi-Fi у родителей</div>
+            <div class="tc-tree__row"><svg><use href="#i-note"/></svg>Список к отпуску</div>
           </div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
@@ -32500,20 +32843,20 @@ dav: HTTP 503: the server is busy</div></div>
           <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
           <div class="tc-field tc-field--md"><details class="tc-drop"><summary class="tc-in is-pick" title="Notebook"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" form="note-loss" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" form="note-loss" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" form="note-loss" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" type="button"><b>B</b></button>
-          <button class="tc-btn tc-btn--fontstyle-italic" type="button">I</button>
-          <button class="tc-btn is-3rd" type="button">H2</button>
-          <button class="tc-btn is-3rd" type="button">• list</button>
-          <button class="tc-btn is-3rd" title="Task" type="button"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
-          <button class="tc-btn is-3rd" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+          <button class="tc-btn" type="button" data-tc-marks="bold"><b>B</b></button>
+          <button class="tc-btn tc-btn--fontstyle-italic" type="button" data-tc-marks="italic">I</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="heading">H2</button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="list">• list</button>
+          <button class="tc-btn is-3rd" title="Task" type="button" data-tc-marks="tick"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg><span class="tc-btn__label">task</span></button>
+          <button class="tc-btn is-3rd" type="button" data-tc-marks="link"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
           <details class="tc-drop"><summary class="tc-btn" title="Attach"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg><span class="tc-btn__label">Attach</span><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-loss" aria-label="From this computer" data-tc-list="note-loss-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right">
-            <button class="tc-check is-3rd" type="button"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
-            <span class="is-2nd">Draft in this window · <span class="tc-mono">11:42</span></span>
+            <button class="tc-check is-3rd" type="button" data-tc-autosave="notes"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
+            <span class="tc-docbar__draft is-2nd" data-tc-draft data-tc-saved="Saved">Draft in this window · <span class="tc-mono">11:42</span></span>
             <kbd class="tc-kbd is-2nd">Ctrl+S</kbd>
             <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn" title="Focus" type="button"><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
+            <button class="tc-btn" title="Focus" type="button" data-tc-focus-mode><svg viewBox="0 0 24 24"><use href="#i-focus"/></svg><span class="tc-btn__label">Focus</span></button>
           </span>
         </div>
         <div class="tc-runbar" data-tc-progress="note-loss" hidden><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="0%"></i></span>Saving · <span class="tc-mono">0 of 0 MB</span></div>

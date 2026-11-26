@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: carrel
 
@@ -51,14 +51,14 @@ jobs:
           git -C typecase checkout --quiet --detach "$tc"
           echo "Typecase $(git -C typecase rev-parse --short HEAD) from ${REPO}"
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: carrel/carrel/server/go.mod
           cache-dependency-path: |
             carrel/carrel/server/go.sum
             carrel/carrel/client/go.sum
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 

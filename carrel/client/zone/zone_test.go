@@ -292,6 +292,10 @@ func TestEveryFixtureHasItsZones(t *testing.T) {
 					if slices.Contains(only[render.TargetQueue], name) {
 						want[render.TargetQueue] = fixture["queue"]
 					}
+					// The dialog's answer (C-7.2): a connection's dialog open.
+					if name == "ConnectionsPage" && fixture["add"] != nil && fixture["dialogTitle"] != "" {
+						want[render.TargetConnectAnswer] = map[string]any{"notices": fixture["notices"], "trace": fixture["trace"]}
+					}
 				}
 				for _, target := range render.Targets() {
 					got, err := zone.Of(model, target)

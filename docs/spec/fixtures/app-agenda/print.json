@@ -993,7 +993,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 19,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",

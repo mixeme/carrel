@@ -6,7 +6,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e34\u0026from=edit\u0026n=0\u0026op=detach",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e47\u0026from=edit\u0026n=0\u0026op=detach",
           "id": "attach.remove",
           "label": "Remove",
           "method": "POST"
@@ -80,7 +80,7 @@
     "csrf": "csrf",
     "danger": true,
     "enabled": true,
-    "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e34",
+    "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e47",
     "icon": "i-trash",
     "id": "record.delete",
     "label": "Delete event",
@@ -136,7 +136,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e34\u0026from=edit\u0026op=attach",
+            "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e47\u0026from=edit\u0026op=attach",
             "icon": "i-upload",
             "id": "attach.add",
             "label": "From this computer",
@@ -144,7 +144,7 @@
           },
           {
             "enabled": true,
-            "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e34\u0026for=attach\u0026from=edit\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+            "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e47\u0026for=attach\u0026from=edit\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
             "icon": "i-file",
             "id": "attach.files",
             "label": "From Files",
@@ -155,7 +155,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e34\u0026from=edit\u0026op=attach",
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e47\u0026from=edit\u0026op=attach",
         "icon": "i-clip",
         "id": "attach.add",
         "label": "Attach",
@@ -192,7 +192,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e34"
+            "value": "e47"
           },
           {
             "add": null,
@@ -3359,10 +3359,101 @@
               },
               {
                 "colour": "#4a6b52",
+                "label": "Ремонт: что осталось",
+                "meta": "note · 25 Jul",
+                "selected": false,
+                "value": "6d94-0a11-c3e1"
+              },
+              {
+                "colour": "#4a6b52",
                 "label": "Про сроки по сборнику",
                 "meta": "note · 21 Jul",
                 "selected": false,
                 "value": "6d93-21b4-c517"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Книги на осень",
+                "meta": "note · 20 Jul",
+                "selected": false,
+                "value": "6d95-0b22-c3e2"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Разбор третьей главы",
+                "meta": "note · 19 Jul",
+                "selected": false,
+                "value": "6d96-0c33-c3e3"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Вопросы к бухгалтеру",
+                "meta": "note · 18 Jul",
+                "selected": false,
+                "value": "6d97-0d44-c3e4"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Как устроить резервные копии",
+                "meta": "note · 17 Jul",
+                "selected": false,
+                "value": "6d98-0e55-c3e5"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Хлеб на закваске",
+                "meta": "note · 16 Jul",
+                "selected": false,
+                "value": "6d99-0f66-c3e6"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Заметки с конференции",
+                "meta": "note · 15 Jul",
+                "selected": false,
+                "value": "6d9a-1077-c3e7"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "План на квартал",
+                "meta": "note · 14 Jul",
+                "selected": false,
+                "value": "6d9b-1188-c3e8"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Идеи для обложки",
+                "meta": "note · 13 Jul",
+                "selected": false,
+                "value": "6d9c-1299-c3e9"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Что взять на дачу",
+                "meta": "note · 12 Jul",
+                "selected": false,
+                "value": "6d9d-13aa-c3ea"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Мысли о переезде",
+                "meta": "note · 11 Jul",
+                "selected": false,
+                "value": "6d9e-14bb-c3eb"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Пароли Wi-Fi у родителей",
+                "meta": "note · 10 Jul",
+                "selected": false,
+                "value": "6d9f-15cc-c3ec"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Список к отпуску",
+                "meta": "note · 9 Jul",
+                "selected": false,
+                "value": "6da0-16dd-c3ed"
               },
               {
                 "hint": "By UID: a record that is not among the loaded ones.",

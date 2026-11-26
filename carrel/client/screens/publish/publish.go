@@ -8,6 +8,8 @@
 package publish
 
 import (
+	"slices"
+
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
@@ -104,8 +106,13 @@ func Sheet(p *view.PublishSheet) w.Sheet {
 				// The link made, whole, to copy (s-publish-13).
 				in := bind.Input(r)
 				in.Variant = w.InputFill
-				f := w.Field{Label: string(r.Label), Parts: []w.FieldPart{w.Line{Items: []w.LinePart{in,
-					w.Button{Label: copyWord, Icon: copyIcon, Small: true, Copy: string(r.Value), Copied: copied}}, Gap: w.LineGapNormal}}, Width: w.FieldW100}
+				cp := w.Button{Label: copyWord, Icon: copyIcon, Small: true, Copy: string(r.Value), Copied: copied}
+				// Without Send by letter (no mail, s-publish-22) Copy is the
+				// sheet's next step: carry the link away (Typecase's note 231).
+				if !slices.ContainsFunc(p.Actions, func(a view.Action) bool { return a.Primary }) {
+					cp.Kind = w.ButtonPrimary
+				}
+				f := w.Field{Label: string(r.Label), Parts: []w.FieldPart{w.Line{Items: []w.LinePart{in, cp}, Gap: w.LineGapNormal}}, Width: w.FieldW100}
 				if p.Expires != "" {
 					f.Parts = append(f.Parts, w.FieldHint{Parts: []w.Inline{w.Text(p.Expires)}})
 				}

@@ -262,7 +262,7 @@
         }
       ]
     },
-    "loaded": 3,
+    "loaded": 16,
     "range": null,
     "segments": [
       {
@@ -489,8 +489,90 @@
       "rubric": "August 2026"
     },
     {
-      "count": 1,
+      "count": 14,
       "rows": [
+        {
+          "badges": [],
+          "changed": "25 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "25 Jul",
+          "excerpt": "Плитка в ванной, плинтус в коридоре, розетка на кухне.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d94-0a11-c3e1\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d94-0a11-c3e1",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d94-0a11-c3e1/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d94-0a11-c3e1/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d94-0a11-c3e1/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d94-0a11-c3e1",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d94-0a11-c3e1",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d94-0a11-c3e1/delete?etag=e27",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d94-0a11-c3e1",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Ремонт: что осталось",
+          "uid": "6d94-0a11-c3e1"
+        },
         {
           "badges": [],
           "changed": "21 Jul 12:00",
@@ -572,6 +654,990 @@
           "target": "details",
           "title": "Про сроки по сборнику",
           "uid": "6d93-21b4-c517"
+        },
+        {
+          "badges": [],
+          "changed": "20 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "20 Jul",
+          "excerpt": "Три романа и одна книга про сады.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d95-0b22-c3e2\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d95-0b22-c3e2",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d95-0b22-c3e2/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d95-0b22-c3e2/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d95-0b22-c3e2/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d95-0b22-c3e2",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d95-0b22-c3e2",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d95-0b22-c3e2/delete?etag=e28",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d95-0b22-c3e2",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Книги на осень",
+          "uid": "6d95-0b22-c3e2"
+        },
+        {
+          "badges": [],
+          "changed": "19 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "19 Jul",
+          "excerpt": "Сократить вступление, перенести пример в конец.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d96-0c33-c3e3\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d96-0c33-c3e3",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d96-0c33-c3e3/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d96-0c33-c3e3/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d96-0c33-c3e3/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d96-0c33-c3e3",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d96-0c33-c3e3",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d96-0c33-c3e3/delete?etag=e29",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d96-0c33-c3e3",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Разбор третьей главы",
+          "uid": "6d96-0c33-c3e3"
+        },
+        {
+          "badges": [],
+          "changed": "18 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "18 Jul",
+          "excerpt": "Вычет за лечение, сроки декларации.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d97-0d44-c3e4\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d97-0d44-c3e4",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d97-0d44-c3e4/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d97-0d44-c3e4/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d97-0d44-c3e4/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d97-0d44-c3e4",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d97-0d44-c3e4",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d97-0d44-c3e4/delete?etag=e30",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d97-0d44-c3e4",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Вопросы к бухгалтеру",
+          "uid": "6d97-0d44-c3e4"
+        },
+        {
+          "badges": [],
+          "changed": "17 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "17 Jul",
+          "excerpt": "Раз в неделю на диск, раз в месяц — вне дома.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d98-0e55-c3e5\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d98-0e55-c3e5",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d98-0e55-c3e5/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d98-0e55-c3e5/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d98-0e55-c3e5/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d98-0e55-c3e5",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d98-0e55-c3e5",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d98-0e55-c3e5/delete?etag=e31",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d98-0e55-c3e5",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Как устроить резервные копии",
+          "uid": "6d98-0e55-c3e5"
+        },
+        {
+          "badges": [],
+          "changed": "16 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "16 Jul",
+          "excerpt": "Подкормить закваску за ночь до замеса.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d99-0f66-c3e6\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d99-0f66-c3e6",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d99-0f66-c3e6/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d99-0f66-c3e6/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d99-0f66-c3e6/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d99-0f66-c3e6",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d99-0f66-c3e6",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d99-0f66-c3e6/delete?etag=e32",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d99-0f66-c3e6",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Хлеб на закваске",
+          "uid": "6d99-0f66-c3e6"
+        },
+        {
+          "badges": [],
+          "changed": "15 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "15 Jul",
+          "excerpt": "Доклад про синхронизацию календарей — слайды прислать.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d9a-1077-c3e7\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9a-1077-c3e7",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9a-1077-c3e7/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9a-1077-c3e7/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9a-1077-c3e7/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d9a-1077-c3e7",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d9a-1077-c3e7",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9a-1077-c3e7/delete?etag=e33",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d9a-1077-c3e7",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Заметки с конференции",
+          "uid": "6d9a-1077-c3e7"
+        },
+        {
+          "badges": [],
+          "changed": "14 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "14 Jul",
+          "excerpt": "Сборник, ремонт, отпуск.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d9b-1188-c3e8\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9b-1188-c3e8",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9b-1188-c3e8/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9b-1188-c3e8/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9b-1188-c3e8/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d9b-1188-c3e8",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d9b-1188-c3e8",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9b-1188-c3e8/delete?etag=e34",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d9b-1188-c3e8",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "План на квартал",
+          "uid": "6d9b-1188-c3e8"
+        },
+        {
+          "badges": [],
+          "changed": "13 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "13 Jul",
+          "excerpt": "Шрифт без засечек, тёмно-зелёный фон.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d9c-1299-c3e9\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9c-1299-c3e9",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9c-1299-c3e9/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9c-1299-c3e9/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9c-1299-c3e9/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d9c-1299-c3e9",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d9c-1299-c3e9",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9c-1299-c3e9/delete?etag=e35",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d9c-1299-c3e9",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Идеи для обложки",
+          "uid": "6d9c-1299-c3e9"
+        },
+        {
+          "badges": [],
+          "changed": "12 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "12 Jul",
+          "excerpt": "Удлинитель, семена, перчатки.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d9d-13aa-c3ea\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9d-13aa-c3ea",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9d-13aa-c3ea/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9d-13aa-c3ea/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9d-13aa-c3ea/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d9d-13aa-c3ea",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d9d-13aa-c3ea",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9d-13aa-c3ea/delete?etag=e36",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d9d-13aa-c3ea",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Что взять на дачу",
+          "uid": "6d9d-13aa-c3ea"
+        },
+        {
+          "badges": [],
+          "changed": "11 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "11 Jul",
+          "excerpt": "Ближе к работе или ближе к парку.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d9e-14bb-c3eb\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9e-14bb-c3eb",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9e-14bb-c3eb/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9e-14bb-c3eb/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9e-14bb-c3eb/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d9e-14bb-c3eb",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d9e-14bb-c3eb",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9e-14bb-c3eb/delete?etag=e37",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d9e-14bb-c3eb",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Мысли о переезде",
+          "uid": "6d9e-14bb-c3eb"
+        },
+        {
+          "badges": [],
+          "changed": "10 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "10 Jul",
+          "excerpt": "Спросить у отца, где наклейка с роутера.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d9f-15cc-c3ec\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9f-15cc-c3ec",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9f-15cc-c3ec/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9f-15cc-c3ec/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9f-15cc-c3ec/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d9f-15cc-c3ec",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d9f-15cc-c3ec",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d9f-15cc-c3ec/delete?etag=e38",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6d9f-15cc-c3ec",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Пароли Wi-Fi у родителей",
+          "uid": "6d9f-15cc-c3ec"
+        },
+        {
+          "badges": [],
+          "changed": "9 Jul 12:00",
+          "colour": "#4a6b52",
+          "date": "9 Jul",
+          "excerpt": "Паспорта, зарядки, страховка.",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6da0-16dd-c3ed\u0026task=t-task",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6da0-16dd-c3ed",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6da0-16dd-c3ed/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6da0-16dd-c3ed/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6da0-16dd-c3ed/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6da0-16dd-c3ed",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6da0-16dd-c3ed",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6da0-16dd-c3ed/delete?etag=e39",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "page": "/app/notes/a-nc-home/zapisi/6da0-16dd-c3ed",
+          "sources": [],
+          "stamp": "nextcloud · Записи",
+          "state": "ok",
+          "tags": [],
+          "target": "details",
+          "title": "Список к отпуску",
+          "uid": "6da0-16dd-c3ed"
         }
       ],
       "rubric": "July 2026"
@@ -613,11 +1679,11 @@
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": true,
-    "short": "1 of 2 · 3 notes",
+    "short": "1 of 2 · 16 notes",
     "sources": [
       {
         "colour": "#4a6b52",
-        "count": 3,
+        "count": 16,
         "fromCache": false,
         "message": "",
         "retry": null,
@@ -637,7 +1703,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polling · 1 of 2 answered · 3 notes"
+        "text": "Polling · 1 of 2 answered · 16 notes"
       }
     ],
     "taskID": "t-task"
@@ -713,7 +1779,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 19,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -769,7 +1835,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 3,
+            "count": 16,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/zapisi",

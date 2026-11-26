@@ -430,7 +430,7 @@
               "target": "sheet"
             }
           ],
-          "objects": 3,
+          "objects": 16,
           "path": "/alice/calendars/zapisi/",
           "pick": "a-nc-home|/alice/calendars/zapisi/",
           "readOnly": false,
@@ -1814,16 +1814,7 @@
     {
       "actions": [],
       "body": "The server refused the login and password. Nothing was saved.",
-      "details": {
-        "lines": [
-          ".well-known · bad · GET /.well-known/caldav → 401",
-          ".well-known · bad · GET /.well-known/carddav → 401",
-          "direct URL · ok · using entered URL as-is",
-          "principal · bad · 401 Unauthorized: unauthorized",
-          "401 Unauthorized: unauthorized"
-        ],
-        "summary": "Discovery trace"
-      },
+      "details": null,
       "role": "alert",
       "title": "Could not connect"
     }
@@ -2262,5 +2253,29 @@
     ],
     "userHref": "/app/settings/account"
   },
-  "trace": null
+  "trace": {
+    "ok": false,
+    "steps": [
+      {
+        "detail": "GET /.well-known/caldav → 401",
+        "name": ".well-known",
+        "state": "bad"
+      },
+      {
+        "detail": "GET /.well-known/carddav → 401",
+        "name": ".well-known",
+        "state": "bad"
+      },
+      {
+        "detail": "using entered URL as-is",
+        "name": "direct URL",
+        "state": "ok"
+      },
+      {
+        "detail": "401 Unauthorized: unauthorized",
+        "name": "principal",
+        "state": "bad"
+      }
+    ]
+  }
 }

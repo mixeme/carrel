@@ -623,7 +623,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/delete?etag=e32",
+              "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/delete?etag=e45",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete task",
@@ -648,7 +648,7 @@
           "tick": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=off\u0026etag=e32\u0026from=all\u0026op=done",
+            "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=off\u0026etag=e45\u0026from=all\u0026op=done",
             "id": "task.done",
             "label": "Mark not done",
             "method": "POST"

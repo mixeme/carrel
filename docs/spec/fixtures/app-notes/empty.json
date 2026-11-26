@@ -371,7 +371,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 16,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -408,7 +408,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 3,
+            "count": 16,
             "detail": "",
             "feed": false,
             "href": "/app/notes",
@@ -427,7 +427,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 3,
+            "count": 16,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/zapisi",

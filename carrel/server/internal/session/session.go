@@ -44,6 +44,7 @@ type Session struct {
 	unlockAt    time.Time
 	readings    map[string]Reading               // by connection and collection path (S-22)
 	ticks       map[string]tick                  // tasks marked done, by collection and UID (ticks.go)
+	autosaves   map[string]autosaved             // what an edit's auto-saves wrote, by collection and UID (autosaves.go)
 	refusals    map[string]bool                  // what a server refused in a collection (refusals.go)
 	filesCounts map[string]string                // files of a storage at every depth (filescount.go)
 	checks      map[string]*view.DiagnosticTrace // last check of each connection (C-6)

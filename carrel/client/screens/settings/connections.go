@@ -128,6 +128,16 @@ func ConnectionsNotices(p *view.ConnectionsPage) w.MsgSpace {
 // connectID is the ID of the dialog's form, which its foot submits.
 const connectID = "connect"
 
+// AnswerZone is the zone of the dialog under its head (Typecase's notes
+// 232, 233): what Connect and Test only answered — the outcome, the trace
+// under it. Test only sends the form into it with the live layer, the form
+// and the typed password untouched; the next answer of either takes its
+// place.
+const AnswerZone = "connect-answer" // render.TargetConnectAnswer of C-7.2
+
+// testID is Test only of the dialog's foot.
+const testID = "connection.test"
+
 // connectWidths are the widths the frame gives the dialog's fields.
 var connectWidths = map[string]w.FieldWidth{"label": w.FieldMD, "server": w.FieldFull, "login": w.FieldMD, "password": w.FieldMD, "certFingerprint": w.FieldFull}
 
@@ -171,36 +181,43 @@ func connectDialog(p *view.ConnectionsPage) w.Dialog {
 		}
 		form.Items = append(form.Items, fl)
 	}
-	items := []w.DialogPart{head}
-	// A refusal and its trace come before the fields (s-profile-24); the
-	// trace of Test only, after them.
-	for _, n := range p.Notices {
-		m := bind.Notice(n, w.MsgFlushSides)
-		m.Column = true
-		items = append(items, m)
-		if d := bind.NoticeDiag(n); d != nil {
-			items = append(items, d.Diag)
-		}
-	}
-	if p.Trace != nil && len(p.Notices) > 0 {
-		items = append(items, trace(p.Trace.Steps))
-	}
-	items = append(items, form)
-	if p.Trace != nil && len(p.Notices) == 0 {
-		items = append(items, trace(p.Trace.Steps))
-	}
+	items := []w.DialogPart{head, Answer(p), form}
 	foot := w.FormFoot{Variant: w.FormFootFlush}
 	for _, a := range f.Actions {
 		switch {
 		case a.Method == "GET":
 			foot.Items = append(foot.Items, bind.Button(a, ""))
-		case a.Primary:
-			foot.Items = append(foot.Items, bind.SubmitForm(a, connectID))
+		case a.ID == testID:
+			// Into the zone under the head, with the live layer; without
+			// it, the page as before.
+			b := bind.SubmitForm(a, connectID)
+			b.Target = AnswerZone
+			foot.Items = append(foot.Items, b)
 		default:
 			foot.Items = append(foot.Items, bind.SubmitForm(a, connectID))
 		}
 	}
 	return w.Dialog{Items: append(items, foot), Variant: w.Dialog540}
+}
+
+// Answer is the zone of the dialog under its head (AnswerZone): each notice
+// — a refusal of Connect, the outcome of Test only — and under them the
+// trace of the check, one block in the same lines for both (s-profile-24,
+// -39, -40); empty and hidden before either answered (s-profile-2).
+func Answer(p *view.ConnectionsPage) w.Notices {
+	z := w.Notices{Zone: AnswerZone}
+	for _, n := range p.Notices {
+		m := bind.Notice(n, w.MsgFlushSides)
+		m.Column = true
+		z.Items = append(z.Items, m)
+		if d := bind.NoticeDiag(n); d != nil {
+			z.Items = append(z.Items, d.Diag)
+		}
+	}
+	if p.Trace != nil {
+		z.Items = append(z.Items, trace(p.Trace.Steps))
+	}
+	return z
 }
 
 // msgParts are runs as the parts of a message.

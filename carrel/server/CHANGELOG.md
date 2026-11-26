@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.20 — 2026-11-26
+
+Client `v0.11.61`; Typecase `37401ba`.
+
+### For consumers
+
+- **An edit's auto-save** (`Tc-Autosave: 1` on the edit's or a new
+  record's POST; C-7.2): written — 204; a new record — 303 to its
+  `…/edit`; not written (field errors, a conflict, a loss, a question) —
+  409, no body. A version this session's auto-save wrote stands in for the
+  version the form was opened at (`session.AutosavedFrom`): the form's next
+  write, auto-save or Save, is no conflict with itself. An auto-save does
+  not move a note to another notebook; Save does.
+- **Target `connect-answer`** (C-7.2): Test only answers into the zone of
+  the connection's dialog — its outcome as the page's notice («Test
+  passed:» / «Test failed:» / «Test not run:») over `Trace`. A refused
+  Connect or Save of a connection: the notice without `Details`, the trace
+  in `ConnectionsPage.Trace`.
+- **Neighbours is the whole notebook** (a window of 250 notes each side
+  for a very large one).
+- The fixture set's «Записи» holds the frames' 16 notes; fixtures shot
+  again (etags shifted with them).
+
 ## v0.4.19 — 2026-11-26
 
 Client `v0.11.60`; Typecase `a0f2006`.

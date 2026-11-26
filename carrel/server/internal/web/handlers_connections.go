@@ -200,7 +200,7 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 	res, trace, err := discover.Run(r.Context(), s.guard, f.Server, f.Login, password, pin)
 	if err != nil || res == nil || trace == nil || !trace.OK {
 		f.Refused, f.PasswordRefused = true, discover.Refused(err)
-		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, discoveryFailure(trace, err, "Nothing was saved.")))
+		s.writePage(w, r, http.StatusOK, s.refusedDialog(sess, f, trace, err, "Nothing was saved."))
 		return
 	}
 
@@ -343,7 +343,7 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 	pin := dav.NormalizeFingerprint(f.CertFingerprint)
 	res, trace, err := discover.Run(r.Context(), s.guard, f.Server, f.Login, password, pin)
 	if err != nil || res == nil || trace == nil || !trace.OK {
-		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, discoveryFailure(trace, err, "Nothing was changed.")))
+		s.writePage(w, r, http.StatusOK, s.refusedDialog(sess, f, trace, err, "Nothing was changed."))
 		return
 	}
 	edited := sealed.Connection{
@@ -1109,6 +1109,24 @@ const missingPassword = "Type the password, or tick «The server asks no passwor
 
 func (s *Server) connectAction() view.Action {
 	return view.Action{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.connectHref(), Method: "GET", Enabled: true}
+}
+
+// refusedDialog is the dialog of a connection whose Connect or Save the
+// server refused (s-profile-24): in the zone under its head, what it said and
+// under it the trace of the check, in the lines of Test only (Typecase's
+// note 233) — the next answer of either button takes its place.
+func (s *Server) refusedDialog(sess *session.Session, f connectionForm, trace *view.DiagnosticTrace, err error, nothing string) view.ConnectionsPage {
+	n := discoveryFailure(trace, err, nothing)
+	n.Details = nil
+	if trace == nil {
+		trace = &view.DiagnosticTrace{}
+	}
+	if err != nil && len(trace.Steps) == 0 {
+		trace.Steps = []view.TraceStep{{Name: "connect", State: view.CheckBad, Detail: text(err.Error())}}
+	}
+	page := s.connectionsPage(sess, f, n)
+	page.Trace = trace
+	return page
 }
 
 func discoveryFailure(trace *view.DiagnosticTrace, err error, nothing string) *view.Notice {

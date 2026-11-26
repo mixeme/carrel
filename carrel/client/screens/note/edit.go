@@ -24,12 +24,18 @@ const (
 	more     = "More"
 	autoSave = "Auto-save"
 	draft    = "Draft in this window ·"
+	saved    = "Saved"
 	saveKey  = "Ctrl+S"
 	focus    = "Focus"
 	saving   = "Saving · "
 	noBytes  = "0 of 0 MB"
 	none     = "—"
 )
+
+// autoSaveName is the name the tick of Auto-save is kept under in the
+// browser (Check.AutoSave; Typecase's note 229): one for every notebook — a
+// person who wants their notes to save themselves wants it in each.
+const autoSaveName = "notes"
 
 // The names of the contract the edit places by (C-6.8, C-7.5): the title and
 // the text of the document's form, Save of its bar, and the notebook among
@@ -163,15 +169,19 @@ func edit(p *view.NotePage) []w.MainPart {
 	}
 	// The client's buttons of the markup, «⋯», Auto-save, the draft in this
 	// window, the width and Focus are the page's script's: an edit's bar draws
-	// none of them without it (Docbar.Edit).
+	// none of them without it (Docbar.Edit). With it the markup marks the text
+	// (Marks), Auto-save sends the form after a pause in typing with
+	// Tc-Autosave (AutoSave), the draft is kept in the window and says when
+	// it was saved (Saved), Focus hides the rail and the column (Focuses;
+	// Typecase's note 229).
 	items = append(items,
 		w.BarSep{},
-		w.Button{Label: bold, Bold: true},
-		w.Button{Label: italic, Variant: w.ButtonItalic},
-		w.Button{Label: heading2, Tertiary: true},
-		w.Button{Label: list, Tertiary: true},
-		w.Button{Folds: true, Label: task, Icon: "task", Title: taskName, Tertiary: true},
-		w.Button{Icon: "link", Title: link, Tertiary: true},
+		w.Button{Label: bold, Bold: true, Marks: w.MarkBold},
+		w.Button{Label: italic, Variant: w.ButtonItalic, Marks: w.MarkItalic},
+		w.Button{Label: heading2, Tertiary: true, Marks: w.MarkHeading},
+		w.Button{Label: list, Tertiary: true, Marks: w.MarkList},
+		w.Button{Folds: true, Label: task, Icon: "task", Title: taskName, Tertiary: true, Marks: w.MarkTick},
+		w.Button{Icon: "link", Title: link, Tertiary: true, Marks: w.MarkLink},
 	)
 	if attach != nil {
 		items = append(items, w.Drop{
@@ -179,14 +189,14 @@ func edit(p *view.NotePage) []w.MainPart {
 			Menu:    w.Menu{Items: editFiles(barItems(attach.Arrow), formEdit, listOf(p)), Width: w.MenuWidth212, Pop: w.MenuUnder},
 		})
 	}
-	end := []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text(autoSave)}, Tertiary: true}}
+	end := []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text(autoSave)}, Tertiary: true, AutoSave: autoSaveName}}
 	if !blank(p) {
-		end = append(end, w.DraftNote{Text: draft, Secondary: true})
+		end = append(end, w.DraftNote{Text: draft, Saved: saved, Secondary: true})
 	}
 	end = append(end,
 		w.Kbd{Keys: saveKey, Secondary: true},
 		widthSeg(p.Look, false),
-		w.Button{Folds: true, Label: focus, Icon: "focus", Title: focus},
+		w.Button{Folds: true, Label: focus, Icon: "focus", Title: focus, Focuses: true},
 	)
 	bar := w.Docbar{Items: items, More: &w.Button{Icon: "dots", Title: more}, End: end, Edit: true}
 	main := []w.MainPart{bar, w.Runbar{Progress: formEdit, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}

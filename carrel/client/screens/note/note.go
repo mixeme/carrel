@@ -169,7 +169,7 @@ func railParts(r view.Rail) []w.RailPart {
 	parts := []w.RailPart{nav}
 	parts = append(parts, bind.Sources(r, rail)...)
 	if len(r.Neighbours) > 0 {
-		tree := w.Tree{Variant: w.TreePadded}
+		tree := w.Tree{Variant: w.TreePadded, Scrolls: true}
 		for i, a := range r.Neighbours {
 			tree.Rows = append(tree.Rows, bind.TreeRow(a))
 			if a.On {

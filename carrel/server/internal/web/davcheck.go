@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -19,10 +21,17 @@ import (
 
 // traceOf runs discovery for a form, or says why it cannot start.
 func (s *Server) traceOf(r *http.Request) (*discover.Result, *view.DiagnosticTrace) {
+	res, trace, _ := s.checkOf(r)
+	return res, trace
+}
+
+// checkOf is traceOf with the error discovery ended on: whether the server
+// refused the login and password (discover.Refused).
+func (s *Server) checkOf(r *http.Request) (*discover.Result, *view.DiagnosticTrace, error) {
 	server := strings.TrimSpace(r.FormValue("server"))
 	if !validServerURL(server) {
 		return nil, &view.DiagnosticTrace{Steps: []view.TraceStep{{Name: "address", State: view.CheckBad,
-			Detail: "Enter the full address, starting with https:// or http://."}}, Stopped: "Discovery stopped at the address."}
+			Detail: "Enter the full address, starting with https:// or http://."}}, Stopped: "Discovery stopped at the address."}, nil
 	}
 	pin := dav.NormalizeFingerprint(strings.TrimSpace(r.FormValue("certFingerprint")))
 	password := r.FormValue("password")
@@ -37,7 +46,7 @@ func (s *Server) traceOf(r *http.Request) (*discover.Result, *view.DiagnosticTra
 		trace.Steps = []view.TraceStep{{Name: "connect", State: view.CheckBad, Detail: text(err.Error())}}
 	}
 	stopped(trace)
-	return res, trace
+	return res, trace, err
 }
 
 // stopped names the step discovery did not get past (s-admin-28): the last
@@ -72,17 +81,86 @@ func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Requ
 		NoPassword:      noPasswordMark(r),
 		Open:            true,
 	}
-	// No password and no mark: said at the field, no server asked.
+	// No password and no mark: said at the field, no server asked. Answered
+	// into the dialog's zone (the live layer), the field is not drawn again:
+	// the zone says it.
 	if !f.NoPassword && r.FormValue("password") == "" && f.Login != "" {
 		f.PasswordErr = missingPassword
-		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		page := s.connectionsPage(sess, f, nil)
+		if render.WantsFragment(r) && render.FragmentTarget(r) == connectAnswer {
+			page.Shell.Notices = append(page.Shell.Notices, view.Notice{Role: view.NoticeAlert, Title: "Test not run:", Body: text(missingPassword)})
+		}
+		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
-	_, trace := s.traceOf(r)
+	res, trace, err := s.checkOf(r)
 	f.Tested = true
 	page := s.connectionsPage(sess, f, nil)
+	page.Shell.Notices = append([]view.Notice{testOutcome(res, trace, err, primaryLabel(page.Add))}, page.Shell.Notices...)
 	page.Trace = trace
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// connectAnswer is the zone of the connection's dialog under its head that
+// Connect and Test only answer into (C-7.2): the outcome and the trace under
+// it.
+const connectAnswer = render.TargetConnectAnswer
+
+// testOutcome is what Test only found, over its trace (s-profile-39, -40):
+// passed — what was found, that nothing is kept until the dialog's own
+// button (Connect, Save), and the steps that had a warning, by name;
+// failed — the step discovery stopped at, what to do, that nothing was
+// saved.
+func testOutcome(res *discover.Result, trace *view.DiagnosticTrace, err error, save string) view.Notice {
+	if res != nil && trace != nil && trace.OK {
+		found := "Carrel can sign in"
+		if n := len(res.Collections); n > 0 {
+			found += " and found " + plural(n, "collection")
+		}
+		body := found + ". Nothing is saved until you press " + save + "."
+		var warned []string
+		for _, st := range trace.Steps {
+			if st.State == view.CheckBad {
+				warned = append(warned, string(st.Name))
+			}
+		}
+		switch len(warned) {
+		case 0:
+		case 1:
+			body += " One step had a warning: see " + warned[0] + " below."
+		default:
+			body += fmt.Sprintf(" %d steps had warnings: see %s below.", len(warned), strings.Join(warned, ", "))
+		}
+		return view.Notice{Role: view.NoticeInfo, Title: "Test passed:", Body: text(body)}
+	}
+	step := "check"
+	if trace != nil {
+		for i := len(trace.Steps) - 1; i >= 0; i-- {
+			if trace.Steps[i].State == view.CheckBad {
+				step = string(trace.Steps[i].Name)
+				break
+			}
+		}
+	}
+	what := "Check the address and test again."
+	if discover.Refused(err) {
+		what = "the server refused the login and password. Check them and test again."
+		return view.Notice{Role: view.NoticeAlert, Title: "Test failed:", Body: text("discovery stopped at the " + step + ": " + what + " Nothing was saved.")}
+	}
+	return view.Notice{Role: view.NoticeAlert, Title: "Test failed:", Body: text("discovery stopped at the " + step + ". " + what + " Nothing was saved.")}
+}
+
+// primaryLabel is the label of the dialog's own button — Connect, or Save of
+// a connection edited —, «Connect» where the page has no dialog.
+func primaryLabel(f *view.Form) string {
+	if f != nil {
+		for _, a := range f.Actions {
+			if a.Primary {
+				return string(a.Label)
+			}
+		}
+	}
+	return "Connect"
 }
 
 func (s *Server) getAdminDav(w http.ResponseWriter, r *http.Request) {

@@ -42,10 +42,11 @@ func (s *Server) recordRail(c *collectionCtx, back view.Action) view.Rail {
 }
 
 // neighbourSpan is how many notes the rail of a note's page shows on each
-// side of the open one: the whole notebook (the owner's decision of
-// 24.11.2026 — one on each side showed «то 3 заметки, то 2»), a window only
-// for a very large one. The frames draw one on a side (Typecase's task 289).
-const neighbourSpan = 20
+// side of the open one: the whole notebook (the owner's decisions of
+// 24.11.2026 and 26.11.2026 — Neighbours scrolls in its own block, the
+// open note in its middle; Typecase's task 289), a window only for a very
+// large one, so that a page of a note does not carry thousands of links.
+const neighbourSpan = 250
 
 // noteNeighbours are the notes around uid in its notebook, in the order the
 // notebook's list shows by default — newest first, then by title — with the

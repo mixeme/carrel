@@ -72,6 +72,29 @@ type control struct {
 	picture bool
 }
 
+// editBar tells whether a scripted control stands in an edit's bar
+// (Docbar.Edit) rather than in an upload's queue.
+func editBar(c control) bool {
+	return strings.Contains(c.path, "(Docbar)") || strings.HasPrefix(c.path, "Docbar.")
+}
+
+// editBarButton is the meaning of a button of an edit's bar, which the
+// library's script gives it (Typecase's note 229): the markup marks the text
+// (Marks), Focus hides the rail and the column (Focuses); the bar's «⋯» and
+// the trigger of a closed menu (Attach) open what they hold, and one that
+// leads or sends — Save, Cancel — is held as anywhere.
+func editBarButton(c control) string {
+	if c.opens || strings.HasSuffix(c.path, ".More(Button)") || c.str("Marks") != "" || c.flag("Focuses") || c.v.FieldByName("State").Int() == buttonDisabled {
+		return ""
+	}
+	for _, f := range []string{"Href", "Form"} {
+		if c.str(f) != "" {
+			return ""
+		}
+	}
+	return "a button of an edit's bar the script does not know (Marks, Focuses)"
+}
+
 func (c control) str(name string) string {
 	f := c.v.FieldByName(name)
 	if !f.IsValid() || f.Kind() != reflect.String {
@@ -235,6 +258,9 @@ func liveQueuePart(c control, name, field string) bool {
 // must carry (docs/guide/screen.md of Typecase, §3 and §5).
 var contract = map[string]rule{
 	"Button": func(c control) string {
+		if c.scripted && editBar(c) {
+			return editBarButton(c)
+		}
 		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens || c.scripted || picksFile(c) || c.flag("ScriptOnly") || c.flag("Removes") {
 			return ""
 		}
@@ -299,6 +325,9 @@ var contract = map[string]rule{
 		return field(c)
 	},
 	"Check": func(c control) string {
+		if c.scripted && editBar(c) && c.str("AutoSave") == "" {
+			return "Auto-save of an edit's bar the script does not know (no AutoSave)"
+		}
 		if c.scripted { // Auto-save of an edit's bar
 			return ""
 		}

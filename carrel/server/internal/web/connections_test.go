@@ -149,8 +149,10 @@ func TestAddConnectionFailureSavesNothing(t *testing.T) {
 			failure = &page.Notices[i]
 		}
 	}
-	if failure == nil || failure.Details == nil || len(failure.Details.Lines) < 3 {
-		t.Fatalf("notices = %+v", page.Notices)
+	// The trace stands under the notice in the dialog's zone, in the lines
+	// of Test only (Typecase's note 233): the page's, not the notice's.
+	if failure == nil || failure.Details != nil || page.Trace == nil || len(page.Trace.Steps) < 3 {
+		t.Fatalf("notices = %+v, trace %+v", page.Notices, page.Trace)
 	}
 	// A wrong password is said as what the server said — it refused the
 	// login and password (the owner's word of 10.10.2026) —, and the step
@@ -158,7 +160,7 @@ func TestAddConnectionFailureSavesNothing(t *testing.T) {
 	if string(failure.Body) != "The server refused the login and password. Nothing was saved." {
 		t.Errorf("body = %q, want the refusal said as it is", failure.Body)
 	}
-	if trace := fmt.Sprint(failure.Details.Lines); !strings.Contains(trace, "principal") || !strings.Contains(trace, "401") {
+	if trace := fmt.Sprint(page.Trace.Steps); !strings.Contains(trace, "principal") || !strings.Contains(trace, "401") {
 		t.Errorf("trace = %q, want the step that failed and the answer", trace)
 	}
 	if got := rowNamed(t, *page.Add, "server").Value; got != text(srv.URL) {

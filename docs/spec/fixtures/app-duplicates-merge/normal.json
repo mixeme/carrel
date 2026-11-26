@@ -100,7 +100,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 19,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -257,7 +257,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 3,
+            "count": 16,
             "detail": "",
             "feed": false,
             "href": "",

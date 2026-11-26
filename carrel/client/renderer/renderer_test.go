@@ -2,13 +2,16 @@ package renderer_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
 	"carrel.dev/carrel/client/document"
 	"carrel.dev/carrel/client/renderer"
+	"carrel.dev/carrel/client/screens/settings"
 	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
@@ -232,5 +235,33 @@ func TestThePanelComesWithItsList(t *testing.T) {
 	got := rec.Body.String()
 	if !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/html") || !strings.Contains(got, `<template data-tc-zone="main">`) || !strings.Contains(got, "Ada Lovelace") {
 		t.Errorf("the panel with its list = %s %.600s", rec.Header().Get("Content-Type"), got)
+	}
+}
+
+// Test only answers into the dialog's zone (Typecase's notes 232, 233): the
+// zone alone, its outcome and the trace under it — not the page, so the form
+// and the typed password stay as they are.
+func TestTestOnlyAnswersItsZone(t *testing.T) {
+	raw, err := os.ReadFile("../../../docs/spec/fixtures/app-settings-connections/refused.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var p view.ConnectionsPage
+	if err := json.Unmarshal(raw, &p); err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/app/settings/connections/new/test", nil)
+	rec := httptest.NewRecorder()
+	if settings.AnswerZone != render.TargetConnectAnswer {
+		t.Fatalf("the dialog's zone %q is not the target %q of C-7.2", settings.AnswerZone, render.TargetConnectAnswer)
+	}
+	if err := renderer.New("").Fragment(rec, req, http.StatusOK, render.TargetConnectAnswer, &p, nil); err != nil {
+		t.Fatal(err)
+	}
+	got := rec.Body.String()
+	if !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/html") || !strings.HasPrefix(got, `<div class="tc-notices" data-tc-zone="connect-answer">`) ||
+		!strings.Contains(got, "Could not connect") || !strings.Contains(got, `class="tc-diag"`) || !strings.Contains(got, "[principal]") ||
+		strings.Contains(got, "<form") || strings.Contains(got, "tc-shell") {
+		t.Errorf("the zone of the answer = %s %.1200s", rec.Header().Get("Content-Type"), got)
 	}
 }

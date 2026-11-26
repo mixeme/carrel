@@ -73,6 +73,13 @@ var (
 	queueType   = reflect.TypeFor[view.TransferQueue]()
 )
 
+// ConnectAnswer is the zone connect-answer of the connection's dialog
+// (C-7.2): what Connect or Test only answered, the trace under it.
+type ConnectAnswer struct {
+	Notices []view.Notice         `json:"notices"`
+	Trace   *view.DiagnosticTrace `json:"trace"`
+}
+
 // sheets are the view models C-5 answers as a sheet. Nothing in their shape
 // tells a sheet from a fragment, so they are named; a test holds this list
 // against the «лист» rows of C-5.
@@ -163,6 +170,8 @@ func Targets(model any) []string {
 //	queue    *view.TransferQueue — the page's queue; nil: none now
 //	sheet    the sheet itself
 //	topbar   view.TopBar — Shell.Top
+//	connect-answer  ConnectAnswer — Shell.Notices and Trace of a
+//	         ConnectionsPage with its dialog open
 func Of(model any, target string) (any, error) {
 	if !known(target) {
 		return nil, fmt.Errorf("zone: %q: %w", target, ErrUnknownTarget)
@@ -210,6 +219,12 @@ func Of(model any, target string) (any, error) {
 		return shell.Notices, nil
 	case render.TargetTopbar:
 		return shell.Top, nil
+	case render.TargetConnectAnswer:
+		p, ok := v.Interface().(view.ConnectionsPage)
+		if !ok || p.Add == nil || p.DialogTitle == "" {
+			return fail(ErrNoZone)
+		}
+		return ConnectAnswer{Notices: shell.Notices, Trace: p.Trace}, nil
 	case render.TargetDetails:
 		own, err := ownField(v, detailsType)
 		if err != nil {

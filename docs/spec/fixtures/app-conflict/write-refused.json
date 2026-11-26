@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e33\u0026op=mine",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e46\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
       "method": "POST"
@@ -11,7 +11,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e33\u0026op=theirs",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e46\u0026op=theirs",
       "id": "conflict.theirs",
       "label": "Use only the server version",
       "method": "POST"
@@ -72,7 +72,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e33"
+            "value": "e46"
           },
           {
             "add": null,

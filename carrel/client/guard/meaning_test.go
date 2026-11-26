@@ -225,9 +225,17 @@ func TestMeaningRules(t *testing.T) {
 		"a page's own sheet with a button that does nothing": {w.Shell{Dialogs: []w.Scrim{{ID: "keys", Closed: true, Content: w.Sheet{
 			Foot: []w.SheetFootPart{w.Button{Label: "Close"}}}}}}, []string{"(Button): a button with nothing"}},
 		"a sheet's Close that only closes": {w.Sheet{Foot: []w.SheetFootPart{w.Button{Label: "Close", Closes: true}}}, []string{"(Button): a button with nothing"}},
-		"a control the guard lacks":        {w.CardPick{}, []string{"CardPick carries meaning the guard's contract does not know"}},
-		"rows that lead":                   {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
-		"rows that lead nowhere":           {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
+		// An edit's bar (Docbar.Edit; Typecase's note 229): its markup, Focus
+		// and Auto-save are the library's script's, and each names what it
+		// does — one that names nothing is held.
+		"an edit's bar that the script knows": {w.Docbar{Edit: true, Items: []w.DocbarPart{w.Button{Label: "B", Marks: w.MarkBold}},
+			More: &w.Button{Icon: "dots"}, End: []w.DocbarEnd{w.Check{AutoSave: "notes"}, w.Button{Label: "Focus", Focuses: true}}}, nil},
+		"an edit's bar that the script does not know": {w.Docbar{Edit: true, Items: []w.DocbarPart{w.Button{Label: "B"}},
+			End: []w.DocbarEnd{w.Check{}, w.Button{Label: "Focus"}}},
+			[]string{"Items[0](Button): a button of an edit's bar the script does not know", "(Check): Auto-save of an edit's bar the script does not know", "End[1](Button): a button of an edit's bar the script does not know"}},
+		"a control the guard lacks": {w.CardPick{}, []string{"CardPick carries meaning the guard's contract does not know"}},
+		"rows that lead":            {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
+		"rows that lead nowhere":    {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
 		// A task's row (Typecase's task 95): its title leads to the record,
 		// its tick posts the form of Mark done.
 		"a task's row that leads": {w.List{Rows: []w.ListRow{w.DueRow{Href: "/t", Tick: w.Tick{Label: "Done", Send: w.Send{Form: "post"}}}}}, nil},
@@ -331,8 +339,8 @@ func TestMeaningRules(t *testing.T) {
 		// script only its Save and Cancel stand, and the rest is the page's
 		// script's — the buttons of the markup, «⋯», Auto-save, the width,
 		// Focus need no meaning of HTML; in a bar that is no edit's they do.
-		"an edit's bar, the script's controls": {w.Docbar{Edit: true, Items: []w.DocbarPart{w.Button{Label: "Cancel", Href: "/n"}, w.Button{Label: "B", Bold: true}},
-			More: &w.Button{Icon: "dots"}, End: []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text("Auto-save")}}, w.Seg{Options: []w.SegOption{{Label: "Full width", On: true}}}, w.Button{Label: "Focus"}}}, nil},
+		"an edit's bar, the script's controls": {w.Docbar{Edit: true, Items: []w.DocbarPart{w.Button{Label: "Cancel", Href: "/n"}, w.Button{Label: "B", Bold: true, Marks: w.MarkBold}},
+			More: &w.Button{Icon: "dots"}, End: []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text("Auto-save")}, AutoSave: "notes"}, w.Seg{Options: []w.SegOption{{Label: "Full width", On: true}}}, w.Button{Label: "Focus", Focuses: true}}}, nil},
 		"a bar that is no edit's": {w.Docbar{Items: []w.DocbarPart{w.Button{Label: "Cancel", Href: "/n"}, w.Button{Label: "B", Bold: true}},
 			More: &w.Button{Icon: "dots"}, End: []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text("Auto-save")}}, w.Seg{Options: []w.SegOption{{Label: "Full width", On: true}}}, w.Button{Label: "Focus"}}},
 			[]string{"Items[1](Button): a button with nothing", "More(Button): a button with nothing", "(Check): a field without Name", "(Seg): a field without Name", "End[2](Button): a button with nothing"}},

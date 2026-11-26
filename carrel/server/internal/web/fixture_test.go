@@ -1744,7 +1744,7 @@ func TestFixtureCombinedNotes(t *testing.T) {
 	paperAt := onPaper("/app/notes?task=" + page.Poll.TaskID)
 	paper := decode[view.NotesPage](t, app.h.do(get(paperAt, app.sess))).Print
 	if !paper.Paper || paper.Heading != "Notes · Combined notebook" || paper.Sources != "nextcloud · Записи, Дневник" ||
-		!strings.HasPrefix(string(paper.Foot), "Carrel · notes · 4 notes · captured ") || !strings.HasSuffix(string(paper.Foot), " · 2 of 2 notebooks") {
+		!strings.HasPrefix(string(paper.Foot), "Carrel · notes · 17 notes · captured ") || !strings.HasSuffix(string(paper.Foot), " · 2 of 2 notebooks") {
 		t.Errorf("the notes on paper = %+v", paper)
 	}
 	app.compare(t, "app-notes-all/print.json", app.h.do(get(paperAt, app.sess)))
