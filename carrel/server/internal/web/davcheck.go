@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
@@ -118,18 +119,20 @@ func testOutcome(res *discover.Result, trace *view.DiagnosticTrace, err error, s
 			found += " and found " + plural(n, "collection")
 		}
 		body := found + ". Nothing is saved until you press " + save + "."
+		// A step by its name, once: .well-known asked for CalDAV and for
+		// CardDAV is one step of the trace's.
 		var warned []string
 		for _, st := range trace.Steps {
-			if st.State == view.CheckBad {
+			if st.State == view.CheckBad && !slices.Contains(warned, string(st.Name)) {
 				warned = append(warned, string(st.Name))
 			}
 		}
-		switch len(warned) {
+		switch n := len(warned); n {
 		case 0:
 		case 1:
 			body += " One step had a warning: see " + warned[0] + " below."
 		default:
-			body += fmt.Sprintf(" %d steps had warnings: see %s below.", len(warned), strings.Join(warned, ", "))
+			body += fmt.Sprintf(" %d steps had warnings: see %s and %s below.", n, strings.Join(warned[:n-1], ", "), warned[n-1])
 		}
 		return view.Notice{Role: view.NoticeInfo, Title: "Test passed:", Body: text(body)}
 	}

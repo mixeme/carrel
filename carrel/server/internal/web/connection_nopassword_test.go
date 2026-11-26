@@ -234,7 +234,7 @@ func TestConnectWithoutPassword(t *testing.T) {
 	page = decode[view.ConnectionsPage](t, h.do(postForm("/app/settings/connections", sess, url.Values{
 		"label": {"other"}, "server": {srv.URL + "/nowhere/"}, "login": {"nobody"}, "noPassword": {"on"},
 	})))
-	if noticeTitled(page.Shell.Notices, "Could not connect") == nil {
+	if noticeTitled(page.Shell.Notices, "Could not connect.") == nil {
 		t.Fatalf("notices = %+v, want the failure", page.Shell.Notices)
 	}
 	check, password = checkRow(t, *page.Add)
@@ -268,7 +268,7 @@ func TestEditClearsThePasswordWithTheMark(t *testing.T) {
 	// Unticked and empty: «unchanged» — the stored password goes on, and the
 	// server refuses it.
 	page := post(url.Values{"server": {conn.Server}, "login": {"mix"}})
-	if noticeTitled(page.Shell.Notices, "Could not connect") == nil {
+	if noticeTitled(page.Shell.Notices, "Could not connect.") == nil {
 		t.Fatalf("an empty field did not keep the stored password: %+v", page.Shell.Notices)
 	}
 	if got := catalogOf(t, f).Connections[0]; got.Password != "stored-secret-7" || got.NoPassword {
@@ -280,7 +280,7 @@ func TestEditClearsThePasswordWithTheMark(t *testing.T) {
 	}
 
 	page = post(url.Values{"server": {conn.Server}, "login": {"mix"}, "password": {"typed-left-over-9"}, "noPassword": {"true"}})
-	if n := noticeTitled(page.Shell.Notices, "Could not connect"); n != nil {
+	if n := noticeTitled(page.Shell.Notices, "Could not connect."); n != nil {
 		t.Fatalf("edit with the mark failed: %+v", n)
 	}
 	got := catalogOf(t, f).Connections[0]

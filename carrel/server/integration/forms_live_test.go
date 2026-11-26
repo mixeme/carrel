@@ -662,7 +662,7 @@ func liveConnectionEditRight(t *testing.T, app *liveApp, connID, endpoint, user,
 	}
 	page := liveDecode[view.ConnectionsPage](t, "edit", app.post(edit, form))
 	for _, n := range page.Shell.Notices {
-		if n.Title == "Could not connect" {
+		if n.Title == "Could not connect." {
 			t.Fatalf("edit with the right password failed: %+v", n)
 		}
 	}

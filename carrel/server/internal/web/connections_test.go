@@ -145,7 +145,7 @@ func TestAddConnectionFailureSavesNothing(t *testing.T) {
 	}
 	var failure *view.Notice
 	for i := range page.Notices {
-		if page.Notices[i].Title == "Could not connect" {
+		if page.Notices[i].Title == "Could not connect." {
 			failure = &page.Notices[i]
 		}
 	}

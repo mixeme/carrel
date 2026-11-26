@@ -69,7 +69,7 @@ func TestEditConnectionAfterPasswordAndAddressChange(t *testing.T) {
 	srv.Password = "changed"
 	before := catalogOf(t, f).Connections[0]
 	page = post(url.Values{"server": {before.Server}, "login": {"alice"}, "password": {"wrong"}})
-	if noticeTitled(page.Shell.Notices, "Could not connect") == nil {
+	if noticeTitled(page.Shell.Notices, "Could not connect.") == nil {
 		t.Errorf("notices = %+v, want the failure with its trace", page.Shell.Notices)
 	}
 	if got := catalogOf(t, f).Connections[0]; !reflect.DeepEqual(got, before) {

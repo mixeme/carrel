@@ -181,7 +181,7 @@ func TestRediscoveryFailureChangesNothing(t *testing.T) {
 	srv.RemoveCollection(work)
 	srv.Password = "changed"
 	page := rediscoverPage(t, f)
-	n := noticeTitled(page.Notices, "Could not connect")
+	n := noticeTitled(page.Notices, "Could not connect.")
 	if n == nil || !strings.Contains(string(n.Body), "Nothing was changed.") {
 		t.Fatalf("notices = %+v", page.Notices)
 	}

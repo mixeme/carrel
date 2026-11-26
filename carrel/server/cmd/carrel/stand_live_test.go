@@ -606,7 +606,7 @@ func liveHrefs(t *testing.T, a account, path string) map[string]bool {
 // there, and what it says is the finding.
 func connected(t *testing.T, b *plainBrowser, a account) {
 	t.Helper()
-	if strings.HasSuffix(b.page.url.Path, "/new") || strings.Contains(b.page.text(), "Could not connect") {
+	if strings.HasSuffix(b.page.url.Path, "/new") || strings.Contains(b.page.text(), "Could not connect.") {
 		t.Fatalf("%s (%s, %s): Connect did not connect — %s: %.1500s", a.label, a.name, a.server, b.page.url, b.page.text())
 	}
 	t.Logf("%s (%s) connected: %s", a.label, a.name, b.page.url.Path)

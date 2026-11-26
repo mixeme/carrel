@@ -1132,7 +1132,7 @@ func (s *Server) refusedDialog(sess *session.Session, f connectionForm, trace *v
 func discoveryFailure(trace *view.DiagnosticTrace, err error, nothing string) *view.Notice {
 	n := &view.Notice{
 		Role:  view.NoticeAlert,
-		Title: text("Could not connect"),
+		Title: text("Could not connect."),
 		Body:  text(nothing),
 	}
 	d := &view.Diagnostic{Summary: text("Discovery trace")}

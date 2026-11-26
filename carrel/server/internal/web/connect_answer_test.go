@@ -41,6 +41,12 @@ func TestTestOnlySaysWhatItFound(t *testing.T) {
 		!strings.HasPrefix(string(n.Body), "Carrel can sign in and found 1 collection. Nothing is saved until you press Connect.") || p.Trace == nil {
 		t.Errorf("passed: %+v, trace %+v", n, p.Trace)
 	}
+	// A step with a warning is named once, however many lines it has.
+	for _, st := range p.Trace.Steps {
+		if c := strings.Count(string(n.Body), " "+string(st.Name)+" ") + strings.Count(string(n.Body), " "+string(st.Name)+","); c > 1 {
+			t.Errorf("passed names %q %d times: %q", st.Name, c, n.Body)
+		}
+	}
 
 	form.Set("password", "wrong")
 	p = decode[view.ConnectionsPage](t, f.h.do(postForm(test, f.sess, form)))
