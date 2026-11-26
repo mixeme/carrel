@@ -121,7 +121,7 @@ func TestAgendaPrintsNoEmptyDay(t *testing.T) {
 // «Previous week», «Next week» — and a day or a month steps by itself.
 func TestAgendaPagingIsTheFrames(t *testing.T) {
 	frame := mockupFrame(t, "s-agenda-1")
-	link := regexp.MustCompile(`<a class="tc-btn" href="[^"]*" title="([^"]*)"><svg viewBox="0 0 24 24"><use href="#(i-[\w-]+)"/></svg></a>`)
+	link := regexp.MustCompile(`<a class="tc-btn" href="[^"]*" title="([^"]*)"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#(i-[\w-]+)"/></svg></a>`)
 	drawn := link.FindAllStringSubmatch(frame, -1)
 	if len(drawn) != 2 {
 		t.Fatalf("s-agenda-1 draws %d steps: read the frame again", len(drawn))
