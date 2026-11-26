@@ -196,6 +196,9 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | `CARREL_FILES_MAX_ENTRIES` | 2000 | Членов папки в листинге |
 | `CARREL_MAIL_MAX_RECIPIENTS` | 20 | Получателей в письме |
 | `CARREL_MAIL_MAX_PER_DAY` | 50 | Писем на человека в сутки |
+| `CARREL_MAILBOX_MAX_CONNECTIONS` | 64 | Соединений IMAP своих ящиков на процесс (M-4) |
+| `CARREL_MAILBOX_PAGE` | 50 | Писем на странице списка папки |
+| `CARREL_MAILBOX_MAX_TEXT_BYTES` | 1048576 | Текст письма при показе; длиннее — с пометкой «обрезано» |
 | `CARREL_DUPLICATES_THRESHOLD` | 60 | Очков для кандидата-дубликата |
 | `CARREL_DUPLICATES_WEIGHT_*` | см. §4.4 | Очки признаков дубликата; человек задаёт свои |
 
@@ -312,6 +315,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Размер файла на чужой WebDAV | Поток идёт на/с удалённого сервера; ограничивает он или обратный прокси (C-12) |
 | Число устройств davloom | architecture.md |
 | Число учётных записей | — |
+| Отправка со своего ящика | Размер, получатели и письма в сутки решает сервер ящика; размер берётся из `SIZE` в ответе `EHLO` ([carrel-mailbox.md](carrel-mailbox.md), M-7) |
 
 ---
 

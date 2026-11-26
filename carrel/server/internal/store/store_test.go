@@ -142,6 +142,24 @@ func TestRejectNewerVersion(t *testing.T) {
 	}
 }
 
+// A state file of the format before mailboxes (1) opens in this build and
+// is written back in its own (2): nothing to migrate, the blob simply has
+// none (carrel-mailbox.md M-3).
+func TestOpenTheFormatBeforeMailboxes(t *testing.T) {
+	dir := t.TempDir()
+	key := testKey(t)
+	payload, err := encodeFile(1, key, emptyState())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, StateFile), payload, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Open(dir, key); err != nil {
+		t.Fatalf("a file of format 1: %v", err)
+	}
+}
+
 func TestConnectionCountWithoutOpeningBlob(t *testing.T) {
 	dir := t.TempDir()
 	key := testKey(t)

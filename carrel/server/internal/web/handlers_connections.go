@@ -1193,6 +1193,13 @@ func labelTaken(blob sealed.Blob, label, except string) bool {
 			return true
 		}
 	}
+	// A mailbox's label is the first half of a source's stamp as well: one
+	// space of labels with the servers (M-3).
+	for _, m := range blob.Mailboxes {
+		if m.ID != except && strings.EqualFold(m.Name(), label) {
+			return true
+		}
+	}
 	return false
 }
 

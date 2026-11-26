@@ -38,6 +38,18 @@ type mailPolicy struct {
 	Recipients, PerDay int
 }
 
+// mailboxesOn says whether people may connect and read their own mailboxes
+// (carrel-mailbox.md M-2): the administrator's choice on /admin/settings,
+// else CARREL_MAILBOX_ENABLED of the start. Off, there is no mail of
+// mailboxes anywhere — one check at the entry of the section, not one per
+// screen.
+func (s *Server) mailboxesOn() bool {
+	if set := s.users.Settings(); set.Mailboxes != nil {
+		return *set.Mailboxes
+	}
+	return s.cfg.MailboxEnabled
+}
+
 func (s *Server) mailPolicy() mailPolicy {
 	set := s.users.Settings()
 	p := mailPolicy{People: s.cfg.MailEnabled, Attach: s.cfg.MailMaxAttachBytes, Letter: s.cfg.MailMaxMessageBytes,

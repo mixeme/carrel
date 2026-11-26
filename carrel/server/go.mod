@@ -8,6 +8,7 @@ require (
 	carrel.dev/carrel/client v0.0.0
 	filippo.io/age v1.3.2
 	github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
+	github.com/emersion/go-imap/v2 v2.0.0-beta.9
 	github.com/emersion/go-vcard v0.1.0
 	github.com/emersion/go-webdav v0.0.0-20260625083450-1901d193ce99
 	github.com/google/go-cmp v0.7.0
@@ -24,8 +25,8 @@ require (
 require (
 	carrel.dev/typecase v0.0.0-00010101000000-000000000000 // indirect
 	filippo.io/hpke v0.4.0 // indirect
-	github.com/emersion/go-imap/v2 v2.0.0-beta.9 // indirect
 	github.com/emersion/go-message v0.18.2 // indirect
+	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 )
 

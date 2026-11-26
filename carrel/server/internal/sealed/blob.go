@@ -55,6 +55,12 @@ type Blob struct {
 	// UploadTo is where "Upload file" of the create menu puts files, once
 	// chosen on its sheet; until then the attachment folder (U-6.4).
 	UploadTo *AttachmentFolder `json:"uploadTo,omitempty"`
+	// Mailboxes are the person's own mailboxes (carrel-mailbox.md M-3):
+	// IMAP and SMTP, sealed like the DAV credentials. A blob written before
+	// this field reads as none; the state file's format went up with it
+	// (store.FormatVersion 2), so an older build refuses the file rather
+	// than drop the mailboxes with their passwords.
+	Mailboxes []Mailbox `json:"mailboxes,omitempty"`
 }
 
 // Destinations of a backup job (S-24.1).
@@ -358,12 +364,11 @@ type Selection struct {
 	Path      string    `json:"path"`
 }
 
-// ConnectionCount is the number of connections S-3 counts: the servers
-// today. A mailbox is a connection too (carrel-mailbox.md M-3) and is counted
-// here when it comes, so every screen that shows the number asks this.
-// Subscriptions are not connections and are not counted.
+// ConnectionCount is the number of connections S-3 counts: the servers and
+// the mailboxes (carrel-mailbox.md M-3), so every screen that shows the
+// number asks this. Subscriptions are not connections and are not counted.
 func (b Blob) ConnectionCount() int {
-	return len(b.Connections)
+	return len(b.Connections) + len(b.Mailboxes)
 }
 
 // Connection returns the connection with id.

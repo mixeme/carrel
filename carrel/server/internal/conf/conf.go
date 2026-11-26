@@ -72,6 +72,16 @@ type Config struct {
 	MailMaxRecipients   int
 	MailMaxPerDay       int
 
+	// The person's own mailboxes (carrel-mailbox.md M-1…M-5, C-12): off
+	// until the administrator decides on /admin/settings; the relay's
+	// ceilings do not apply to them.
+	MailboxEnabled        bool
+	MailboxMaxConnections int           // IMAP connections of the process (M-4)
+	MailboxIdleClose      time.Duration // idle before a mailbox's connection closes
+	MailboxPoll           time.Duration // between checks of an open folder without IDLE
+	MailboxPage           int           // letters on a page of a folder's list
+	MailboxMaxTextBytes   int64         // a letter's text shown; longer is cut with a mark
+
 	// DAVloomPort is zero when davloom is disabled (empty CARREL_DAVLOOM_PORT).
 	DAVloomPort int
 }
@@ -165,6 +175,12 @@ func defaults() *Config {
 		MailMaxMessageBytes: 25 << 20,
 		MailMaxRecipients:   20,
 		MailMaxPerDay:       50,
+
+		MailboxMaxConnections: 64,
+		MailboxIdleClose:      300 * time.Second,
+		MailboxPoll:           60 * time.Second,
+		MailboxPage:           50,
+		MailboxMaxTextBytes:   1 << 20,
 	}
 }
 
@@ -401,6 +417,32 @@ func applyKV(c *Config, key, val string) error {
 		if err != nil {
 			return err
 		}
+	case "CARREL_MAILBOX_ENABLED":
+		if c.MailboxEnabled, err = boolVal(key, val); err != nil {
+			return err
+		}
+	case "CARREL_MAILBOX_MAX_CONNECTIONS":
+		if c.MailboxMaxConnections, err = positive(key, val); err != nil {
+			return err
+		}
+	case "CARREL_MAILBOX_IDLE_CLOSE":
+		if c.MailboxIdleClose, err = positiveSeconds(key, val); err != nil {
+			return err
+		}
+	case "CARREL_MAILBOX_POLL":
+		if c.MailboxPoll, err = positiveSeconds(key, val); err != nil {
+			return err
+		}
+	case "CARREL_MAILBOX_PAGE":
+		if c.MailboxPage, err = positive(key, val); err != nil {
+			return err
+		}
+	case "CARREL_MAILBOX_MAX_TEXT_BYTES":
+		var n int
+		if n, err = positive(key, val); err != nil {
+			return err
+		}
+		c.MailboxMaxTextBytes = int64(n)
 	case "CARREL_DAVLOOM_PORT":
 		if val == "" {
 			c.DAVloomPort = 0
@@ -536,6 +578,22 @@ func atoi64(key, val string) (int64, error) {
 		return 0, fmt.Errorf("%s: not a number: %q", key, val)
 	}
 	return n, nil
+}
+
+// positive is a count that must be above zero: a ceiling of none would stop
+// everything it bounds.
+func positive(key, val string) (int, error) {
+	n, err := atoi(key, val)
+	if err == nil && n <= 0 {
+		err = fmt.Errorf("%s: must be above zero: %q", key, val)
+	}
+	return n, err
+}
+
+// positiveSeconds is seconds above zero.
+func positiveSeconds(key, val string) (time.Duration, error) {
+	n, err := positive(key, val)
+	return time.Duration(n) * time.Second, err
 }
 
 func seconds(key, val string) (time.Duration, error) {

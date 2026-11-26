@@ -21,6 +21,9 @@ type InstanceUpdate struct {
 	MailMaxMessageMB  int
 	MailMaxRecipients int
 	MailMaxPerDay     int
+	// Mailboxes is the block «Users’ own mailboxes» (s-mailbox-29): nil —
+	// the form did not carry it, and what is stored stays.
+	Mailboxes *bool
 }
 
 // ErrSetting is a value out of its range; Field names the form row.
@@ -85,6 +88,10 @@ func (s *Service) SaveSettings(actorID string, in InstanceUpdate, relay store.SM
 		set.PeopleMail = &people
 		set.MailMaxAttachMB, set.MailMaxMessageMB = in.MailMaxAttachMB, in.MailMaxMessageMB
 		set.MailMaxRecipients, set.MailMaxPerDay = in.MailMaxRecipients, in.MailMaxPerDay
+		if in.Mailboxes != nil {
+			on := *in.Mailboxes
+			set.Mailboxes = &on
+		}
 		set.SMTP = relay
 		if len(changed) == 0 {
 			return nil, nil
@@ -127,6 +134,9 @@ func settingsChanged(was store.InstanceSettings, in InstanceUpdate, relay store.
 		{"letter", was.MailMaxMessageMB != in.MailMaxMessageMB},
 		{"recipients", was.MailMaxRecipients != in.MailMaxRecipients},
 		{"perDay", was.MailMaxPerDay != in.MailMaxPerDay},
+		// As people's letters: a box ticked over the start's value, or
+		// changed from what was stored, is a change (M-2).
+		{"mailboxes", in.Mailboxes != nil && (was.Mailboxes == nil && *in.Mailboxes || was.Mailboxes != nil && *was.Mailboxes != *in.Mailboxes)},
 	} {
 		if c.diff {
 			out = append(out, c.name)

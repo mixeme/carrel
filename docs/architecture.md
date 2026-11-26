@@ -53,6 +53,7 @@ carrel/server/
   internal/dav discover model
   internal/provider/{card,cal,file}
   internal/photo fanout dupes web user mail backup publish proxy
+  internal/mailbox       свой ящик (carrel-mailbox.md): обнаружение, вход IMAP и SMTP
   integration/           живой набор, -tags=integration
   testdata/ scripts/ Dockerfile (+ .dockerignore) docker-compose.linux.yml
 carrel/client/           module carrel.dev/carrel/client; require server (replace ../server)
@@ -68,7 +69,7 @@ carrel/client/           module carrel.dev/carrel/client; require server (replac
 провайдеры → `model`, `dav` → страж, `discover`; `store` и `session` → `crypt`.
 Транспорт не знает календарь, модель не знает запрос, провайдер не знает
 разметку. Страницы собирает `web`; `fanout`, `dupes`, `photo`, `backup`,
-`publish`, `mail`, `proxy` не импортируют `internal/web` и не заполняют
+`publish`, `mail`, `mailbox`, `proxy` не импортируют `internal/web` и не заполняют
 `*Page` / `Shell` / `Action`. Исключения провайдеров: goldmark →
 `[]view.Block`, `card.Foreign` → `[]view.Field`. Общего `internal/provider`
 нет: интерфейс источника — в `internal/fanout`.

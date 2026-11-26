@@ -15,7 +15,7 @@ import (
 const (
 	StateFile     = "state.enc"
 	magic         = "CRL1"
-	FormatVersion = 1
+	FormatVersion = 2 // 2: the blob holds mailboxes (sealed.Mailbox)
 	tmpSuffix     = ".tmp"
 )
 

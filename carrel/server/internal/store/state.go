@@ -182,6 +182,9 @@ type InstanceSettings struct {
 	MailMaxMessageMB  int    `json:"mailMaxMessageMB,omitempty"`
 	MailMaxRecipients int    `json:"mailMaxRecipients,omitempty"`
 	MailMaxPerDay     int    `json:"mailMaxPerDay,omitempty"`
+	// Mailboxes: people may connect their own mailboxes (carrel-mailbox.md
+	// M-2); nil — as CARREL_MAILBOX_ENABLED of the start says.
+	Mailboxes *bool `json:"mailboxes,omitempty"`
 }
 
 // InstanceName is the name the instance goes by: "Carrel" unless set.

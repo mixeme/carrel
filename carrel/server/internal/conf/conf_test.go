@@ -264,3 +264,27 @@ func TestDuplicatesWeights(t *testing.T) {
 		t.Error("a negative weight was taken")
 	}
 }
+
+// The own mailboxes (carrel-mailbox.md, C-12): off by default, the
+// ceilings of the table; a ceiling of zero is refused, not taken.
+func TestMailboxSettings(t *testing.T) {
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.MailboxEnabled || c.MailboxMaxConnections != 64 || c.MailboxIdleClose != 300*time.Second ||
+		c.MailboxPoll != 60*time.Second || c.MailboxPage != 50 || c.MailboxMaxTextBytes != 1<<20 {
+		t.Fatalf("defaults = %v %d %v %v %d %d", c.MailboxEnabled, c.MailboxMaxConnections, c.MailboxIdleClose,
+			c.MailboxPoll, c.MailboxPage, c.MailboxMaxTextBytes)
+	}
+	t.Setenv("CARREL_MAILBOX_ENABLED", "true")
+	t.Setenv("CARREL_MAILBOX_PAGE", "20")
+	t.Setenv("CARREL_MAILBOX_POLL", "30")
+	if c, err = Load(); err != nil || !c.MailboxEnabled || c.MailboxPage != 20 || c.MailboxPoll != 30*time.Second {
+		t.Fatalf("set = %+v, %v", c, err)
+	}
+	t.Setenv("CARREL_MAILBOX_MAX_CONNECTIONS", "0")
+	if _, err := Load(); err == nil || !strings.Contains(err.Error(), "CARREL_MAILBOX_MAX_CONNECTIONS") {
+		t.Fatalf("a ceiling of zero: %v", err)
+	}
+}
