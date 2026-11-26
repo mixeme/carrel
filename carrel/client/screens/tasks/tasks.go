@@ -516,7 +516,7 @@ func side(d view.Details) *w.Side {
 			lines = append(lines, bind.WithFrom([]w.SecItemPart{
 				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
 				w.Text(" "),
-				w.Dim{Parts: []w.Inline{w.Text(about(r))}},
+				w.Dim{Parts: []w.Inline{w.Text(bind.RelatedAbout(r, lead))}},
 			}, r.From))
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: w.StackGapTight}}})
@@ -580,13 +580,3 @@ const upload = "Upload"
 // Rail is the page's rail alone and the form its ticks send: the end of a
 // poll brings it out of band (C-7.4; Typecase's note 124).
 func Rail(r view.Rail) ([]w.RailPart, *w.PostForm) { return railParts(r), bind.RailForm(r, formRail) }
-
-// about is what a related record is, and its day where it has one: «· event
-// · 11 Aug» (s-tasks-20; Typecase's note 130 p. 3), as a note's panel says
-// it.
-func about(r view.TimelineRow) string {
-	if r.When == "" {
-		return lead + string(r.Kind)
-	}
-	return lead + string(r.Kind) + " " + lead + string(r.When)
-}

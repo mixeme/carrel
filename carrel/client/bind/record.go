@@ -147,6 +147,24 @@ func Related(r view.FormRow) w.TagInput {
 	return in
 }
 
+// RelatedAbout is the muted part of a line of «Related» (C-6.5 TimelineRow):
+// the record's kind and day after lead, the screen's, «· event · 11 Aug»
+// (s-tasks-20; Typecase's note 130 p. 3) — on every kind's card and panel
+// alike. A record the session
+// has not read has no kind — its title is its UID —, and the line says the
+// server's reason (Why) instead of a lead before nothing.
+func RelatedAbout(r view.TimelineRow, lead string) string {
+	switch {
+	case r.Kind == "" && r.Why == "":
+		return ""
+	case r.Kind == "":
+		return lead + string(r.Why)
+	case r.When == "":
+		return lead + string(r.Kind)
+	}
+	return lead + string(r.Kind) + " " + lead + string(r.When)
+}
+
 // Attendee is a person of an event (C-6.5 AttendeeRow) as a line of the
 // rubric of attendees, read only (s-agenda-1, -2): a person the ticked
 // address books know by the address (Href) — the mark of the book, the name
