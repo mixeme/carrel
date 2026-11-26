@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.21 — 2026-11-26
+
+Client `v0.11.61`; Typecase `37401ba`.
+
+### For consumers
+
+- **Test only names a step with a warning once** (the stand, 26.11.2026:
+  «see .well-known, .well-known, principal»): «2 steps had warnings: see
+  .well-known and principal below.»
+- **«Could not connect.»** with its period, as s-profile-24 writes it.
+
 ## v0.4.20 — 2026-11-26
 
 Client `v0.11.61`; Typecase `37401ba`.
