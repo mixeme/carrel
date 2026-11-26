@@ -11,7 +11,13 @@
 # beside this file); dev/, docs/ and the rest of the repository never do.
 # The paths inside mirror the context, so the replaces of go.mod resolve
 # as they do on a developer's machine.
-FROM golang:1.27-alpine AS build
+#
+# The binary is built on the builder's own platform for the image's one
+# (TARGETOS, TARGETARCH, given by BuildKit): CI builds linux/amd64 and
+# linux/arm64 without running Go under emulation (.github/workflows/image.yml).
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS build
+ARG TARGETOS=linux
+ARG TARGETARCH
 RUN apk add --no-cache ca-certificates git
 WORKDIR /src/carrel/carrel/server
 COPY typecase/go.mod typecase/go.sum /src/typecase/
@@ -23,7 +29,7 @@ COPY carrel/carrel/client /src/carrel/carrel/client
 COPY carrel/carrel/server ./
 ARG VERSION=dev
 ARG COMMIT=unknown
-RUN CGO_ENABLED=0 GOOS=linux go build -trimpath \
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath \
     -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
     -o /out/carrel ./cmd/carrel
 

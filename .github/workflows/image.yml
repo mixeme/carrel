@@ -1,0 +1,154 @@
+name: Image
+
+# The image of the Carrel server in the GitHub registry (ghcr.io):
+#
+#   docker pull ghcr.io/<owner>/carrel:<version>
+#
+# The repository on GitHub is a mirror of Gitea, as Wynd's and SelfPost's
+# are. The version is the highest of carrel/server/CHANGELOG.md, as
+# scripts/deploy.sh takes it; the image is built when that file changes on
+# main, that is, with each version. A version already in the registry is not
+# built again: an edit of an older entry publishes nothing.
+#
+# Two architectures, linux/amd64 and linux/arm64. The binary is built on the
+# runner's own platform for the target one (the Dockerfile's BUILDPLATFORM);
+# only the last stage's apk add runs under QEMU for arm64.
+#
+# Each build has its own tag, <version>-amd64 and <version>-arm64; the tags
+# <version> and latest are the index over the two, so docker pull picks the
+# build for its processor. Provenance is off: it would lie in the package as
+# versions without tags.
+#
+# After the first publish the package on GitHub is private: open it once
+# (Packages → carrel → Package settings → Change visibility → Public), or a
+# server pulls it only signed in.
+#
+# By hand (workflow_dispatch): with «publish» — as a release, even when the
+# version is there already; without it — the image is only built.
+
+on:
+  push:
+    branches: [main]
+    paths: [carrel/server/CHANGELOG.md]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the image in the package
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: image
+  cancel-in-progress: false
+
+jobs:
+  gates:
+    uses: ./.github/workflows/gates.yml
+    secrets: inherit
+
+  publish:
+    needs: gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: carrel
+
+      - name: Typecase at the client plan's commit
+        env:
+          TOKEN: ${{ secrets.TYPECASE_TOKEN || github.token }}
+          REPO: ${{ vars.TYPECASE_REPO || format('{0}/typecase', github.repository_owner) }}
+        run: |
+          set -euo pipefail
+          tc=$(sed -n 's/^Typecase сборки: `\([0-9a-f]\{7,40\}\)`.*/\1/p' carrel/docs/plan/client.md)
+          if [ "$(printf '%s\n' "$tc" | grep -c .)" != 1 ]; then
+            echo "::error::docs/plan/client.md: want exactly one line «Typecase сборки: \`<commit>\`»"
+            exit 1
+          fi
+          git clone --quiet --filter=blob:none "https://x-access-token:${TOKEN}@github.com/${REPO}.git" typecase
+          git -C typecase checkout --quiet --detach "$tc"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # The image's name in lower case: ghcr.io takes no capitals in the owner.
+      - name: version, commit and image name
+        id: meta
+        env:
+          DISPATCHED: ${{ github.event_name == 'workflow_dispatch' }}
+          PUBLISH: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^## v\([0-9][0-9.]*\) .*/\1/p' carrel/carrel/server/CHANGELOG.md | sort -V | tail -1)
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::carrel/server/CHANGELOG.md: no version «## vX.Y.Z — date» (got '${version}')"
+            exit 1
+          fi
+          image="ghcr.io/$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')/carrel"
+          push="$PUBLISH"
+          if [ "$DISPATCHED" != true ] && docker manifest inspect "${image}:${version}" >/dev/null 2>&1; then
+            echo "::notice::${image}:${version} is in the registry already: nothing to publish"
+            push=false
+          fi
+          {
+            echo "version=${version}"
+            echo "commit=$(git -C carrel rev-parse --short=8 HEAD)"
+            echo "image=${image}"
+            echo "push=${push}"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - uses: docker/setup-buildx-action@v3
+
+      # The context is the workspace: carrel/ and typecase/ side by side
+      # (the Dockerfile; Dockerfile.dockerignore names what goes in).
+      - name: amd64
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: carrel/carrel/server/Dockerfile
+          platforms: linux/amd64
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            COMMIT=${{ steps.meta.outputs.commit }}
+          tags: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}-amd64
+          provenance: false
+          push: ${{ steps.meta.outputs.push == 'true' }}
+          cache-from: type=gha,scope=amd64
+          cache-to: type=gha,mode=max,scope=amd64
+
+      - name: arm64
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: carrel/carrel/server/Dockerfile
+          platforms: linux/arm64
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            COMMIT=${{ steps.meta.outputs.commit }}
+          tags: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}-arm64
+          provenance: false
+          push: ${{ steps.meta.outputs.push == 'true' }}
+          cache-from: type=gha,scope=arm64
+          cache-to: type=gha,mode=max,scope=arm64
+
+      - name: version and latest
+        if: steps.meta.outputs.push == 'true'
+        run: |
+          image="${{ steps.meta.outputs.image }}"
+          version="${{ steps.meta.outputs.version }}"
+          docker buildx imagetools create \
+            -t "${image}:${version}" -t "${image}:latest" \
+            "${image}:${version}-amd64" "${image}:${version}-arm64"
+          docker buildx imagetools inspect "${image}:${version}"
