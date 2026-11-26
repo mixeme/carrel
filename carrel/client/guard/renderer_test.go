@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -213,10 +214,19 @@ func TestRendererDrawsBuiltScreens(t *testing.T) {
 				continue
 			}
 			root := scr.Draw(model).Render()
-			if code != http.StatusOK || ctype != htmlType || body != root+forms {
-				t.Errorf("%s: fragment of %s %d %q, not the root and the forms", at, target, code, ctype)
+			// The page's title comes first (Typecase's note 237): main owns
+			// the address, and the live layer sets it as the tab's.
+			title := ""
+			if scr.Title != nil {
+				if tt := scr.Title(model); tt != "" {
+					title = "<title>" + html.EscapeString(tt) + "</title>"
+				}
+			}
+			if code != http.StatusOK || ctype != htmlType || body != title+root+forms {
+				t.Errorf("%s: fragment of %s %d %q, not the title, the root and the forms", at, target, code, ctype)
 				continue
 			}
+			body = strings.TrimPrefix(body, title)
 			for _, f := range served(l, scr, model, path, frame, fmt.Sprintf("%s (%s, fragment)", at, frame), strings.TrimSuffix(body, forms)) {
 				t.Error(f)
 			}
@@ -383,6 +393,13 @@ func TestRendererDrawsShellZones(t *testing.T) {
 				code, ctype, body := answer(t, renderer.New(""), func(rd render.Renderer, w http.ResponseWriter) error {
 					return rd.Fragment(w, req, http.StatusOK, target, byValue(model), nil)
 				})
+				// main owns the address: the page's title first (Typecase's
+				// note 237).
+				if target == render.TargetMain && scr.Title != nil {
+					if tt := scr.Title(model); tt != "" {
+						body = strings.TrimPrefix(body, "<title>"+html.EscapeString(tt)+"</title>")
+					}
+				}
 				if code != http.StatusOK || ctype != htmlType || body != want {
 					t.Errorf("%s, %s: %d %q, not the zone and the forms", at, target, code, ctype)
 					continue

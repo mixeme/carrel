@@ -45,16 +45,9 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	}
 	// The table counts rows, the rail records (the owner's decision of
 	// 09.10.2026): the linked note is one row of «17 notes», and one of each
-	// of its notebooks in the rail. «Записи» holds the 16 notes of
-	// Neighbours since Typecase's note 234; the frame still says «4 notes» —
-	// Typecase's task 295. When it says 17, this is red: hold the subtitle
-	// to the frame again.
-	const subtitle = "2 of 3 notebooks · 17 notes · VJOURNAL"
-	if sub := frameSubtitle(t, "s-notes-1"); sub == subtitle {
-		t.Errorf("s-notes-1 says %q now: task 295 is answered, hold the subtitle to the frame", sub)
-	}
-	if string(page.Subtitle) != subtitle || !strings.HasSuffix(runsText(page.Poll.Summary), " · 17 notes") {
-		t.Errorf("subtitle = %q, poll %q; want %q", page.Subtitle, runsText(page.Poll.Summary), subtitle)
+	// of its notebooks in the rail (Typecase's notes 234, 238).
+	if sub := frameSubtitle(t, "s-notes-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 17 notes") {
+		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), sub)
 	}
 	// «Записи 16», «Дневник 3» (Typecase's notes 123 p. 8, 182, 234): the
 	// rail counts what lies in each, the copies too.
@@ -113,11 +106,7 @@ func TestNotebookIsTheFrame(t *testing.T) {
 
 	// One notebook: where, how many and as what (s-notes-31).
 	one := decode[view.NotesPage](t, app.h.do(get(app.listPath(t, "notes", "zapisi")+"?open="+url.QueryEscape(open), app.sess)))
-	// «16 notes»: the frame says 3 until Typecase's task 295.
-	if sub := frameSubtitle(t, "s-notes-31"); sub == "nextcloud · 16 notes · VJOURNAL" {
-		t.Errorf("s-notes-31 says %q now: task 295 is answered, hold the subtitle to the frame", sub)
-	}
-	if string(one.Subtitle) != "nextcloud · 16 notes · VJOURNAL" || one.Details == nil || one.Bar.FilterForm == nil {
+	if sub := frameSubtitle(t, "s-notes-31"); string(one.Subtitle) != sub || one.Details == nil || one.Bar.FilterForm == nil {
 		t.Errorf("one notebook = %q %+v", one.Subtitle, one.Details)
 	}
 

@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.63 — 2026-11-26
+
+Server `v0.4.23`; Typecase `9cd1220` (notes 236–238: tasks 287, 294, 295).
+- **An answer into main carries the page's title** (`page.Fragment.Title`
+  from `Screen.Title`): the live layer sets the tab's title when main owns
+  the address. An answer into another zone carries none.
+- Mockup copy: an icon beside words 1 px lower; the notes' frames count the
+  16 «Записи».
+
 ## v0.11.62 — 2026-11-26
 
 Server `v0.4.22`; Typecase `26c4391` (note 235; the owner's remarks of

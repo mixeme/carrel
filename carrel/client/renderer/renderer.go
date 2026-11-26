@@ -169,7 +169,7 @@ func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int
 		// rail out of band with the row of what opened lit (server v0.4.18).
 		if panel, drawn := ShellZone(scr, model, target); drawn {
 			if more, ok := r.outOfBand(extra); ok {
-				return writeHTML(w, status, page.Fragment{Body: []page.Part{page.Printed(panel)}, Extra: more}.Render())
+				return writeHTML(w, status, page.Fragment{Title: titleOf(scr, model, target), Body: []page.Part{page.Printed(panel)}, Extra: more}.Render())
 			}
 		}
 	}
@@ -187,10 +187,24 @@ func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int
 			out, drawn = ShellZone(scr, model, target)
 		}
 		if drawn {
+			if t := titleOf(scr, model, target); t != "" {
+				out = page.Fragment{Title: t, Body: []page.Part{page.Printed(out)}}.Render()
+			}
 			return writeHTML(w, status, out)
 		}
 	}
 	return r.json.Fragment(w, req, status, target, body, extra)
+}
+
+// titleOf is the document's title an answer into target carries: the
+// page's own (Document.Title) for main, the zone that owns the address — the
+// live layer sets it as the tab's title (Typecase's task 294, note 237); none
+// for any other zone.
+func titleOf(scr screens.Screen, model any, target string) string {
+	if target != render.TargetMain || scr.Title == nil {
+		return ""
+	}
+	return scr.Title(model)
 }
 
 // SheetZone is a sheet answered alone: its scrim named as the zone sheet,

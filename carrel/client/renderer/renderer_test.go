@@ -211,6 +211,10 @@ func TestAMainAnswerComesWithItsRail(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := rec.Body.String()
+	// The tab's title with it (Typecase's note 237): the page's own.
+	if !strings.HasPrefix(got, "<title>People</title>") {
+		t.Errorf("main's answer does not open with the page's title: %.120s", got)
+	}
 	at := strings.Index(got, `<template data-tc-zone="rail">`)
 	if !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/html") || at < 0 || !strings.Contains(got[:at], "Ada Lovelace") {
 		t.Fatalf("main with its rail = %s %.800s", rec.Header().Get("Content-Type"), got)
@@ -263,5 +267,24 @@ func TestTestOnlyAnswersItsZone(t *testing.T) {
 		!strings.Contains(got, "Could not connect") || !strings.Contains(got, `class="tc-diag"`) || !strings.Contains(got, "[principal]") ||
 		strings.Contains(got, "<form") || strings.Contains(got, "tc-shell") {
 		t.Errorf("the zone of the answer = %s %.1200s", rec.Header().Get("Content-Type"), got)
+	}
+}
+
+// Any answer into main carries the page's title; one into another zone
+// carries none (Typecase's note 237).
+func TestOnlyMainAnswersCarryTheTitle(t *testing.T) {
+	rd := renderer.New("")
+	list := view.ContactsListPage{Shell: view.Shell{Title: "People", Details: &view.Details{Title: "Ada", Close: "/app/contacts"}}}
+	for _, c := range []struct {
+		target string
+		want   bool
+	}{{render.TargetMain, true}, {render.TargetDetails, false}} {
+		rec := httptest.NewRecorder()
+		if err := rd.Fragment(rec, httptest.NewRequest(http.MethodGet, "/app/contacts", nil), http.StatusOK, c.target, list, nil); err != nil {
+			t.Fatal(err)
+		}
+		if got := strings.HasPrefix(rec.Body.String(), "<title>People</title>"); got != c.want {
+			t.Errorf("%s: title %v, want %v: %.100s", c.target, got, c.want, rec.Body.String())
+		}
 	}
 }
