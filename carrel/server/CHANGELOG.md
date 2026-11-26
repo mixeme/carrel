@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.22 — 2026-11-26
+
+Client `v0.11.62`; Typecase `26c4391`.
+
+### For consumers
+
+- **Nothing in the contract.** The pages carry Typecase `26c4391`:
+  Neighbours fills the rail down to its footer; Related to of a note's
+  edit has a row of its own.
+
 ## v0.4.21 — 2026-11-26
 
 Client `v0.11.61`; Typecase `37401ba`.

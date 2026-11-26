@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.62 — 2026-11-26
+
+Server `v0.4.22`; Typecase `26c4391` (note 235; the owner's remarks of
+26.11.2026).
+- **Related to of a note's edit stands on a row of its own** (`FieldW100`;
+  `FieldFlex3_340` is gone from the library).
+- **Neighbours reaches the rail's footer** (mockup copy, the library's CSS).
+
 ## v0.11.61 — 2026-11-26
 
 Server `v0.4.20`; Typecase `37401ba` (notes 229–234: tasks 286, 291, 284,

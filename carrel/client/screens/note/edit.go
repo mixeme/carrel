@@ -49,14 +49,16 @@ const (
 
 // widths are the widths of the edit's fields by their names, as the frame
 // lays them out (C-6.1: the layout is the screen's): the link after the
-// tags, as wide as the notebook (s-notes-20; Typecase's task 172).
+// tags, as wide as the notebook (s-notes-20; Typecase's task 172); Related
+// to on a row of its own, as wide as the column, so that it grows without
+// leaving gaps (the owner, 26.11.2026; Typecase's note 235).
 var widths = map[string]w.FieldWidth{
 	notebook:     w.FieldFlex2_280,
 	"start.date": w.FieldFix150,
 	"start.time": w.FieldFix130,
 	"categories": w.FieldFlex3_320,
 	"url":        w.FieldFlex2_280,
-	"related":    w.FieldFlex3_340,
+	"related":    w.FieldW100,
 }
 
 // ro is the badge of a notebook read only in the choice of the notebook.
