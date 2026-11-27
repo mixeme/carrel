@@ -163,6 +163,16 @@ func liveForm(f view.Form) url.Values {
 			case row.Name == "removed":
 				// Each row Remove took out is named once (C-6.8).
 				out.Add(row.Name, string(row.Value))
+			case row.Kind == view.InputSelect && row.Multiple:
+				// A list of several choices (Related to) posts every chosen
+				// option, as a browser does; the row's Value is only the first
+				// (27.11.2026: before, a save here kept one relation of three).
+				out.Del(row.Name)
+				for _, o := range row.Options {
+					if o.Selected && o.Value != "" {
+						out.Add(row.Name, o.Value)
+					}
+				}
 			case row.Kind == view.InputCheck && len(row.Options) > 0:
 				// Several ticks under one name: each one ticked is a value.
 				out.Del(row.Name)

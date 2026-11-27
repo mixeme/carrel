@@ -68,6 +68,14 @@ func liveMatrix(ctx context.Context, t *testing.T, client *dav.Client, endpoint,
 			})
 		}
 	}
+	// The candidate «Projects»: a task whose links name its material
+	// (project_links_live_test.go).
+	if col, ok := colOf[view.KindTask]; ok {
+		t.Run("project links", func(t *testing.T) {
+			app.freshSession(t)
+			liveProjectLinks(ctx, t, app, client, connID, col, suffix)
+		})
+	}
 	// A new record holds what was typed and no line for a field left empty.
 	for _, n := range []struct {
 		kind view.Kind
