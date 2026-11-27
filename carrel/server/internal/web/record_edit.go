@@ -150,8 +150,8 @@ type editField struct {
 	// on the day of the start, or on the next when it is earlier (s-notes-9).
 	// The full form reads its time typed without a date the same way (S-11).
 	quickNoDate bool
-	// quickSample is the sample in the empty row of the quick sheet: «+7 …»,
-	// «name@example.org» (s-notes-8); of a time, its date's, and
+	// quickSample is the sample in the empty row of the quick sheet: «Given
+	// Family», «+7 …», «name@example.org» (s-notes-8); of a time, its date's, and
 	// quickTimeSample its time's: «YYYY-MM-DD», «--:--» (s-notes-10).
 	quickSample     string
 	quickTimeSample string
@@ -789,7 +789,9 @@ var editFields = map[view.Kind][]editField{
 	view.KindContact: {
 		// No hint under it (s-contacts-3): the order Display name is cut in is
 		// said on the quick sheet (NewSheet.Note, s-notes-8).
-		{name: "fn", label: "Display name", prop: "FN", typ: fieldText},
+		// The quick sheet's sample names the card's own fields in their order,
+		// «Given Family» (s-notes-8; Typecase's notes 240, 241).
+		{name: "fn", label: "Display name", prop: "FN", typ: fieldText, quickSample: "Given Family"},
 		{name: "n", label: "Name", prop: "N", typ: fieldName},
 		// The nickname and the birthday stand in the head empty too
 		// (s-contacts-3, s-contacts-4).
@@ -901,7 +903,7 @@ var quickFieldNames = map[view.Kind][]string{
 // quickNotes are the lines under the quick sheet's fields: what it does not
 // ask and why (s-notes-8, s-notes-9, s-notes-10).
 var quickNotes = map[view.Kind]view.Text{
-	view.KindContact: "The first word is Given, the rest Family — «Пётр Ковалёв», not «Ковалёв Пётр». Everything else is filled in on the card.",
+	view.KindContact: "Everything else is filled in on the card.",
 	view.KindEvent:   "Repeats, guests and more live on the card. A reminder is set here because that is why most events are created.",
 	view.KindTask:    "No time means the whole day. A task with no due date is a task all the same — both may stay empty.",
 }
@@ -3135,12 +3137,15 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		before := len(set.Rows)
 		switch f.typ {
 		case fieldText:
-			label := f.label
+			label, sample := f.label, f.placeholder
 			if !full && f.quick != "" {
 				label = f.quick
 			}
+			if !full && f.quickSample != "" {
+				sample = f.quickSample
+			}
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required,
-				Placeholder: text(f.placeholder)})
+				Placeholder: text(sample)})
 		case fieldArea:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
 		case fieldList:

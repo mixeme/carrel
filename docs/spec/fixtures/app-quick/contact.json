@@ -93,6 +93,7 @@
             "label": "Display name",
             "name": "fn",
             "options": [],
+            "placeholder": "Given Family",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -134,7 +135,7 @@
   },
   "icon": "i-con",
   "kind": "contact",
-  "note": "The first word is Given, the rest Family — «Пётр Ковалёв», not «Ковалёв Пётр». Everything else is filled in on the card.",
+  "note": "Everything else is filled in on the card.",
   "target": {
     "chosen": "/app/contacts/a-nc-home/kontakty/new",
     "field": "into",

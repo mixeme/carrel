@@ -14,7 +14,7 @@ import (
 )
 
 // The instance's settings are one form (s-admin-3, Ад17): Global, Mail,
-// Letters from users and the test letter, Save and Discard in the head. A
+// Letters from users, Users’ own mailboxes and the test letter, Save and Discard in the head. A
 // save stores all of it or nothing; the test letter is a button of the same
 // form that sends what is typed and stores nothing (Ад37).
 
@@ -62,6 +62,11 @@ func (s *Server) settingsTyped(r *http.Request) typedSettings {
 	in.PeopleMail = v == "on" || v == "true"
 	in.MailMaxAttachMB, in.MailMaxMessageMB = atoi("attach"), atoi("letter")
 	in.MailMaxRecipients, in.MailMaxPerDay = atoi("recipients"), atoi("perDay")
+	// The form always holds the block «Users’ own mailboxes» (s-admin-3,
+	// Typecase's note 241): a box not ticked is off.
+	own := r.FormValue("mailboxes")
+	mailboxes := own == "on" || own == "true"
+	in.Mailboxes = &mailboxes
 	port, _ := strconv.Atoi(strings.TrimSpace(r.FormValue("port")))
 	relay := store.SMTPSettings{
 		Host: r.FormValue("host"), Port: port, Security: r.FormValue("security"),
@@ -190,12 +195,16 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 	shown := cur
 	set := s.users.Settings()
 	people := s.mailPolicy().People
+	own := s.mailboxesOn()
 	if t := flash.typed; t != nil {
 		shown = t.relay
 		set.Name, set.IdleHours, set.SessionDays, set.InviteHours = t.set.Name, t.set.IdleHours, t.set.SessionDays, t.set.InviteHours
 		set.MailMaxAttachMB, set.MailMaxMessageMB = t.set.MailMaxAttachMB, t.set.MailMaxMessageMB
 		set.MailMaxRecipients, set.MailMaxPerDay = t.set.MailMaxRecipients, t.set.MailMaxPerDay
 		people = t.set.PeopleMail
+		if t.set.Mailboxes != nil {
+			own = *t.set.Mailboxes
+		}
 	}
 	// «Settings», as the rail and the frame name it (Ад16; s-admin-3), with
 	// what it holds under it.
@@ -297,6 +306,19 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		letters.Badges = []view.Badge{{Label: "on", Role: view.BadgeNeutral}}
 	}
 
+	// People's own mailboxes (M-2, s-mailbox-29): the last block before the
+	// test, off unless the start or the administrator turned it on; the line
+	// under it says that off removes nothing. Its badge is what is saved.
+	mailboxes := view.FieldSet{Legend: "Users’ own mailboxes", Rows: []view.FormRow{
+		{Name: "mailboxes", Label: "Let users connect their own mailboxes over IMAP and SMTP", Kind: view.InputCheck, Value: text(boolStr(own)),
+			Hint: "Carrel then keeps each person’s mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above."},
+	}, Hint: "When off, there is no mail anywhere in Carrel. Connected mailboxes are kept and come back when it is on again."}
+	if s.mailboxesOn() {
+		mailboxes.Badges = []view.Badge{{Label: "on", Role: view.BadgeNeutral}}
+	} else {
+		mailboxes.Badges = []view.Badge{{Label: "off", Role: view.BadgeNeutral}}
+	}
+
 	test := view.FieldSet{Legend: "Test", Rows: []view.FormRow{
 		{Name: "to", Label: "Send test message to", Kind: view.InputEmail, Value: text(flash.testTo), Placeholder: "you@example.org"},
 	}}
@@ -308,7 +330,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 
 	page.Form = view.Form{
 		Action: s.route("/admin/settings"), Method: "POST",
-		Sets:    []view.FieldSet{global, relay, letters, test},
+		Sets:    []view.FieldSet{global, relay, letters, mailboxes, test},
 		Actions: []view.Action{{ID: "admin.settings.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}, send},
 	}
 	for i := range page.Form.Sets {

@@ -700,6 +700,10 @@ a.tc-row__title:hover{text-decoration:underline}
   background:var(--tc-card);border-left:2px solid var(--tc-edge);border-radius:0 3px 3px 0}
 .tc-msg.is-row{display:flex;gap:9px;align-items:flex-start}
 .tc-msg.is-row > svg{flex:none;margin-top:1px}
+/* Сообщение полосы над страницей в строку с кнопками в конце («2 new letters · Show»,
+   задача Carrel 293): значок, слова и кнопка — по одной середине, и на телефоне, где
+   кнопка выше строки. Многострочное сообщение с кнопками (desktop-14) — как было. */
+.tc-notices > .tc-msg.is-row:has(> .tc-push){align-items:center}
 .tc-msg.is-alert{border-left-color:var(--tc-danger);color:var(--tc-danger);background:transparent;border:.5px solid var(--tc-danger);border-left-width:2px}
 .tc-msg.is-accent{border-left-color:var(--tc-accent)}
 /* кнопка после слов сообщения — с зазором */
@@ -10258,11 +10262,11 @@ Read  2 min ago</div>
             </div>
             <div class="tc-sheet__body">
               <div class="tc-line tc-sheet__fields">
-                <div class="tc-field tc-grow"><label>Display name</label><input class="tc-in is-focus" type="text" name="fn" value="Пётр Ковалёв" aria-label="Display name"></div>
+                <div class="tc-field tc-grow"><label>Display name</label><input class="tc-in is-focus is-ph" type="text" name="fn" placeholder="Given Family" aria-label="Display name"></div>
                 <div class="tc-field tc-field--fill200"><label>Phone</label><input class="tc-in is-mono is-ph" type="text" name="tel" placeholder="+7 …" aria-label="Phone"></div>
                 <div class="tc-field tc-field--fill200"><label>Email</label><input class="tc-in is-ph" type="text" name="email" placeholder="name@example.org" aria-label="Email"></div>
               </div>
-              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The first word is Given, the rest Family — «Пётр Ковалёв», not «Ковалёв Пётр». Everything else is filled in on the card.</span>
+              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Everything else is filled in on the card.</span>
             </div>
             <div class="tc-sheet__foot">
               <button class="tc-btn is-primary" type="submit">Save contact</button>
@@ -16382,7 +16386,7 @@ dav: HTTP 503: the server is busy</div>
                     </div></span></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -16613,7 +16617,7 @@ dav: HTTP 503: the server is busy</div>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -16870,7 +16874,7 @@ dav: HTTP 503: the server is busy</div>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -18039,7 +18043,7 @@ dav: HTTP 503: the server is busy</div>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -18934,7 +18938,7 @@ dav: HTTP 503: the server is busy</div>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4 is-2nd">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4 is-2nd">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -22369,7 +22373,7 @@ jobs:
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -22616,7 +22620,7 @@ jobs:
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -22829,7 +22833,7 @@ jobs:
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>
@@ -26378,6 +26382,12 @@ password  4c1-tide-oven</div>
               <span class="tc-field__hint tc-field__hint--max580">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
           </div>
           <div class="tc-fset">
+            <div class="tc-rubric">Users’ own mailboxes <span class="tc-badge">off</span></div>
+            <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="mailboxes" value="on"><span class="tc-tickrow__tick is-off"></span>Let users connect their own mailboxes over IMAP and SMTP</label>
+              <span class="tc-field__hint tc-field__hint--max580">Carrel then keeps each person’s mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above.</span></div>
+            <div class="tc-msg tc-msg--flush tc-grow">When off, there is no mail anywhere in Carrel. Connected mailboxes are kept and come back when it is on again.</div>
+          </div>
+          <div class="tc-fset">
             <div class="tc-rubric">Test</div>
             <div class="tc-field tc-field--lg"><label>Send test message to</label>
               <span class="tc-line tc-line--normal"><input class="tc-in is-ph tc-in--fill" type="text" name="to" placeholder="you@example.org" aria-label="Send test message to"><button class="tc-btn" type="submit" formaction="/admin/settings/mail-test">Send test</button></span></div>
@@ -26386,7 +26396,7 @@ password  4c1-tide-oven</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Две формы становятся двумя блоками одной формы с рубрикаторами. Пароль SMTP стоит здесь же, рядом с узлом и портом: это один релей, а не отдельный экран. Порт — 96&nbsp;px, а не во всю ширину. «Letters from users» — отдельный блок под Mail: сначала завести релей, потом решать, пускать ли жильцов писать через него. Проверка сервера DAV уехала на свою страницу — она про чужой сервер, а не про настройки этого. <b>Проба письма — кнопка той же формы со своим адресом</b> (форма не держит форму; задача 158): она шлёт то, что набрано в полях почты сейчас, сохранено оно или нет, — так релей проверяют до «Save» — и сама ничего не сохраняет; кнопка не выключается никогда: без сервера в поле Host ответ на неё — «Mail is not configured: there is nothing to send through yet.» (кнопка, выключенная по сохранённому, без сценария не включилась бы от набранного; задача 195 п. 5). <b>Public address</b> только читается: его задаёт <code>CARREL_PUBLIC_URL</code>, и от него строятся ссылки в письмах. <b>Письма людей — только через настроенную почту</b> (владелец, 19.10): пока почта не сохранена, флажок выключен с причиной; адреса отправителя и лимитов нет, пока отправка выключена, — флажок и Save, и они появляются (s-admin-32).</figcaption>
+  <figcaption>Две формы становятся двумя блоками одной формы с рубрикаторами. Пароль SMTP стоит здесь же, рядом с узлом и портом: это один релей, а не отдельный экран. Порт — 96&nbsp;px, а не во всю ширину. «Letters from users» — отдельный блок под Mail: сначала завести релей, потом решать, пускать ли жильцов писать через него. Проверка сервера DAV уехала на свою страницу — она про чужой сервер, а не про настройки этого. <b>Проба письма — кнопка той же формы со своим адресом</b> (форма не держит форму; задача 158): она шлёт то, что набрано в полях почты сейчас, сохранено оно или нет, — так релей проверяют до «Save» — и сама ничего не сохраняет; кнопка не выключается никогда: без сервера в поле Host ответ на неё — «Mail is not configured: there is nothing to send through yet.» (кнопка, выключенная по сохранённому, без сценария не включилась бы от набранного; задача 195 п. 5). <b>Public address</b> только читается: его задаёт <code>CARREL_PUBLIC_URL</code>, и от него строятся ссылки в письмах. <b>Письма людей — только через настроенную почту</b> (владелец, 19.10): пока почта не сохранена, флажок выключен с причиной; адреса отправителя и лимитов нет, пока отправка выключена, — флажок и Save, и они появляются (s-admin-32). <b>Users’ own mailboxes</b> — последний блок перед пробой, выключен по умолчанию; почему — s-mailbox-29.</figcaption>
   </figure>
 
 <figure>
@@ -26455,6 +26465,12 @@ password  4c1-tide-oven</div>
             <div class="tc-field tc-field--xs"><label>Letter, MB</label><input class="tc-in is-mono" type="text" name="letter" value="8" aria-label="Letter, MB"></div>
             <div class="tc-field tc-field--xs"><label>Recipients</label><input class="tc-in is-mono" type="text" name="recipients" value="10" aria-label="Recipients"></div>
             <div class="tc-field tc-field--xs"><label>Letters a day</label><input class="tc-in is-mono" type="text" name="perDay" value="50" aria-label="Letters a day"></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Users’ own mailboxes <span class="tc-badge">off</span></div>
+            <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="mailboxes" value="on"><span class="tc-tickrow__tick is-off"></span>Let users connect their own mailboxes over IMAP and SMTP</label>
+              <span class="tc-field__hint tc-field__hint--max580">Carrel then keeps each person’s mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above.</span></div>
+            <div class="tc-msg tc-msg--flush tc-grow">When off, there is no mail anywhere in Carrel. Connected mailboxes are kept and come back when it is on again.</div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Test</div>
@@ -26528,6 +26544,12 @@ password  4c1-tide-oven</div>
             <div class="tc-rubric">Letters from users <span class="tc-badge">off</span></div>
             <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="people" value="on"><span class="tc-tickrow__tick is-off"></span>Let users send letters and links from Carrel</label>
               <span class="tc-field__hint tc-field__hint--max580">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Users’ own mailboxes <span class="tc-badge">off</span></div>
+            <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="mailboxes" value="on"><span class="tc-tickrow__tick is-off"></span>Let users connect their own mailboxes over IMAP and SMTP</label>
+              <span class="tc-field__hint tc-field__hint--max580">Carrel then keeps each person’s mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above.</span></div>
+            <div class="tc-msg tc-msg--flush tc-grow">When off, there is no mail anywhere in Carrel. Connected mailboxes are kept and come back when it is on again.</div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Test</div>
@@ -28363,6 +28385,146 @@ Read  2 min ago · not changed on server</div>
 <figcaption><b>Раздел Mail стоит в рейле после Files.</b> Он есть у всех, как только администратор включил почту ящиков. Число у раздела — непрочитанные во входящих всех ящиков. Под разделами — ящик за ящиком: подпись ящика, под ней его папки. Специальные папки берут значки по роли и идут первыми, в постоянном порядке: Inbox, Drafts, Sent, Archive, Spam, Trash. Порядок не зависит от того, как их назвал сервер. Остальные папки — по имени с сервера. Число у папки — непрочитанные; счётчики берутся одним <span class="tc-mono">STATUS</span> на ящик при сборке рейла.<br><br><b>Папки — дерево, а не флажки.</b> Открыта всегда одна папка одного ящика: общих входящих нет (M-9). Флажки тут обещали бы единый вид, которого нет. <b>Ящик, который не ответил, остаётся в рейле</b> с причиной и кнопкой Retry прямо под своей подписью: это состояние источника (S-21), а не ошибка экрана. Другой ящик и весь остальной стол работают.<br><br><b>Строка письма</b> — отправитель, тема с началом текста, скрепка, размер, дата прихода. Непрочитанное выделено начертанием, а не цветом: цвет в строке закреплён за источником. Флажок «важное» — кнопка в самой строке: одно нажатие, без открытия письма. Список плоский, без цепочек (M-5). <b>Папка прокручивается дальше, страниц нет</b> (решение 30.09.2026): письма приходят по 50 (<code>CARREL_MAILBOX_PAGE</code>), в конце списка — «Show 50 more». Без сценария это ссылка: папка открывается заново на 50 писем длиннее, и адрес помнит, докуда она раскрыта, так что из письма возвращаются на то же место. Со сценарием ссылка срабатывает сама, когда до конца остаётся экран. Папка не выкачивается целиком никогда; сколько писем на сервере, говорит строка под заголовком. «Select all shown» выбирает показанное, не всю папку. Поля «Filter» у списка нет, в отличие от контактов: фильтр просеивал бы только показанное. Найти письмо — общий поиск в шапке: сегмент Mail и флажки папок сужают выдачу до нужного (кадр «Поиск по всем источникам · с почтой»).</figcaption>
 </figure>
 
+
+<figure>
+<div class="frame" data-frame="s-mailbox-33">
+  <div class="frame-label"><span>Входящие · пришли письма, пока папка открыта</span><i>со сценарием, не умолчание</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <span class="tc-split"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note</button><button class="tc-btn is-primary" type="button" title="More to create" aria-label="More to create"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></span>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav">
+          <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts<span class="tc-num">8</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar<span class="tc-num">10</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks<span class="tc-num">2</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes<span class="tc-num">5</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+          <a class="is-on tc-nav__item" href="#"><svg><use href="#i-mail"/></svg>Mail<span class="tc-num">14</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates<span class="tc-num">2</span></a>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric"><span class="tc-line tc-line--normal"><span class="tc-mark tc-mark--h11" data-tc-colour="#A05A2C"></span>home</span></div>
+          <div class="tc-tree tc-tree--padx">
+            <div class="is-on tc-tree__row"><svg><use href="#i-inbox"/></svg>Inbox<span class="tc-num">14</span></div>
+            <div class="tc-tree__row"><svg><use href="#i-pencil"/></svg>Drafts<span class="tc-num">1</span></div>
+            <div class="tc-tree__row"><svg><use href="#i-send"/></svg>Sent</div>
+            <div class="tc-tree__row"><svg><use href="#i-archive"/></svg>Archive</div>
+            <div class="tc-tree__row"><svg><use href="#i-spam"/></svg>Spam<span class="tc-num">3</span></div>
+            <div class="tc-tree__row"><svg><use href="#i-trash"/></svg>Trash</div>
+            <div class="tc-tree__row"><svg><use href="#i-file"/></svg>Стройка<span class="tc-num">2</span></div>
+            <div class="tc-tree__row"><svg><use href="#i-file"/></svg>Рассылки</div>
+          </div>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric"><span class="tc-line tc-line--normal"><span class="tc-mark tc-mark--h11" data-tc-colour="#3F6E8C"></span>office</span></div>
+          <div class="tc-railsec__note"><span class="tc-dim--danger" title="mail.office.example:993 did not answer in 8 s. Other mailboxes and the rest of Carrel work.">no reply · 8 s</span> <a class="tc-btn is-sm" href="?retry=office">Retry</a></div>
+        </div>
+        <div class="tc-railfoot">
+          <button class="tc-btn" title="Connect a mailbox" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-mail"/></svg></button>
+          <svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles"><div class="tc-head__title">Inbox</div><div class="tc-head__sub">home · <span class="tc-mono">mix@home.example</span> · 1 284 letters · 12 unread · newest first</div></div>
+          <div class="tc-acts">
+            <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>Write</button>
+          </div>
+        </div>
+
+        <div class="tc-notices" data-tc-zone="mail-new"><div class="tc-msg is-accent is-row"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-inbox"/></svg><span class="tc-msg__aside">2 new letters</span><span class="tc-push"><a class="tc-btn is-sm" href="#">Show</a></span></div></div>
+        <div class="tc-list" data-part="page">
+          <div class="tc-row tc-row--mailcols is-unread">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag is-on" title="Important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Анна Ковалёва</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Вёрстка сборника: правки и встреча в четверг</span> — Михаил, добрый день! Прислала правки к третьей вёрстке, они в PDF и отмечены жёлтым…</span>
+            <span class="tc-row__clip" title="3 attachments"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg></span>
+            <span class="tc-row__cell tc-mono tc-row__size">2.6 MB</span>
+            <span class="tc-mono tc-row__date">2026-09-24 10:12</span>
+          </div>
+          <div class="tc-row tc-row--mailcols is-unread">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag" title="Mark as important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Пётр Смирнов</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Смета по второму этапу</span> — Во вложении смета, кровлю пересчитал по новым ценам, фасад без изменений…</span>
+            <span class="tc-row__clip" title="1 attachment"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg></span>
+            <span class="tc-row__cell tc-mono tc-row__size">1.1 MB</span>
+            <span class="tc-mono tc-row__date">2026-09-24 08:47</span>
+          </div>
+          <div class="tc-row tc-row--mailcols is-unread">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag" title="Mark as important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Книжная ярмарка</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Сентябрьская рассылка: сорок новинок осени</span> — Не видите картинки? Откройте письмо в браузере…</span>
+            <span class="tc-row__clip"></span>
+            <span class="tc-row__cell tc-mono tc-row__size">84 KB</span>
+            <span class="tc-mono tc-row__date">2026-09-23 19:30</span>
+          </div>
+          <div class="tc-row tc-row--mailcols">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag" title="Mark as important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Виктор Гончаров</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Re: Миграция на копии базы</span> — Прогнал на копии, всё сошлось, кроме вложений старше 2019 года…</span>
+            <span class="tc-row__clip"></span>
+            <span class="tc-row__cell tc-mono tc-row__size">12 KB</span>
+            <span class="tc-mono tc-row__date">2026-09-23 16:05</span>
+          </div>
+          <div class="tc-row tc-row--mailcols">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag" title="Mark as important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Nextcloud</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Your storage is almost full</span> — You are using 91% of your storage quota on cloud.example.org…</span>
+            <span class="tc-row__clip"></span>
+            <span class="tc-row__cell tc-mono tc-row__size">9 KB</span>
+            <span class="tc-mono tc-row__date">2026-09-23 03:00</span>
+          </div>
+          <div class="tc-row tc-row--mailcols">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag is-on" title="Important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Артём Белов</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Скриншоты к релизу</span> — Лови, шесть штук, как договаривались. Тёмная тема — отдельно…</span>
+            <span class="tc-row__clip" title="6 attachments"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg></span>
+            <span class="tc-row__cell tc-mono tc-row__size">5.8 MB</span>
+            <span class="tc-mono tc-row__date">2026-09-22 14:21</span>
+          </div>
+          <div class="tc-row tc-row--mailcols">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag" title="Mark as important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Вера Лебедева</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Дача: ключи и счётчики</span> — Ключи оставила у соседки, показания сфотографировала…</span>
+            <span class="tc-row__clip"></span>
+            <span class="tc-row__cell tc-mono tc-row__size">6 KB</span>
+            <span class="tc-mono tc-row__date">2026-09-21 11:40</span>
+          </div>
+          <div class="tc-row tc-row--mailcols">
+            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <button class="tc-row__flag" title="Mark as important" type="button"><svg viewBox="0 0 24 24"><use href="#i-flag"/></svg></button>
+            <span class="tc-row__title">Банк «Пример»</span>
+            <span class="tc-row__letter"><span class="tc-row__topic">Выписка за август</span> — Выписка по счёту во вложении, пароль к файлу — последние четыре цифры…</span>
+            <span class="tc-row__clip" title="1 attachment"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg></span>
+            <span class="tc-row__cell tc-mono tc-row__size">240 KB</span>
+            <span class="tc-mono tc-row__date">2026-09-20 09:00</span>
+          </div>
+
+        </div>
+        <div class="tc-empty tc-empty--dusty tc-empty--t12-pad"><a class="tc-dim--accent" href="/app/mail/home/inbox?shown=100">Show 50 more</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Пришедшие письма не встают в список сами</b> (задача Carrel 293): список не сдвигается, пока человек читает или целится. Плашка над списком и число у папки в рейле приходят одним событием; Show ставит письма сверху и снимает плашку. Без сценария плашки нет — папка перечитывается при открытии и по Refresh.</figcaption>
+</figure>
+
 <figure>
 <div class="frame" data-frame="s-mailbox-2">
   <div class="frame-label"><span>Почта · ящика ещё нет</span><i>/app/mail</i></div>
@@ -30113,7 +30275,7 @@ SMTP  mail.home.example:465  TLS
           <div class="tc-fset">
             <div class="tc-rubric">Users’ own mailboxes <span class="tc-badge">off</span></div>
             <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="mailboxes" value="on"><span class="tc-tickrow__tick is-off"></span>Let users connect their own mailboxes over IMAP and SMTP</label>
-              <span class="tc-field__hint">Carrel then keeps each person’s mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above.</span></div>
+              <span class="tc-field__hint tc-field__hint--max580">Carrel then keeps each person’s mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above.</span></div>
             <div class="tc-msg tc-msg--flush tc-grow">When off, there is no mail anywhere in Carrel. Connected mailboxes are kept and come back when it is on again.</div>
           </div>
           <div class="tc-fset">
@@ -34475,7 +34637,7 @@ Read  2 min ago · changed on server 3 days ago</div>
                     </div></span></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|zapisi" aria-label="Записи" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Записи</span></span></td>
-                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">3</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
+                  <td class="tc-mono tc-table__n3">journal</td><td class="tc-mono tc-table__n4">16</td><td class="tc-mono tc-table__main" data-tc-label="Changed on the server">2 h ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
                 <tr><td><button class="tc-tickrow__tick" type="submit" form="conn-picks" name="pick" value="nextcloud|dnevnik" aria-label="Дневник" aria-pressed="true"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Дневник</span></span></td>

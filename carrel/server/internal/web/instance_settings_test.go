@@ -45,7 +45,7 @@ func TestInstanceSettingsAreEdited(t *testing.T) {
 	for _, s := range page.Form.Sets {
 		legends = append(legends, string(s.Legend))
 	}
-	if strings.Join(legends, ", ") != "Global, Mail, Letters from users, Test" || page.Subtitle != "Global settings and mail" ||
+	if strings.Join(legends, ", ") != "Global, Mail, Letters from users, Users’ own mailboxes, Test" || page.Subtitle != "Global settings and mail" ||
 		page.Discard.Href != "/admin/settings" || page.Discard.Method != "GET" {
 		t.Errorf("rubrics %q, subtitle %q, discard %+v", legends, page.Subtitle, page.Discard)
 	}
@@ -191,5 +191,53 @@ func peopleOn(t *testing.T, h *harness) {
 		return nil, nil
 	}); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// People's own mailboxes are off on a new instance and the block says so
+// (s-admin-3, s-mailbox-29; Typecase's note 241): the tick is saved with the
+// form, unticked is off, and the journal names it.
+func TestOwnMailboxesAreTickedInTheSettings(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+
+	block := func() view.FieldSet {
+		t.Helper()
+		for _, s := range decode[view.AdminSettingsPage](t, h.do(get("/admin/settings", alice))).Form.Sets {
+			if s.Legend == "Users’ own mailboxes" {
+				return s
+			}
+		}
+		t.Fatal("no block «Users’ own mailboxes»")
+		return view.FieldSet{}
+	}
+	b := block()
+	if len(b.Rows) != 1 || b.Rows[0].Name != "mailboxes" || b.Rows[0].Value != "" || len(b.Badges) != 1 || b.Badges[0].Label != "off" ||
+		!strings.HasPrefix(string(b.Hint), "When off, there is no mail anywhere in Carrel.") {
+		t.Fatalf("block = %+v", b)
+	}
+
+	if rec := h.do(postForm("/admin/settings", alice, settingsForm(t, h, alice, map[string]string{"mailboxes": "on"}))); rec.Code != 303 {
+		t.Fatalf("save: %d %s", rec.Code, rec.Body)
+	}
+	if set := h.users.Settings(); set.Mailboxes == nil || !*set.Mailboxes {
+		t.Fatalf("stored = %v, want on", set.Mailboxes)
+	}
+	snap := h.st.Snapshot()
+	if last := snap.Audit[len(snap.Audit)-1]; last.Detail != "mailboxes" {
+		t.Errorf("journal = %+v", last)
+	}
+	if b := block(); b.Rows[0].Value == "" || b.Badges[0].Label != "on" {
+		t.Errorf("after on: %+v", b)
+	}
+
+	off := settingsForm(t, h, alice, nil)
+	off.Del("mailboxes")
+	if rec := h.do(postForm("/admin/settings", alice, off)); rec.Code != 303 {
+		t.Fatalf("save: %d %s", rec.Code, rec.Body)
+	}
+	if set := h.users.Settings(); set.Mailboxes == nil || *set.Mailboxes {
+		t.Fatalf("stored = %v, want off", set.Mailboxes)
 	}
 }

@@ -29,7 +29,7 @@ var settingsWidths = map[string]w.FieldWidth{
 
 // Settings is the instance's settings, /admin/settings (AdminSettingsPage,
 // s-admin-3; the test sent, -32; a field refused, -33): one form — Global,
-// Mail with its badge, Letters from users, Test —, Discard and Save in the
+// Mail with its badge, Letters from users, Users’ own mailboxes, Test —, Discard and Save in the
 // head; the relay's answer to the test under its field, in alarm where it
 // was refused.
 func Settings(p *view.AdminSettingsPage) w.Shell {
@@ -55,6 +55,11 @@ func Settings(p *view.AdminSettingsPage) w.Shell {
 				continue
 			}
 			fs.Items = append(fs.Items, settingsField(p, r))
+		}
+		// The line under a group (FieldSet.Hint): «When off, there is no
+		// mail anywhere in Carrel…» of Users’ own mailboxes (s-mailbox-29).
+		if set.Hint != "" {
+			fs.Items = append(fs.Items, w.Msg{Parts: []w.MsgPart{w.Text(set.Hint)}, Space: w.MsgFlush, Place: w.Grown})
 		}
 		if p.Test != nil && i == len(p.Form.Sets)-1 {
 			fs.Items = append(fs.Items, w.Field{Parts: []w.FieldPart{testMsg(*p.Test)}, Width: w.FieldFull})

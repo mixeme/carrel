@@ -358,6 +358,32 @@
         "unfold": null
       },
       {
+        "badges": [
+          {
+            "label": "off",
+            "role": "neutral"
+          }
+        ],
+        "hint": "When off, there is no mail anywhere in Carrel. Connected mailboxes are kept and come back when it is on again.",
+        "legend": "Users’ own mailboxes",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Carrel then keeps each person’s mailbox password, usually the most valuable one they have. Their letters go through their own mail server, not the relay above.",
+            "kind": "check",
+            "label": "Let users connect their own mailboxes over IMAP and SMTP",
+            "name": "mailboxes",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
         "legend": "Test",
         "rows": [
           {
