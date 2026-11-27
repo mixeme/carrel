@@ -87,7 +87,7 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 	var f Found
 	domain := Domain(address)
 	if domain == "" {
-		step("address", "not an address: no domain after @", false)
+		step(stepAddress, "not an address: no domain after @", false)
 		return f
 	}
 
@@ -100,17 +100,21 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 		{"submissions", sealed.MailTLS, true},
 		{"submission", sealed.MailSTARTTLS, true},
 	}
-	var said []string
+	// A line a record asked (s-mailbox-25): «_imaps._tcp.office.example →
+	// mail.office.example:993», «… → none». IMAP with STARTTLS is asked only
+	// when IMAP with TLS is not offered; both ways of sending are asked.
 	for _, s := range srvs {
+		if s.service == "imap" && len(f.IMAP) > 0 {
+			continue
+		}
+		name := "_" + s.service + "._tcp." + domain
 		ctx, cancel := context.WithTimeout(ctx, p.Timeout)
 		recs, err := p.SRV(ctx, s.service, domain)
 		cancel()
-		if err != nil || len(recs) == 0 {
-			continue
-		}
+		var found []string
 		for _, r := range recs {
 			host := strings.TrimSuffix(r.Target, ".")
-			if host == "" { // «.»: the service is not offered (RFC 2782)
+			if err != nil || host == "" { // «.»: the service is not offered (RFC 2782)
 				continue
 			}
 			srv := sealed.MailServer{Host: host, Port: int(r.Port), Security: s.security}
@@ -119,13 +123,13 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 			} else {
 				f.IMAP = appendServer(f.IMAP, srv)
 			}
-			said = append(said, fmt.Sprintf("_%s._tcp → %s:%d", s.service, host, r.Port))
+			found = append(found, fmt.Sprintf("%s:%d", host, r.Port))
 		}
-	}
-	if len(said) > 0 {
-		step("SRV", strings.Join(said, "; "), true)
-	} else {
-		step("SRV", "_imaps, _imap, _submissions, _submission of "+domain+": none", false)
+		if len(found) == 0 {
+			step(stepSRV, name+" → none", false)
+			continue
+		}
+		step(stepSRV, name+" → "+strings.Join(found, ", "), true)
 	}
 
 	for _, at := range []string{
@@ -137,12 +141,12 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 		cancel()
 		shown := strings.SplitN(at, "?", 2)[0]
 		if err != nil {
-			step("autoconfig", "GET "+shown+" → "+short(err), false)
+			step(stepAutoconfig, "GET "+shown+" → "+short(err), false)
 			continue
 		}
 		cfg, err := parseAutoconfig(body, address)
 		if err != nil || len(cfg.IMAP) == 0 && len(cfg.SMTP) == 0 {
-			step("autoconfig", "GET "+shown+" → no IMAP or SMTP server in it", false)
+			step(stepAutoconfig, "GET "+shown+" → no IMAP or SMTP server in it", false)
 			continue
 		}
 		for _, s := range cfg.IMAP {
@@ -154,7 +158,7 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 		if f.Login == "" {
 			f.Login = cfg.Login
 		}
-		step("autoconfig", "GET "+shown+" → "+serversSaid(cfg), true)
+		step(stepAutoconfig, "GET "+shown+" → "+serversSaid(cfg), true)
 		break
 	}
 
@@ -198,7 +202,7 @@ func serversSaid(f Found) string {
 }
 
 func serverSaid(s sealed.MailServer) string {
-	return s.Host + ":" + strconv.Itoa(s.Port) + " " + s.Security
+	return s.Host + ":" + strconv.Itoa(s.Port) + " " + securitySaid(s.Security)
 }
 
 // short is an error as the trace says it: its last part, the network's.

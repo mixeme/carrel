@@ -1,9 +1,7 @@
 package mailbox
 
 import (
-	"bufio"
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"net"
@@ -13,11 +11,10 @@ import (
 	"time"
 
 	"github.com/emersion/go-imap/v2"
-	"github.com/emersion/go-imap/v2/imapserver"
-	"github.com/emersion/go-imap/v2/imapserver/imapmemserver"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/mailbox/mailboxtest"
 	"carrel.dev/carrel/server/internal/sealed"
 )
 
@@ -70,9 +67,12 @@ func TestDiscoverOrder(t *testing.T) {
 	if len(f.IMAP) != 1 || f.IMAP[0].Host != "mx.example.org" || len(f.SMTP) != 1 || f.SMTP[0].Host != "out.example.org" {
 		t.Errorf("found = %+v: the SRV record and the file, no guesses", f)
 	}
-	if len(steps) != 3 || !strings.HasPrefix(steps[0], "SRV true _imaps._tcp → mx.example.org:993") ||
-		!strings.HasPrefix(steps[1], "autoconfig false GET https://autoconfig.example.org/mail/config-v1.1.xml → 404") ||
-		!strings.HasPrefix(steps[2], "autoconfig true") {
+	// A line a record (s-mailbox-25): _imap is not asked where _imaps is
+	// offered; both ways of sending are.
+	if len(steps) != 5 || steps[0] != "srv true _imaps._tcp.example.org → mx.example.org:993" ||
+		steps[1] != "srv false _submissions._tcp.example.org → none" || steps[2] != "srv false _submission._tcp.example.org → none" ||
+		!strings.HasPrefix(steps[3], "autoconfig false GET https://autoconfig.example.org/mail/config-v1.1.xml → 404") ||
+		steps[4] != "autoconfig true GET https://example.org/.well-known/autoconfig/mail/config-v1.1.xml → SMTP out.example.org:465 TLS" {
 		t.Errorf("steps = %q", steps)
 	}
 	// Nothing found: the guesses of the address's own domain.
@@ -84,56 +84,21 @@ func TestDiscoverOrder(t *testing.T) {
 	}
 }
 
-// testServers are an IMAP server in memory and a small SMTP server, both
-// plain on 127.0.0.1 (excepted by the guard), and a prober that points the
-// allowed ports at them: 143 — IMAP, 587 — SMTP.
+// testServers are the servers of mailboxtest for anna@example.org and a
+// prober that points the allowed ports at them, the guard's word on a port
+// or an address standing first.
 type testServers struct {
-	prober   *Prober
-	smtpAuth bool // the SMTP server accepts AUTH
+	*mailboxtest.Servers
+	prober *Prober
 }
 
 func newTestServers(t *testing.T, folders map[string][]imap.MailboxAttr, specialUse bool) *testServers {
 	t.Helper()
-	mem := imapmemserver.New()
-	u := imapmemserver.NewUser("anna@example.org", "secret")
-	for name, attrs := range folders {
-		if err := u.Create(name, &imap.CreateOptions{SpecialUse: attrs}); err != nil {
-			t.Fatal(err)
-		}
-	}
-	mem.AddUser(u)
-	caps := imap.CapSet{imap.CapIMAP4rev1: {}}
-	if specialUse {
-		caps[imap.CapSpecialUse] = struct{}{}
-		caps[imap.CapCreateSpecialUse] = struct{}{}
-	}
-	srv := imapserver.New(&imapserver.Options{
-		NewSession: func(*imapserver.Conn) (imapserver.Session, *imapserver.GreetingData, error) {
-			return mem.NewSession(), nil, nil
-		},
-		Caps:         caps,
-		InsecureAuth: true,
-		Logger:       discard{},
-	})
-	imapLn, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	go func() { _ = srv.Serve(imapLn) }()
-	t.Cleanup(func() { _ = srv.Close() })
-
-	ts := &testServers{smtpAuth: true}
-	smtpLn, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = smtpLn.Close() })
-	go ts.serveSMTP(smtpLn)
-
+	ms := mailboxtest.Start(t, "anna@example.org", "secret", folders, specialUse)
 	c := &conf.Config{DAVConnectTimeout: 5 * time.Second, DAVRequestTimeout: 10 * time.Second, DAVMaxResponseBytes: 1 << 20,
 		DAVMaxRedirects: 5, DAVSSRFAllowlist: "127.0.0.1,localhost"}
 	g := dav.NewGuard(c)
-	ports := map[int]string{143: imapLn.Addr().String(), 587: smtpLn.Addr().String()}
+	ts := &testServers{Servers: ms}
 	ts.prober = &Prober{Guard: g, Timeout: 5 * time.Second,
 		SRV:   func(context.Context, string, string) ([]*net.SRV, error) { return nil, errors.New("no") },
 		Fetch: func(context.Context, string) ([]byte, error) { return nil, errors.New("no") },
@@ -141,120 +106,22 @@ func newTestServers(t *testing.T, folders map[string][]imap.MailboxAttr, special
 			if _, err := g.DialMail(ctx, host, port, false, pin); errors.Is(err, dav.ErrMailPort) || errors.Is(err, dav.ErrSSRF) {
 				return nil, err // the guard's word stands
 			}
-			return (&net.Dialer{}).DialContext(ctx, "tcp", ports[port])
+			return ms.Dial(ctx, host, port, implicitTLS, pin)
 		},
 	}
 	return ts
 }
 
-// serveSMTP answers EHLO and AUTH PLAIN, accepting «anna@example.org» with
-// «secret» while smtpAuth, and QUIT; nothing else.
-func (ts *testServers) serveSMTP(ln net.Listener) {
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			return
-		}
-		go func(conn net.Conn) {
-			defer conn.Close()
-			r := bufio.NewReader(conn)
-			fmt.Fprintf(conn, "220 smtp.test ESMTP\r\n")
-			for {
-				line, err := r.ReadString('\n')
-				if err != nil {
-					return
-				}
-				cmd := strings.ToUpper(strings.TrimSpace(line))
-				switch {
-				case strings.HasPrefix(cmd, "EHLO"):
-					fmt.Fprintf(conn, "250-smtp.test\r\n250-SIZE 10485760\r\n250 AUTH PLAIN\r\n")
-				case strings.HasPrefix(cmd, "AUTH PLAIN"):
-					fields := strings.Fields(strings.TrimSpace(line))
-					raw, _ := base64.StdEncoding.DecodeString(fields[len(fields)-1])
-					if ts.smtpAuth && string(raw) == "\x00anna@example.org\x00secret" {
-						fmt.Fprintf(conn, "235 2.7.0 Authentication successful\r\n")
-					} else {
-						fmt.Fprintf(conn, "535 5.7.8 Username and Password not accepted\r\n")
-					}
-				case strings.HasPrefix(cmd, "QUIT"):
-					fmt.Fprintf(conn, "221 bye\r\n")
-					return
-				default:
-					fmt.Fprintf(conn, "502 not here\r\n")
-				}
-			}
-		}(conn)
-	}
-}
-
-type discard struct{}
-
-func (discard) Printf(string, ...any) {}
-
 var typed = Input{Address: "anna@example.org", Password: "secret",
 	IMAP: sealed.MailServer{Host: "127.0.0.1", Port: 143, Security: sealed.MailPlain},
 	SMTP: sealed.MailServer{Host: "127.0.0.1", Port: 587, Security: sealed.MailPlain}}
-
-// specialUseIMAP is an IMAP server of four commands that announces the
-// roles of its folders (SPECIAL-USE, RFC 6154) — the server in memory of
-// go-imap keeps none. Plain, on 127.0.0.1.
-func specialUseIMAP(t *testing.T) string {
-	t.Helper()
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = ln.Close() })
-	go func() {
-		for {
-			conn, err := ln.Accept()
-			if err != nil {
-				return
-			}
-			go func(conn net.Conn) {
-				defer conn.Close()
-				r := bufio.NewReader(conn)
-				fmt.Fprintf(conn, "* OK [CAPABILITY IMAP4rev1 SPECIAL-USE LIST-EXTENDED] ready\r\n")
-				for {
-					line, err := r.ReadString('\n')
-					if err != nil {
-						return
-					}
-					f := strings.Fields(line)
-					if len(f) < 2 {
-						continue
-					}
-					tag, cmd := f[0], strings.ToUpper(f[1])
-					switch cmd {
-					case "CAPABILITY":
-						fmt.Fprintf(conn, "* CAPABILITY IMAP4rev1 SPECIAL-USE LIST-EXTENDED\r\n%s OK done\r\n", tag)
-					case "LOGIN":
-						fmt.Fprintf(conn, "%s OK [CAPABILITY IMAP4rev1 SPECIAL-USE LIST-EXTENDED] in\r\n", tag)
-					case "LIST":
-						fmt.Fprintf(conn, "* LIST (\\HasNoChildren) \"/\" INBOX\r\n"+
-							"* LIST (\\HasNoChildren \\Sent) \"/\" Sent\r\n"+
-							"* LIST (\\HasNoChildren \\Drafts) \"/\" Drafts\r\n"+
-							"* LIST (\\HasNoChildren \\Trash) \"/\" Bin\r\n"+
-							"* LIST (\\Noselect \\HasChildren) \"/\" Shared\r\n%s OK listed\r\n", tag)
-					case "LOGOUT":
-						fmt.Fprintf(conn, "* BYE\r\n%s OK out\r\n", tag)
-						return
-					default:
-						fmt.Fprintf(conn, "%s BAD not here\r\n", tag)
-					}
-				}
-			}(conn)
-		}
-	}()
-	return ln.Addr().String()
-}
 
 // Signing in (M-3): IMAP lets in, the roles come from SPECIAL-USE — a
 // folder that cannot be selected is none —, SMTP accepts AUTH and nothing is
 // sent; every step is in the trace.
 func TestCheckSignsIn(t *testing.T) {
 	ts := newTestServers(t, nil, true)
-	announcing := specialUseIMAP(t)
+	announcing := mailboxtest.Announcing(t)
 	dial := ts.prober.Dial
 	ts.prober.Dial = func(ctx context.Context, host string, port int, implicitTLS bool, pin string) (net.Conn, error) {
 		if port == 143 {
@@ -276,8 +143,16 @@ func TestCheckSignsIn(t *testing.T) {
 	for _, s := range trace.Steps {
 		names = append(names, string(s.Name))
 	}
-	if !slices.Equal(names, []string{"IMAP", "folders", "SMTP"}) {
+	if !slices.Equal(names, []string{"imap", "smtp"}) {
 		t.Errorf("steps = %v", names)
+	}
+	// In the frame's words (s-mailbox-25): how each server was reached,
+	// then a line a command and what it answered.
+	if d := string(trace.Steps[0].Detail); !strings.HasPrefix(d, "127.0.0.1:143  plain text\nLOGIN → OK · CAPABILITY IMAP4rev1 ") {
+		t.Errorf("imap = %q", d)
+	}
+	if d := string(trace.Steps[1].Detail); d != "127.0.0.1:587  plain text\nEHLO → 250 SIZE 10485760\nAUTH PLAIN → 235 · nothing sent" || res.MaxLetter != 10485760 {
+		t.Errorf("smtp = %q, size %d", d, res.MaxLetter)
 	}
 }
 
@@ -304,7 +179,7 @@ func TestCheckRefusals(t *testing.T) {
 	if _, trace, err := ts.prober.Check(context.Background(), wrong); !errors.Is(err, ErrRefused) || trace.OK {
 		t.Errorf("a wrong password: %v %+v", err, trace)
 	}
-	ts.smtpAuth = false
+	ts.RefuseSMTP(true)
 	res, trace, err := ts.prober.Check(context.Background(), typed)
 	if err != nil || res == nil || !strings.Contains(res.SendRefused, "535") || res.CanSend() || !trace.OK {
 		t.Errorf("SMTP refused: %v %+v %+v", err, res, trace)

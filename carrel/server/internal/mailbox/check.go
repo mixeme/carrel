@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/emersion/go-imap/v2"
@@ -16,12 +17,14 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// The names of the trace's steps (s-mailbox-25): what discovery asked, then
-// what signing in answered.
+// The names of the trace's steps (s-mailbox-25): what discovery asked —
+// «srv», «autoconfig» —, then what signing in answered.
 const (
-	stepIMAP    = "IMAP"
-	stepFolders = "folders"
-	stepSMTP    = "SMTP"
+	stepAddress    = "address"
+	stepSRV        = "srv"
+	stepAutoconfig = "autoconfig"
+	stepIMAP       = "imap"
+	stepSMTP       = "smtp"
 )
 
 // ErrRefused is the IMAP server refusing the login and password: said as
@@ -46,7 +49,11 @@ type Input struct {
 // person is asked once (M-3, s-mailbox-24), and why sending does not work,
 // when it does not — the mailbox is kept, reading works (s-mailbox-25).
 type Result struct {
-	IMAP, SMTP  sealed.MailServer
+	IMAP, SMTP sealed.MailServer
+	// MaxLetter is the largest letter the SMTP server takes, from SIZE in
+	// its answer to EHLO (limits.md: sending from one's own mailbox has no
+	// ceiling of Carrel's); 0 — it said none.
+	MaxLetter   int64
 	Login       string
 	Folders     sealed.MailFolders
 	Unannounced []string // roles: "sent", "drafts", "trash", "archive", "junk"
@@ -75,7 +82,7 @@ func (p *Prober) Check(ctx context.Context, in Input) (*Result, *view.Diagnostic
 	}
 	provider, known := ProviderOf(in.Address)
 	if known && provider.Closed {
-		step("address", provider.Name+" closed signing in by password", false)
+		step(stepAddress, provider.Name+" closed signing in by password", false)
 		return nil, trace, ErrClosed
 	}
 	login := in.Login
@@ -101,19 +108,18 @@ func (p *Prober) Check(ctx context.Context, in Input) (*Result, *view.Diagnostic
 	res := &Result{Login: login, KeepsSent: known && provider.KeepsSent}
 	var imapErr error
 	for _, srv := range imaps {
-		folders, err := p.signIn(ctx, srv, login, in.Password, in.CertFingerprint)
+		folders, said, err := p.signIn(ctx, srv, login, in.Password, in.CertFingerprint)
 		if err != nil {
-			step(stepIMAP, serverSaid(srv)+" → "+short(err), false)
+			step(stepIMAP, said, false)
 			imapErr = err
 			if errors.Is(err, ErrRefused) {
 				break // the password is wrong there; not tried on the guesses
 			}
 			continue
 		}
-		step(stepIMAP, serverSaid(srv)+" → signed in as "+login, true)
+		step(stepIMAP, said, true)
 		res.IMAP, imapErr = srv, nil
 		res.Folders, res.Unannounced, res.All = roles(folders)
-		step(stepFolders, foldersSaid(res.Folders, res.Unannounced), true)
 		break
 	}
 	if res.IMAP.Host == "" {
@@ -126,13 +132,14 @@ func (p *Prober) Check(ctx context.Context, in Input) (*Result, *view.Diagnostic
 
 	var smtpErr error
 	for _, srv := range smtps {
-		if err := p.checkSMTP(ctx, srv, login, in.Password, in.CertFingerprint); err != nil {
-			step(stepSMTP, serverSaid(srv)+" → "+err.Error(), false)
+		said, size, err := p.checkSMTP(ctx, srv, login, in.Password, in.CertFingerprint)
+		if err != nil {
+			step(stepSMTP, said, false)
 			smtpErr = err
 			continue
 		}
-		step(stepSMTP, serverSaid(srv)+" → AUTH accepted, nothing sent", true)
-		res.SMTP, smtpErr = srv, nil
+		step(stepSMTP, said, true)
+		res.SMTP, res.MaxLetter, smtpErr = srv, size, nil
 		break
 	}
 	switch {
@@ -150,30 +157,84 @@ func (p *Prober) Check(ctx context.Context, in Input) (*Result, *view.Diagnostic
 }
 
 // signIn opens IMAP on srv through the guard, signs in and lists the
-// folders with their roles.
-func (p *Prober) signIn(ctx context.Context, srv sealed.MailServer, login, password, pin string) ([]*imap.ListData, error) {
+// folders with their roles. said is the step of the trace as the frame
+// writes it (s-mailbox-25): the server, how it was reached and whether its
+// certificate matched; then what LOGIN answered and what the server can.
+func (p *Prober) signIn(ctx context.Context, srv sealed.MailServer, login, password, pin string) ([]*imap.ListData, string, error) {
+	said := reached(srv, pin)
 	c, err := p.dialIMAP(ctx, srv, pin)
 	if err != nil {
-		return nil, err
+		return nil, said + " → " + short(err), err
 	}
 	defer c.Close()
 	if err := c.Login(login, password).Wait(); err != nil {
 		var ie *imap.Error
 		if errors.As(err, &ie) && ie.Type == imap.StatusResponseTypeNo {
-			return nil, fmt.Errorf("%w: %s", ErrRefused, ie.Text)
+			return nil, said + "\nLOGIN → NO " + ie.Text, fmt.Errorf("%w: %s", ErrRefused, ie.Text)
 		}
-		return nil, err
+		return nil, said + "\nLOGIN → " + short(err), err
 	}
+	said += "\nLOGIN → OK · CAPABILITY " + capsSaid(c.Caps())
 	opts := &imap.ListOptions{}
 	if c.Caps().Has(imap.CapSpecialUse) {
 		opts.ReturnSpecialUse = true
 	}
 	list, err := c.List("", "*", opts).Collect()
 	if err != nil {
-		return nil, err
+		return nil, said + "\nLIST → " + short(err), err
 	}
 	_ = c.Logout().Wait()
-	return list, nil
+	return list, said, nil
+}
+
+// reached is how a server was reached, in the trace's words:
+// «mail.office.example:993  TLS · certificate matches»; STARTTLS says its
+// certificate on the line of the command itself.
+func reached(srv sealed.MailServer, pin string) string {
+	s := fmt.Sprintf("%s:%d  %s", srv.Host, srv.Port, securitySaid(srv.Security))
+	if srv.Security == sealed.MailTLS {
+		s += " · " + certSaid(pin)
+	}
+	return s
+}
+
+// securitySaid is a server's security as a screen says it: «TLS»,
+// «STARTTLS», «plain text».
+func securitySaid(security string) string {
+	switch security {
+	case sealed.MailTLS:
+		return "TLS"
+	case sealed.MailSTARTTLS:
+		return "STARTTLS"
+	}
+	return "plain text"
+}
+
+// SecuritySaid is a server's security as the screens say it.
+func SecuritySaid(security string) string { return securitySaid(security) }
+
+// certSaid is what the trace says of the certificate: it matched the host's
+// name, or it is the one the person accepted before (F-13).
+func certSaid(pin string) string {
+	if pin != "" {
+		return "certificate accepted before"
+	}
+	return "certificate matches"
+}
+
+// capsSaid is what an IMAP server can, its version first, the rest in order.
+func capsSaid(caps imap.CapSet) string {
+	var first, rest []string
+	for c := range caps {
+		if strings.HasPrefix(string(c), "IMAP4") {
+			first = append(first, string(c))
+		} else {
+			rest = append(rest, string(c))
+		}
+	}
+	slices.Sort(first)
+	slices.Sort(rest)
+	return strings.Join(append(first, rest...), " ")
 }
 
 // dialIMAP is an IMAP client on srv: implicit TLS, STARTTLS, or plain text to
@@ -202,13 +263,16 @@ func (p *Prober) dialIMAP(ctx context.Context, srv sealed.MailServer, pin string
 
 // checkSMTP says EHLO and AUTH to srv, sends nothing and says goodbye. The
 // error is the server's answer as it is: «not sent» says nothing (M-7).
-func (p *Prober) checkSMTP(ctx context.Context, srv sealed.MailServer, login, password, pin string) error {
+// said is the step of the trace, a line a command (s-mailbox-25); size is
+// what SIZE of EHLO allows, 0 when it says nothing.
+func (p *Prober) checkSMTP(ctx context.Context, srv sealed.MailServer, login, password, pin string) (said string, size int64, err error) {
+	said = reached(srv, pin)
 	if srv.Security == sealed.MailPlain && !p.Guard.MailPlainAllowed(srv.Host) {
-		return dav.ErrMailPlain
+		return said + " → " + dav.ErrMailPlain.Error(), 0, dav.ErrMailPlain
 	}
 	conn, err := p.Dial(ctx, srv.Host, srv.Port, srv.Security == sealed.MailTLS, pin)
 	if err != nil {
-		return errors.New(short(err))
+		return said + " → " + short(err), 0, errors.New(short(err))
 	}
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
@@ -216,29 +280,51 @@ func (p *Prober) checkSMTP(ctx context.Context, srv sealed.MailServer, login, pa
 	c, err := smtp.NewClient(conn, srv.Host)
 	if err != nil {
 		_ = conn.Close()
-		return err
+		return said + " → " + err.Error(), 0, err
 	}
 	defer c.Close()
 	if err := c.Hello(helloName); err != nil {
-		return err
+		return said + "  EHLO → " + err.Error(), 0, err
+	}
+	// What EHLO offered that matters here: STARTTLS where it is the way in,
+	// and the largest letter.
+	ehlo := func() string {
+		var offered []string
+		if ok, _ := c.Extension("STARTTLS"); ok && srv.Security == sealed.MailSTARTTLS {
+			offered = append(offered, "STARTTLS")
+		}
+		size = 0
+		if ok, param := c.Extension("SIZE"); ok {
+			size, _ = strconv.ParseInt(strings.TrimSpace(param), 10, 64)
+			offered = append(offered, strings.TrimSpace("SIZE "+param))
+		}
+		return strings.TrimSpace("EHLO → 250 " + strings.Join(offered, " · "))
 	}
 	if srv.Security == sealed.MailSTARTTLS {
+		said += "  " + ehlo()
 		if ok, _ := c.Extension("STARTTLS"); !ok {
 			// Announced and not carried out, or not announced: never plain
 			// text instead (S-5.1).
-			return errors.New("the server offers no STARTTLS")
+			err := errors.New("the server offers no STARTTLS")
+			return said + "\nSTARTTLS → " + err.Error(), 0, err
 		}
 		if err := c.StartTLS(p.Guard.MailTLSConfig(srv.Host, pin)); err != nil {
-			return err
+			return said + "\nSTARTTLS → " + err.Error(), 0, err
 		}
+		said += "\nSTARTTLS → 220 · " + certSaid(pin)
+		// After STARTTLS the client says EHLO again: what it offers now.
+		ehlo()
+	} else {
+		said += "\n" + ehlo()
 	}
 	if ok, _ := c.Extension("AUTH"); !ok {
-		return errors.New("the server offers no AUTH")
+		err := errors.New("the server offers no AUTH")
+		return said + "\nAUTH → " + err.Error(), size, err
 	}
 	if err := c.Auth(smtp.PlainAuth("", login, password, srv.Host)); err != nil {
-		return err
+		return said + "\nAUTH PLAIN → " + err.Error(), size, err
 	}
-	return c.Quit()
+	return said + "\nAUTH PLAIN → 235 · nothing sent", size, c.Quit()
 }
 
 // helloName is what Carrel calls itself in EHLO: no name of the instance
@@ -318,23 +404,4 @@ func roles(list []*imap.ListData) (sealed.MailFolders, []string, []string) {
 		}
 	}
 	return f, unannounced, all
-}
-
-// foldersSaid is the trace's words of the roles: those announced, and those
-// offered by name.
-func foldersSaid(f sealed.MailFolders, unannounced []string) string {
-	named := map[string]string{"sent": f.Sent, "drafts": f.Drafts, "trash": f.Trash, "archive": f.Archive, "junk": f.Junk}
-	var out []string
-	for _, role := range roleOrder {
-		name := named[role]
-		switch {
-		case name == "":
-			out = append(out, role+": none")
-		case slices.Contains(unannounced, role):
-			out = append(out, role+": "+name+" (by name)")
-		default:
-			out = append(out, role+": "+name)
-		}
-	}
-	return strings.Join(out, ", ")
 }
