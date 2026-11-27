@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.25 — 2026-11-26
+
+Client `v0.11.64`; Typecase `9cd1220`.
+
+### For consumers
+
+- **Related says why a record has no name** (the owner's phone,
+  26.11.2026): a related record this session has not read stands as its
+  UID with the server's reason — «8f1c-4a02-b7d3 · Not in the lists loaded
+  for this collection» — on the cards and panels of notes, events and
+  tasks, not «8f1c-4a02-b7d3 ·» with nothing after the dot. Nothing in the
+  contract: `TimelineRow.Why` was there already.
+
 ## v0.4.24 — 2026-11-26
 
 Client `v0.11.63`; Typecase `9cd1220`.

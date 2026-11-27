@@ -275,10 +275,7 @@ func read(p *view.NotePage) []w.MainPart {
 	if len(p.Meta.Related) > 0 {
 		refs := w.DocRefs{}
 		for _, r := range p.Meta.Related {
-			about := lead + string(r.Kind)
-			if r.When != "" {
-				about += sep + string(r.When)
-			}
+			about := bind.RelatedAbout(r, lead)
 			refs.Items = append(refs.Items, w.DocRef{Name: string(r.Title), Href: r.Href, What: w.Dim{Parts: []w.Inline{w.Text(about)}}, From: bind.From(r.From)})
 		}
 		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Related"}, Items: []w.DocmetaPart{refs}})

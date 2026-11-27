@@ -134,10 +134,7 @@ func Screen(p *view.TaskPage) w.Shell {
 	if len(p.Related) > 0 {
 		var lines [][]w.SecItemPart
 		for _, r := range p.Related {
-			about := lead + string(r.Kind)
-			if r.When != "" {
-				about += sep + string(r.When)
-			}
+			about := bind.RelatedAbout(r, lead)
 			lines = append(lines, bind.WithFrom([]w.SecItemPart{
 				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
 				w.Text(" "),

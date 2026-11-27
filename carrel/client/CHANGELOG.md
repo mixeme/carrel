@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.64 — 2026-11-26
+
+Server `v0.4.25`; Typecase `9cd1220`.
+- **A related record not read says why** (`bind.RelatedAbout`, one for
+  every kind): its UID with `TimelineRow.Why` after the lead, where the
+  cards and panels of notes, events and tasks printed «· » before an empty
+  kind and dropped the reason (the owner's phone, 26.11.2026).
+
 ## v0.11.63 — 2026-11-26
 
 Server `v0.4.23`; Typecase `9cd1220` (notes 236–238: tasks 287, 294, 295).
