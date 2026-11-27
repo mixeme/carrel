@@ -1876,6 +1876,8 @@
     "theme": "auto",
     "wide": false
   },
+  "mailboxes": [],
+  "mailboxesOff": "",
   "note": [
     {
       "text": "A feed is read anew on every visit: there is nothing to refresh. "

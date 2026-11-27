@@ -529,7 +529,7 @@ C-11. Поля до, между и после файлов разбираютс�
 | `/app/settings/mailboxes/{mailbox}/edit` | GET, POST | вход, почта ящиков включена | страница, редирект | `MailboxPage` — правка ящика (s-mailbox-27): `label`, `colour`, `fromName`, `signature`, `autosave`, `password` (пусто — прежний), серверы руками; новый пароль или серверы сперва проверяются входом |
 | `/app/settings/mailboxes/{mailbox}/edit/test` | POST | вход, почта ящиков включена | страница | `MailboxPage` — Test only правки, ничего не сохранено |
 | `/app/settings/mailboxes/{mailbox}/test` | POST | вход, почта ящиков включена | редирект | Test карточки: вход в IMAP и SMTP; ответ отправки хранится в ящике, след — на карточке в сеансе |
-| `/app/settings/mailboxes/{mailbox}/sentcopy` | POST | вход, почта ящиков включена | редирект | отметка подвала карточки «The server puts a copy of sent letters into Sent itself» переворачивается |
+| `/app/settings/mailboxes/{mailbox}/sentcopy` | POST | вход, почта ящиков включена | редирект | отметка подвала карточки «The server puts a copy of sent letters into Sent itself»: поле `sentCopy` (`on` — стоит, нет поля — снята) |
 | `/app/settings/mailboxes/{mailbox}/remove` | POST | вход | редирект | Disconnect, с выключенной почтой — Remove (s-mailbox-28): ящик уходит из блоба, письма остаются на почтовом сервере |
 | `/app/settings/connections/disconnect` | GET, POST | вход | лист | `ConnectionRemoveSheet` |
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
@@ -3331,12 +3331,13 @@ type SubscriptionCard struct {
 type MailboxPage struct {
     Shell
     // Shell.Title — «Connect a mailbox» (-22, -25); у правки — подпись ящика, «home» (-27)
-    Subtitle Text // «Read it and write from it over IMAP and SMTP. Letters stay on your mail server.» (-22); у итога «office · m.yenuchenko@office.example» (-25); у правки «mix@home.example · mailbox» (-27)
+    Subtitle Runs // «Read it and write from it over IMAP and SMTP. Letters stay on your mail server.» (-22); у итога «office · m.yenuchenko@office.example» (-25); у правки «‹mix@home.example› · mailbox», адрес моноширинно (-27)
     // Поля: Email address, Label, Colour, App password или Password, узлы и
     // порты руками (?servers=manual); у правки — Label, Colour, Name in From,
     // Signature, автосохранение черновика, Password. nil — итог подключения
     Form     *Form
-    Provider *Notice // что узнанный по домену провайдер требует, до поля пароля: пароль приложения — Accent (-22); вход по паролю закрыт — Alert, Connect выключен (-23); nil — не узнан
+    Provider Runs // что узнанный по домену провайдер требует, до поля пароля: «Yandex lets mail programs in with an **app password**…» (-22); пусто — не узнан
+    Closed   bool // вход по паролю закрыт: Provider — «**This mailbox cannot be connected.** …» тревогой после адреса, пароля нет, Connect выключен (-23)
     Servers  *MailServers // рубрика Servers; nil — серверы ещё не искали или они набираются руками
     Escrow   Runs // «**Key escrow is on:** the administrator can open this password too — and through a mailbox, reset your other passwords.» тревогой в конце формы, пока депонирование действует (S-29.2); пусто — не действует
     Saved    Runs // итог: «**Saved. Reading works, sending does not:** the server refused the password for sending.» (-25); пусто — диалог

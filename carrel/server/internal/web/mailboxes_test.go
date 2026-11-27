@@ -144,7 +144,6 @@ func TestAMailboxIsConnected(t *testing.T) {
 	}
 }
 
-
 // Reading without sending is kept (s-mailbox-25, -26): the mailbox is saved,
 // the outcome says so with the trace; the card is in alarm, Test again, and
 // what SMTP answered under it. Test passing puts it right.
@@ -153,7 +152,7 @@ func TestAMailboxThatDoesNotSendIsKept(t *testing.T) {
 	ms.RefuseSMTP(true)
 	page := decode[view.MailboxPage](t, h.do(postForm("/app/settings/mailboxes/new", alice, url.Values{"address": {"mix@home.example"}, "password": {"secret"}, "label": {"office"}})))
 	if len(page.Saved) == 0 || runsText(page.Saved) != "Saved. Reading works, sending does not: the server refused the password for sending." ||
-		page.Trace == nil || page.Subtitle != "office · mix@home.example" || len(page.Actions) != 3 || page.Actions[0].Label != "Done" {
+		page.Trace == nil || runsText(page.Subtitle) != "office · mix@home.example" || len(page.Actions) != 3 || page.Actions[0].Label != "Done" {
 		t.Fatalf("outcome = %+v", page)
 	}
 	last := page.Trace.Steps[len(page.Trace.Steps)-1]
@@ -186,7 +185,7 @@ func TestAMailboxRefused(t *testing.T) {
 		t.Errorf("refused = %+v", page)
 	}
 	page = decode[view.MailboxPage](t, h.do(postForm("/app/settings/mailboxes/new", alice, url.Values{"address": {"mix.home@outlook.com"}, "password": {"x"}})))
-	if page.Provider == nil || page.Provider.Role != view.NoticeAlert || page.Actions[0].Enabled || mbRow(page.Form, "password") != nil {
+	if !page.Closed || len(page.Provider) == 0 || page.Actions[0].Enabled || mbRow(page.Form, "password") != nil {
 		t.Errorf("Microsoft = %+v", page)
 	}
 	key, _ := alice.DataKey()
@@ -236,7 +235,7 @@ func TestAMailboxIsEdited(t *testing.T) {
 	blob, _ := h.users.Catalog(alice.AccountID(), key)
 	id := blob.Mailboxes[0].ID
 	page := decode[view.MailboxPage](t, h.do(get("/app/settings/mailboxes/"+id+"/edit", alice)))
-	if page.Title != "home" || page.Subtitle != "mix@home.example · mailbox" || mbRow(page.Form, "fromName") == nil ||
+	if page.Title != "home" || runsText(page.Subtitle) != "mix@home.example · mailbox" || mbRow(page.Form, "fromName") == nil ||
 		mbRow(page.Form, "autosave").Hint != "Into home · Drafts, the new version replacing the last." ||
 		page.Servers == nil || page.Servers.From != "found by SRV" || page.Actions[0].Label != "Save" {
 		t.Fatalf("edit = %+v", page)

@@ -17,6 +17,49 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.26 — 2026-11-27
+
+Client `v0.11.65`; Typecase `01d7165` (notes 240, 241).
+
+### For consumers
+
+- **People's own mailboxes, step 1: turning on and connecting**
+  ([carrel-mailbox.md](../../docs/spec/carrel-mailbox.md) M-2, M-3). Off by
+  default: `CARREL_MAILBOX_ENABLED`, then the administrator's block «Users’
+  own mailboxes» on `/admin/settings`, which stands in the form always, last
+  before Test (s-admin-3, s-mailbox-29). While it is off every address of a
+  mailbox answers 404, except Remove.
+  - **Connect a mailbox** (`/app/settings/mailboxes/new`, s-mailbox-22): the
+    address first; the servers found by SRV, the domain's autoconfig file or
+    a guess are shown before the password; Gmail, Yandex, Mail.ru, iCloud
+    say «app password» before the field; Outlook.com and Microsoft 365 are
+    refused by the domain, Connect off (-23). IMAP is signed in to and SMTP
+    gets EHLO and AUTH, nothing is sent. IMAP refused — nothing saved, the
+    trace under the fields; SMTP refused — the mailbox is kept for reading,
+    and the page says so with what was tried (-25).
+  - **The folders the server did not name** are asked once, each suggested
+    by its name, with the mark of the copy of sent letters (-24).
+  - **The card on Connections** (-26): the address line with the servers
+    and «up to N MB» from `SIZE`, the roles' table — announced by the
+    server, chosen by the person —, Show password, Test, Edit, Disconnect;
+    one that does not send in alarm with the SMTP answer. Off on the
+    instance — the cards with Remove only and the line above them (-28).
+  - **Edit** (-27): label, colour, Name in From (the profile's name by
+    default), signature, autosave of drafts into Drafts; a new password or
+    servers typed by hand are signed in to before they are kept.
+  - The trace says each step as the frame does: `[srv]` a record,
+    `[imap]` with the certificate and `CAPABILITY`, `[smtp]` a command a
+    line, the server's answer without quotes.
+  - Contract: `MailboxPage`, `MailboxFoldersPage`, `MailboxCard`,
+    `MailFolderRow`, `MailServers`, `MailRole`; `ConnectionsPage.Mailboxes`
+    and `.MailboxesOff`; the addresses of `/app/settings/mailboxes/…` in C-5.
+- **Objects of «Записи» is 16** in every table of connections (Typecase's
+  note 240): the test holds it to the frame without an exception.
+- **The quick contact's name** shows the sample «Given Family»; the line
+  under the fields is «Everything else is filled in on the card.» (notes
+  240, 241).
+- Counts of words ending in s, x, z, ch, sh take «es»: «2 mailboxes».
+
 ## v0.4.25 — 2026-11-26
 
 Client `v0.11.64`; Typecase `9cd1220`.

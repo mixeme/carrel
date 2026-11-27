@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"source","trash","folder-cut","book-empty","panel-one","whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","pick","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
+states = {"closed","saved","mailboxes-off","source","trash","folder-cut","book-empty","panel-one","whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","pick","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","delete-folder","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
@@ -196,6 +196,9 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-note-edit": "/app/notes/{account}/{col}/{uid}/edit",
     "app-settings-account": "/app/settings/account",
     "app-settings-connections": "/app/settings/connections",
+    "app-settings-mailboxes-new": "/app/settings/mailboxes/new",
+    "app-settings-mailboxes-folders": "/app/settings/mailboxes/{mailbox}/folders",
+    "app-settings-mailboxes-edit": "/app/settings/mailboxes/{mailbox}/edit",
     "app-settings-connections-disconnect": "/app/settings/connections/disconnect",
     "app-settings-davloom-scope": "/app/settings/davloom/scope",
     "app-settings-davloom-tree": "/app/settings/davloom/tree",
@@ -692,6 +695,12 @@ STATE_FRAME = {
     # Нс30: диалог Connect account (s-profile-2), занятая подпись
     # (s-profile-11), панель подписки (s-profile-10, часть subscribe).
     "app-settings-connections/add": "s-profile-2",
+    "app-settings-mailboxes-new/normal": "s-mailbox-22",
+    "app-settings-mailboxes-new/closed": "s-mailbox-23",
+    "app-settings-mailboxes-new/saved": "s-mailbox-25",
+    "app-settings-mailboxes-folders/normal": "s-mailbox-24",
+    "app-settings-mailboxes-edit/normal": "s-mailbox-27",
+    "app-settings-connections/mailboxes-off": "s-mailbox-28",
     "app-settings-connections/label-taken": "s-profile-11",
     "app-settings-connections/feed": "s-profile-10",
     "app-settings-connections/edit-links": "s-profile-23",

@@ -1,0 +1,353 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/mailboxes/m-office/folders",
+      "id": "mailbox.done",
+      "label": "Done",
+      "method": "GET",
+      "primary": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/mailboxes/m-office/edit?servers=manual",
+      "id": "mailbox.manual",
+      "label": "Enter servers by hand",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/mailboxes/m-office/edit",
+      "id": "mailbox.password",
+      "label": "Change the password",
+      "method": "GET"
+    }
+  ],
+  "closed": false,
+  "details": null,
+  "escrow": [],
+  "form": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "provider": [],
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 3 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 5,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
+          }
+        ],
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "saved": [
+    {
+      "mark": "strong",
+      "text": "Saved. Reading works, sending does not:"
+    },
+    {
+      "text": " the server refused the password for sending."
+    }
+  ],
+  "servers": null,
+  "subtitle": [
+    {
+      "text": "office · m.yenuchenko@office.example"
+    }
+  ],
+  "title": "Connect a mailbox",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "trace": {
+    "ok": true,
+    "steps": [
+      {
+        "detail": "_imaps._tcp.office.example → mail.office.example:993",
+        "name": "srv",
+        "state": "ok"
+      },
+      {
+        "detail": "_submissions._tcp.office.example → mail.office.example:465",
+        "name": "srv",
+        "state": "ok"
+      },
+      {
+        "detail": "_submission._tcp.office.example → none",
+        "name": "srv",
+        "state": "bad"
+      },
+      {
+        "detail": "GET https://autoconfig.office.example/mail/config-v1.1.xml → 404 Not Found",
+        "name": "autoconfig",
+        "state": "bad"
+      },
+      {
+        "detail": "GET https://office.example/.well-known/autoconfig/mail/config-v1.1.xml → 404 Not Found",
+        "name": "autoconfig",
+        "state": "bad"
+      },
+      {
+        "detail": "mail.office.example:993  TLS · certificate matches\nLOGIN → OK · CAPABILITY IMAP4rev1 LIST-EXTENDED SPECIAL-USE",
+        "name": "imap",
+        "state": "ok"
+      },
+      {
+        "detail": "mail.office.example:465  TLS · certificate matches\nEHLO → 250 SIZE 52428800\nAUTH PLAIN → 535 5.7.8 Error: authentication failed",
+        "name": "smtp",
+        "state": "bad"
+      }
+    ]
+  },
+  "traceNote": "Some servers keep a separate password for sending: ask whoever runs office.example. Test in Connections checks it without sending."
+}

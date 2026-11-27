@@ -11,18 +11,21 @@ type MailboxPage struct {
 	//
 	// Subtitle — «Read it and write from it over IMAP and SMTP. Letters stay
 	// on your mail server.» (-22); у итога — «office ·
-	// m.yenuchenko@office.example» (-25); у правки — «mix@home.example ·
-	// mailbox» (-27)
-	Subtitle Text `json:"subtitle"`
+	// m.yenuchenko@office.example» (-25); у правки — «‹mix@home.example› ·
+	// mailbox», адрес моноширинно (-27)
+	Subtitle Runs `json:"subtitle"`
 	// Form — поля: Email address, Label, Colour, App password или Password,
 	// узлы и порты руками (?servers=manual); у правки — Label, Colour, Name
 	// in From, Signature, автосохранение черновика, Password. nil — итог
 	// подключения: формы нет
 	Form *Form `json:"form"`
 	// Provider — что узнанный по домену провайдер требует, до поля пароля:
-	// пароль приложения — Accent (-22); вход по паролю закрыт — Alert, и
-	// Connect выключен (-23); nil — провайдер не узнан
-	Provider *Notice `json:"provider"`
+	// «Yandex lets mail programs in with an **app password**…» (-22); пусто
+	// — провайдер не узнан. Closed — вход по паролю закрыт: Provider —
+	// «**This mailbox cannot be connected.** …» тревогой после адреса,
+	// пароля нет, Connect выключен (-23)
+	Provider Runs `json:"provider"`
+	Closed   bool `json:"closed"`
 	// Servers — рубрика Servers: найденные или хранимые серверы и «Enter
 	// servers by hand»; nil — их ещё не искали или они набираются руками
 	Servers *MailServers `json:"servers"`

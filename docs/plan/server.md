@@ -221,7 +221,7 @@ PUT к `baikal.mixeme.ru` и `webdav.mixeme.ru` после входа молчи
 go-message `v0.18.2` (решение владельца 26.11.2026, [architecture.md](../architecture.md)).
 Адреса кадров — предложение Typecase; свои — в C-5 по шагу.
 
-- [ ] **Шаг 1 — включение и подключение.** `CARREL_MAILBOX_ENABLED` и блок
+- [x] **Шаг 1 — включение и подключение** (сервер `v0.4.26`, клиент `v0.11.65`; пробелы кадров — задача Typecase 300). `CARREL_MAILBOX_ENABLED` и блок
       «Users’ own mailboxes» настроек экземпляра (`s-mailbox-29`); ящик в
       блобе (`Blob.Mailboxes`, `store.FormatVersion` +1); подключение ящика —
       адрес, подпись, цвет, пароль, обнаружение SRV → автонастройка → догадка

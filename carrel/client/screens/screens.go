@@ -638,8 +638,24 @@ var All = []Screen{
 		Forms:  func(model any) []widget.PostForm { return settings.AttachmentsForms(model.(*view.AttachmentsPage)) },
 	},
 	{
+		Model:  func() any { return new(view.MailboxPage) },
+		Frames: []string{"s-mailbox-22", "s-mailbox-23", "s-mailbox-25", "s-mailbox-27"},
+		Draw:   func(model any) Root { return settings.Mailbox(model.(*view.MailboxPage)) },
+		Title:  func(model any) string { return string(model.(*view.MailboxPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.MailboxForms(model.(*view.MailboxPage)) },
+	},
+	{
+		Model:  func() any { return new(view.MailboxFoldersPage) },
+		Frames: []string{"s-mailbox-24"},
+		Draw:   func(model any) Root { return settings.MailboxFolders(model.(*view.MailboxFoldersPage)) },
+		Title:  func(model any) string { return string(model.(*view.MailboxFoldersPage).Title) },
+		Forms: func(model any) []widget.PostForm {
+			return settings.MailboxFoldersForms(model.(*view.MailboxFoldersPage))
+		},
+	},
+	{
 		Model:     func() any { return new(view.ConnectionsPage) },
-		Frames:    []string{"s-profile-1", "s-profile-2", "s-profile-10", "s-profile-11", "s-profile-16", "s-profile-23", "s-profile-24", "s-profile-25", "s-profile-27", "s-profile-31", "s-profile-32", "s-profile-4"},
+		Frames:    []string{"s-profile-1", "s-profile-2", "s-profile-10", "s-profile-11", "s-profile-16", "s-profile-23", "s-profile-24", "s-profile-25", "s-profile-27", "s-profile-31", "s-profile-32", "s-profile-4", "s-mailbox-28"},
 		Draw:      func(model any) Root { return settings.Connections(model.(*view.ConnectionsPage)) },
 		Title:     func(model any) string { return string(model.(*view.ConnectionsPage).Title) },
 		Forms:     func(model any) []widget.PostForm { return settings.ConnectionsForms(model.(*view.ConnectionsPage)) },

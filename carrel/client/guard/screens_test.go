@@ -214,13 +214,24 @@ func frameBlock(mock, id string) string {
 	if at < 0 {
 		return ""
 	}
-	start := strings.LastIndex(mock[:at], `<div class="frame"`)
-	end := strings.Index(mock[at:], `<div class="frame"`)
-	if end < 0 {
+	// A frame may carry a class of its width beside «frame» (`frame cap820`,
+	// s-mailbox-28): its block starts at its own div, not at the frame
+	// before it.
+	starts := frameOpen.FindAllStringIndex(mock[:at], -1)
+	if len(starts) == 0 {
+		return ""
+	}
+	start := starts[len(starts)-1][0]
+	next := frameOpen.FindStringIndex(mock[at:])
+	if next == nil {
 		return mock[start:]
 	}
-	return mock[start : at+end]
+	return mock[start : at+next[0]]
 }
+
+// frameOpen is the opening of a frame's div, with or without a class of
+// its width.
+var frameOpen = regexp.MustCompile(`<div class="frame[" ]`)
 
 // modelName is the name of a screen's view model: the key of the registry.
 func modelName(scr screens.Screen) string {

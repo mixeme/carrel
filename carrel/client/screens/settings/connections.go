@@ -80,6 +80,9 @@ func Connections(p *view.ConnectionsPage) w.Shell {
 	for _, c := range p.Accounts {
 		res.Items = append(res.Items, serverCard(c, narrow))
 	}
+	// The person's own mailboxes between the servers and the feeds
+	// (s-mailbox-26, -28).
+	res.Items = append(res.Items, mailboxCards(p)...)
 	if len(p.Subscriptions) > 0 {
 		res.Items = append(res.Items, w.Rubric{Text: rubricFeeds, Items: []w.RubricPart{w.Mono{Text: strconv.Itoa(len(p.Subscriptions)), Variant: w.MonoTight}}, Variant: w.RubricSplit})
 	}
@@ -475,6 +478,14 @@ func ConnectionsForms(p *view.ConnectionsPage) []w.PostForm {
 		}
 		for _, r := range c.Collections {
 			pick(r.Toggle)
+		}
+	}
+	for _, m := range p.Mailboxes {
+		for _, a := range m.Actions {
+			post(a)
+		}
+		if m.SentToggle != nil {
+			post(*m.SentToggle)
 		}
 	}
 	for _, f := range p.Subscriptions {

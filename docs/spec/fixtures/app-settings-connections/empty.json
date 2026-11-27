@@ -36,6 +36,8 @@
     "theme": "auto",
     "wide": false
   },
+  "mailboxes": [],
+  "mailboxesOff": "",
   "note": [],
   "notices": [],
   "print": {

@@ -238,8 +238,8 @@ type Server struct {
 	guard    *dav.Guard // every outbound DAV request of this server (S-5.1)
 	// mail finds and signs in to people's own mailboxes through the guard
 	// (carrel-mailbox.md M-3); a test points its dial at its own servers
-	mail *mailbox.Prober
-	probes   probes     // self-requests of a running installation check (S-28.1)
+	mail   *mailbox.Prober
+	probes probes // self-requests of a running installation check (S-28.1)
 	// probeWay is how the installation check's own requests go out; nil —
 	// the default transport (SetProbeTransport)
 	probeWay http.RoundTripper

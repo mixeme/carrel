@@ -4,6 +4,19 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.65 — 2026-11-27
+
+Server `v0.4.26`; Typecase `01d7165` (notes 240, 241).
+- **The mailbox's screens** (`screens/settings/mailbox.go`): the dialog
+  of connecting, its outcome and the edit (`MailboxPage`, s-mailbox-22,
+  -23, -25, -27), the question of the folders (`MailboxFoldersPage`, -24),
+  the rubric Mailboxes and its cards on Connections (-26, -28); a
+  mailbox's trace with the records' arrows in one column. The card's mark
+  of the copy of sent letters is drawn as the frame draws it and sends
+  nothing yet: a check that posts is Typecase's task 300.
+- **Users’ own mailboxes** in the instance's settings: a group's line
+  (`FieldSet.Hint`) is a message in the group (s-mailbox-29).
+
 ## v0.11.64 — 2026-11-26
 
 Server `v0.4.25`; Typecase `9cd1220`.

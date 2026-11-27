@@ -1,0 +1,466 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "id": "mailbox.connect",
+      "label": "Connect",
+      "method": "POST",
+      "primary": true,
+      "submits": true
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/settings/mailboxes/new/test",
+      "id": "mailbox.test",
+      "label": "Test only",
+      "method": "POST",
+      "submits": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/connections",
+      "id": "mailbox.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "closed": false,
+  "details": null,
+  "escrow": [
+    {
+      "mark": "strong",
+      "text": "Key escrow is on:"
+    },
+    {
+      "text": " the administrator can open this password too — and through a mailbox, reset your other passwords."
+    }
+  ],
+  "form": {
+    "action": "/app/settings/mailboxes/new",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Email address",
+            "name": "address",
+            "options": [],
+            "placeholder": "name@example.org",
+            "readOnly": false,
+            "required": false,
+            "value": "mix.letters@yandex.ru"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "How this mailbox is named in the rail: «yandex · Inbox».",
+            "kind": "text",
+            "label": "Label",
+            "name": "label",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "yandex"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "radio",
+            "label": "Colour",
+            "name": "colour",
+            "options": [
+              {
+                "label": "#4a6b52",
+                "selected": false,
+                "value": "#4a6b52"
+              },
+              {
+                "label": "#3f6e8c",
+                "selected": false,
+                "value": "#3f6e8c"
+              },
+              {
+                "label": "#6b4e7a",
+                "selected": false,
+                "value": "#6b4e7a"
+              },
+              {
+                "label": "#a05a2c",
+                "selected": false,
+                "value": "#a05a2c"
+              },
+              {
+                "label": "#8c6239",
+                "selected": false,
+                "value": "#8c6239"
+              },
+              {
+                "label": "#9a9280",
+                "selected": true,
+                "value": "#9a9280"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "#9a9280"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "password",
+            "label": "App password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "provider": [
+    {
+      "text": "Yandex lets mail programs in with an "
+    },
+    {
+      "mark": "strong",
+      "text": "app password"
+    },
+    {
+      "text": ", not with the password of your Yandex account. Make one in Yandex ID → Security → App passwords → Mail, and paste it here."
+    }
+  ],
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 3 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 4,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
+          }
+        ],
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "saved": [],
+  "servers": {
+    "badges": [
+      {
+        "label": "found",
+        "role": "linked"
+      }
+    ],
+    "from": "from autoconfig.yandex.ru",
+    "lines": [
+      {
+        "address": "imap.yandex.ru:993",
+        "role": "IMAP",
+        "security": "TLS"
+      },
+      {
+        "address": "smtp.yandex.ru:465",
+        "role": "SMTP",
+        "security": "TLS"
+      }
+    ],
+    "manual": {
+      "enabled": true,
+      "href": "/app/settings/mailboxes/new?servers=manual",
+      "id": "mailbox.manual",
+      "label": "Enter servers by hand",
+      "method": "GET"
+    }
+  },
+  "subtitle": [
+    {
+      "text": "Read it and write from it over IMAP and SMTP. Letters stay on your mail server."
+    }
+  ],
+  "title": "Connect a mailbox",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "trace": null,
+  "traceNote": ""
+}

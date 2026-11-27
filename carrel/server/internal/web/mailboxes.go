@@ -188,11 +188,11 @@ func (s *Server) profileName(sess *session.Session) string {
 // editing one (-27), in the main zone alone.
 func (s *Server) mailboxPage(sess *session.Session, f mailboxForm, stored *sealed.Mailbox) view.MailboxPage {
 	page := view.MailboxPage{Shell: s.settingsShell(sess, mailboxConnectTitle, "/app/settings/connections", "/app/settings/connections"),
-		Subtitle: mailboxConnectSub}
+		Subtitle: view.Runs{{Text: mailboxConnectSub}}}
 	action, test := s.route("/app/settings/mailboxes/new"), s.route("/app/settings/mailboxes/new/test")
 	if stored != nil {
 		page.Shell.Title = text(stored.Name())
-		page.Subtitle = text(stored.Address + " · mailbox")
+		page.Subtitle = view.Runs{monoRun(stored.Address), {Text: " · mailbox"}}
 		action, test = s.mailboxHref(stored.ID, "/edit"), s.mailboxHref(stored.ID, "/edit/test")
 	}
 	form := view.Form{Action: action, Method: "POST"}
@@ -217,8 +217,9 @@ func (s *Server) mailboxPage(sess *session.Session, f mailboxForm, stored *seale
 	// Microsoft closed signing in by password (s-mailbox-23): said by the
 	// domain before a password is typed, and Connect is off with it.
 	if known && provider.Closed {
-		page.Provider = &view.Notice{Role: view.NoticeAlert, Title: "This mailbox cannot be connected.",
-			Body: text("Outlook.com and Microsoft 365 no longer let mail programs in with a password, and Carrel does not sign in with a Microsoft account. It is not your password that is wrong.")}
+		page.Closed = true
+		page.Provider = view.Runs{strongRun("This mailbox cannot be connected."),
+			{Text: " Outlook.com and Microsoft 365 no longer let mail programs in with a password, and Carrel does not sign in with a Microsoft account. It is not your password that is wrong."}}
 		connect.Enabled, connect.Reason = false, "This mailbox cannot be connected."
 		form.Sets = []view.FieldSet{{Rows: rows}}
 		page.Form = &form
@@ -234,8 +235,13 @@ func (s *Server) mailboxPage(sess *session.Session, f mailboxForm, stored *seale
 	if sample == "" {
 		sample = "home"
 	}
-	rows = append(rows, view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(label), Error: f.LabelErr,
-		Hint: text("How this mailbox is named in the rail: «" + sample + " · Inbox».")})
+	labelRow := view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(label), Error: f.LabelErr}
+	if stored == nil {
+		// Said where the label is chosen first (s-mailbox-22); the edit
+		// does not repeat it (-27).
+		labelRow.Hint = text("How this mailbox is named in the rail: «" + sample + " · Inbox».")
+	}
+	rows = append(rows, labelRow)
 	colour := f.Colour
 	if colour == "" {
 		colour = string(collectionColour("mailbox " + f.Address))
@@ -264,7 +270,7 @@ func (s *Server) mailboxPage(sess *session.Session, f mailboxForm, stored *seale
 	passLabel := "Password"
 	if known && provider.AppPassword {
 		passLabel = "App password"
-		page.Provider = &view.Notice{Role: view.NoticeAccent, Body: text(appPasswordHint(provider.Name))}
+		page.Provider = appPasswordHint(provider.Name)
 	}
 	pass := view.FormRow{Name: "password", Label: text(passLabel), Kind: view.InputPassword, Error: f.PassErr}
 	if stored != nil {
@@ -310,10 +316,22 @@ func (s *Server) mailboxPage(sess *session.Session, f mailboxForm, stored *seale
 			page.Servers.Manual = view.Action{ID: "mailbox.manual", Label: "Enter servers by hand", Href: manual, Method: "GET", Enabled: true}
 		}
 	}
-	if s.escrowCovers(sess) {
+	// Said where the password is first given (s-mailbox-22); the edit does
+	// not repeat it (-27).
+	if stored == nil && s.escrowCovers(sess) {
 		page.Escrow = view.Runs{strongRun(mailboxEscrowBold), {Text: mailboxEscrowRest}}
 	}
 	form.Sets = []view.FieldSet{{Rows: rows}}
+	// The caret where the dialog is typed next: the password of a
+	// connection (s-mailbox-22), the signature of an edit (-27).
+	caret := "password"
+	if stored != nil {
+		caret = "signature"
+	}
+	if f.AddressErr != "" || f.Address == "" {
+		caret = "address"
+	}
+	form = focused(form, caret)
 	page.Form = &form
 	page.Actions = []view.Action{connect, testOnly, cancel}
 	return page
@@ -321,15 +339,15 @@ func (s *Server) mailboxPage(sess *session.Session, f mailboxForm, stored *seale
 
 // appPasswordHint is what a provider that lets mail programs in by an app
 // password asks, in the words of s-mailbox-22.
-func appPasswordHint(name string) string {
+func appPasswordHint(name string) view.Runs {
 	where := map[string]string{
 		"Yandex":  "Yandex ID → Security → App passwords → Mail",
 		"Gmail":   "Google Account → Security → App passwords",
 		"Mail.ru": "Mail.ru → Settings → Security → Passwords for external applications",
 		"iCloud":  "Apple Account → Sign-In and Security → App-Specific Passwords",
 	}[name]
-	return name + " lets mail programs in with an app password, not with the password of your " + name +
-		" account. Make one in " + where + ", and paste it here."
+	return view.Runs{{Text: text(name + " lets mail programs in with an ")}, strongRun("app password"),
+		{Text: text(", not with the password of your " + name + " account. Make one in " + where + ", and paste it here.")}}
 }
 
 // serverLines are a mailbox's servers as the rubric Servers says them.
@@ -354,6 +372,15 @@ func (s *Server) getMailboxNew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	f := mailboxForm{Manual: r.URL.Query().Get("servers") == "manual", Address: strings.TrimSpace(r.URL.Query().Get("address"))}
+	// An address given (?address=, what a script sends when the field is
+	// left): the servers are found and shown before the password is typed
+	// (s-mailbox-22); finding them reads DNS and a file, it changes nothing.
+	if validMailAddress(f.Address) && !f.Manual {
+		if p, known := mailbox.ProviderOf(f.Address); !known || !p.Closed {
+			found := s.mail.Discover(r.Context(), f.Address, func(string, string, bool) {})
+			f.Found = &found
+		}
+	}
 	s.writePage(w, r, http.StatusOK, s.mailboxPage(sess, f, nil))
 }
 
@@ -492,7 +519,7 @@ func (s *Server) mailboxRefused(sess *session.Session, f mailboxForm, trace *vie
 // do; Done goes on to the question of the folders when there is one.
 func (s *Server) mailboxSaved(sess *session.Session, m sealed.Mailbox, trace *view.DiagnosticTrace, next string) view.MailboxPage {
 	page := view.MailboxPage{Shell: s.settingsShell(sess, mailboxConnectTitle, "/app/settings/connections", "/app/settings/connections"),
-		Subtitle: text(m.Name() + " · " + m.Address)}
+		Subtitle: view.Runs{{Text: text(m.Name() + " · " + m.Address)}}}
 	page.Saved = view.Runs{strongRun("Saved. Reading works, sending does not:"), {Text: text(" " + sendRefusedWords(m.SendRefused))}}
 	page.Trace = trace
 	page.TraceNote = text("Some servers keep a separate password for sending: ask whoever runs " + mailbox.Domain(m.Address) +
@@ -839,8 +866,9 @@ func (s *Server) postMailboxTest(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/settings/connections")
 }
 
-// postMailboxSentCopy turns the mark of the card's foot over: the server
-// puts the copy of a sent letter into Sent itself, or Carrel does (M-3).
+// postMailboxSentCopy keeps the mark of the card's foot as it was sent
+// (sentCopy): the server puts the copy of a sent letter into Sent itself,
+// or Carrel does (M-3).
 func (s *Server) postMailboxSentCopy(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.mailboxesGate(w, r)
 	if !ok {
@@ -851,8 +879,10 @@ func (s *Server) postMailboxSentCopy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	key, _ := sess.DataKey()
+	_ = readForm(r)
+	on := r.FormValue("sentCopy") == "on"
 	_ = s.users.EditMailbox(sess.AccountID(), key, m.ID, "mailbox.sentcopy", func(mb *sealed.Mailbox) {
-		mb.ServerKeepsSent = !mb.ServerKeepsSent
+		mb.ServerKeepsSent = on
 	})
 	s.redirect(w, r, "/app/settings/connections")
 }
