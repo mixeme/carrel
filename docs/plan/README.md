@@ -11,6 +11,7 @@
 | [reviews.md](reviews.md) | Ревью Opus: заходы и находки, на номера которых ссылается код |
 | [to-typecase.md](to-typecase.md) | Задачи для Typecase: что сервер нашёл и что решается на стороне кадров |
 | [from-typecase.md](from-typecase.md) | Записки из Typecase: что из правок макета касается сервера |
+| [device-checks.md](device-checks.md) | Что после выкладки проверить на телефоне и планшете, и что проверено |
 
 Рядом, в [docs/](../):
 
