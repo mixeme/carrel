@@ -59,6 +59,14 @@ Client `v0.11.65`; Typecase `01d7165` (notes 240, 241).
   under the fields is «Everything else is filled in on the card.» (notes
   240, 241).
 - Counts of words ending in s, x, z, ch, sh take «es»: «2 mailboxes».
+- **A tick of a timeline's rail keeps the page** (the owner, 27.11.2026):
+  with the live layer the answer is the rail, the poll and the timeline as
+  the zone main, as a list's tick is; it was a redirect that reloaded the
+  whole page.
+- **Rail ticks are not journaled**: `sources.select` was an entry for every
+  tick of every rail — noise in the audit log (the owner, 27.11.2026).
+- **Files without a storage**: Connect account is the primary button, as in
+  the empty states beside it (states-35, -37).
 
 ## v0.4.25 — 2026-11-26
 

@@ -390,19 +390,28 @@ func keptTimeline(sess *session.Session, account, col, uid string, from, last ti
 }
 
 func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
+	if tl, ok := s.contactTimeline(w, r); ok {
+		s.writePage(w, r, http.StatusOK, tl)
+	}
+}
+
+// contactTimeline is the timeline of the person {uid} as its address asks
+// it; false — the answer is written already (a missing record, the card of
+// a server that did not answer, a failure).
+func (s *Server) contactTimeline(w http.ResponseWriter, r *http.Request) (view.ContactTimelinePage, bool) {
 	c, ok := s.openCollection(w, r, "contacts", true)
 	if !ok {
-		return
+		return view.ContactTimelinePage{}, false
 	}
 	uid := r.PathValue("uid")
 	obj, err := c.find(r.Context(), uid)
 	switch {
 	case notFoundErr(err):
 		s.notFound(w, r)
-		return
+		return view.ContactTimelinePage{}, false
 	case err != nil:
 		s.writePage(w, r, http.StatusOK, s.cardAnswer(r, c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/timeline", err)))
-		return
+		return view.ContactTimelinePage{}, false
 	}
 	tz := s.tz()
 	from, last := timelineWindow(r, tz, s.now())
@@ -430,7 +439,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 				Body: text(fmt.Sprintf("This session already runs %d searches and lists. Stop one or wait for one to finish, then open the timeline again.", conf.MaxLiveFanouts))})
 		default:
 			http.Error(w, "could not start the timeline", http.StatusInternalServerError)
-			return
+			return view.ContactTimelinePage{}, false
 		}
 	}
 	tl := s.timelinePage(r.Context(), c, obj, person, task, from, last, r.URL.Query().Get("kind"), strings.TrimSpace(r.URL.Query().Get("filter")), notices)
@@ -448,7 +457,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 		q.Set("card", "0")
 		tl.Card.Close = s.route(card+"/timeline") + "?" + q.Encode()
 	}
-	s.writePage(w, r, http.StatusOK, tl)
+	return tl, true
 }
 
 func (s *Server) startTimeline(sess *session.Session, person timelinePerson, from, to time.Time) (*timelineTask, error) {

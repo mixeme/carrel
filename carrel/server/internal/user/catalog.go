@@ -559,14 +559,16 @@ func (s *Service) RenameCollection(viewerID string, dataKey [crypt.KeyLen]byte, 
 // other kinds stay as they are. A pick the catalog does not hold for that kind
 // is dropped. A gone entry stays ticked only if it was ticked already: a tick
 // is taken off by the person, never put on what is no longer there (S-6.1).
-// The journal names the kind, not the addresses.
+// Nothing goes into the journal: a tick says what this person looks at,
+// not what happened to the account, and every tick of the rail made an
+// entry (the owner, 27.11.2026: noise in the audit log).
 func (s *Service) SetSelection(viewerID string, dataKey [crypt.KeyLen]byte, kind view.Kind, picks []sealed.Selection) error {
 	type at struct{ account, path string }
 	want := make(map[at]bool, len(picks))
 	for _, p := range picks {
 		want[at{p.AccountID, p.Path}] = true
 	}
-	return s.editCatalog(viewerID, dataKey, "sources.select", string(kind), func(blob *sealed.Blob) error {
+	return s.editBlob(viewerID, dataKey, nil, func(blob *sealed.Blob) error {
 		was := map[at]bool{}
 		var out []sealed.Selection
 		for _, sel := range blob.Selected {

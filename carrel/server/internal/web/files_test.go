@@ -105,7 +105,8 @@ func rowMenu(t *testing.T, row view.FileRow, id string) string {
 func TestFilesRootFollowsTheTicks(t *testing.T) {
 	bare := contactsFixture(t, false, adaCard())
 	root := decode[view.FilesRootPage](t, bare.h.do(get("/app/files", bare.sess)))
-	if root.Empty == nil || root.Empty.Title != "No file storage is connected" || len(root.Collections) != 0 {
+	if root.Empty == nil || root.Empty.Title != "No file storage is connected" || len(root.Collections) != 0 ||
+		len(root.Empty.Actions) != 1 || !root.Empty.Actions[0].Primary {
 		t.Fatalf("no storage: %+v", root.Empty)
 	}
 

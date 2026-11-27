@@ -16,6 +16,10 @@ Server `v0.4.26`; Typecase `01d7165` (notes 240, 241).
   nothing yet: a check that posts is Typecase's task 300.
 - **Users’ own mailboxes** in the instance's settings: a group's line
   (`FieldSet.Hint`) is a message in the group (s-mailbox-29).
+- **Columns changes the contacts' table** (the owner, 27.11.2026): a chosen
+  set draws the row of chosen columns (`ColumnRow`, s-contacts-23, -24), as
+  the lists of events, tasks and notes already did; the contacts' rows kept
+  phone, email and organisation whatever was chosen.
 
 ## v0.11.64 — 2026-11-26
 

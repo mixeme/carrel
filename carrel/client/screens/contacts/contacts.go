@@ -6,6 +6,7 @@
 package contacts
 
 import (
+	"slices"
 	"strconv"
 
 	"carrel.dev/carrel/client/bind"
@@ -84,10 +85,17 @@ func Screen(p *view.ContactsListPage) w.Shell {
 	compact := bind.Checked(p.Bar.Compact)
 	// One collection, or a browser that hides the source column (Appearance).
 	single := bind.Sourceless(p.Rail, p.Look)
+	// The columns a person chose (s-contacts-23, -24), as every kind's list
+	// draws them (the owner, 27.11.2026: Columns did not change the table).
+	shown := chosen(p.Bar.Columns)
 	for _, g := range p.Groups {
 		rows := make([]w.ListRow, 0, len(g.Rows))
 		for _, r := range g.Rows {
-			rows = append(rows, row(r, single))
+			if shown != nil {
+				rows = append(rows, columnRow(r, shown))
+			} else {
+				rows = append(rows, row(r, single))
+			}
 		}
 		list := w.List{Rows: rows, Compact: compact}
 		// A row that opens in the details panel asks the panel alone with the
@@ -361,3 +369,68 @@ func side(d view.Details) *w.Side {
 // Rail is the page's rail alone and the form its ticks send: the end of a
 // poll brings it out of band (C-7.4; Typecase's note 124).
 func Rail(r view.Rail) ([]w.RailPart, *w.PostForm) { return railParts(r), bind.RailForm(r, formRail) }
+
+// defaultColumns are the columns of the frame's own row (s-contacts-1): a
+// choice that is these is drawn as that row.
+var defaultColumns = []string{"name", "phone", "email", "org", "source"}
+
+// cells are the columns a contact's row may have, by their IDs.
+var cells = map[string]w.Column{
+	"name": w.ColumnName, "phone": w.ColumnPhone, "email": w.ColumnEmail, "org": w.ColumnOrg,
+	"birthday": w.ColumnBirthday, "tags": w.ColumnTags, "changed": w.ColumnChanged, "source": w.ColumnSource,
+}
+
+// chosen are the columns a person chose for the list, by ID in their order
+// (Columns.Items on); nil where they are the frame's own row's.
+func chosen(c *view.Columns) []string {
+	if c == nil {
+		return nil
+	}
+	var on []string
+	for _, it := range c.Items {
+		if it.On {
+			on = append(on, it.ID)
+		}
+	}
+	if slices.Equal(on, defaultColumns) || slices.Equal(on, defaultColumns[:len(defaultColumns)-1]) {
+		return nil
+	}
+	return on
+}
+
+// columnRow is a contact in a list of the columns a person chose
+// (s-contacts-23, -24): the mark, the avatar, a cell for each column in
+// their order — the dash where the card has nothing —, leading to the card.
+func columnRow(r view.ContactRow, shown []string) w.ColumnRow {
+	av := bind.Avatar(r.Avatar)
+	c := w.ColumnRow{Mark: w.Mark{Colour: string(r.Colour)}, Avatar: &av, Strong: r.On, On: r.On, Href: r.Href, Page: r.Page}
+	for _, id := range shown {
+		col, ok := cells[id]
+		if !ok {
+			continue
+		}
+		cell := w.ColumnCell{Column: col}
+		switch col {
+		case w.ColumnName:
+			cell.Text = string(r.Name)
+		case w.ColumnPhone:
+			cell.Text = or(r.Phone)
+		case w.ColumnEmail:
+			cell.Text = or(r.Email)
+		case w.ColumnOrg:
+			cell.Text = or(r.Org)
+		case w.ColumnBirthday:
+			cell.Text = or(r.Birthday)
+		case w.ColumnTags:
+			for _, tag := range bind.Tags(r.Tags) {
+				cell.Tags = append(cell.Tags, tag)
+			}
+		case w.ColumnChanged:
+			cell.Text = or(r.Changed)
+		case w.ColumnSource:
+			cell.Text = string(r.Stamp)
+		}
+		c.Cells = append(c.Cells, cell)
+	}
+	return c
+}

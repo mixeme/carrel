@@ -1272,7 +1272,12 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 	}
 	if back, ok := timelineReturn(r.FormValue("back")); ok {
 		// Apply from a timeline's rail: the same ticks, and back to the
-		// timeline, which asks its sources again.
+		// timeline, which asks its sources again. With the live layer the
+		// answer is the rail, the poll and the timeline, the page kept, as
+		// a list's (the owner, 27.11.2026: a tick reloaded the whole page).
+		if render.WantsFragment(r) && s.timelineFragment(w, r, back) {
+			return
+		}
 		s.redirect(w, r, back+"?again=1")
 		return
 	}
@@ -1330,6 +1335,36 @@ func combinedRailPoll(page any) (view.Rail, *view.PollBar) {
 		return p.Rail, p.Poll
 	}
 	return view.Rail{}, nil
+}
+
+// timelineFragment answers a tick of a timeline's rail as fragments: the
+// timeline at back asked again, its rail in place, its poll and the main
+// zone after it. False — back names no timeline, and nothing is written.
+func (s *Server) timelineFragment(w http.ResponseWriter, r *http.Request, back string) bool {
+	segs := strings.Split(strings.TrimPrefix(back, "/app/contacts/"), "/")
+	if len(segs) != 4 || segs[3] != "timeline" {
+		return false
+	}
+	get := r.Clone(r.Context())
+	get.Method, get.Form, get.PostForm = http.MethodGet, nil, nil
+	get.URL = &url.URL{Path: back, RawPath: back, RawQuery: "again=1"}
+	if p, err := url.PathUnescape(back); err == nil {
+		get.URL.Path = p
+	}
+	for i, name := range []string{"account", "col", "uid"} {
+		v, err := url.PathUnescape(segs[i])
+		if err != nil {
+			return false
+		}
+		get.SetPathValue(name, v)
+	}
+	tl, ok := s.contactTimeline(w, get)
+	if !ok {
+		return true // the answer is written: a missing record, a refusal
+	}
+	extra := []render.OOB{{Target: render.TargetPoll, Body: tl.Poll}, {Target: render.TargetMain, Body: tl}}
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetRail, tl.Rail, extra)
+	return true
 }
 
 // timelineReturn is the way back an Apply may take: only to a person's

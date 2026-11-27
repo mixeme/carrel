@@ -427,13 +427,15 @@ func filesEmpty(s *Server, blob sealed.Blob) *view.Notice {
 			}
 		}
 	}
+	// The one way on is the primary button, as in the empty states beside
+	// it (states-35, -37; the owner, 27.11.2026).
+	connect := s.connectAction()
+	connect.Primary = true
 	return &view.Notice{
-		Role:  view.NoticeInfo,
-		Title: "No file storage is connected",
-		Body:  "Files come from a WebDAV storage. Connect one, then tick its folders in the rail.",
-		Actions: []view.Action{
-			s.connectAction(),
-		},
+		Role:    view.NoticeInfo,
+		Title:   "No file storage is connected",
+		Body:    "Files come from a WebDAV storage. Connect one, then tick its folders in the rail.",
+		Actions: []view.Action{connect},
 	}
 }
 
