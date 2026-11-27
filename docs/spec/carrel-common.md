@@ -523,6 +523,14 @@ C-11. Поля до, между и после файлов разбираютс�
 | `/app/settings/connections/new/test` | POST | вход | страница | `ConnectionsPage` — «Test only» диалога подключения (s-profile-2): набранное и след проверки, ничего не сохранено |
 | `/app/settings/connections/{account}/edit` | GET, POST | вход | страница, редирект | `ConnectionsPage` с правкой подключения (s-profile-16, -22, -23): те же поля, пароль пустой — «оставить сохранённый»; ответ на ссылки — `links` |
 | `/app/settings/connections/test` | POST | вход | страница | `ConnectionsPage` — «Test only»: диалог с набранным (пароль не возвращается) и след проверки в `Trace`; ничего не пишет, сценарии ни при чём |
+| `/app/settings/mailboxes/new` | GET, POST | вход, почта ящиков включена | страница, редирект | `MailboxPage` — Connect a mailbox (s-mailbox-22; Microsoft — -23); `?servers=manual` — узлы и порты руками. POST — подключить: поля `address`, `label`, `colour`, `password`, `imap.host`, `imap.port`, `smtp.host`, `smtp.port`; без пароля — найденные серверы и просьба о пароле; IMAP не пустил — тот же диалог, отказ и след, ничего не сохранено; SMTP не пустил — сохранён, итог `Saved` со следом (-25); сервер не назвал роли — редирект на `…/{mailbox}/folders`, иначе на Connections. Почта ящиков выключена — как несуществующий адрес (M-2) |
+| `/app/settings/mailboxes/new/test` | POST | вход, почта ящиков включена | страница | `MailboxPage` — Test only: набранное и след, ничего не сохранено |
+| `/app/settings/mailboxes/{mailbox}/folders` | GET, POST | вход, почта ящиков включена | страница, редирект | `MailboxFoldersPage` — роли, которых сервер не назвал (s-mailbox-24); `?role=` — одна роль, Change карточки. POST — поля `sent`, `drafts`, `archive`, `spam`, `trash` (пусто — None), `sentCopy`; папки нет на сервере — роль не меняется |
+| `/app/settings/mailboxes/{mailbox}/edit` | GET, POST | вход, почта ящиков включена | страница, редирект | `MailboxPage` — правка ящика (s-mailbox-27): `label`, `colour`, `fromName`, `signature`, `autosave`, `password` (пусто — прежний), серверы руками; новый пароль или серверы сперва проверяются входом |
+| `/app/settings/mailboxes/{mailbox}/edit/test` | POST | вход, почта ящиков включена | страница | `MailboxPage` — Test only правки, ничего не сохранено |
+| `/app/settings/mailboxes/{mailbox}/test` | POST | вход, почта ящиков включена | редирект | Test карточки: вход в IMAP и SMTP; ответ отправки хранится в ящике, след — на карточке в сеансе |
+| `/app/settings/mailboxes/{mailbox}/sentcopy` | POST | вход, почта ящиков включена | редирект | отметка подвала карточки «The server puts a copy of sent letters into Sent itself» переворачивается |
+| `/app/settings/mailboxes/{mailbox}/remove` | POST | вход | редирект | Disconnect, с выключенной почтой — Remove (s-mailbox-28): ящик уходит из блоба, письма остаются на почтовом сервере |
 | `/app/settings/connections/disconnect` | GET, POST | вход | лист | `ConnectionRemoveSheet` |
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
 | `/app/settings/devices` | GET, POST | вход | страница | `DevicesPage` |
@@ -3214,6 +3222,8 @@ type ConnectionsPage struct {
     // сколько было при последнем ответе
     Subtitle      Runs // логин жирным (s-profile-10)
     Accounts      []ConnectionCard
+    Mailboxes     []MailboxCard // свои ящики рубрикой между DAV-серверами и подписками (s-mailbox-26); пусто — ящиков нет
+    MailboxesOff  Text // почта ящиков выключена на экземпляре, а ящики есть: «Passwords stay sealed in your profile; everything works again when mailboxes are back on.» над их карточками (s-mailbox-28); пусто — включена или ящиков нет
     Subscriptions []SubscriptionCard
     Empty         Runs // ни одного подключения и подписки: «**Nothing is connected yet.**» (s-profile-25); подзаголовок тогда — «Signed in as **mix**», в рейле нет счётов и строк состояния
     // Диалог подключения (`?op=add`, s-profile-2), его правка (`?op=edit`)
@@ -3314,6 +3324,79 @@ type SubscriptionCard struct {
     Note     Text          // строка под карточкой у отказавшей: «The feed asks for a password and the saved one no longer fits. A feed that stopped answering must not look like a feed with nothing in it.»
     Trace    *DiagnosticTrace // след последней Check в сеансе: что спросили и что ответили (s-profile-1, у отказавшей — над Note); nil — Check не было
     Actions  []Action // Check · Edit · Unsubscribe
+}
+// Свой почтовый ящик (carrel-mailbox.md M-3): его подключение (s-mailbox-22,
+// -23), итог подключения, когда чтение работает, а отправка нет (-25), и
+// правка (-27). Диалог стоит в главной зоне один, без страницы под ним.
+type MailboxPage struct {
+    Shell
+    // Shell.Title — «Connect a mailbox» (-22, -25); у правки — подпись ящика, «home» (-27)
+    Subtitle Text // «Read it and write from it over IMAP and SMTP. Letters stay on your mail server.» (-22); у итога «office · m.yenuchenko@office.example» (-25); у правки «mix@home.example · mailbox» (-27)
+    // Поля: Email address, Label, Colour, App password или Password, узлы и
+    // порты руками (?servers=manual); у правки — Label, Colour, Name in From,
+    // Signature, автосохранение черновика, Password. nil — итог подключения
+    Form     *Form
+    Provider *Notice // что узнанный по домену провайдер требует, до поля пароля: пароль приложения — Accent (-22); вход по паролю закрыт — Alert, Connect выключен (-23); nil — не узнан
+    Servers  *MailServers // рубрика Servers; nil — серверы ещё не искали или они набираются руками
+    Escrow   Runs // «**Key escrow is on:** the administrator can open this password too — and through a mailbox, reset your other passwords.» тревогой в конце формы, пока депонирование действует (S-29.2); пусто — не действует
+    Saved    Runs // итог: «**Saved. Reading works, sending does not:** the server refused the password for sending.» (-25); пусто — диалог
+    Trace    *DiagnosticTrace // «What was tried»: след подключения (-25) или Test only; nil — проверки не было
+    TraceNote Text // строка под следом: что делать (-25)
+    Actions  []Action // Connect · Test only · Cancel (-22); правка — Save · Test only · Cancel (-27); итог — Done · Enter servers by hand · Change the password (-25)
+}
+type MailServers struct {
+    Badges []Badge // «found» у найденных при подключении (-22); у хранимых пусто
+    Lines  []MailServerLine
+    From   Text   // откуда они: «from autoconfig.yandex.ru» (-22), «found by SRV» (-27), «typed by hand»
+    Manual Action // «Enter servers by hand»: тот же диалог с узлами и портами (?servers=manual)
+}
+type MailServerLine struct {
+    Role     Text // IMAP · SMTP
+    Address  Text // узел:порт
+    Security Text // TLS · STARTTLS
+}
+// Вопрос о специальных папках, которых сервер не назвал (s-mailbox-24):
+// один раз после подключения, как папка вложений; потом — Change в таблице
+// карточки ящика.
+type MailboxFoldersPage struct {
+    Shell
+    // Shell.Title — «Which folders are these?»
+    Subtitle Text // «home did not say where it keeps its archive and spam.»
+    // Выбор папки на роль, «None» среди вариантов, под предложенным по имени
+    // — «Suggested by the name.»; отметка sentCopy «The server puts a copy of
+    // sent letters into Sent itself»; Save · Skip
+    Form     Form
+}
+// Свой ящик на экране подключений, рубрикой Mailboxes между DAV-серверами и
+// подписками (s-mailbox-26); с выключенной на экземпляре почтой — только
+// Remove (-28).
+type MailboxCard struct {
+    ID          string // «home» — {mailbox} его адресов
+    Label       Text
+    Colour      Colour
+    // Строка адреса: «mix@home.example · IMAP mail.home.example:993 · SMTP
+    // mail.home.example:465 · up to 25 MB»; Limit пусто — сервер SIZE не назвал
+    Address     Text
+    IMAP        Text
+    SMTP        Text
+    Limit       Text
+    Answered    When // когда ящик последним ответил сеансу, после «last answer»; пусто — сеанс его не спрашивал
+    SendRefused bool // отправка не работает: бейдж «sending does not work», карточка тревожная, «reading works» в строке адреса, Test again (-26, office)
+    Trace       *DiagnosticTrace // ответ SMTP при последней проверке у отказавшей отправки; nil у прочих
+    Note        Text // «In «From» it stays off until Test passes.» у отказавшей отправки; у прочих пусто
+    Off         Text // «not used while mail is off» в строке адреса (-28); пусто — почта включена
+    Password    *SecretField // Show password; nil, пока почта выключена
+    Folders     []MailFolderRow // Sent, Drafts, Archive, Spam, Trash; пусто, пока почта выключена
+    KeepsSent   bool    // стоит отметка «The server puts a copy of sent letters into Sent itself» в подвале карточки
+    SentToggle  *Action // её нажатие: POST …/{mailbox}/sentcopy; подпись — слова отметки; nil, пока почта выключена
+    Actions     []Action // Test · Test again · Edit · Disconnect; с выключенной почтой — Remove
+}
+type MailFolderRow struct {
+    Role   MailRole
+    Label  Text   // «Sent», «Spam»
+    Folder Text   // папка на сервере, «Архив»; пусто — нет
+    How    Text   // «announced by the server», «you chose it», «suggested by the name»
+    Change Action // Change: вопрос о папках (s-mailbox-24) с этой ролью
 }
 
 // Строка «Lands in» (s-profile-1): род словом экрана, отмечен ли он в своём
@@ -4252,6 +4335,9 @@ const (
 
 type TickState string
 const ( TickOff TickState = "off"; TickOn = "on"; TickPart = "part" )
+// Роль специальной папки ящика (RFC 6154, carrel-mailbox.md M-3)
+type MailRole string
+const ( MailSent MailRole = "sent"; MailDrafts = "drafts"; MailArchive = "archive"; MailJunk = "junk"; MailTrash = "trash" )
 ```
 
 `gone` и `unavailable` — разные вещи, и путать их нельзя: молчание упавшего

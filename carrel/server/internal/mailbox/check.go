@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/smtp"
+	"net/textproto"
 	"slices"
 	"strconv"
 	"strings"
@@ -59,7 +60,12 @@ type Result struct {
 	Unannounced []string // roles: "sent", "drafts", "trash", "archive", "junk"
 	All         []string // every folder, for the question
 	SendRefused string
-	KeepsSent   bool
+	// SendTrace is the SMTP step's words where sending failed.
+	SendTrace string
+	KeepsSent bool
+	// From is where the servers came from (Found.From), «typed by hand»
+	// when both were typed.
+	From string
 }
 
 // CanSend says whether letters can go from the mailbox checked.
@@ -105,7 +111,10 @@ func (p *Prober) Check(ctx context.Context, in Input) (*Result, *view.Diagnostic
 		smtps = []sealed.MailServer{in.SMTP}
 	}
 
-	res := &Result{Login: login, KeepsSent: known && provider.KeepsSent}
+	res := &Result{Login: login, KeepsSent: known && provider.KeepsSent, From: found.From}
+	if in.IMAP.Host != "" && in.SMTP.Host != "" {
+		res.From = "typed by hand"
+	}
 	var imapErr error
 	for _, srv := range imaps {
 		folders, said, err := p.signIn(ctx, srv, login, in.Password, in.CertFingerprint)
@@ -135,11 +144,11 @@ func (p *Prober) Check(ctx context.Context, in Input) (*Result, *view.Diagnostic
 		said, size, err := p.checkSMTP(ctx, srv, login, in.Password, in.CertFingerprint)
 		if err != nil {
 			step(stepSMTP, said, false)
-			smtpErr = err
+			smtpErr, res.SendTrace = err, said
 			continue
 		}
 		step(stepSMTP, said, true)
-		res.SMTP, res.MaxLetter, smtpErr = srv, size, nil
+		res.SMTP, res.MaxLetter, res.SendTrace, smtpErr = srv, size, "", nil
 		break
 	}
 	switch {
@@ -154,6 +163,21 @@ func (p *Prober) Check(ctx context.Context, in Input) (*Result, *view.Diagnostic
 	}
 	trace.OK = true
 	return res, trace, nil
+}
+
+// Roles signs in to a mailbox's IMAP server and reads its folders again: the
+// roles it announces — the roles it does not, each with the folder its name
+// offers where there is one — and every folder, for the question of
+// s-mailbox-24.
+func (p *Prober) Roles(ctx context.Context, srv sealed.MailServer, login, password, pin string) (sealed.MailFolders, []string, []string, error) {
+	ctx, cancel := context.WithTimeout(ctx, p.Timeout)
+	defer cancel()
+	list, _, err := p.signIn(ctx, srv, login, password, pin)
+	if err != nil {
+		return sealed.MailFolders{}, nil, nil, err
+	}
+	f, unannounced, all := roles(list)
+	return f, unannounced, all, nil
 }
 
 // signIn opens IMAP on srv through the guard, signs in and lists the
@@ -284,7 +308,7 @@ func (p *Prober) checkSMTP(ctx context.Context, srv sealed.MailServer, login, pa
 	}
 	defer c.Close()
 	if err := c.Hello(helloName); err != nil {
-		return said + "  EHLO → " + err.Error(), 0, err
+		return said + "  EHLO → " + answered(err), 0, errors.New(answered(err))
 	}
 	// What EHLO offered that matters here: STARTTLS where it is the way in,
 	// and the largest letter.
@@ -309,7 +333,7 @@ func (p *Prober) checkSMTP(ctx context.Context, srv sealed.MailServer, login, pa
 			return said + "\nSTARTTLS → " + err.Error(), 0, err
 		}
 		if err := c.StartTLS(p.Guard.MailTLSConfig(srv.Host, pin)); err != nil {
-			return said + "\nSTARTTLS → " + err.Error(), 0, err
+			return said + "\nSTARTTLS → " + answered(err), 0, errors.New(answered(err))
 		}
 		said += "\nSTARTTLS → 220 · " + certSaid(pin)
 		// After STARTTLS the client says EHLO again: what it offers now.
@@ -321,10 +345,44 @@ func (p *Prober) checkSMTP(ctx context.Context, srv sealed.MailServer, login, pa
 		err := errors.New("the server offers no AUTH")
 		return said + "\nAUTH → " + err.Error(), size, err
 	}
-	if err := c.Auth(smtp.PlainAuth("", login, password, srv.Host)); err != nil {
-		return said + "\nAUTH PLAIN → " + err.Error(), size, err
+	if err := c.Auth(plainAuth{login: login, password: password}); err != nil {
+		return said + "\nAUTH PLAIN → " + answered(err), size, errors.New(answered(err))
 	}
 	return said + "\nAUTH PLAIN → 235 · nothing sent", size, c.Quit()
+}
+
+// answered is a mail server's refusal as it said it: «535 5.7.8 Error:
+// authentication failed», the code and its words without the quotes net/smtp
+// puts around them; control characters a server sent are spaces.
+func answered(err error) string {
+	var te *textproto.Error
+	if !errors.As(err, &te) {
+		return err.Error()
+	}
+	msg := strings.Map(func(r rune) rune {
+		if r < ' ' {
+			return ' '
+		}
+		return r
+	}, te.Msg)
+	return fmt.Sprintf("%d %s", te.Code, msg)
+}
+
+// plainAuth is AUTH PLAIN (RFC 4616). net/smtp's own refuses a connection
+// that is not TLS unless the host is localhost; here the guard has already
+// decided: TLS or STARTTLS carried out, or plain text to a host it excepts
+// (S-5.1), and the frames' hosts in tests are reached the same way.
+type plainAuth struct{ login, password string }
+
+func (a plainAuth) Start(*smtp.ServerInfo) (string, []byte, error) {
+	return "PLAIN", []byte("\x00" + a.login + "\x00" + a.password), nil
+}
+
+func (a plainAuth) Next(_ []byte, more bool) ([]byte, error) {
+	if more {
+		return nil, errors.New("unexpected server challenge")
+	}
+	return nil, nil
 }
 
 // helloName is what Carrel calls itself in EHLO: no name of the instance

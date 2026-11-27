@@ -11,6 +11,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/mailbox"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
@@ -81,6 +82,11 @@ type Users interface {
 	// RevealConnectionPassword returns one stored password and journals the
 	// release; the caller checks the unlock window (S-10.7).
 	RevealConnectionPassword(viewerID string, dataKey [32]byte, accountID string) (string, error)
+	// People's own mailboxes in the blob (carrel-mailbox.md M-3).
+	AddMailbox(viewerID string, dataKey [32]byte, m sealed.Mailbox) (string, error)
+	EditMailbox(viewerID string, dataKey [32]byte, id, what string, edit func(*sealed.Mailbox)) error
+	RemoveMailbox(viewerID string, dataKey [32]byte, id string) error
+	RevealMailboxPassword(viewerID string, dataKey [32]byte, id string) (string, error)
 	// AddCollection writes a collection the server has just created into the
 	// catalog; RenameCollection writes the name and colour it accepted (S-12).
 	AddCollection(viewerID string, dataKey [32]byte, accountID string, col sealed.Collection) error
@@ -230,6 +236,9 @@ type Server struct {
 	render   render.Renderer
 	limit    *Limiter
 	guard    *dav.Guard // every outbound DAV request of this server (S-5.1)
+	// mail finds and signs in to people's own mailboxes through the guard
+	// (carrel-mailbox.md M-3); a test points its dial at its own servers
+	mail *mailbox.Prober
 	probes   probes     // self-requests of a running installation check (S-28.1)
 	// probeWay is how the installation check's own requests go out; nil —
 	// the default transport (SetProbeTransport)
@@ -325,6 +334,7 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 		commit:   commit,
 		proxies:  conf.ParseTrustedProxies(cfg.TrustedProxies),
 	}
+	s.mail = mailbox.NewProber(s.guard)
 	s.render = stampingRenderer{Renderer: rd, token: s.sessionToken, base: s.basePath}
 	s.mux = http.NewServeMux()
 	s.registerRoutes()
@@ -334,6 +344,10 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 	s.mux.HandleFunc("GET /static/icon/{version}/{file}", s.getIcon)
 	return s
 }
+
+// MailProber is how this server reaches people's mailboxes: a test sets its
+// SRV, Fetch and Dial to servers of its own (mailboxtest).
+func (s *Server) MailProber() *mailbox.Prober { return s.mail }
 
 // Handler returns the root HTTP handler: the security headers of every
 // answer around the mux, so the mux's own 404 carries them too.

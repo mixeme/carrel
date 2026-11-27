@@ -277,6 +277,12 @@ func plural(n int, unit string) string {
 	if l := len(unit); l > 1 && unit[l-1] == 'y' && !strings.ContainsRune("aeiou", rune(unit[l-2])) {
 		return fmt.Sprintf("%d %sies", n, unit[:l-1])
 	}
+	// A hiss takes «es»: «2 mailboxes», «2 addresses», «2 matches».
+	for _, end := range []string{"s", "x", "z", "ch", "sh"} {
+		if strings.HasSuffix(unit, end) {
+			return fmt.Sprintf("%d %ses", n, unit)
+		}
+	}
 	return fmt.Sprintf("%d %ss", n, unit)
 }
 

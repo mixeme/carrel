@@ -597,21 +597,37 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 			for _, f := range blob.Subscriptions {
 				page.Subscriptions = append(page.Subscriptions, s.subscriptionCard(sess, tf, f))
 			}
+			// The person's own mailboxes between the servers and the
+			// subscriptions (s-mailbox-26); off on the instance, each with
+			// Remove and the line above them (-28).
+			page.Mailboxes = s.mailboxCards(sess, blob, unlocked)
+			if len(page.Mailboxes) > 0 && !s.mailboxesOn() {
+				page.MailboxesOff = mailboxOffNote
+			}
 			// The DAV servers are the cards, the subscriptions apart; the
 			// collections are the rows of those cards, unticked ones too, and
 			// a server not answering now counts what it had at its last
 			// answer (s-profile-1).
 			// The login in bold (s-profile-10).
-			page.Subtitle = join("Signed in as ", strongRun(sess.Login()), fmt.Sprintf(" · %s · %s · %s",
-				plural(len(blob.Connections), "server"), plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription")))
+			counts := []string{plural(len(blob.Connections), "server")}
+			if len(blob.Mailboxes) > 0 && s.mailboxesOn() {
+				counts = append(counts, plural(len(blob.Mailboxes), "mailbox"))
+			}
+			counts = append(counts, plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription"))
+			page.Subtitle = join("Signed in as ", strongRun(sess.Login()), " · "+strings.Join(counts, " · "))
 			// Nothing connected yet (s-profile-25): who is signed in, and the
 			// words of the empty page.
-			if len(blob.Connections) == 0 && len(blob.Subscriptions) == 0 {
+			if len(blob.Connections) == 0 && len(blob.Subscriptions) == 0 && len(blob.Mailboxes) == 0 {
 				page.Subtitle = join("Signed in as ", strongRun(sess.Login()))
 				page.Empty = view.Runs{strongRun("Nothing is connected yet.")}
 			}
 			page.Actions = append(page.Actions,
-				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true},
+				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true})
+			if s.mailboxesOn() {
+				page.Actions = append(page.Actions, view.Action{ID: "mailbox.add", Label: "Connect a mailbox", Icon: "i-mail",
+					Href: s.route("/app/settings/mailboxes/new"), Method: "GET", Enabled: true})
+			}
+			page.Actions = append(page.Actions,
 				view.Action{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link",
 					Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}}), Method: "GET", Enabled: true})
 			if n, ok := goneNotice(blob); ok {
@@ -983,6 +999,18 @@ func (s *Server) revealPassword(sess *session.Session, page *view.ConnectionsPag
 			return false
 		}
 		page.Accounts[i].Password = s.shownPassword(password)
+		return true
+	}
+	// A mailbox's password, behind the same window (M-3).
+	for i := range page.Mailboxes {
+		if page.Mailboxes[i].ID != id || page.Mailboxes[i].Password == nil {
+			continue
+		}
+		password, err := s.users.RevealMailboxPassword(sess.AccountID(), key, id)
+		if err != nil {
+			return false
+		}
+		page.Mailboxes[i].Password = s.shownPassword(password)
 		return true
 	}
 	// A feed's password, behind the same window (Нс25).

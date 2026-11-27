@@ -316,8 +316,16 @@ type ConnectionsPage struct {
 	// Subtitle — строка под заголовком: «Signed in as mix · 3 servers · 12
 	// collections · 2 subscriptions» (s-profile-1); та же и под диалогом;
 	// логин — жирным (s-profile-10)
-	Subtitle      Runs               `json:"subtitle"`
-	Accounts      []ConnectionCard   `json:"accounts"`
+	Subtitle Runs             `json:"subtitle"`
+	Accounts []ConnectionCard `json:"accounts"`
+	// Mailboxes — свои ящики рубрикой между DAV-серверами и подписками
+	// (s-mailbox-26); пусто — ящиков нет
+	Mailboxes []MailboxCard `json:"mailboxes"`
+	// MailboxesOff — почта ящиков выключена на экземпляре, а ящики есть:
+	// «Passwords stay sealed in your profile; everything works again when
+	// mailboxes are back on.» над их карточками (s-mailbox-28); пусто —
+	// включена или ящиков нет
+	MailboxesOff  Text               `json:"mailboxesOff"`
 	Subscriptions []SubscriptionCard `json:"subscriptions"`
 	// Empty — ни одного подключения и подписки: «**Nothing is connected
 	// yet.**» (s-profile-25); иначе пусто

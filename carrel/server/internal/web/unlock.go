@@ -90,6 +90,9 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text, back, wha
 		if f, ok := blob.Subscription(what); ok && what != "" {
 			// A feed's password (Нс25): the sheet names the feed.
 			sheet.Purpose, sheet.Subject, act.Label = "Show password", text(collectionLabel(f.FeedCollection())), "Show"
+		} else if m, ok := blob.Mailbox(what); ok && what != "" {
+			// A mailbox's password, the mailbox named (M-3).
+			sheet.Purpose, sheet.Subject, act.Label = "Show password", text(m.Name()), "Show"
 		} else if conn, ok := blob.Connection(what); ok && what != "" {
 			// Whose, so that two cards' Show password are not confused
 			// (s-profile-3, Нс18).

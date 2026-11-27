@@ -34,6 +34,16 @@ type Mailbox struct {
 	// sending failed: the mailbox is kept, reading works, and a letter from
 	// it is off with this reason (M-3, M-7). Empty — sending works.
 	SendRefused string `json:"sendRefused,omitempty"`
+	// SendTrace is the SMTP step of that check, as the trace said it: the
+	// card shows it under the refusal (s-mailbox-26).
+	SendTrace string `json:"sendTrace,omitempty"`
+	// MaxLetter is the largest letter the SMTP server takes, from SIZE of
+	// EHLO: «up to 25 MB» on the card; 0 — it said none.
+	MaxLetter int64 `json:"maxLetter,omitempty"`
+	// ServersFrom is where the servers came from, in the screen's words:
+	// «found by SRV», «from autoconfig.yandex.ru», «guessed from the
+	// domain», «typed by hand» (s-mailbox-22, -27).
+	ServersFrom string `json:"serversFrom,omitempty"`
 	// Folders are the special folders by role, as the server announced
 	// them (SPECIAL-USE, RFC 6154) or as the person answered once (M-3).
 	Folders MailFolders `json:"folders,omitzero"`
@@ -87,6 +97,11 @@ type MailFolders struct {
 	// Asked: the person answered the question of the roles the server did
 	// not announce; it is asked once, as the attachment folder (S-20).
 	Asked bool `json:"asked,omitempty"`
+	// Chosen are the roles the person set («you chose it», s-mailbox-26); a
+	// role set and not chosen was announced by the server. What the folders'
+	// names suggest is offered in the question only: Skip leaves the role
+	// empty (s-mailbox-24).
+	Chosen []string `json:"chosen,omitempty"`
 }
 
 // CanSend says whether letters can go from the mailbox: a server to send to,

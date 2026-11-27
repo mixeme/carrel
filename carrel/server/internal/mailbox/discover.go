@@ -71,6 +71,10 @@ type Found struct {
 	// Login is what the autoconfig file names as the login: the whole
 	// address or its local part. Empty — the whole address.
 	Login string
+	// From is where the servers came from, in the screen's words (s-mailbox-22,
+	// -27): «found by SRV», «from autoconfig.yandex.ru», «guessed from the
+	// domain».
+	From string
 }
 
 // Step is how discovery writes each of its steps into the trace: its name,
@@ -131,6 +135,9 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 		}
 		step(stepSRV, name+" → "+strings.Join(found, ", "), true)
 	}
+	if len(f.IMAP) > 0 || len(f.SMTP) > 0 {
+		f.From = "found by SRV"
+	}
 
 	for _, at := range []string{
 		"https://autoconfig." + domain + "/mail/config-v1.1.xml?emailaddress=" + url.QueryEscape(address),
@@ -159,11 +166,18 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 			f.Login = cfg.Login
 		}
 		step(stepAutoconfig, "GET "+shown+" → "+serversSaid(cfg), true)
+		if f.From == "" {
+			host := strings.TrimPrefix(shown, "https://")
+			f.From = "from " + host[:strings.Index(host+"/", "/")]
+		}
 		break
 	}
 
 	// The guesses go last and only where nothing better was found: each is
 	// a host of the address's own domain.
+	if (len(f.IMAP) == 0 || len(f.SMTP) == 0) && f.From == "" {
+		f.From = "guessed from the domain"
+	}
 	if len(f.IMAP) == 0 {
 		for _, h := range []string{"imap." + domain, "mail." + domain} {
 			f.IMAP = appendServer(f.IMAP, sealed.MailServer{Host: h, Port: 993, Security: sealed.MailTLS})
