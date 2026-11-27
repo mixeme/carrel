@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.27 — 2026-11-27
+
+Client `v0.11.66`; Typecase `4af5242` (note 242).
+
+### For consumers
+
+- **The phone's layout** (Typecase's note 242, the owner's task 297): a
+  sheet as tall as what it holds; fields 16 px under a finger; a page head's
+  buttons fold to icons where they would wrap; no key hints under a finger;
+  the keyboard's focus an accent ring; the bottom bar's current section as
+  the rail draws it; a note's side-column button gone on a phone. Nothing in
+  the contract.
+- **What to look at on the phone and tablet** after a release is kept in
+  [device-checks.md](../../docs/plan/device-checks.md).
+
 ## v0.4.26 — 2026-11-27
 
 Client `v0.11.65`; Typecase `01d7165` (notes 240, 241).

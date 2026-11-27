@@ -210,6 +210,9 @@ func read(p *view.NotePage) []w.MainPart {
 			case "note.side":
 				sideButton = bind.Button(a, "")
 				sideButton.Label, sideButton.Icon, sideButton.Title = "", "panel", string(a.Label)
+				// The side column's button: the phone draws the column under
+				// the text and no button (Typecase's note 242 p. 9).
+				sideButton.Side = true
 			case "note.width.full":
 				seg.Options[0].Href, seg.Options[0].On = a.Href, a.On
 				seg.Target = bind.Live(a.Target)

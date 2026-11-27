@@ -510,6 +510,11 @@ label.tc-seg__opt{position:relative;cursor:pointer}
   margin-top:-5.5px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
   transform:rotate(45deg);opacity:.5;z-index:2;pointer-events:none}
 .tc-in.is-focus{outline:1.5px solid var(--tc-accent);outline-offset:1px;border-color:var(--tc-accent)}
+/* Фокус настоящего поля и кнопки — тот же, что is-focus кадров, а не синяя рамка браузера; поле с полем
+   внутри (фильтр, теги, выбор) обводится целиком, внутреннее — без своей рамки (задача Carrel 297). */
+.tc-in:focus-visible,.tc-in:has(:focus-visible),.tc-search:has(> .tc-q:focus-visible){outline:1.5px solid var(--tc-accent);outline-offset:1px;border-color:var(--tc-accent)}
+.tc-in :focus-visible,.tc-search > .tc-q:focus-visible{outline:none}
+:is(.tc-btn,.tc-usermenu,.tc-menu__item,.tc-nav__item):focus-visible{outline:1.5px solid var(--tc-accent);outline-offset:1px}
 /* Поле, значение которого сервер не принял: рамка — цвет опасности, причина — подсказкой под ним. */
 .tc-in.is-error{border-color:var(--tc-danger)}
 .tc-in:disabled{opacity:.45;cursor:default}
@@ -958,6 +963,11 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-doc__bullets .tc-doc__bullets.tc-doc__bullets{margin-top:6px;list-style:circle}
 /* Текст заметки в панели (задача 125): части текста отделены друг от друга, как абзацы. */
 .tc-sec > :is(.tc-doc__heading,.tc-doc__bullets,.tc-doc__quote,.tc-doc__code,.tc-doc__table){margin-top:10px}
+/* Заголовок текста заметки без своих задач — с тем же местом сверху, что заголовок с задачами (задача Carrel 297). */
+.tc-doc:not(.tc-stack) > .tc-doc__heading{margin:18px 0 8px}
+/* Кнопки шапки складываются по месту, как бары: где не встают в строку — значками; первичная остаётся словом (задача Carrel 297). */
+.tc-head > .tc-acts[data-tc-fold~="labels"] > .tc-btn:not(.is-primary):has(> svg):not(:has(> .tc-ico--alone)){font-size:0;gap:0;padding-left:0;padding-right:0;aspect-ratio:1;justify-content:center}
+.tc-head > .tc-acts[data-tc-fold~="labels"] > .tc-btn:not(.is-primary) > svg{translate:none}
 /* Абзац после списка дел отделён так же. */
 .tc-sec > .tc-doc__list + .tc-prose{margin-top:10px}
 .tc-doc__code.is-wrap{white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:visible}
@@ -1441,7 +1451,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-shell__rail .tc-nav .tc-nav__item{
     flex:1;flex-direction:column;justify-content:center;gap:3px;height:auto;width:auto;
     padding:7px 0 9px;font-size:9.5px;color:var(--tc-dusty);border-radius:0;overflow:visible}
-  .tc-shell__rail .tc-nav .tc-nav__item.is-on{color:var(--tc-accent);background:transparent;font-weight:400}
+  .tc-shell__rail .tc-nav .tc-nav__item.is-on{color:var(--tc-accent);background:var(--tc-card);font-weight:600;box-shadow:inset 0 2px 0 var(--tc-accent)}
   .tc-shell__rail .tc-nav svg{width:17px;height:17px;opacity:1}
   .tc-shell__rail .tc-nav .tc-emblem{width:16px;height:16px}
   .tc-shell__rail .tc-num{display:none}
@@ -1513,7 +1523,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-sheet__head{flex-wrap:wrap}
   .tc-sheet__head .tc-in{width:auto;max-width:100%;flex:1 1 8em}
   .tc-sheet__head > .tc-drop{flex:1 1 8em}
-  .tc-scrim{padding:12px var(--tc-page-gutter-narrow);align-items:stretch}
+  .tc-scrim{padding:12px var(--tc-page-gutter-narrow);align-items:flex-start}
   .tc-dialog{padding:16px var(--tc-page-gutter-narrow) 20px;min-width:0;max-width:100%}
   label,.tc-msg,.tc-diag,.tc-field__hint,.tc-rubric,.tc-dim--wrap,.tc-sheet__head,.tc-sheet__title{
     overflow-wrap:anywhere;min-width:0}
@@ -1527,7 +1537,11 @@ label.tc-menu__item{position:relative;cursor:pointer}
 }
 /* Поле под пальцем — 16 px: при меньшем кегле телефон увеличивает страницу, когда встают в поле (решение 28.09.2026). */
 @media (pointer:coarse){
-  .tc-in,.tc-q{font-size:16px}
+  .tc-in,.tc-q,:is(input,textarea,select):is(.tc-in,.tc-q,.tc-in__add,.tc-in__list):not(#_){font-size:16px}
+}
+/* Подсказки клавиш — там, где есть клавиатура: на телефоне и планшете под пальцем их нет (задача Carrel 297). */
+@media (hover:none) and (pointer:coarse){
+  .tc-kbd{display:none}
 }
 @container style(--tc-shell-mode: drawer){
   .tc-row{min-height:52px;gap:10px}
@@ -1539,7 +1553,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-list.is-compact .tc-row{min-height:52px}
   .tc-nav--bottom{display:flex;border-top:.5px solid var(--tc-rule);background:var(--tc-surface);margin-top:auto}
   .tc-nav--bottom .tc-nav__item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:auto;padding:7px 0 9px;font-size:9.5px;color:var(--tc-dusty);border-radius:0}
-  .tc-nav--bottom .tc-nav__item.is-on{color:var(--tc-accent);background:transparent;font-weight:400}
+  .tc-nav--bottom .tc-nav__item.is-on{color:var(--tc-accent);background:var(--tc-card);font-weight:600;box-shadow:inset 0 2px 0 var(--tc-accent)}
   .tc-nav--bottom svg{width:17px;height:17px;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:1}
   .tc-btn,.tc-in,.tc-seg,.tc-segfold__current{height:38px}
   /* маленькая кнопка на телефоне — той же мишенью, что остальные (Р-66) */
@@ -1587,9 +1601,16 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-sheet__head{flex-wrap:wrap}
   .tc-sheet__head .tc-in{width:auto;max-width:100%;flex:1 1 8em}
   .tc-sheet__head > .tc-drop{flex:1 1 8em}
-  .tc-scrim{padding:12px var(--tc-page-gutter-narrow);align-items:stretch}
+  .tc-scrim{padding:12px var(--tc-page-gutter-narrow);align-items:flex-start}
   .tc-dialog{padding:16px var(--tc-page-gutter-narrow) 20px;min-width:0;max-width:100%}
   .tc-doc__layout{grid-template-columns:minmax(0,1fr)}
+  /* Колонка стоит под текстом: прятать её сбоку нечем — кнопки нет, как нет Reading width (задача Carrel 297). */
+  .tc-btn--side{display:none}
+  /* На телефоне клавиатуры нет — подсказок клавиш тоже. */
+  .tc-kbd{display:none}
+  /* Без сценария кнопки шапки на телефоне — значками: мерить некому. */
+  .tc-head > .tc-acts:where(:not([data-tc-fold])) > .tc-btn:not(.is-primary):has(> svg):not(:has(> .tc-ico--alone)){font-size:0;gap:0;padding-left:0;padding-right:0;aspect-ratio:1;justify-content:center}
+  .tc-head > .tc-acts:where(:not([data-tc-fold])) > .tc-btn:not(.is-primary) > svg{translate:none}
   .tc-card{display:flex;flex-direction:column}
   /* Строка полей встаёт столбцом; фраза с полем-фишкой («старше [7] дней») — нет. */
   .tc-form .tc-line.tc-line:where(:not(:has(> .tc-in--chip))){flex-direction:column;align-items:stretch}
@@ -8715,7 +8736,7 @@ SEQUENCE  1</div>
             <button class="tc-btn is-3rd" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
             <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?view=source" data-tc-swap="note-main" title="Source"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-code"/></svg></a>
             <span class="tc-seg is-3rd"><a class="is-on tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=full" data-tc-swap="note-main">Full width</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=read" data-tc-swap="note-main">Reading width</a></span>
-            <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
+            <a class="tc-btn tc-btn--side" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
             <details class="tc-drop"><summary class="tc-btn" title="More"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/move" role="menuitem"><svg><use href="#i-move"/></svg>Move</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/copy" role="menuitem"><svg><use href="#i-dup"/></svg>Copy</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/publish" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</a></div></details>
           </div>
         </div>
@@ -8830,7 +8851,7 @@ Read  2 min ago</div>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
             <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012" data-tc-swap="note-main">Rendered</a>
             <span class="tc-seg is-3rd"><a class="is-on tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=full" data-tc-swap="note-main">Full width</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=read" data-tc-swap="note-main">Reading width</a></span>
-            <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
+            <a class="tc-btn tc-btn--side" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
             <details class="tc-drop"><summary class="tc-btn" title="More"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/move" role="menuitem"><svg><use href="#i-move"/></svg>Move</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/copy" role="menuitem"><svg><use href="#i-dup"/></svg>Copy</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/publish" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</a></div></details>
           </div>
         </div>
@@ -9051,7 +9072,7 @@ Read  2 min ago</div>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
             <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?view=source" data-tc-swap="note-main" title="Source"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-code"/></svg></a>
             <span class="tc-seg is-3rd"><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=full" data-tc-swap="note-main">Full width</a><a class="is-on tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=read" data-tc-swap="note-main">Reading width</a></span>
-            <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
+            <a class="tc-btn tc-btn--side" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
             <details class="tc-drop"><summary class="tc-btn" title="More"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/move" role="menuitem"><svg><use href="#i-move"/></svg>Move</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/copy" role="menuitem"><svg><use href="#i-dup"/></svg>Copy</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/publish" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</a></div></details>
           </div>
         </div>
@@ -23235,7 +23256,7 @@ Read  2 min ago · not changed on server</div>
             <button class="tc-btn is-3rd" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
             <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?view=source" data-tc-swap="note-main" title="Source"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-code"/></svg></a>
             <span class="tc-seg is-3rd"><a class="is-on tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=full" data-tc-swap="note-main">Full width</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?width=read" data-tc-swap="note-main">Reading width</a></span>
-            <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
+            <a class="tc-btn tc-btn--side" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012?side=0" data-tc-swap="note-main" title="Hide the side column"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-panel"/></svg></a>
             <details class="tc-drop"><summary class="tc-btn" title="More"><svg class="tc-ico--alone" viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/move" role="menuitem"><svg><use href="#i-move"/></svg>Move</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/copy" role="menuitem"><svg><use href="#i-dup"/></svg>Copy</a><a class="tc-menu__item" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012/publish" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</a></div></details>
           </div>
         </div>
