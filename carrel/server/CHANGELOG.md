@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.4.28 — 2026-11-28
+
+Client `v0.11.66`; Typecase `4af5242`.
+
+### For consumers
+
+- **Reset to defaults of Columns resets** (the phone, 28.11.2026): the
+  browser sends the ticked boxes with the button, and a reset was taken
+  only when its value came alone.
+- **A mail server's way in is its port's** (RFC 8314): 993 and 465 are TLS
+  from the first byte, 143 and 587 STARTTLS, whatever the SRV record's
+  service says — Yandex publishes `_submission._tcp` at 465, and Carrel
+  showed and tried STARTTLS there.
+
 ## v0.4.27 — 2026-11-27
 
 Client `v0.11.66`; Typecase `4af5242` (note 242).

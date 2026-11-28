@@ -197,3 +197,24 @@ func TestCheckMicrosoft(t *testing.T) {
 		t.Errorf("outlook.com: %v", err)
 	}
 }
+
+// The port says the way in (RFC 8314): a record of STARTTLS submission at
+// port 465, as Yandex publishes it, is TLS from the first byte.
+func TestThePortSaysTheWayIn(t *testing.T) {
+	p := &Prober{Timeout: time.Second,
+		SRV: func(_ context.Context, service, domain string) ([]*net.SRV, error) {
+			switch service {
+			case "imaps":
+				return []*net.SRV{{Target: "imap.yandex.ru.", Port: 993}}, nil
+			case "submission":
+				return []*net.SRV{{Target: "smtp.yandex.ru.", Port: 465}}, nil
+			}
+			return nil, errors.New("no such host")
+		},
+		Fetch: func(context.Context, string) ([]byte, error) { return nil, errors.New("404 Not Found") },
+	}
+	f := p.Discover(context.Background(), "someone@yandex.ru", func(string, string, bool) {})
+	if len(f.SMTP) == 0 || f.SMTP[0] != (sealed.MailServer{Host: "smtp.yandex.ru", Port: 465, Security: sealed.MailTLS}) {
+		t.Errorf("smtp = %+v, want smtp.yandex.ru:465 over TLS", f.SMTP)
+	}
+}

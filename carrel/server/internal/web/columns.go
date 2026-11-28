@@ -292,7 +292,9 @@ func (s *Server) saveColumns(w http.ResponseWriter, r *http.Request, segment, ba
 	}
 	cols := r.PostForm["col"]
 	var shown []string
-	if len(cols) == 1 && cols[0] == "default" {
+	// Reset to defaults is a button of the same form: its value comes with
+	// the boxes ticked, whatever they are (the owner's phone, 28.11.2026).
+	if slices.Contains(cols, "default") {
 		cookie.MaxAge = -1
 		shown = columnIDs(offeredColumns(segment, single), true)
 	} else {
