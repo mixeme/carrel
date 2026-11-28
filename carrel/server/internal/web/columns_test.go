@@ -385,8 +385,10 @@ func TestColumnsAreTheFrames(t *testing.T) {
 		t.Errorf("after a choice in one book, the combined view shows %q, want name email phone source", got)
 	}
 
-	// Reset: the cookie goes, and the menu is components-21's again.
-	res = post(all, []string{"default"}, kept)
+	// Reset: the cookie goes, and the menu is components-21's again. The
+	// browser sends the ticked boxes too, Reset's value among them (the
+	// owner's phone, 28.11.2026: Reset kept the choice).
+	res = post(all, []string{"email", "org", "birthday", "source", "default"}, kept)
 	gone := res.Cookies()
 	if len(gone) != 1 || gone[0].MaxAge >= 0 {
 		t.Fatalf("reset keeps %+v", gone)

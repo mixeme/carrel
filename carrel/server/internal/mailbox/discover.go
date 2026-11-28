@@ -195,8 +195,19 @@ func (p *Prober) Discover(ctx context.Context, address string, step Step) Found 
 // appendServer adds s unless it is there already, or its port is none of a
 // mail server's the guard lets through (25 above all, S-5.1): offered by a
 // record or a file, it would only be refused at the dial.
+//
+// The way in is the port's where the port is a standard one (RFC 8314): 993
+// and 465 are TLS from the first byte, 143 and 587 STARTTLS — whatever the
+// record's service says. Yandex publishes `_submission._tcp` (STARTTLS) at
+// port 465, and STARTTLS there finds no plain greeting (28.11.2026).
 func appendServer(list []sealed.MailServer, s sealed.MailServer) []sealed.MailServer {
 	s.Host = strings.ToLower(s.Host)
+	switch s.Port {
+	case 993, 465:
+		s.Security = sealed.MailTLS
+	case 143, 587:
+		s.Security = sealed.MailSTARTTLS
+	}
 	if !dav.MailPortAllowed(s.Port) || slices.Contains(list, s) {
 		return list
 	}

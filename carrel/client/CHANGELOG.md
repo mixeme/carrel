@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.67 — 2026-11-28
+
+Server `v0.4.28`; Typecase `5fc7447` (note 243).
+- The mockup's copy is Typecase `5fc7447`: the phone's block repeated under
+  `@media (max-width:640px)` for browsers without `style()` queries
+  (task 299). No code changed.
+
 ## v0.11.66 — 2026-11-27
 
 Server `v0.4.27`; Typecase `4af5242` (note 242).

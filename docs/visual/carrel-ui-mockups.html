@@ -1632,6 +1632,71 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-sheet__pick .tc-sheet__pick-rail.tc-sheet__pick-rail{width:auto;border-right:0;border-bottom:.5px solid var(--tc-hair)}
   .tc-sheet__foot.tc-sheet__foot > .tc-dim--wrap{order:-1;flex:1 1 100%}
 }
+/* Браузер без запросов style() (Firefox до них, задача Carrel 299) пропускает блок выше целиком.
+   Те же правила — по ширине окна, внутри оболочки: окно ≤640 держит корень не шире, и любая
+   оболочка в нём — в drawer; где style() работает, копия повторяет блок. Правится блок выше,
+   копия — следом за ним (gate drawer-fallback держит её равной). */
+@media (max-width:640px){
+  :where(.tc-shell,.tc-overlay) .tc-row{min-height:52px;gap:10px}
+  :where(.tc-shell,.tc-overlay) .tc-main__strip{position:relative}
+  :where(.tc-shell,.tc-overlay) .tc-main__strip .tc-drop{position:static}
+  :where(.tc-shell,.tc-overlay) .tc-main__strip .tc-drop > .tc-menu.is-pop{left:20px;right:20px;width:auto}
+  :where(.tc-shell,.tc-overlay) .tc-list.is-compact .tc-row{min-height:52px}
+  :where(.tc-shell,.tc-overlay) .tc-nav--bottom{display:flex;border-top:.5px solid var(--tc-rule);background:var(--tc-surface);margin-top:auto}
+  :where(.tc-shell,.tc-overlay) .tc-nav--bottom .tc-nav__item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:auto;padding:7px 0 9px;font-size:9.5px;color:var(--tc-dusty);border-radius:0}
+  :where(.tc-shell,.tc-overlay) .tc-nav--bottom .tc-nav__item.is-on{color:var(--tc-accent);background:var(--tc-card);font-weight:600;box-shadow:inset 0 2px 0 var(--tc-accent)}
+  :where(.tc-shell,.tc-overlay) .tc-nav--bottom svg{width:17px;height:17px;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:1}
+  :where(.tc-shell,.tc-overlay) .tc-btn,:where(.tc-shell,.tc-overlay) .tc-in,:where(.tc-shell,.tc-overlay) .tc-seg,:where(.tc-shell,.tc-overlay) .tc-segfold__current{height:38px}
+  :where(.tc-shell,.tc-overlay) .tc-btn.is-sm.is-sm{height:38px;min-width:38px;padding:0 10px;font-size:12.5px;justify-content:center}
+  :where(.tc-shell,.tc-overlay) .tc-segfold__item{height:40px}
+  :where(.tc-shell,.tc-overlay) .tc-bar .tc-btn,:where(.tc-shell,.tc-overlay) .tc-docbar .tc-btn,:where(.tc-shell,.tc-overlay) .tc-head .tc-acts .tc-btn,:where(.tc-shell,.tc-overlay) .tc-formfoot .tc-btn,:where(.tc-shell,.tc-overlay) .tc-queue__head .tc-btn:not(.is-sm),:where(.tc-shell,.tc-overlay) .tc-sheet__head .tc-btn,:where(.tc-shell,.tc-overlay) .tc-form .tc-btn:not(.is-sm),:where(.tc-shell,.tc-overlay) .tc-fset .tc-btn:not(.is-sm),:where(.tc-shell,.tc-overlay) .tc-field .tc-btn:not(.is-sm),:where(.tc-shell,.tc-overlay) .tc-bar .tc-in,:where(.tc-shell,.tc-overlay) .tc-docbar .tc-in,:where(.tc-shell,.tc-overlay) .tc-head .tc-acts .tc-in,:where(.tc-shell,.tc-overlay) .tc-sheet__head .tc-in,:where(.tc-shell,.tc-overlay) .tc-bar .tc-seg,:where(.tc-shell,.tc-overlay) .tc-docbar .tc-seg,:where(.tc-shell,.tc-overlay) .tc-head .tc-acts .tc-seg{height:38px}
+  :where(.tc-shell,.tc-overlay) .tc-table .tc-seg.tc-seg--h22{height:38px}
+  :where(.tc-shell,.tc-overlay) .tc-bar .tc-in.tc-in,:where(.tc-shell,.tc-overlay) .tc-docbar .tc-in.tc-in,:where(.tc-shell,.tc-overlay) .tc-head .tc-acts .tc-in.tc-in{height:38px}
+  :where(.tc-shell,.tc-overlay) .tc-seg,:where(.tc-shell,.tc-overlay) .tc-bar > .tc-in,:where(.tc-shell,.tc-overlay) .tc-barform > .tc-in,:where(.tc-shell,.tc-overlay) .tc-in{overflow:visible}
+  :where(.tc-shell,.tc-overlay) button,:where(.tc-shell,.tc-overlay) .tc-in,:where(.tc-shell,.tc-overlay) .tc-seg__opt,:where(.tc-shell,.tc-overlay) .tc-check,:where(.tc-shell,.tc-overlay) .tc-nav__item,:where(.tc-shell,.tc-overlay) .tc-tick,:where(.tc-shell,.tc-overlay) .tc-tickrow__tick,:where(.tc-shell,.tc-overlay) .tc-tag,:where(.tc-shell,.tc-overlay) a[href]{position:relative;overflow:visible;z-index:1;appearance:none}
+  :where(.tc-shell,.tc-overlay) button:not(.is-pick)::after,:where(.tc-shell,.tc-overlay) a[href]::after,:where(.tc-shell,.tc-overlay) input:not(.is-pick)::after,:where(.tc-shell,.tc-overlay) textarea::after,:where(.tc-shell,.tc-overlay) select::after,:where(.tc-shell,.tc-overlay) .tc-check::after,:where(.tc-shell,.tc-overlay) .tc-tick::after,:where(.tc-shell,.tc-overlay) .tc-tickrow__tick::after,:where(.tc-shell,.tc-overlay) .tc-seg__opt::after,:where(.tc-shell,.tc-overlay) .tc-menu__item::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px; transform:translate(-50%,-50%);pointer-events:auto}
+  :where(.tc-shell,.tc-overlay) .tc-table__file a.tc-table__filename{overflow:hidden;padding:15px 8px;margin:-15px -8px;min-width:44px}
+  :where(.tc-shell,.tc-overlay) .tc-table__file a.tc-table__filename::after{content:none}
+  :where(.tc-shell,.tc-overlay) .tc-tile a.tc-tile__name{white-space:normal;overflow-wrap:anywhere}
+  :where(.tc-shell,.tc-overlay) .tc-row :is(.tc-row__title,.tc-row__cell,.tc-row__excerpt,.tc-row__file):has(a[href]){white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+  :where(.tc-shell,.tc-overlay) .tc-table .tc-table__wrap.tc-table__wrap{overflow:visible}
+  :where(.tc-shell,.tc-overlay) .tc-in.is-pick::before{pointer-events:auto;width:44px;height:44px;top:50%;bottom:auto;right:auto;left:50%; transform:translate(-50%,-50%);background:transparent}
+  :where(.tc-shell,.tc-overlay) .tc-menu.is-pop,:where(.tc-shell,.tc-overlay) .tc-drop{z-index:6;overflow:visible}
+  :where(.tc-shell,.tc-overlay) .tc-crumbs{position:relative;z-index:1}
+  :where(.tc-shell,.tc-overlay) .tc-shell__body .tc-main,:where(.tc-shell,.tc-overlay) .tc-shell__body .tc-bar,:where(.tc-shell,.tc-overlay) .tc-shell__body .tc-head,:where(.tc-shell,.tc-overlay) .tc-shell__body .tc-acts{overflow:visible}
+  :where(.tc-shell,.tc-overlay) .tc-form{flex-direction:column;flex-wrap:nowrap;align-items:stretch}
+  :where(.tc-shell,.tc-overlay) .tc-form > .tc-field.tc-field{flex-basis:auto}
+  :where(.tc-shell,.tc-overlay) .tc-field,:where(.tc-shell,.tc-overlay) .tc-field--xs,:where(.tc-shell,.tc-overlay) .tc-field--sm,:where(.tc-shell,.tc-overlay) .tc-field--md,:where(.tc-shell,.tc-overlay) .tc-field--lg,:where(.tc-shell,.tc-overlay) .tc-field--xl,:where(.tc-shell,.tc-overlay) .tc-field--full{width:100%;min-width:0}
+  :where(.tc-shell,.tc-overlay) .tc-docbar > .tc-field{width:100%;max-width:none}
+  :where(.tc-shell,.tc-overlay) .tc-fields{grid-template-columns:minmax(0,1fr)}
+  :where(.tc-shell,.tc-overlay) .tc-head .tc-acts{flex:1 1 100%;justify-content:flex-start}
+  :where(.tc-shell,.tc-overlay) .tc-head .tc-acts--stack{align-items:flex-start}
+  :where(.tc-shell,.tc-overlay) .tc-scrim,:where(.tc-shell,.tc-overlay) .tc-sheet,:where(.tc-shell,.tc-overlay) .tc-sheet__head,:where(.tc-shell,.tc-overlay) .tc-sheet__body,:where(.tc-shell,.tc-overlay) .tc-sheet__foot{min-width:0;max-width:100%}
+  :where(.tc-shell,.tc-overlay) .tc-sheet{width:100%;max-width:100%;margin:0}
+  :where(.tc-shell,.tc-overlay) .tc-sheet__head{flex-wrap:wrap}
+  :where(.tc-shell,.tc-overlay) .tc-sheet__head .tc-in{width:auto;max-width:100%;flex:1 1 8em}
+  :where(.tc-shell,.tc-overlay) .tc-sheet__head > .tc-drop{flex:1 1 8em}
+  :where(.tc-shell,.tc-overlay) .tc-scrim{padding:12px var(--tc-page-gutter-narrow);align-items:flex-start}
+  :where(.tc-shell,.tc-overlay) .tc-dialog{padding:16px var(--tc-page-gutter-narrow) 20px;min-width:0;max-width:100%}
+  :where(.tc-shell,.tc-overlay) .tc-doc__layout{grid-template-columns:minmax(0,1fr)}
+  :where(.tc-shell,.tc-overlay) .tc-btn--side{display:none}
+  :where(.tc-shell,.tc-overlay) .tc-kbd{display:none}
+  :where(.tc-shell,.tc-overlay) .tc-head > .tc-acts:where(:not([data-tc-fold])) > .tc-btn:not(.is-primary):has(> svg):not(:has(> .tc-ico--alone)){font-size:0;gap:0;padding-left:0;padding-right:0;aspect-ratio:1;justify-content:center}
+  :where(.tc-shell,.tc-overlay) .tc-head > .tc-acts:where(:not([data-tc-fold])) > .tc-btn:not(.is-primary) > svg{translate:none}
+  :where(.tc-shell,.tc-overlay) .tc-card{display:flex;flex-direction:column}
+  :where(.tc-shell,.tc-overlay) .tc-form .tc-line.tc-line:where(:not(:has(> .tc-in--chip))){flex-direction:column;align-items:stretch}
+  :where(.tc-shell,.tc-overlay) .tc-form .tc-line.tc-line:where(:not(:has(> .tc-in--chip))) > *{flex-basis:auto}
+  :where(.tc-shell,.tc-overlay) label,:where(.tc-shell,.tc-overlay) .tc-msg,:where(.tc-shell,.tc-overlay) .tc-diag,:where(.tc-shell,.tc-overlay) .tc-field__hint,:where(.tc-shell,.tc-overlay) .tc-rubric,:where(.tc-shell,.tc-overlay) .tc-dim--wrap,:where(.tc-shell,.tc-overlay) .tc-sheet__head,:where(.tc-shell,.tc-overlay) .tc-sheet__title{overflow-wrap:anywhere;min-width:0}
+  :where(.tc-shell,.tc-overlay) .tc-field{position:relative}
+  :where(.tc-shell,.tc-overlay) .tc-field:has(> input,> textarea,> .tc-in)::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:44px;pointer-events:auto}
+  :where(.tc-shell,.tc-overlay) .tc-range{position:relative;overflow:visible}
+  :where(.tc-shell,.tc-overlay) .tc-range:has(.tc-in)::after{content:"";position:absolute;inset:-3px 0;min-height:44px;pointer-events:auto}
+  :where(.tc-shell,.tc-overlay) .tc-search{position:relative;overflow:visible}
+  :where(.tc-shell,.tc-overlay) .tc-search:has(.tc-q)::after{content:"";position:absolute;inset:-3px;min-width:44px;min-height:44px;pointer-events:auto}
+  :where(.tc-shell,.tc-overlay) .tc-sheet__pick.tc-sheet__pick--196.tc-sheet__pick--196{flex-direction:column;align-items:stretch}
+  :where(.tc-shell,.tc-overlay) .tc-sheet__pick .tc-sheet__pick-rail.tc-sheet__pick-rail{width:auto;border-right:0;border-bottom:.5px solid var(--tc-hair)}
+  :where(.tc-shell,.tc-overlay) .tc-sheet__foot.tc-sheet__foot > .tc-dim--wrap{order:-1;flex:1 1 100%}
+}
 
 /* layout glue */
 .tc-line.tc-line{display:flex;align-items:center;flex-wrap:wrap}
