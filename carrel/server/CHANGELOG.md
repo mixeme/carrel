@@ -19,7 +19,7 @@ current mockup; fonts are in `docs/visual/fonts/`.
 
 ## v0.4.28 — 2026-11-28
 
-Client `v0.11.66`; Typecase `4af5242`.
+Client `v0.11.67`; Typecase `5fc7447` (note 243).
 
 ### For consumers
 
@@ -30,6 +30,9 @@ Client `v0.11.66`; Typecase `4af5242`.
   from the first byte, 143 and 587 STARTTLS, whatever the SRV record's
   service says — Yandex publishes `_submission._tcp` at 465, and Carrel
   showed and tried STARTTLS there.
+- **The phone's layout without `style()` queries** (Typecase's note 243,
+  task 299): Firefox 132 draws the phone's layout too — the note's side
+  column under the text. Nothing in the contract.
 
 ## v0.4.27 — 2026-11-27
 
